@@ -1,7 +1,8 @@
 pro save_weber_subrois
-;This procedure will load all the Aschwanden DEM results, select the
+;This procedure will load the AIA data, select the
 ;regions used for the ionization and save the datacubes in separate
-;.sav files in the same folder
+;.sav files in the same folder. This was written to prepare subrois
+;for Mark Weber to analyze.
 
 path='/Volumes/PLUME/AIA_data/studies/2011events/'
 event='e37'

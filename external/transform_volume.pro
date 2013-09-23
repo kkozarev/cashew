@@ -7,6 +7,17 @@
 ;       The purpose of this program is to transform (e.g., rotate,
 ;       scale, and translate) a 3D array or volume.
 ;
+;
+; AUTHOR:
+;
+;       Martin Downing,
+;       Clinical Research Physicist,
+;       Grampian Orthopaedic RSA Research Centre,
+;       Woodend Hospital, Aberdeen, AB15 6LS.
+;       Pnone: 01224 556055 / 07903901612
+;       Fa: 01224 556662
+;       E-mail: m.downing@abdn.ac.uk
+;
 ; CATEGORY:
 ;
 ;      Mathematics, graphics.
@@ -52,6 +63,11 @@
 ;       each of which is independant of the result of the others, so the operation
 ;       could easiliy be parallelised.
 ;
+; MODIFICATION HISTORY:
+;
+;       Written by: Martin Downing, 16 September 2001.
+;       Added MISSING keyword. Removed INPLACE keyword. 25 Nov 2001. MD
+;-
 FUNCTION Transform_Volume, volume, Rotation=rotation, $
     Scale=scale, Translate=translate, Centre_Rotation=centre_rotation, $
     T3Dmat=t3dmat,yzexch=yzexch

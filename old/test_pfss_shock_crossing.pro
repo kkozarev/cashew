@@ -1,8 +1,24 @@
 pro test_pfss_shock_crossing,png=png,steps=steps,plot=plot
+;PURPOSE:
 ;This procedure tests visually the geometrical overlap of the pfss
 ;results to the spherical shell model. It does so by plotting the two
 ;on the center of the solar disk.
-;Kamen Kozarev 11/08/2011
+;
+;CATEGORY:
+;PFSS_Shock
+;
+;INPUTS:
+;
+;KEYWORDS:
+;
+;OUTPUTS:
+;
+;DEPENDENCIES:
+;pfss_sphtocart,
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 11/08/2011
+;
 
 ;--------------------------------------------------------------
 ;LOAD DATA
@@ -31,7 +47,6 @@ pro test_pfss_shock_crossing,png=png,steps=steps,plot=plot
   endelse
 
 ;--------------------------------------------------------------
-
 
 
 ;--------------------------------------------------------------

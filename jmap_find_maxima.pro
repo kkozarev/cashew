@@ -12,24 +12,25 @@ end
 
 
 
-pro find_jmap_maxima,zb,x,y,xrange=xrange,yrange=yrange,gaussfit=gaussfit,allgfits=allgfits,allmaxima=allmaxima,mymaxima=mymaxima,nmax=nmax,flipyaxes=flipyaxes,numplotmax=numplotmax
+pro jmap_find_maxima,zb,x,y,xrange=xrange,yrange=yrange,gaussfit=gaussfit,allgfits=allgfits,allmaxima=allmaxima,mymaxima=mymaxima,nmax=nmax,flipyaxes=flipyaxes,numplotmax=numplotmax
+;PURPOSE:
 ;procedure to find maxima in a time-Y image, where Y can be physical distance, or frequency.
 ;this is used in fitting EUV wave and radio tII burst positions and emission frequencies.
 ;
-; COMMON BLOCKS:
+;CATEGORY:
+;AIA/Kinemaics/jmap
 ;
-; EXTERNAL CALLS:
-; lclxtrem.pro, badpar.pro
+;INPUTS:
 ;
-; SIDE EFFECTS:
+;KEYWORDS:
 ;
-; RESTRICTIONS:
+;OUTPUTS:
 ;
-; PROCEDURE:
+;DEPENDENCIES:
+;lclxtrem.pro, badpar.pro, lmfit, gaussfit
 ;
-; MODIFICATION HISTORY:
-; 2013/09/11, Written by Kamen Kozarev, SAO
-;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 09/11/2013   
   
   resolve_routine,'gaussfit',/either,/compile_full_file,/no_recompile
   

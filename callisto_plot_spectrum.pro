@@ -53,13 +53,13 @@ PRO callisto_plot_spectrum_new_temp,files,timerange=timerange,station=station,fr
 set_plot,'x'
 ;plot and analyze spectrograms of Callisto data.
 ; EXTERNAL CALLS:
-; find_jmap_maxima, elimwrongchannels, constbacksub, spectro_plot
+; jmap_find_maxima, elimwrongchannels, constbacksub, spectro_plot
 ;
 ; MODIFICATION HISTORY:
 ; 2013/09/11, Written by Kamen Kozarev, SAO
 
 
-  resolve_routine,'find_jmap_maxima',/either,/compile_full_file,/no_recompile
+  resolve_routine,'jmap_find_maxima',/either,/compile_full_file,/no_recompile
   
 loadct,9,/silent
 tvlct,rr,gg,bb,/get
@@ -139,7 +139,7 @@ write_png,'radio_spectrum.png',image
 
 ;Get the maxima. 
 ;the output array allmaxima[num(maxima),num(timerange)] contains the frequencies
-find_jmap_maxima,zb,time,frequency,xrange=anytim(timerange),yrange=freqrng,$
+jmap_jmap_maxima,zb,time,frequency,xrange=anytim(timerange),yrange=freqrng,$
                  allmaxima=allmaxima,mymaxima=mymaxima,nmax=nmax,$
                  numplotmax=numplotmax,/flipyaxes
 
@@ -283,7 +283,7 @@ if keyword_set(fit) then begin
            back=wave_backedge[ii-sp-1].ind
            front=wave_frontedge[ii-sp-1].ind
            
-           return_jmap_maxima,zb[ii,back:front],frequency[back:front],$
+           jmap_return_maxima,zb[ii,back:front],frequency[back:front],$
                             allmaxima=allmaxima,numplotmax=numplotmax
            
            stop

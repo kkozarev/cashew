@@ -1,22 +1,22 @@
-pro return_jmap_maxima,arr,x,allmaxima=allmaxima,numplotmax=numplotmax
-;procedure returns ordered maxima and their indices in a 1D array of values
+pro jmap_return_maxima,arr,x,allmaxima=allmaxima,numplotmax=numplotmax
+;PURPOSE:
+;Procedure returns ordered maxima and their indices in a 1D array of values
 ;
-; COMMON BLOCKS:
+;CATEGORY:
+;AIA/Kinematics/jmap
 ;
-; EXTERNAL CALLS:
-; lclxtrem.pro, badpar.pro
+;INPUTS:
+; arr - 1D array of values.
+;KEYWORDS:
 ;
-; SIDE EFFECTS:
+;OUTPUTS:
 ;
-; RESTRICTIONS:
+;DEPENDENCIES:
+;lclxtrem.pro, badpar.pro
 ;
-; PROCEDURE:
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 2013/09/19
 ;
-; MODIFICATION HISTORY:
-; 2013/09/19, Written by Kamen Kozarev, SAO
-;
-
-;This function expects a 1D array of values.
 
   arr=reform(arr)
   nx=n_elements(x)

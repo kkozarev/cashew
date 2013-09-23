@@ -1,8 +1,24 @@
 function str, invar
+;PURPOSE:
 ;This function returns the string version of a numerical variable,
 ;with all white space removed, in the appropriate format so that
 ;no information is lost.
-;02/2011 Kamen Kozarev
+;
+;CATEGORY:
+;AIA/General
+;
+;INPUTS:
+; invar - the type of variable given by a number.
+;KEYWORDS:
+;
+;OUTPUTS:
+;
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 02/2011
+
 
 case size(invar,/type) of 
      2:  format='(I)';INT

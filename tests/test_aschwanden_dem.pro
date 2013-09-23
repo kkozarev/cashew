@@ -13,8 +13,30 @@ nsig=3 ;   (contrast in number of standard deviations)
 nsm=7 ;   (smoothing boxcar of limb profiles)
 ;st='2011-05-11 02:10:00'
 ;et='2011-05-11 02:40:47'
-st='2011-05-11 02:21:36'
+st='2011-05-11 02:22:26'
 et='2011-05-11 02:40:47'
+
+;To run on multiple processes in parallel, I split the calculation in time...
+;2011-05-11 02:10:00
+;       0
+;2011 05 11 02 10 24
+;      19
+;2011 05 11 02 14 12
+;      38
+;2011 05 11 02 18 00
+;      57
+;2011 05 11 02 21 48
+;      76
+;2011 05 11 02 25 36
+;      95
+;2011 05 11 02 29 24
+;     114
+;2011 05 11 02 33 12
+;     133
+;2011 05 11 02 37 00
+;     152
+;2011 05 11 02 40 48
+
 
 fileset ='AschDEM'
 arcoords=[785,399] ; The AR coordinates in arcseconds for selecting a subframe
@@ -49,25 +71,21 @@ for i=0,18 do begin
    table_fname=outpath+fileset+'_'+datstr+'_'+'teem'
    teem_table=table_fname+'_table.sav' ;   (savefile that contains DEM loopup table)
    teem_map=teem_fname+'_map'
-   ;print,teem_fname
-   ;stop
-   
-
    
    if i eq 1000 then begin
-
 
 ;aia_teem_table,wave_,tsig,te_range,q94,fileset,teem_table
       aia_cfa_teem_table,files,wave_,tsig,te_range,q94,teem_table
       
 ;aia_coalign_test,fileset,wave_,io,ct,nsig,nsm,h_km,dx,dy
       aia_cfa_coalign_test,st,eet,table_fname,wave_,io,ct,nsig,nsm,h_km,dx,dy
-   endif
+ 
    
    
    aia_cfa_teem_map,files,arcoords,wave_,npix,teem_table,teem_map
 ;stop
    aia_cfa_teem_disp,teem_map,te_range,st
+endif
 
 endfor
 print,''

@@ -1,12 +1,25 @@
 pro roiselect50,xrange,yrange
+;PURPOSE:
 ;This procedure helps the user select a 50x50 pixel subregion of the image
 ;It returns the x- and y- indices of the rectangular region, ordered,
 ;in the DEVICE coordinate system.
-
-;Input: None.
-;Output: xrange,yrange - ordered pairs of the x-and y-ranges of the ROI
-
-;Kamen Kozarev, Jan 2011
+;
+;CATEGORY:
+;AIA/General
+;
+;INPUTS:
+;
+;KEYWORDS:
+;
+;OUTPUTS:
+;xrange,yrange - ordered pairs of the x-and y-ranges of the ROI
+;
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 01/2011
+;
 
 
 yes=0

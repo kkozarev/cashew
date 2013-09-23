@@ -1,6 +1,20 @@
-;------------------------------------------------------------------
-;  Trace field line from (x0,y0,z0) in heliocentric coordinates:
-;------------------------------------------------------------------
+;PURPOSE:
+; Trace field line from (x0,y0,z0) in heliocentric coordinates
+;
+;CATEGORY:
+;External
+;
+;INPUTS:
+;
+;KEYWORDS:
+;
+;OUTPUTS:
+;
+;DEPENDENCIES:
+;
+;MODIFICATION HISTORY:
+;Written by Aad van Ballegoijen (When?)  
+
 pro subr_trace,x2,y2,z2,rbase=rbase
 @cms2.blk
 @cms2.trc

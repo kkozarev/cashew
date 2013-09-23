@@ -1,17 +1,29 @@
 pro roiselect_square,xrang,yrang,roisize=roisize,roiname=roiname
+;PURPOSE:
 ;This procedure helps the user select a 50x50 pixel subregion of the image
 ;It returns the x- and y- indices of the rectangular region, ordered,
 ;in the DEVICE coordinate system.
-
-;Input: None.
-;Optional Input:
+;
+;CATEGORY:
+;AIA/General
+;
+;INPUTS:
+;
+;KEYWORDS:
 ;               roisize - size in pixels of the region
 ;               roiname - if provided, will print the name of the
 ;                         region on top of its location
-;Output: xrang,yrang - ordered pairs of the x-and y-ranges of the ROI
-
-;Kamen Kozarev, Oct 2011
-
+;
+;OUTPUTS:
+;xrang,yrang - ordered pairs of the x-and y-ranges of the ROI
+;
+;DEPENDENCIES:
+;pfss_sphtocart,
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 10/2011
+;
+  
   if not keyword_set(roisize) then roisize=50
   
   yes=0

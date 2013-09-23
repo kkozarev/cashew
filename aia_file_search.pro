@@ -1,7 +1,27 @@
 function aia_file_search, st, et, wave,path=path,loud=loud,missing=missing,cfa=cfa,jsoc=jsoc
+;PURPOSE:
 ;Search for AIA fits files from the local CfA archive.
 ;Assume searching on a single day only.
-
+;
+;CATEGORY:
+;AIA/General
+;
+;INPUTS:
+;st, et - start and end time (Example: '2011/01/15 00:00:10')
+;wave - wavelength string
+;
+;KEYWORDS:
+; path=path,loud=loud,missing=missing,cfa=cfa,jsoc=jsoc
+;
+;OUTPUTS:
+; Returns a string array of full path filenames of AIA data.
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 02/2010   
+;
   if not keyword_set(path) then path='/Data/SDO/AIA/level1/'
   
   if n_elements(st) eq 1 then begin

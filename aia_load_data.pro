@@ -33,61 +33,20 @@ fname='AIA'+st[0]+st[1]+st[2]+'_'+strtrim(string(hour),2)+strtrim(string(min),2)
 if loud eq 1 then print, fname
 return, fname
 end
-
 ;-----------------------------------------------------------------------
 
-
-
-
-pro check_dirs,basepath,st,et
-;check for existing folders
-
-;check for year
-if not dir_exist(basepath+st[0]) then begin
-   exec='mkdir '+basepath+st[0]
-   spawn,exec
-endif
-
-;check for month
-if not dir_exist(basepath+st[0]+'/'+st[1]) then begin
-   exec='mkdir '+basepath+st[0]+'/'+st[1]
-   spawn,exec
-endif
-
-;check for day
-if not dir_exist(basepath+st[0]+'/'+st[1]+'/'+st[2]) then begin
-   exec='mkdir '+basepath+st[0]+'/'+st[1]+'/'+st[2]
-   spawn,exec
-endif
-
-;check for hours
-if not dir_exist(basepath+st[0]+'/'+st[1]+'/'+st[2]+'/H'+st[3]+'00') then begin
-   exec='mkdir '+basepath+st[0]+'/'+st[1]+'/'+st[2]+'/H'+st[3]+'00'
-   spawn,exec 
-endif
-
-if st[3] ne et[3] then begin
-   for t=fix(st[3]),fix(et[3]) do begin
-      if t lt 10 then hr='0'+strtrim(string(t),2) else hr=strtrim(string(t),2)
-      if not dir_exist(basepath+st[0]+'/'+st[1]+'/'+st[2]+'/H'+hr+'00') then begin
-         exec='mkdir '+basepath+st[0]+'/'+st[1]+'/'+st[2]+'/H'+hr+'00'
-         spawn,exec
-      endif
-   endfor
-endif
-
-
-end 
 
 ;-----------------------------------------------------------------------
 
 pro aia_load_data,starttime,endtime,wave,index,data,savefile=savefile,nodata=nodata,map=map,norm=norm,noprep=noprep,quiet=quiet,local=local,archive=archive,first=first
+;PURPOSE
 ;This procedure reads in a sequence of AIA fits images from the CfA
 ;archive and returns/saves a prepped data cube and index
-;Kamen Kozarev, 02/2010
 ;
+;CATEGORY:
+;AIA/General
 ;
-;INPUT:
+;INPUTS:
 ;	starttime - a string date
 ;	(Example: '2011/01/15 00:00:10')	
 ;	endtime - a string date
@@ -111,7 +70,13 @@ pro aia_load_data,starttime,endtime,wave,index,data,savefile=savefile,nodata=nod
 ;OPTIONAL OUTPUT:
 ;       savefile - if a filename is specified here, the data and index
 ;                  will be written into a file.
-;  
+;
+;DEPENDENCIES:
+;aia_file_search,aia_check_dirs,vso_search,index2map, read_sdo
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 02/2010
+
 
 ;===========================================================
 ;Constants and definitions
@@ -204,7 +169,7 @@ if files[0] eq '' then begin
                                 ;before writing the files, check that
                                 ;the directories exist, and make them
                                 ;if not.
-    check_dirs,locarc,st,et
+    aia_check_dirs,locarc,st,et
     ;copy files in their appropriate directories
     if st[3] ne et[3] then begin
         spl=strarr(numrec)
