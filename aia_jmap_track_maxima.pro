@@ -1,5 +1,4 @@
 pro test_aia_track_jmap_maxima
-
 ;Load the time height data and any additional information
 ;datafile='restore_me_007.sav'
 ;infofile='info_007.sav'
@@ -14,12 +13,29 @@ numplotmax=2 ;number of maxima to track
 dynrange=[-90,45]
 
 aia_track_jmap_maxima_temp,datafile,infofile,path=path,numplotmax=numplotmax,allmaxima=allmaxima,nmax=nmax,allgfits=allgfits,time=time,distance=distance,dynrange=dynrange,radrange=radrange;/gaussfit,
-
 end
 
 
-PRO aia_track_jmap_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,path=path,numplotmax=numplotmax,allmaxima=allmaxima,nmax=nmax,allgfits=allgfits,time=time,distance=distance,dynrange=dynrange,refine=refine
-;Detect and fit emission maxima
+PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,path=path,numplotmax=numplotmax,allmaxima=allmaxima,nmax=nmax,allgfits=allgfits,time=time,distance=distance,dynrange=dynrange,refine=refine
+;PURPOSE:
+;;Detect and fit the AIA emission maxima
+;CATEGORY:
+;AIA/Kinematics
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 07/2013
+;
 
   resolve_routine,'find_jmap_maxima',/either,/compile_full_file;,/no_recompile
   !P.font=1

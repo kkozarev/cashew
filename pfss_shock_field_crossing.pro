@@ -1,11 +1,12 @@
-;+
-;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pro pfss_shock_field_crossing,pfss_cartpos,nstep,vertex_list
+;PURPOSE:
+;This procedure finds the intersection points of a set of field lines
+;with a specified 3D surface (the shock)
 ;
-;  pfss_field_shock_crossing.pro - This procedure finds the
-;                                  intersection points of a set of field lines
-;                                with a specified 3D surface (the shock)
+;CATEGORY:
+; PFSS_Shock
 ;
-;INPUT:
+;INPUTS:
 ;      vertex_list - a 3D, [3,nspts] array of x-y-z shock surface
 ;                    coordinates, where nspts is the number of
 ;                    surface points
@@ -13,10 +14,18 @@
 ;                   coordinates. nlinpts are number of points on a line,
 ;                   nlines is the number of lines.
 ;
-;             11/04/2011 - Kamen Kozarev
-;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-;-
-pro pfss_field_shock_crossing,pfss_cartpos,nstep,vertex_list
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 11/04/2011 
+;
 
 ;Constants and definitions
 nlines=n_elements(pfss_cartpos[*,0,0])

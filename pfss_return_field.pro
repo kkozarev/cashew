@@ -1,4 +1,24 @@
 pro pfss_return_field,date,rstart=rstart,invdens=invdens,pfss_struct=pfss_struct,save=save
+;PURPOSE:
+; Return the PFSS field model
+;CATEGORY:
+; PFSS
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;pfss_restore, pfss_field_start_coord, pfss_trace_field,
+;pfss_to_spherical, 
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 2011
+;
 
 ;date='2011-01-25'
 ;/Users/kkozarev/AIA/algoTests/yaftawave/normalized_AIA_20110125_05_193_subdata.sav

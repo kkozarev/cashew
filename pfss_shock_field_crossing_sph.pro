@@ -1,11 +1,15 @@
-;+
-;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pro pfss_shock_field_crossing_sph;,pfss_sphpos,nstep,sphvertex_list
+;PURPOSE:
+;This procedure finds the intersection points of a set of field lines
+;with a specified 3D surface (the shock)
+;This procedure assumes that all the coordinate conversions have been
+;performed correctly, and that both position arrays are in
+;heliographic coordinates.
 ;
-;  pfss_field_shock_crossing_sph.pro - This procedure finds the
-;                                  intersection points of a set of field lines
-;                                with a specified 3D surface (the shock)
+;CATEGORY:
+; PFSS_Shock
 ;
-;INPUT:
+;INPUTS:
 ;      sphvertex_list - a 3D, [3,nspts] array of r-theta-phi shock surface
 ;                    coordinates, where nspts is the number of
 ;                    surface points
@@ -13,13 +17,20 @@
 ;                   coordinates. nlinpts are number of points on a line,
 ;                   nlines is the number of lines.
 ;
-;             11/04/2011 - Kamen Kozarev
-;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-;-
-pro pfss_field_shock_crossing_sph;,pfss_sphpos,nstep,sphvertex_list
-;This procedure assumes that all the coordinate conversions have been
-;performed correctly, and that both position arrays are in
-;heliographic coordinates.
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 11/04/2011 
+;
+
+
   
 ;TEST CASE
 ;To test this procedure, comment out the arguments above and uncomment

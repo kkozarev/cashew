@@ -1,7 +1,23 @@
-pro plot_wave_sphere_measurement
-;A quick-plot program for the circle
-;measurements of AIA EUV waves 
-;01/16/2012 Kamen A. Kozarev
+pro aia_plot_wave_sphere_measurement
+;PURPOSE:
+;A quick-plot program for the circle measurements of AIA EUV waves 
+;
+;CATEGORY:
+;AIA/Kinematics
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 01/16/2012
 
 ;+========================================
   ;User Input Parameters

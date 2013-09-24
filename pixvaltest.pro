@@ -1,5 +1,23 @@
 pro pixvaltest,image
-
+;PURPOSE:
+; Test pixel values
+;CATEGORY:
+; General
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;?
+;
 imsiz=size(image)
 if imsiz[2] eq 0 then begin
    print,"You need to supply an image, like 'IDL> pixvaltest,image'!"

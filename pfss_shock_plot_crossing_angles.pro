@@ -1,10 +1,30 @@
-pro plot_pfss_shock_crossing_angles,allcrossPoints,nsteps,allcrosses,radiusfitlines,vertex_list,allcrossangles,subindex,suncenter,vert_rotmat,vert_transmat,sc,datapath=datapath
+pro pfss_shock_plot_crossing_angles,allcrossPoints,nsteps,allcrosses,radiusfitlines,vertex_list,allcrossangles,subindex,suncenter,vert_rotmat,vert_transmat,sc,datapath=datapath
+;PURPOSE:
 ;Plot the crossing points on the polar projection of the shock
 ;surface with their color signifying the crossing angle.
 ;If I want to make a movie out of it, then plot this for every step
 ;with the same size dots. If it is to be presented as a single slide,
 ;make the size of the dots correspond to the number of points with
 ;that angle in that area of the projection.
+;
+;CATEGORY:
+;PFSS_Shock
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;transform_volume, 
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 2011
+;
+
   deproj_cross_points = allcrossPoints
   sunrad=subindex[0].r_sun+10
   kmpx=subindex[0].IMSCL_MP*subindex[0].RSUN_REF/(1000.0*subindex[0].RSUN_OBS)

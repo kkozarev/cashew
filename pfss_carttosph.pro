@@ -1,6 +1,26 @@
 pro pfss_carttosph,x,y,z,l,b,r,theta,phi,degrees=degrees
+;PURPOSE:
 ;Convert between cartesian and spherical positions. 
 ;Angles by default in radians. l/b are the lon/lat of the subsolar point.
+;
+;CATEGORY:
+;
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev,  
+;
+
 ;Kamen Kozarev, 11/04/2011
 
   r = sqrt(x^2+y^2+z^2)

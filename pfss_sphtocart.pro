@@ -1,7 +1,25 @@
 pro pfss_sphtocart,r,theta,phi,l,b,x,y,z,degrees=degrees
+;PURPOSE:
 ;Convert between spherical and normalized cartesian positions. 
 ;Angles by default in radians. l/b are the lon/lat of the subsolar point.
-;Kamen Kozarev, 11/04/2011
+;
+;CATEGORY:
+; PFSS_Shock
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 11/04/2011
+;
 
   if keyword_set(degrees) then begin
      theta*=!PI/180.0

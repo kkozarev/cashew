@@ -5,9 +5,28 @@ return,dens
 end
 
 
-pro plot_pfss_shock_radio_spectrum;,datapath,fname
-; A procedure to plot an artificial type II radio spectrum based on
-;the PFSS/shock model and AIA observations.
+pro pfss_shock_plot_radio_spectrum;,datapath,fname
+;PURPOSE:
+;A procedure to plot an artificial type II radio spectrum based on the PFSS/shock model and AIA observations.
+;CATEGORY:
+;
+;
+;INPUTS:
+;
+;KEYWORDS:
+;
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;fcolorbar
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 2011
+;
+
+
   evnum='113'
   datapath='/Volumes/PLUME/AIA_data/studies/2011events/e'+evnum+'/'
   fname='aia_shock_pfss_r2.0.sav'

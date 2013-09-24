@@ -592,7 +592,7 @@ endif
 next:
   fname='aia_shock_pfss_r2.0.sav'
   restore,datapath+fname
-  plot_pfss_shock_crossing_angles,allcrossPoints,nsteps,allcrosses,radiusfitlines,$
+  pfss_shock_plot_crossing_angles,allcrossPoints,nsteps,allcrosses,radiusfitlines,$
                                   vertex_list,allcrossangles,subindex,suncenter,$
                                   vert_rotmat,vert_transmat,sc,datapath=datapath
 ;-==============================================================================
@@ -601,7 +601,7 @@ next:
 ;+==============================================================================
 ;10. Plot the final energy histogram
 
-     plot_pfss_shock_energy_histogram,shockjumps=shockcomp,datapath=datapath
+     pfss_shock_plot_energy_histogram,shockjumps=shockcomp,datapath=datapath
 
 ;-==============================================================================   
   

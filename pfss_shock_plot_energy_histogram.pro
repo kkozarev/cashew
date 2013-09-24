@@ -6,9 +6,26 @@ pro test_plot_pfss_shock_energy_histogram
 end
 
 
-pro plot_pfss_shock_energy_histogram,shockjumps=shockjumps,mine=mine,maxe=maxe,path=path
-;+==============================================================================
-;Create the histogram of the maximum energy distribution.
+pro pfss_shock_plot_energy_histogram,shockjumps=shockjumps,mine=mine,maxe=maxe,path=path
+;PURPOSE:
+;Create and plot the histogram of the maximum energy distribution.
+;
+;CATEGORY:
+; PFSS_Shock
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 2011
 
 ;  +================================================
   ;Create the proton momentum grid
