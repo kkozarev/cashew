@@ -1,4 +1,5 @@
-function aia_oplot_radials,index,image,latrange=latrange,angres=angres,flarepos=flarepos,offset=offset,profrad=profrad,tv=tv,color=color,radcirc=radcirc
+function aia_overplot_radials,index,image,latrange=latrange,angres=angres,flarepos=flarepos,offset=offset,profrad=profrad,tv=tv,color=color,radcirc=radcirc
+;PURPOSE:
 ;This program makes a radial grid of profiles going from the sun
 ;center out to some distance above the limb, centered in latitude on a
 ;point the user supplies.
@@ -11,7 +12,24 @@ function aia_oplot_radials,index,image,latrange=latrange,angres=angres,flarepos=
 ;color is the color used to draw the radial profiles.
 ;if radcirc is set, overplot circles at every 0.1 Rs above the limb
 ;centered on sun center.
-; Kamen Kozarev, 03/2011
+;
+;CATEGORY:
+; AIA/Kinematics
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 03/2011
+;
 
 image=reform(image)
 index=reform(index)

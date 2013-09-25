@@ -1,4 +1,4 @@
-pro test_aia_jmap_shock_model
+pro test_jmap_pfss_shock_model
 ;Test the shock modeling procedure
 
   path='/Volumes/Backscratch/Users/kkozarev/AIA_data/studies/2011events/'
@@ -6,12 +6,8 @@ pro test_aia_jmap_shock_model
   outpath=path+ev+'/'
   pfssfile=path+ev+'/pfss_results_20110511_1.1Rs_dens_1.sav'
   shockfile=path+ev+'/AIA_20110511_37_193_shocklocations.sav'
-  
   shockfile='/home/kkozarev/Desktop/AIA/pro/e37_051111_193_jmap_measurements.sav'
-
-  
   aia_jmap_shock_model,shockfile,pfssfile,outpath=outpath
-  
 end
 
 function bfield,rmag
@@ -19,11 +15,28 @@ function bfield,rmag
 return,0.409*rmag^(-1.3) * 1.0e-4
 end
 
-pro aia_jmap_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockcomp,outpath=outpath
-;This procedure tests visually the geometrical overlap of the pfss
-;results to the spherical shell model. It does so by plotting the two
-;on the center of the solar disk.
-;Kamen Kozarev 11/08/2011
+
+pro jmap_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockcomp,outpath=outpath
+;PURPOSE:
+; An implementation of the pfss shock model
+;
+;CATEGORY:
+;
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;bfield, transform_volume, pfss_sphtocart
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 11/08/2011
+;
 
 ;+==================================================================================
 ;LOAD DATA

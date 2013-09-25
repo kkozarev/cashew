@@ -1,10 +1,25 @@
 pro aia_oplot_radial,subindex,s_point,location
+;PURPOSE:
 ;This program overplots a radial line passing through a given point on
 ;the solar surface.
-; Kamen Kozarev, 01/2012
-; UPDATES:
-;         Michael Hammer, 07/30/2013 - make it work for both east and
-;                                      west limbs.
+;
+;CATEGORY:
+;
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 01/2012
+;         Michael Hammer, 07/30/2013 - make it work for both east and west limbs.
 
 index=reform(subindex[0])
 point=s_point

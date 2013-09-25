@@ -97,7 +97,4 @@ endfor
 ;Finally, the results will have to be visualized in some way...
 ;Need to figure out how to map the velocities over time on a dynamic plot.
 
-
-
-
 end

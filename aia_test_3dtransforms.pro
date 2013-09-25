@@ -1,3 +1,4 @@
+;+=====================================================================
 pro test_aia_test_3dtransforms
   path='/Volumes/Backscratch/Users/kkozarev/AIA_data/studies/2011events/'
   ev='e37'
@@ -14,14 +15,36 @@ pro test_aia_test_3dtransforms
      
      aia_test_3dtransforms,rad,lon,lat,subindex[init+t]
   endfor
-  
 end
+;-=====================================================================
 
 
+
+;+=====================================================================
 pro aia_test_3dtransforms,radius,lon,lat,ind
+;PURPOSE:
 ;This procedure tests visually the 3D transformations of the wave
 ;surfaces.
-;Kamen Kozarev 07/14/2012
+;
+;CATEGORY:
+;
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+; transform_volume
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 07/14/2012
+;
+
+
 
 ;--------------------------------------------------------------
 ;Constants and definitions
@@ -53,16 +76,16 @@ pro aia_test_3dtransforms,radius,lon,lat,ind
 ;--------------------------------------------------------------
    tvlct,rr,gg,bb,/get
   
-;+==============================================================================
+;+===========================================
 ;2. Draw a circle representing the solar disk.
   points = (2 * !PI / 399.0) * FINDGEN(400)
   x = xcenter + sunrad * cos(points)
   y = ycenter + sunrad * sin(points)
   plots,[x],[y],/device,color=150,thick=2
-;-==============================================================================
+;-==========================================
 
 
-;+==============================================================================
+;+==========================================
 ;3. Calculate and plot the spherical surface:
 
 ;Create the shock surface
@@ -105,15 +128,10 @@ pro aia_test_3dtransforms,radius,lon,lat,ind
   
 ;plot the de-rotated surface to test the inversion
   plots,vertex_list,psym=sym(1),color=200,symsize=0.2,/device ;,/device
-
-;-============================================================================== 
-
-
-
-
-;-==============================================================================
+;-====================
 
 wait,0.2
 
 loadct,0,/silent
 end
+;-=====================================================================

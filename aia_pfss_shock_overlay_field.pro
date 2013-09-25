@@ -1,5 +1,31 @@
-pro aia_overlay_pfss
-;this procedure will create overlayed aia/pfss maps.
+pro test_aia_pfss_shock_overlay_field
+  aia_pfss_shock_overlay_field
+end
+
+
+
+pro aia_pfss_shock_overlay_field
+;PURPOSE:
+; This procedure will create overlayed aia/pfss maps.
+;THIS PROCEDURE NEEDS TO BE GENERALIZED!
+;
+;CATEGORY:
+; AIA/PFSS_Shock
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+; diff_map, sub_map, plot_map
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 2011
+;
 
 dsun_aia=1574.39*2 ; in px, from index[0].R_SUN
 dsun_pfss=192.0 ; in px, from detailed notes in PFSS_VIEWER

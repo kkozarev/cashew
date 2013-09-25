@@ -1,5 +1,25 @@
 pro aia_map_contour_oplot
+;PURPOSE:
 ;a quick program that overplots contours of 211 and 193 AIA images
+;
+;CATEGORY:
+;
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 2010  
+;
+
 
 date='0612' ;0613
 

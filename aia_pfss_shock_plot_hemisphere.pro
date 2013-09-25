@@ -1,4 +1,4 @@
-pro test_aia_plot_hemisphere
+pro test_aia_pfss_shock_plot_hemisphere
 ;;TEST CASE
 restore,'/Volumes/Backscratch/Users/kkozarev/AIA_data/studies/2011events/e05/normalized_AIA_20110125_05_193_subdata.sav'
 index=subindex
@@ -7,17 +7,36 @@ tvscl,subdata[*,*,0]
 arcoords=[-20,-70]
 radius=300
 
-aia_plot_hemisphere,index,radius,arcoords=arcoords,vertex_list=vertex_list
-
+aia_pfss_shock_plot_hemisphere,index,radius,arcoords=arcoords,vertex_list=vertex_list
 stop
 end
 
-pro aia_plot_hemisphere,index,radius,arcoords=arcoords,vertex_list=vertex_list
+
+
+pro aia_pfss_shock_plot_hemisphere,index,radius,arcoords=arcoords,vertex_list=vertex_list
+;PURPOSE:
 ;This program will overplot a hemispherical surface on an AIA image,
 ;given the image index, which should contain the AR coordinates and
-;the solar radius.
-;It will optionally return the vertex list of the hemisphere.
-;Kamen Kozarev, 10/20/2011
+;the solar radius. It will optionally return the vertex list of the hemisphere.
+;
+;CATEGORY:
+; AIA/PFSS_Shock
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;aia_circle
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 10/20/2011
+;
+
 
 loadct,8,/silent
 

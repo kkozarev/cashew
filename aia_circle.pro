@@ -1,4 +1,27 @@
 function aia_circle, xcenter, ycenter, rad, plot=plot
+;PURPOSE:
+; calculate the coordinates of a circle
+;
+;CATEGORY:
+; AIA/General
+;
+;INPUTS:
+; xcenter
+; ycenter
+; rad
+;
+;KEYWORDS:
+; plot
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 2011
+;
 
 radius = rad + 10
 points = (2 * !PI / 199.0) * FINDGEN(200)

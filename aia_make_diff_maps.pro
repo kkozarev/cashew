@@ -1,22 +1,31 @@
 pro aia_make_diff_maps,wav,date,maps,diffmaps,outpath=outpath
+;PURPOSE:
 ;A procedure to create base difference maps
 ;(map tutorial available at http://www.sipwork.org/?p=42 ), and then
 ;make difference maps. Save the difference and original maps for
 ;future use. Also make plots and save them for making a movie.
-;Procedure by Kamen Kozarev with code help from David Long, 08/11/2010.
-
-;INPUT
+;
+;CATEGORY:
+; AIA/General
+;
+;INPUTS:
 ;wav (string) - wavelength, in the format '000', like '193'
 ;date (string array) - date, in format ['2010','06','12']
 ;indata (type map)- an array of maps
-
-;OUTPUT
-;diffmaps (type map) - an array of base difference maps
-
-
-;KEYWORDS
+;
+;KEYWORDS:
 ;outpath - the destination, in which to save the difference maps, in
 ;          the format diffMapData_0612_193.sav
+;
+;OUTPUTS:
+;diffmaps (type map) - an array of base difference maps
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev with code help from David Long, 08/11/2010.
+;
 
 set_plot,'x'
 nmaps=n_elements(maps)

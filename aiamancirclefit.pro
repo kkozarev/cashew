@@ -1,21 +1,30 @@
 pro aiamancirclefit,circlepos,p,np=np,error=error,mousebutton=mousebutton,$
                     special_point=special_point
+;PURPOSE:
 ;This procedure uses the mpfitellipse procedure to make a circle fit to 
 ;a bunch of points selected by the user.
-;Kamen Kozarev, October 2010
-
-;INPUT: None
-
-;KEYWORDS
+;
+;CATEGORY:
+; AIA/Kinematics
+;
+;INPUTS:
+;
+;KEYWORDS:
 ; np - number of points the user must select manually for the fittng.
 ;      Default is 10.
-
-;OUTPUT
+;
+;OUTPUTS:
 ; circlepos - a two by n array containing the x and y positions of the
 ;          ellipse fit. 'n' is the number of points chosen in the fit,
 ;          default is 501
 ; p - ellipse parameters from the fit.
-;mousebutton=0
+; 
+;DEPENDENCIES:
+; mpfitellipse
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 10/2010
+;
 
 if not keyword_set(np) then np=10
 xarr=fltarr(np)

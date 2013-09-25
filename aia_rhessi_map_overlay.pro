@@ -1,11 +1,4 @@
-pro aia_rhessi_map_overlay,ps=ps
-;Procedure to load RHESSI and AIA data, and overlay them on top of
-;each other. RHESSI data-loading code from
-;http://hesperia.gsfc.nasa.gov/ssw/hessi/doc/image/hsi_image_howto.html
-  search_network, /enable
-  
-;------------------------------
-;INPUTS
+pro test_aia_rhessi_map_overlay
   datapath="/Users/kkozarev/Desktop/Antonia/"
   rhessipath=datapath+'RHESSI/'
   aiapath=datapath+'AIA/'
@@ -16,6 +9,48 @@ pro aia_rhessi_map_overlay,ps=ps
   hsi_end_times=[['18:13:00','18:45:00'],$
                  ['09:50:00','09:40:00']]
   min_augment=1                 ;by how many minutes to augment the array
+  aia_rhessi_map_overlay,ps=ps,datapath=datapath, rhessipath=rhessipath, aiapath=aiapath, hsi_dates=hsi_dates, hsi_start_times=hsi_start_times, hsi_end_times=hsi_end_times, minaugment=minaugment
+end
+
+
+pro aia_rhessi_map_overlay,ps=ps,datapath=datapath, rhessipath=rhessipath, aiapath=aiapath, hsi_dates=hsi_dates, hsi_start_times=hsi_start_times, hsi_end_times=hsi_end_times, minaugment=minaugment
+;PURPOSE:
+;Procedure to load RHESSI and AIA data, and overlay them on top of
+;each other. RHESSI data-loading code from
+;http://hesperia.gsfc.nasa.gov/ssw/hessi/doc/image/hsi_image_howto.html
+;This is written for a particular date/times
+;
+;CATEGORY:
+; AIA/RHESSI
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+; hsi_image(), fits2map, aia_load_data
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 04/2013
+;
+  
+  search_network, /enable
+  
+;------------------------------
+;INPUTS
+ if not keyword_set(datapath) then datapath="/Users/kkozarev/Desktop/Antonia/"
+ if not keyword_set(rhessipath) then rhessipath=datapath+'RHESSI/'
+ if not keyword_set(aiapath) then aiapath=datapath+'AIA/'
+ if not keyword_set(hsi_dates) then hsi_dates=['2010/08/07','2012/05/08']
+ if not keyword_set(hsi_start_times) then hsi_start_times=[['18:01:00','18:40:00'],$
+                                                           ['09:40:00','09:27:00']]
+ if not keyword_set(hsi_end_times) then hsi_end_times=[['18:13:00','18:45:00'],$
+                                                       ['09:50:00','09:40:00']]
+ if not keyword_set(min_augment) then min_augment=1 ;by how many minutes to augment the array
 
   ;RHESSI images parameters
   clean_niter=175

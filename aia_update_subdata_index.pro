@@ -1,14 +1,30 @@
 function aia_update_subdata_index,index,subroi_start,npx,coords
+;PURPOSE:
 ;This procedure will update several AIA index tags,
 ;which need to be changed when choosing a subregion
 ;of data.
-;Written by Kamen A Kozarev, 07/06/2011
-  newind=index
-
-;INPUT:
+;
+;CATEGORY:
+; AIA/General
+;
+;INPUTS:
 ;      index - the index structure to be updated
 ;      subroi_start - the [x,y] pixel coords of lower left corner of the subroi.
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;aia_get_arcoords, rep_tag_value (sswidl)
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 07/06/2011
+;
 
+  newind=index
   if n_elements(subroi_start) lt 2 then begin
      print,'subroi_start=[x,y]. Aborting...'
      return,0
