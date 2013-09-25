@@ -1,10 +1,67 @@
+;+============================================================================
+pro batch_calculate_observed_ionization_times
+;This procedure runs the aia_calculate_observed_ionization_times procedure for multiple events
+;Kamen Kozarev, 10/31/2011
+;This is made for the 2011 events - needs to be updated.
+
+evindex=['05','06','13','19','20','32','37','38']
+;eventsToRun=[0,1,2,3,4,5,6,7]
+eventsToRun=[6]
+nevents=n_elements(eventsToRun)
+numrois=5
+
+;loop over the events
+;The ratios of wavelengths: 
+; 1) 193/211
+; 2) 193/335
+; 3) 211/335
+;more to come later...
+ratios=[1,2,3]
+nratios=n_elements(ratios)
+
+;This array contains the observed ionization timescales for various
+;events and wavelength ratios
+ionizTimes=fltarr(nevents,nratios,numrois)
+
+for e=0,nevents-1 do begin
+   event=eventsToRun[e]
+   eventName='e'+evindex[event]
+   for r=0,nratios-1 do begin
+      aia_calculate_observed_ionization_times,eventName,ratios[r],iontimes
+      ionizTimes[e,r,*]=iontimes
+   endfor
+endfor
+end
+;-============================================================================
+
+
+
+;+============================================================================
 pro aia_calculate_observed_ionization_times, event, ratio, obsIonizTimes
+;PURPOSE:
 ;This procedure allows a user to determine ionization timescales
 ;based on the method used in Ma et al. (2011) - by inspecting time series
 ;of the ratios of intensities of two different AIA channels.
 ;This procedure is meant to work with the results from applying the
-;batch_define_rois procedure, for the 2011 AIA event study.
-;Kamen Kozarev, 10/31/2011
+;batch_define_rois procedure.
+;
+;CATEGORY:
+; AIA/Ionization
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 10/31/2011
+;
 
 ;Constants and definitions:
 inpath='/Volumes/PLUME/AIA_data/studies/2011events/'
@@ -151,7 +208,5 @@ device,file=inpath+event+'/ionization/'+fname+'.eps',$
    wait,0.5
 endfor	;The SUBROI loop
 
-
-
-
 end
+;-============================================================================

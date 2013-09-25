@@ -1,3 +1,4 @@
+pro bootstrap_sdo_cubic, distance, time, error=error, fit_line, p1, p2, p3, p4, s1, s2, s3, s4
 ;+
 ; NAME:
 ;       bootstrap_sdo_cubic
@@ -31,13 +32,12 @@
 ;        - Stand-alone code taken from original all-inclusive
 ;          bootstrapping routines
 ;
-;-
+; DEPENDENCIES:
+; 
+;
 ; UPDATE:
 ;       Kamen Kozarev 31-January-2011
 ;        - Modified the code to do third-order polynomial fitting
-
-pro bootstrap_sdo_cubic, distance, time, error=error, fit_line, p1, p2, p3, p4, s1, s2, s3, s4
-
 
 ; Bootstrap noisy data
 

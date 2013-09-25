@@ -1,7 +1,27 @@
 pro batch_load_events_2013
+;PURPOSE:
+;
 ;This is the new format for loading big bunches of AIA data for
 ;multiple events and wavelengths.
-;Kamen Kozarev, 10/2013
+;
+;CATEGORY:
+;
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 06/2013
+;
+
    
   path='/Data/tokyo/mhammer/Volumes/Scratch/2013events/'
   wave=['171','193','211','335','094','131','304']

@@ -1,4 +1,24 @@
 pro getpixvalue,image
+;PURPOSE:
+; Select and obtain the pizel value
+;CATEGORY:
+; General
+;
+;INPUTS:
+; image
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 2011
+;
 
 image=reform(image)
 

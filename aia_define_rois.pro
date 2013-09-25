@@ -1,6 +1,5 @@
 pro batch_define_rois
-
-;The actual events and AIA channels which to measure...
+;The actual events and AIA channels to measure...
   er=[6]
 
   evindex=['05','06','13','19','20','32','37','38']
@@ -9,17 +8,37 @@ pro batch_define_rois
   begstep=[25,30,10,30,20,5,35,1] ;these are the initial steps for which to run the algorithm
   endstep=[100,100,100,85,90,100,110,110] ;these are the final steps for which to run the algorithm
   
-  
-  run_define_rois,evindex[6],evdate[6],begstep[6],endstep[6];,waves=['94','131']
-  
+  aia_define_rois,evindex[6],evdate[6],begstep[6],endstep[6];,waves=['94','131']
 end
 
 
 
-pro run_define_rois,events,evdate,begstep,endstep,basepath=basepath,automatic=automatic,waves=waves,numroi=numroi,roisize=roisize
+pro aia_define_rois,events,evdate,begstep,endstep,basepath=basepath,automatic=automatic,waves=waves,numroi=numroi,roisize=roisize
+;PURPOSE:
+;
 ;This procedure defines the ROIs for the ionization and DEM
 ;calculations.
-;Kamen Kozarev, 10/01/2011
+;
+;CATEGORY:
+; AIA/Ionization
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+; aia_circle, roiselect_square
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 10/01/2011
+;
+
+
+;Kamen Kozarev, 
   
   loadct,9,/silent
   tvlct,rr,gg,bb,/get

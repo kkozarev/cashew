@@ -1,3 +1,4 @@
+pro bootstrap_sdo, distance, time, error=error, fit_line, p1, p2, p3, s1, s2, s3
 ;+
 ; NAME:
 ;       bootstrap_sdo
@@ -30,11 +31,7 @@
 ;	David Long 10-July-2010 
 ;        - Stand-alone code taken from original all-inclusive
 ;          bootstrapping routines
-;
 ;-
-
-pro bootstrap_sdo, distance, time, error=error, fit_line, p1, p2, p3, s1, s2, s3
-
 if not keyword_set(error) then error=fltarr(n_elements(time))+1.0e-33
 
 ; Bootstrap noisy data
