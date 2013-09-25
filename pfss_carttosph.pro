@@ -4,7 +4,7 @@ pro pfss_carttosph,x,y,z,l,b,r,theta,phi,degrees=degrees
 ;Angles by default in radians. l/b are the lon/lat of the subsolar point.
 ;
 ;CATEGORY:
-;
+; PFSS
 ;
 ;INPUTS:
 ;
