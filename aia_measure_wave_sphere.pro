@@ -1,35 +1,66 @@
-pro measure_wave_sphere
-;This is a HACK to measure the radius of the wave in one event
-;for my ESWW8 poster. This will be the template for later doing
-;this for multiple events.
-;Kamen Kozarev, 11/2011
+pro test_aia_measure_wave_sphere
+;this procedure tests aia_measure_wave_sphere
 
-
-;+========================================
-  ;User Input Parameters
-  wav='193'
-  evindex=11 ;the index of the event. See 'evnums' below
-  ;The range of images to measure - this is currently
-  ;determined by visual inspection of the subdataset
-  init=11 ;The first image to record
-  fin=31 ;The last image to record
-;-========================================
-
-
-
-
-;+========================================
-;0. Load the subdata
+  evindex=11
+  profrange=[11,31]
   datapath='/Volumes/PLUME/AIA_data/studies/2011events/'
-  wavelength=['171','193','211','335','094','131','304']
+  wavelength=['193','211']
   evnums=['05','06','07','13','19','20','23','32','37','38','41','113','112']
   sts=['2011/01/25 11:56:00','2011/01/27 11:50:00','2011/01/28 00:45:00',$
        '2011/02/11 12:30:00','2011/03/07 19:35:00','2011/03/08 03:30:00',$
        '2011/03/12 15:20:00','2011/04/27 02:05:00','2011/05/11 02:10:00',$
        '2011/05/29 10:00:00','2012/01/05 06:56:00','2010/06/13 05:35:00',$
        '2010/06/12 00:55:00']
+  wav=wavelength[0]
   evnum=evnums[evindex]
-  std=strsplit(sts[evindex],'/ :',/extract)
+  st=sts[evindex]
+  
+  
+end
+
+pro aia_measure_wave_sphere,wav=wav,evnum=evnum,profrange=profrange,st=st,datapath=datapath
+;PURPOSE:
+; Measure the radius of a wave event interactively
+;CATEGORY:
+; AIA/Kinematics
+;
+;INPUTS:
+;
+;KEYWORDS:
+; wav
+; evnum
+; profrange
+; st
+; datapath
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+; aia_oplot_radial, aiamancirclefit,  bootstrap_sdo
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 11/2011
+
+
+;+========================================
+  ;User Input Parameters
+  if not keyword_set(wav) then wav='193'
+  if not keyword_set(st) then st='2010/06/13 05:35:00'
+  ;The range of images to measure - this is currently
+  ;determined by visual inspection of the subdataset
+  if not keyword_set(profrange) then profrange=[11,31] ;The range of images to record
+  init=profrange[0]
+  fin=profrange[1]
+  if not keyword_set(datapath) then datapath='/Volumes/PLUME/AIA_data/studies/2011events/'
+  if not keyword_set(evnum) then evnum='113'
+;-========================================
+
+
+;+========================================
+;0. Load the subdata
+
+  std=strsplit(st,'/ :',/extract)
   date=std[0]+std[1]+std[2]
   eventname='AIA_'+date+'_'+evnum+'_'+wav
   print,'Loading '+wav+' channel AIA data for event #'+evnum

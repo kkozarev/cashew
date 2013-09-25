@@ -5,24 +5,48 @@ pro test_model_coronal_shock
   ev='e37'
   shockfile=path+ev+'/AIA_20110511_37_193_shocklocations.sav'
   restore,shockfile
-  stop
   
   pfssfile=path+ev+'/pfss_results_20110511_1.1Rs_dens_1.sav'
-  
 
   model_coronal_shock,shockfile,pfssfile
-  
+  stop
 end
+;-==========================================================================
+
+
 
 function bfield,rmag
-;Return field as a function of radius from Gopalswamy paper
+;Return field as a function of radius from Gopalswamy (2011?) paper
 return,0.409*rmag^(-1.3) * 1.0e-4
 end
+;-==========================================================================
+
+
 
 pro model_coronal_shock,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockcomp
-;This procedure tests visually the geometrical overlap of the pfss
-;results to the spherical shell model. It does so by plotting the two
-;on the center of the solar disk.
+;PURPOSE:
+; Run the coronal shock model. This procedure needs to be revisited.
+;
+;CATEGORY:
+; PFSS_Shock
+;
+;INPUTS:
+; shockfile - position of the shock wave in time from the kinematics measurements
+; pfssfile - the pfss model for the given time
+;
+;KEYWORDS:
+; vupstream - optional upstream plasma speed
+; shockcomp - optional shock compression
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;pfss_sphtocart, transform_volume, bfield (this file)
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev,  
+;
 ;Kamen Kozarev 11/08/2011
 
 ;+==================================================================================
