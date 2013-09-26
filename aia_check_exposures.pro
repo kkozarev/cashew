@@ -1,24 +1,5 @@
 pro aia_check_exposures, good_exposures_bool, good_exposures, DATA_FILE = data_file, SUBDATA = subdata, SUBINDEX = subindex, DELETE = delete, W_DELETE = w_delete
-; Parameters:
-; good_exposures: The 'return array' containing booleans indicating
-; which exposures are good and which are useless
-; data_file: Data to be restored including subdata and subindex
-; subdata: The subdata from the restored file
-; subindex: The subindex from the restored file
-;
-; Note: Your input should be one of the following:
-; (1) DATA_FILE
-; (2) SUBDATA and SUBINDEX
-; If you put neither or both, it makes no sense. Don't do it.
-; Do (1) if you haven't restored the data yet.
-; Do (2) if you have already restored the data.
-;
-; delete: If delete is selected, bad_exposures will be deleted from
-; only the wavelength of the data_file
-; w_delete: If w_delete is selected, bad_exposures will be deleted
-; from all of the wavelength, not just that of the data_file
-;
-; What This Program Does:
+;PURPOSE:
 ; This program checks the exposure times of the frames in an image
 ; sequence and identifies which frames had an unusually short exposure
 ; time due to a crazy flare going off or some other reason.
@@ -29,9 +10,36 @@ pro aia_check_exposures, good_exposures_bool, good_exposures, DATA_FILE = data_f
 ; a constant time interval if the bad exposures were literally every
 ; other frame for the entire duration of the event. In this case, the
 ; constant interval would be 24 seconds instead of 12 seconds.
-
+; Note: Your input should be one of the following:
+; (1) DATA_FILE
+; (2) SUBDATA and SUBINDEX
+; If you put neither or both, it makes no sense. Don't do it.
+; Do (1) if you haven't restored the data yet.
+; Do (2) if you have already restored the data.
 ;
-;  Written by Michael Hammer - 07/2013
+;CATEGORY:
+; AIA/General
+;
+;INPUTS:
+; data_file: Data to be restored including subdata and subindex
+; subdata: The subdata from the restored file
+; subindex: The subindex from the restored file
+;
+;KEYWORDS:
+; delete: If delete is selected, bad_exposures will be deleted from
+; only the wavelength of the data_file
+; w_delete: If w_delete is selected, bad_exposures will be deleted
+; from all of the wavelength, not just that of the data_file
+;
+;OUTPUTS:
+; good_exposures and good_exposures_bool: The 'return arrays'
+; containing booleans indicating which exposures are good and which are useless
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Michael Hammer, 07/2013 
 ;
 wave = ['171','193','211','335','094','131','304']
 wave_exposure_times = [2.0,2.0,2.9,2.9,2.9,2.9,2.9]

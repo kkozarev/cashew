@@ -1,6 +1,26 @@
 function aia_get_arcoords, index, angular_coords, subroi_start, arlonlat=arlonlat
+;PURPOSE:
 ;A small program to convert angular to pixel AR coordinates.
-;01/2012 UPDATE (KAK): Introduced WCS procedures to make this more accurate. 
+;
+;CATEGORY:
+; AIA/General
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+;
+;DEPENDENCIES:
+; fits2headwcs, wds_convert_from_coord, wcs_get_pixel
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 2011
+;01/2012, Kamen Kozarev: Introduced WCS procedures to make this more
+;accurate. 
+;
 
 pscale=index.imscl_mp ;arcsecs per pixel
 acx=angular_coords[0]*1.0 ;arcsecs

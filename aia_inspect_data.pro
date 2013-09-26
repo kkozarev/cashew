@@ -1,10 +1,13 @@
 function aia_inspect_data,index,data,subcor=subcor,autoregion=autoregion,bdiff=bdiff,bratio=bratio
+;PURPOSE:
 ;This procedure converts the full 4k AIA data to 1k cube and shows a
 ;movie to the user, allowing an inspection of the data. 
 ;Optionally, it can allow the user to select a subregion, and return it.
 ;
+;CATEGORY:
+; AIA/General
 ;
-;INPUT:
+;INPUTS:
 ;      index - the index array
 ;      data - the datacube
 ;

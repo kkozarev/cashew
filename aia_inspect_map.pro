@@ -1,32 +1,32 @@
 pro aia_inspect_map,map,submap=submap,automatic=automatic
+;PURPOSE:
 ;This procedure converts the full 4k AIA mapcube to 1k mapcube and shows a
 ;movie to the user, allowing an inspection of the data. 
 ;Optionally, it can allow the user to select a subregion, and return it.
 ;
+;CATEGORY:
+; AIA/General
 ;
-;INPUT:
-;      map - the original mapcube
+;INPUTS:
+; map - the original mapcube
 ;
-;OPTIONAL INPUT:
-;         automatic - Automatically select a subregion, do
+;KEYWORDS:
+; automatic - Automatically select a subregion, do
 ;                     not show a movie of the data. The program expects the 
 ;                     pixel coordinates for the upper left(x1,y1) and lower
 ;                     right(x2,y2) corners of the ROI to be supplied, like   
 ;                     [x1,y1,x2,y2].
 ;
-;KEYWORDS:
-;         
-;
-;
-;OPTIONAL OUTPUT:
-;         submap - if a variable is provided, return a submap of
+;OUTPUTS:
+; submap - if a variable is provided, return a submap of
 ;                   the datacube.
-;
+; 
 ;DEPENDENCIES:
-;         roiselect.pro
+; roiselect, sub_map, plot_map
 ;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 02/2010
 ;
-;Kamen Kozarev 02/2010
 
 nt=n_elements(map)
 

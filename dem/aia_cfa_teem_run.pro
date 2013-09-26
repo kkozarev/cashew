@@ -1,6 +1,6 @@
+;+==============================================================================
 pro test_aia_cfa_teem_run
-  
-  
+  ;test/batch run the AschDEM code
   fileset ='AschDEM'
   evnums=['05','06','07','13','19','20','23','32','37','38','41','113','112']
   coordX=[-955,729,777,-1073,812,-1069,771,-835,785,-843,864,883,633]
@@ -24,16 +24,33 @@ pro test_aia_cfa_teem_run
   aia_cfa_teem_run,st=sts[er],et=ets[er],arcoords=[coordX[er],coordY[er]],outpath=outpath
   outpath='/Volumes/Backscratch/Users/kkozarev/AIA_data/studies/2011events/'+'e'+evnums[er]+'/dem/aschwanden/'
 end
+;-==============================================================================
 
 
 
+;+==============================================================================
 pro aia_cfa_teem_run,st=st,et=et,arcoords=arcoord,outpath=outpath,workdir=workdir,fileset=fileset,cfaarc=cfaarc
+;PURPOSE:
 ;Program which runs Marcus Aschwanden's DEM code on an AIA datacube
 ;
+;CATEGORY:
+; DEM/AschDEM
 ;
+;INPUTS:
 ;
+;KEYWORDS:
+; 
 ;
-;07/2013 KAK 
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+; aia_load_data, aia_augment_timestring(this file), aia_cfa_coalign_test
+; aia_cfa_teem_table, aia_file_search, aia_cfa_teem_map, aia_cfa_teem_disp
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 07/2013
+;
 resolve_routine,'aia_load_data',/either,/compile_full_file,/no_recompile
 
 if not keyword_set(fileset) then fileset ='AschDEM'
@@ -52,8 +69,6 @@ wave =['131','171','193','211','335','94']
 nwave =n_elements(wave)
 if not keyword_set(workdir) then workdir ='./'
 if not keyword_set(cfaarc) then cfaarc='/Data/SDO/AIA/level1/'
-
-;AIA_data/studies/2011events/e37/dem/aschwanden
 
 io=3 ;   (0=screen, 3=color postscript file)
 ct=3 ;   (IDL color table) 
@@ -117,15 +132,13 @@ while anytim(tmp2) le anytim(et) do begin
 endwhile
 
 end
-;_________________________________________________________________________
-;_________________________________________________________________________
+;-==============================================================================
 
 
 
 
 
-;_________________________________________________________________________
-;_________________________________________________________________________
+;+==============================================================================
 function aia_augment_timestring,oldtime,nsec
 ;a simple procedure that takes a date/time string, like '2011-05-11
 ;02:26:00' and adds a certain number of SECONDS to the time,
@@ -190,3 +203,4 @@ newtime=st[0]+'-'+st[1]+'-'+newday+' '+newhr+':'+newmin+':'+newsec
 
 return, newtime
 end
+;-==============================================================================

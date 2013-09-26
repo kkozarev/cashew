@@ -1,14 +1,15 @@
-pro test_jmap_pfss_shock_model
+pro test_aia_coronal_shock_model
 ;Test the shock modeling procedure
 
   path='/Volumes/Backscratch/Users/kkozarev/AIA_data/studies/2011events/'
   ev='e37'
   outpath=path+ev+'/'
   pfssfile=path+ev+'/pfss_results_20110511_1.1Rs_dens_1.sav'
-  shockfile=path+ev+'/AIA_20110511_37_193_shocklocations.sav'
-  shockfile='/home/kkozarev/Desktop/AIA/pro/e37_051111_193_jmap_measurements.sav'
-  aia_jmap_shock_model,shockfile,pfssfile,outpath=outpath
+  shockfile=path+ev+'/AIA_20110511_37_193_shocklocations.sav' 
+  
+  aia_coronal_shock_model,shockfile,pfssfile,outpath=outpath
 end
+
 
 function bfield,rmag
 ;Return field as a function of radius from Gopalswamy paper
@@ -16,7 +17,7 @@ return,0.409*rmag^(-1.3) * 1.0e-4
 end
 
 
-pro jmap_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockcomp,outpath=outpath
+pro aia_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockcomp,outpath=outpath
 ;PURPOSE:
 ; An implementation of the pfss shock model
 ;
@@ -44,21 +45,16 @@ pro jmap_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shock
   print,'Loading data...'
   
   restore, shockfile
-
   ;get some relevant info from the file name
   res=strsplit(shockfile,'_',/extract)
   date=res[1]
-  tmp=strsplit(res[0],'/',/extract)
-  event=tmp[n_elements(tmp)-1]
-  wav=res[2]
-  subindex=ind
+  event=res[2]
+  wav=res[3]
   
-  ;Convert radius to km above the surface
-  radius=(reform(wave_rads)-1.0)*subindex[0].rsun_ref/1000.0
-
+  radius=reform(radius[0,*])
   lon=subindex[0].arlon
   lat=subindex[0].arlat
-  
+  stop
   ;Calculate the number of steps and their size.
   winsize=1024
   shockthick=0.4                ;shock thickness, in pixels
@@ -69,10 +65,9 @@ pro jmap_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shock
   zcenter=sunrad*cos(subindex[0].arlon*!PI/180.0)
   
   ;nsteps=fix((maxshockrad-minshockrad)/(shockthick*1.01))
-  nsteps=n_elements(wave_times)
+  nsteps=n_elements(time)
 ;  dt=(maxshockrad-minshockrad)*mpix/(nsteps*1.0)/vshock ;timestep in seconds
-  dt=wave_times[1:nsteps-1]-wave_times[0:nsteps-2]
-
+  dt=time[1:nsteps-1]-time[0:nsteps-2]
 
   restore, pfssfile
   ;get relevant info from file name
@@ -115,6 +110,8 @@ pro jmap_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shock
 ;+==================================================================================
 ;Constants and definitions
   loadct,8,/silent
+
+
 
 ;Physical constants
   rsun_m=6.955e8 ;Solar radius in m.
@@ -193,7 +190,7 @@ pro jmap_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shock
   for sstep=0,nsteps-1 do begin
      print,'Step #'+string(sstep)
      ;calculate the shock radius
-     shockrad=(radius[sstep]-1)/subindex[sstep].rsun_ref*1000.*subindex[sstep].r_sun
+     shockrad=(radius[sstep]-1)/subindex[init+sstep].rsun_ref*1000.*subindex[init+sstep].r_sun
      ;shockrad=minshockrad+((maxshockrad-minshockrad)*sstep)/(nsteps-1)
      
 ;Rotation angles for the entire plot
@@ -229,7 +226,7 @@ pro jmap_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shock
         
 ;Apply the rotations and translations
         pfss_cartpos=fltarr(nlines,3,maxnpts)
-        Window, 0, Xsize=winsize, Ysize=winsize
+        ;Window, 0, Xsize=winsize, Ysize=winsize
         for ff=0.0,nlines-1 do begin
            npt=nstep[ff]        ;the number of points in this particular line.
            pos = transpose([[reform(pfss_px[0:npt-1,ff])],$
@@ -285,7 +282,7 @@ pro jmap_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shock
      rotmat=!P.T
      
      ;plot the rotated surface
-     plots,Vertex_list,psym=sym(1),color=150,symsize=0.2,/device
+     ;plots,Vertex_list,psym=sym(1),color=150,symsize=0.2,/device
      
      nverts=n_elements(vertex_list[0,*])
 ;-============================================================================== 
@@ -302,14 +299,6 @@ pro jmap_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shock
      
      if ptind[0] gt -1 then begin
         pind=array_indices(reform(pfss_cartpos[*,0,*]),ptind)
-        
-        ;Leave only the unique crossing lines - IS THIS NECESSARY?
-        ;srt=sort(pind[0,*])
-        ;pind=pind[*,srt]
-        ;tmp=reform(pind[0,*])
-        ;unique_lines=pind[*,uniq(tmp)]
-        ;pind=unique_lines
-        
         ncrosses=n_elements(pind[0,*])
      endif else begin
         print,'No field/shock crossings. Continuing...'
@@ -318,7 +307,7 @@ pro jmap_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shock
 
      cross_points=fltarr(3,ncrosses)
      for i=0,ncrosses-1 do cross_points[*,i]=reform(pfss_cartpos[pind[0,i],*,pind[1,i]])
-     allcrossPoints[sstep,*,0:ncrosses-1]=cross_points*1.0D
+     allcrossPoints[sstep,*,0:ncrosses-1]=cross_points
      
      ;find the normals at the crossing
      ;points and the local field direction.
@@ -452,6 +441,7 @@ pro jmap_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shock
      ;else oplot,gride,sss/pgrid     
      ;stop
   endfor
+;stop
 
 ;+==============================================================================
 ;6. Plot the histogram of all angles at all steps.
@@ -529,7 +519,7 @@ pro rungrid_model_shock
         if max(enrg) gt maxerg then maxerg=max(enrg)
   endfor
 
-  
+
   ;Create the histograms
   nbins=fix((maxerg-mine)/binsiz)
   bins=FINDGEN(nbins)*binsiz + mine

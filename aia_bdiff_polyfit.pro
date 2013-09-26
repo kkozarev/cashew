@@ -1,11 +1,13 @@
 pro aia_bdiff_polyfit,indices,framerange,proflocs,peakpos,nms,checkbad=checkbad,titprefix=titprefix,outpath=outpath
+;PURPOSE:
 ;Using the hand measurements of the wave positions, perform second-
 ;and third-order polynomial fitting to obtain velocities and
 ;accelerations.
-
-set_plot,'x'
-
-;INPUT
+;
+;CATEGORY:
+; AIA/Kinematics
+;
+;INPUTS:
 ;avgprofile - the average of the radial profiles 
 ;indices - a corresponding array of data indices
 ;framerange - the first and last frame for which to measure the
@@ -13,21 +15,27 @@ set_plot,'x'
 ;proflocs - the position of the profiles, for reference.
 ;nms - since measuring the points is done manually, this variable has
 ;      the number of measurements the user has to perform.
-
-;checkbad (optional) - if set, prompt the user to approve each profile
-;                      before selecting profile peak
-;titprefix (optional) - set to the name of the transient (CME,shock,
-;                       etc) (string)
-;outpath (optional) - set to the location where the plots of velocity
-;                     and position vs. time should be saved. 
-
-;OPTIONAL OUTPUT
 ;
+;KEYWORDS:
+;checkbad - if set, prompt the user to approve each profile
+;                      before selecting profile peak
+;titprefix - set to the name of the transient (CME,shock,
+;                       etc) (string)
+;outpath - set to the location where the plots of velocity
+;                     and position vs. time should be saved. 
+;
+;OUTPUTS:
 ;if the keyword outpath is set, saves a plot of position vs. time and
 ;a plot of velocity vs. time for the examined averaged profile.
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 10/2010
 ;
 
-
+set_plot,'x'
 ;=============================================================================
 ;0. Constants, Definitions, Data Preparation
 

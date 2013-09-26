@@ -18,6 +18,8 @@ pro aia_cfa_teem_table,files,wave_,tsig,te_range,q94,teem_table
 ;
 ; History     :  3-Mar-2011, Version 1 written by Markus J. Aschwanden
 ;
+; Dependencies: aia_get_response, read_sdo, aia_prep
+;
 ; Contact     : aschwanden@lmsal.com
 ;-
 
