@@ -12,11 +12,28 @@ end
 
 
 pro aia_analyze_deprojected,fname,outpath=outpath,thrange=thrange
-; Procedure to analyze the speeds of radial and lateral expansion of a
+;PURPOSE:
+;Procedure to analyze the speeds of radial and lateral expansion of a
 ;wave and/or a filament.
 ;Uses output from aia_annulus_plot.pro, a procedure deprojecting AIA
 ;data onto a rectangular grid, where the X-axis is latitude along the
 ;limb, and the Y-axis is radial distance.
+;
+;CATEGORY:
+; AIA/Kinematics
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 08/07/2013
 
 ;Restore the file with the deprojected data

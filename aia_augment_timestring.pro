@@ -1,8 +1,28 @@
 function aia_augment_timestring,oldtime,nsec
+;PURPOSE:
 ;a simple procedure that takes a date/time string, like '2011-05-11
 ;02:26:00' and adds a certain number of SECONDS to the time,
 ;taking care to augment it properly. It is only accurate to within a
 ;day change...
+;
+;CATEGORY:
+; AIA/General
+;
+;INPUTS:
+; oldtime - the original time string
+; nsec - number of seconds to add to the old time string
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+; function returns newtime - the augmented time string
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 2012
+
 newtime=''
 nsec=fix(nsec)
 

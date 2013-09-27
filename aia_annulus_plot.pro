@@ -1,35 +1,41 @@
 pro test_aia_annulus_plot
-
 wav='193'
 st='2011-05-11 02:25:00'
 et='2011-05-11 02:40:00'
 ring_width=550
 files=aia_file_search(st,et,wav)
-
 thrange=[10,120]
-
 aia_annulus_plot,files,projdata,thrange=thrange,/diff,/save,/plot
-stop
 end
 
+
+
+pro aia_annulus_plot, f, projdata, passband=passband, diff=diff, plot=plot, norm=norm, latzero=latzero, ring_width=ring_width,thrange=thrange,datascale=datascale,save=save
+;PURPOSE:
 ; Routine to produce RD polar plot using annulus applied to SDO
-; images. Code modified from rd_annulus.pro. D. Long 2013/07/30
+; images.
 ;
-; TITLE:
-;   ANNULUS_PLOT
+;CATEGORY:
+; AIA/Kinematics
 ;
-; KEYWORDS:
+;INPUTS:
+;
+;KEYWORDS:
 ;   FILES: The list of files to read for the deprojected images.
 ;   PASSBAND: Passband being studied. Required for labelling and to
 ;             identify data.
 ;   DIFF: Set to produce windowed running difference images.
 ;
-; HISTORY:
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
 ;   Written 2013-Jul-07 by David Long using code from rd_annulus.pro.
 ;   2013/07/30 - Reworked for the CfA infrastructure by Kamen Kozarev
-
-pro aia_annulus_plot, f, projdata, passband=passband, diff=diff, plot=plot, norm=norm, latzero=latzero, ring_width=ring_width,thrange=thrange,datascale=datascale,save=save
-
+;
   if not keyword_set(passband) then passband = '193'
   img_size = [1200., 800.]
   ang_step = 0.2                ; Angle step size (degree)

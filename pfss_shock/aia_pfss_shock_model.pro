@@ -6,7 +6,6 @@ pro test_aia_coronal_shock_model
   outpath=path+ev+'/'
   pfssfile=path+ev+'/pfss_results_20110511_1.1Rs_dens_1.sav'
   shockfile=path+ev+'/AIA_20110511_37_193_shocklocations.sav' 
-  
   aia_coronal_shock_model,shockfile,pfssfile,outpath=outpath
 end
 

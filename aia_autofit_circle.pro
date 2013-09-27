@@ -1,18 +1,29 @@
 pro aia_autofit_circle,xarr,yarr,ellpos,p,error=error
+;PURPOSE:
 ;This procedure uses the mpfitellipse procedure to make a circle fit to 
 ;a bunch of points supplied to the program. It is based on aiamancirclefit.pro.
-;Kamen Kozarev, 09/06/2011
-
-;INPUT: None
-
-;KEYWORDS
 ;
-
-;OUTPUT
+;CATEGORY:
+;
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
 ; circlepos - a two by n array containing the x and y positions of the
 ;          ellipse fit. 'n' is the number of points chosen in the fit,
 ;          default is 501
 ; p - ellipse parameters from the fit.
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 09/06/2011
+;
+
 
 if n_elements(xarr) ne n_elements(yarr) then begin
    print,'Number of supplied x- and y- coordinates supplied differs!'

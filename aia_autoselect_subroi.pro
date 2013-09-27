@@ -1,6 +1,25 @@
 function aia_autoselect_subroi, index, angular_coords
+;PURPOSE:
 ;This function will automatically determine the subregion
 ;from the angular coordinates of the active region in arcseconds.
+;
+;CATEGORY:
+; AIA/General
+;
+;INPUTS:
+;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 2011
+;
 
 
 ;Definitions
