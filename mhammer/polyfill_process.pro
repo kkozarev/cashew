@@ -1,5 +1,15 @@
 pro polyfill_process,subdata,subindex,rotation_angle,date,evnum,WAVELENGTH = wavelength, START = start, REVISION_NUM = revision_num, SIMPLE_TIME = simple_time, REPLICA = replica, COLOR_TABLE_TEST = color_table_test, INNER_X = inner_x, DYNAMIC_RANGE = dynamic_range, EXTREME_START_TIME = extreme_start_time, EXTREME_FINAL_TIME = extreme_final_time, EXTREME_START_RADIUS = extreme_start_radius, EXTREME_FINAL_RADIUS = extreme_final_radius, TIME = time, RAD = rad, SAVE_OPTION = save_option
-; Parameters:
+;PURPOSE:
+;
+; This program takes an array of image data as a function of radius
+; and time and plots that data by assembling a grid of polyfill squares. 
+; If the time array does not have an even cadence, polyfill should
+; draw rectangles instead of squares due to the uneven times.
+;
+;CATEGORY:
+; AIA/Kinematic
+;
+;INPUTS:
 ; Subdata: A 2-D array where subdata[t,r] = the data at time t and pixel r
 ; Subindex: The subindex from the restored data
 ; Rotation Angle: The angle at which the images were rotated. This is
@@ -8,43 +18,47 @@ pro polyfill_process,subdata,subindex,rotation_angle,date,evnum,WAVELENGTH = wav
 ; Date: Write the date in MMDDYY format. (eg 042313)
 ; Evnum: Each event has an a unique number. Leave off the initial 'e'
 ;
-; Wavelength: The wavelength of the event (Note: There is no default. If
+;KEYWORDS:
+;      Wavelength: The wavelength of the event (Note: There is no default. If
 ; the keyword is not set, the program will prompt the user to type in
 ; a wavelength in the terminal.)
-; Start: The start frame of the event
-; Revision_Num: A string of length 3 containing a number to be used in
+;      Start: The start frame of the event
+;      Revision_Num: A string of length 3 containing a number to be used in
 ; the name of the file that will be saved. An integer is also acceptable.
 ; However, revision_num = 0 is bad. Use revision_num = '000'
-; Simple_Time: If this keyword is set, an even cadence of 12 seconds
+;      Simple_Time: If this keyword is set, an even cadence of 12 seconds
 ; is assumed. If there are bad exposures, this is an unrealistic
 ; assumption.
-; Replica: If this keyword is set, the program will recognize that the
+;      Replica: If this keyword is set, the program will recognize that the
 ; revision_num has already been used and will create the next lettered
 ; copy. For example, if revision_num = '003' and both '003' and '003a'
 ; exist, the saved file will be called '003b'
-; Color_Table_Test: If this keyword is set, the program will create a
+;      Color_Table_Test: If this keyword is set, the program will create a
 ; new directory containing the plots of all 40 color tables.
-; Dynamic_Range: This keyword should be an array of length 2. If it is
+;      Dynamic_Range: This keyword should be an array of length 2. If it is
 ; set, the program will use dynamic_range[0] as a minimum and
 ; dynamic_range[1] as a maximum for assigning colors.
-;
-; Time: If this keyword is set, the time coordinates array can be returned.
-; Rad: If this keyword is set, the radial coordinates array can be returned.
-;
-; Save_Option: If this keyword is set, the program will prompt the
+;      Time: If this keyword is set, the time coordinates array can be returned.
+;      Rad: If this keyword is set, the radial coordinates array can be returned.
+;      Save_Option: If this keyword is set, the program will prompt the
 ; user whether or not the data should be saved.
 ;
 ; Sample Replica Calls:
 ; polyfill_process, data_thin_wave, data_subindex, data_rotation_angle, data_date, data_evnum, WAVELENGTH = data_wavelength, START = data_start, REVISION_NUM = data_revision_num_str, INNER_X = data_inner_x_index, /REPLICA
 ;
-; polyfill_process, data_thin_wave, data_subindex, data_rotation_angle, data_date, data_evnum, WAVELENGTH = 193, START = 52, REVISION_NUM = '000', INNER_X = data_inner_x_index, /REPLICA
+; polyfill_process, data_thin_wave, data_subindex,
+; data_rotation_angle, data_date, data_evnum, WAVELENGTH = 193, START
+; = 52, REVISION_NUM = '000', INNER_X = data_inner_x_index, /REPLICA
 ;
-; What the Program Does:
-; This program takes an array of image data as a function of radius
-; and time and plots that data by assembling a grid of polyfill squares. 
-; If the time array does not have an even cadence, polyfill should
-; draw rectangles instead of squares due to the uneven times.
-
+;OUTPUTS:
+;
+; 
+;DEPENDENCIES:
+;
+;
+;MODIFICATION HISTORY:
+;Written by Michael Hammer, 07/2013
+;
 
 data = subdata ; Make a copy (It never was the full subdata)
 index = subindex

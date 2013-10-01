@@ -1,4 +1,20 @@
-pro aia_load_event,st,et,wave,index,data,savefile=savefile,map=map,subdata=subdata,submap=submap
+pro test_aia_load_event
+;Test the loading of data
+
+;Load the information about events
+load_events_info,events=events
+st=events[0].st
+;Create a short interval - add 4 mins to the start time of the event
+et=aia_augment_timestring(events[0].st,240)
+wav='193'
+coords=[events[0].coordX,events[0].coordY]
+;run aia_load_event - remove AEC images, return the subdata array and index
+aia_load_event,st,et,coords,wav,index,data,subdata=subdata,subindex=subindex,/remove_aec,/subroi
+end
+
+
+
+pro aia_load_event,st,et,coords,wave,index,data,savefile=savefile,map=map,subdata=subdata,subindex=subindex,submap=submap,remove_aec=remove_aec, subroi=subroi
 ;PURPOSE:
 ;This procedure will load full AIA data for a wavelength and time interval,
 ;then allow the user to select a subregion, and create sub-arrays and submaps
@@ -13,14 +29,14 @@ pro aia_load_event,st,et,wave,index,data,savefile=savefile,map=map,subdata=subda
 ;	wave - wavelength of the AIA channel, string - 94,131,171,193,211,304,335
 ;
 ;KEYWORDS:
-; 
+; subroi - if set, return the sub-region of interest data
 ;
 ;OUTPUTS:
 ;       savefile - a string to hold the output save file
 ;       (for example, savefile='/Volumes/PLUME/AIA_data/normalized_noprep_0818_3_A193.sav')
 ;       map - if keyword is set, the map of the data will also be created.
-;       subdata - if set, an interactive subroutine will allow the
-;                 user to select a subregion
+;       subdata - if set, determine the subregion and return it. Also
+;                 return subindex
 ;       submap - if selected, create a submap that corresponds to the subdata.
 ;
 ;DEPENDENCIES:
@@ -28,29 +44,33 @@ pro aia_load_event,st,et,wave,index,data,savefile=savefile,map=map,subdata=subda
 ;
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 02/2011
-;
+;Added a keyword remove_aec to check for automatic exposure control
+;(AEC) images and remove them from the datacube - KAK 09/30/2013
+;Added the AR coordinates as a required parameter - KAK 09/30/2013
 
 ;1. Load the data, prep it. Use aia_data_load
 if keyword_set(savefile) then begin
    if keyword_set(map) then begin
-      aia_load_data,st,et,wave,index,data,savefile=savefile,map=map,/norm
+      aia_load_data,st,et,wave,index,data,savefile=savefile,map=map,/norm,remove_aec=remove_aec
    endif else begin
-      aia_load_data,st,et,wave,index,data,savefile=savefile,/norm
+      aia_load_data,st,et,wave,index,data,savefile=savefile,/norm,remove_aec=remove_aec
    endelse
 endif else begin
    if keyword_set(map) then begin
-      aia_load_data,st,et,wave,index,data,map=map,/norm
+      aia_load_data,st,et,wave,index,data,map=map,/norm,remove_aec=remove_aec
    endif else begin
-      aia_load_data,st,et,wave,index,data,/norm
+      aia_load_data,st,et,wave,index,data,/norm,remove_aec=remove_aec
    endelse
 endelse
 
-;2. Make 1k data array. Plot 1k movie. Select a subregion (interactive). 
-;Convert the selection coords back to 4k coords by simply multiplying them by 4. 
-;Write a new procedure to do this, aia_inspect_event. Use/improve roiselect.pro for this.
-if keyword_set(subdata) then begin
-   aia_inspect_data,index,data,subdata=subdata,/bdiff
+;2. Make 1k data array.
+if keyword_set(subroi) then begin
+   newcoords=aia_autoselect_subroi(index[0],coords)
+   subdata=aia_inspect_data(index,data,autoregion=newcoords)
+   subindex=aia_update_subdata_index(index,[newcoords[0],newcoords[1]],1024,coords)
 endif
+
+stop
 
 if keyword_set(submap) then begin
       if not keyword_set(map) then begin

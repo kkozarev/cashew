@@ -1,18 +1,21 @@
-pro test_aia_annulus_plot
+pro test_aia_annulus_interactive
 wav='193'
-st='2011-05-11 02:25:00'
-et='2011-05-11 02:40:00'
+load_events_info,events=events
 ring_width=550
-files=aia_file_search(st,et,wav)
+;The May 2011 event is index=
+files=aia_file_search(events[3].st,events[3].et,wav)
 thrange=[10,120]
-aia_annulus_plot,files,projdata,thrange=thrange,/diff,/save,/plot
+savepath='./'
+
+aia_annulus_create,files,projdata,thrange=thrange,/diff,/plot,savepath=savepath
+stop
 end
 
 
 
-pro aia_annulus_plot, f, projdata, passband=passband, diff=diff, plot=plot, norm=norm, latzero=latzero, ring_width=ring_width,thrange=thrange,datascale=datascale,save=save
+pro aia_annulus_create, f, projdata, passband=passband, diff=diff, plot=plot, norm=norm, latzero=latzero, ring_width=ring_width,thrange=thrange,datascale=datascale,savename=savename,savepath=savepath
 ;PURPOSE:
-; Routine to produce RD polar plot using annulus applied to SDO
+; Routine to produce RD polar-deprojected data using an annulus technique applied to SDO
 ; images.
 ;
 ;CATEGORY:
@@ -35,6 +38,7 @@ pro aia_annulus_plot, f, projdata, passband=passband, diff=diff, plot=plot, norm
 ;MODIFICATION HISTORY:
 ;   Written 2013-Jul-07 by David Long using code from rd_annulus.pro.
 ;   2013/07/30 - Reworked for the CfA infrastructure by Kamen Kozarev
+;   2013/09/30 - Added savename, savepath keywords - Kamen Kozarev
 ;
   if not keyword_set(passband) then passband = '193'
   img_size = [1200., 800.]
@@ -195,7 +199,9 @@ pro aia_annulus_plot, f, projdata, passband=passband, diff=diff, plot=plot, norm
   
   tmp=strsplit(ind[0].date_obs,'-T',/extract)
   date=tmp[0]+tmp[1]+tmp[2]
-  
-  save,filename='aia_deprojected_annulus_'+date+'_'+passband+'.sav',projdata,ring_width,thrang,passband,ang_step,res,ind_arr,new_theta
+  if not keyword_set(savepath) then savepath=''
+  if not keyword_set(savename) then savname=savepath+'aia_deprojected_annulus_'+date+'_'+passband+'.sav' $
+  else savname=savepath+savename
+  save,filename=savname,projdata,ring_width,thrang,passband,ang_step,res,ind_arr,new_theta
  
 end

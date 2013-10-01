@@ -42,7 +42,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 if not keyword_set(inspect) then begin
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 endif else begin
 ;Then, to inspect the data:
@@ -65,7 +65,7 @@ endelse
 ;std=strsplit(st,'/ :',/extract)
 ;savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 ;if not keyword_set(inspect) then begin
-;    aia_load_event,st,et,wav,index,data,savefile=savefile+'.sav'
+;    aia_load_event,st,et,coords,wav,index,data,savefile=savefile+'.sav'
 ;    save,filename=savefile+'_map'+'.sav',map
 ;endif else begin
 ;
@@ -82,7 +82,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 if not keyword_set(inspect) then begin
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 endif else begin
 ;Then, to inspect the data:
@@ -105,7 +105,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 if not keyword_set(inspect) then begin
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 ;    save,filename=savefile+'_map'+'.sav',map
 endif else begin
@@ -129,7 +129,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 if not keyword_set(inspect) then begin
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 endif else begin
 ;Then, to inspect the data:
@@ -152,7 +152,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 if not keyword_set(inspect) then begin
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 endif else begin
 ;Then, to inspect the data:
@@ -176,7 +176,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 if not keyword_set(inspect) then begin
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 endif else begin
 ;Then, to inspect the data:
@@ -199,7 +199,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 if not keyword_set(inspect) then begin
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 endif else begin
 ;Then, to inspect the data:
@@ -223,7 +223,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 if not keyword_set(inspect) then begin
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 endif else begin
 ;Then, to inspect the data:
@@ -247,7 +247,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 if not keyword_set(inspect) then begin
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 endif else begin
 ;Then, to inspect the data:
@@ -271,7 +271,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 if not keyword_set(inspect) then begin
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 endif else begin
 ;Then, to inspect the data:
@@ -297,7 +297,7 @@ endelse
 ;std=strsplit(st,'/ :',/extract)
 ;savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 ;if not keyword_set(inspect) then begin
-;    aia_load_event,st,et,wav,index,data
+;    aia_load_event,st,et,coords,wav,index,data
 ;    save,filename=savefile+'.sav',index,data  
 ;endif else begin
 ;;Then, to inspect the data:

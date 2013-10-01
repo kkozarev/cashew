@@ -1,5 +1,14 @@
 pro run_polyfill_process, date, event_num, wavelength, revision_num, PATH = path, DYNAMIC_RANGE = dynamic_range, TIME = time, RAD = rad, RESTORE = restore, DATA_THIN_WAVE = data_thin_wave, DATA_SUBINDEX = data_subindex, DATA_ROTATION_ANGLE = data_rotation_angle, DATA_DATE = data_date, DATA_EVNUM = data_evnum, START = data_start, INNER_X = data_inner_x_index
-; Parameters:
+;PURPOSE:
+;
+; This program runs polyfill_process on restored_data.
+; It is assumed that the output is a replica, that is, a plot was
+; already made using the given data set.
+;
+;CATEGORY:
+; AIA/Kinematic
+;
+;INPUTS:
 ; Date: Write the date in MMDDYY format. (eg 042313)
 ; Event_num: Each event has an a unique number. Leave off the initial 'e'
 ; Wavelength: The wavelength of the event
@@ -7,6 +16,10 @@ pro run_polyfill_process, date, event_num, wavelength, revision_num, PATH = path
 ; the name of the file that will be saved. An integer is also acceptable.
 ; However, revision_num = 0 is bad. Use revision_num = '000'
 ;
+;KEYWORDS:
+; 
+;
+;OUTPUTS:
 ; There are two possibilities for running polyfill_process
 ; (1) You have not restored the data yet.
 ; If you feel this describes your situation, enter the keyword /RESTORE.
@@ -21,10 +34,13 @@ pro run_polyfill_process, date, event_num, wavelength, revision_num, PATH = path
 ; Note to self: Create to two (2) more run_polyfill_process programs.
 ; One of them will assume the data has not been restored. The other will.
 ;
-; What the Program Does:
-; This program runs polyfill_process on restored_data.
-; It is assumed that the output is a replica, that is, a plot was
-; already made using the given data set.
+; 
+;DEPENDENCIES:
+; polyfill_process
+;
+;MODIFICATION HISTORY:
+;Written by Michael Hammer, 07/2013
+;
 
 
 ; Restore Data

@@ -38,7 +38,7 @@ end
 
 ;-----------------------------------------------------------------------
 
-pro aia_load_data,starttime,endtime,wave,index,data,savefile=savefile,nodata=nodata,map=map,norm=norm,noprep=noprep,quiet=quiet,local=local,archive=archive,first=first
+pro aia_load_data,starttime,endtime,wave,index,data,savefile=savefile,nodata=nodata,map=map,norm=norm,noprep=noprep,quiet=quiet,local=local,archive=archive,first=first,remove_aec=remove_aec
 ;PURPOSE
 ;This procedure reads in a sequence of AIA fits images from the CfA
 ;archive and returns/saves a prepped data cube and index
@@ -76,6 +76,8 @@ pro aia_load_data,starttime,endtime,wave,index,data,savefile=savefile,nodata=nod
 ;
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 02/2010
+;Added a keyword remove_aec to check for automatic exposure control
+;(AEC) images and remove them from the datacube - KAK 09/30/2013
 
 
 ;===========================================================
@@ -255,12 +257,38 @@ nfiles=n_elements(files)
 ;===========================================================
 
 if not keyword_set(nodata) then begin
-    
+   
 ;2. Load and prep the files
 
    if keyword_set(first) then files=files[0]
-   read_sdo,files,ind,dat,/uncomp_delete 
-
+   if not keyword_set(remove_aec) then begin
+      read_sdo,files,ind,dat,/uncomp_delete
+   endif else begin
+      print,''
+      print,'Controlling for images with Automatic Exposure Control (AEC) - where index.aectype != 0'
+      print,''
+      read_sdo,files,ind,dat,/nodata
+      mask=where(ind.aectype eq 0)
+      if mask[0] ne -1 then begin 
+         files=files[mask]
+         nfiles=n_elements(files)
+         ind=0
+         dat=0
+         print,'Updated list of files to load:'
+         print,files
+         print,''
+         print,'Number of files found: '+strtrim(string(nfiles),2)
+         print,''
+         print,'---------------------------------------------------'
+         print,''
+         read_sdo,files,ind,dat,/uncomp_delete
+      endif else begin
+         print,'No AEC images found. Continuing.'
+         print,''
+         print,'---------------------------------------------------'
+      endelse
+   endelse
+   
    if keyword_set(noprep) then begin
         data=dat
         index=ind

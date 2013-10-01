@@ -15,7 +15,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'e'+evnum+'/normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
     newcoords=aia_autoselect_subroi(index[0],coords)
     arcoords=aia_get_arcoords(index[0],coords)
@@ -34,7 +34,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'e'+evnum+'/normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
     newcoords=aia_autoselect_subroi(index[0],coords)
     arcoords=aia_get_arcoords(index[0],coords)
@@ -53,7 +53,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 newcoords=aia_autoselect_subroi(index[0],coords)
 arcoords=aia_get_arcoords(index[0],coords)
@@ -72,7 +72,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 newcoords=aia_autoselect_subroi(index[0],coords)
 arcoords=aia_get_arcoords(index[0],coords)
@@ -91,7 +91,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 newcoords=aia_autoselect_subroi(index[0],coords)
 arcoords=aia_get_arcoords(index[0],coords)
@@ -109,7 +109,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 newcoords=aia_autoselect_subroi(index[0],coords)
 arcoords=aia_get_arcoords(index[0],coords)
@@ -126,7 +126,7 @@ et='2011/05/11 02:40:00'
 print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and '+et
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 newcoords=aia_autoselect_subroi(index[0],coords)
 arcoords=aia_get_arcoords(index[0],coords)
@@ -143,7 +143,7 @@ et='2011/03/07 20:05:00'
 print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and '+et
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 newcoords=aia_autoselect_subroi(index[0],coords)
 arcoords=aia_get_arcoords(index[0],coords)
@@ -177,7 +177,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 newcoords=aia_autoselect_subroi(index[0],coords)
 arcoords=aia_get_arcoords(index[0],coords)
@@ -196,7 +196,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 newcoords=aia_autoselect_subroi(index[0],coords)
 arcoords=aia_get_arcoords(index[0],coords)
@@ -214,7 +214,7 @@ et='2011/03/08 04:00:00'
 print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and '+et
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 newcoords=aia_autoselect_subroi(index[0],coords)
 arcoords=aia_get_arcoords(index[0],coords)
@@ -231,7 +231,7 @@ et='2011/02/11 13:00:00'
 print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and '+et
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 newcoords=aia_autoselect_subroi(index[0],coords)
 arcoords=aia_get_arcoords(index[0],coords)
@@ -248,7 +248,7 @@ et='2011/05/11 02:40:00'
 print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and '+et
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 newcoords=aia_autoselect_subroi(index[0],coords)
 arcoords=aia_get_arcoords(index[0],coords)
@@ -266,7 +266,7 @@ et='2011/03/07 20:05:00'
 print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and '+et
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 newcoords=aia_autoselect_subroi(index[0],coords)
 arcoords=aia_get_arcoords(index[0],coords)

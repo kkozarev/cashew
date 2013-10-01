@@ -1,6 +1,6 @@
 
 ;+====================================================================
-pro test_callisto_plot_spectrum_new_temp
+pro test_callisto_plot_spectrum
   
 ;Run the program like this to combine four files at different times
 ;and frequency ranges
@@ -12,7 +12,7 @@ pro test_callisto_plot_spectrum_new_temp
 ;freqrange=[40,160]
 
 files = [['SSRT_20110511_021500_59.fit.gz','SSRT_20110511_023000_59.fit.gz']]
-files='/home/kkozarev/Desktop/AIA/pro/callisto_plot/'+files
+files='/home/kkozarev/svn/corwav/trunk/radio/callisto/'+files
 station='SSRT'
 freqrange=[45,160]
 timerange='2011-MAY-11 02:' + ['20:00','32:00']
@@ -20,36 +20,37 @@ numplotmax=2
 
 
 files = ['ALMATY_20110809_080000_59.fit']
-files='/home/kkozarev/Desktop/AIA/pro/callisto_plot/'+files
+files='/home/kkozarev/svn/corwav/trunk/radio/callisto/'+files
 timerange='2011-AUG-09 08:' + ['02:30','04:30']
 freqrange=[200,450]
 station='Almaty'
 width_cutoff=0.5
 
-callisto_plot_spectrum_new_temp,files,timerange=timerange,station=station,$
+callisto_plot_spectrum,files,timerange=timerange,station=station,$
                                 numplotmax=numplotmax,/fit,freqrange=freqrange,width_cutoff=width_cutoff,/refine
 
 stop
-stop
+
 
 files = ['ALMATY_20110809_080000_59.fit']
+files='/home/kkozarev/svn/corwav/trunk/radio/callisto/'+files
 timerange='2011-AUG-09 08:' + ['02:00','04:30']
 freqrange=[47,450]
 station='Almaty'
 
 ;plot this to see everything in the file (frequency and time)
-callisto_plot_spectrum_new_temp,files
+callisto_plot_spectrum,files
 
 stop
 
 ;run this to zoom in on a range of frequencies and times
-callisto_plot_spectrum_new_temp,files,timerange=timerange,station=station,freqrange=freqrange,plot=plot;,fit=fit
+callisto_plot_spectrum,files,timerange=timerange,station=station,freqrange=freqrange,plot=plot;,fit=fit
 end
 ;-====================================================================
 
 
 ;+====================================================================
-PRO callisto_plot_spectrum_new_temp,files,timerange=timerange,station=station,freqrange=freqrange,fit=fit,plot=plot,numplotmax=numplotmax,width_cutoff=width_cutoff,refine=refine
+PRO callisto_plot_spectrum,files,timerange=timerange,station=station,freqrange=freqrange,fit=fit,plot=plot,numplotmax=numplotmax,width_cutoff=width_cutoff,refine=refine
 set_plot,'x'
 ;plot and analyze spectrograms of Callisto data.
 ; EXTERNAL CALLS:
@@ -139,7 +140,7 @@ write_png,'radio_spectrum.png',image
 
 ;Get the maxima. 
 ;the output array allmaxima[num(maxima),num(timerange)] contains the frequencies
-jmap_jmap_maxima,zb,time,frequency,xrange=anytim(timerange),yrange=freqrng,$
+jmap_find_maxima,zb,time,frequency,xrange=anytim(timerange),yrange=freqrng,$
                  allmaxima=allmaxima,mymaxima=mymaxima,nmax=nmax,$
                  numplotmax=numplotmax,/flipyaxes
 

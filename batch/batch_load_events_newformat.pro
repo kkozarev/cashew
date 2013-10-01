@@ -42,7 +42,7 @@ pro batch_load_events_newformat
         print,''
         std=strsplit(st,'/ :',/extract)
         savefile=path+'e'+evnum+'/normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
-        aia_load_event,st,et,wav,index,data
+        aia_load_event,st,et,coords,wav,index,data
         ;save,filename=savefile+'.sav',index,data
         ;restore,savefile+'.sav'
 

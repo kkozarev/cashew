@@ -53,7 +53,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 
    ; restore,savefile+'.sav'
@@ -75,7 +75,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 
 ;restore,savefile+'.sav'
@@ -102,7 +102,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 
     ;restore,savefile+'.sav'
@@ -122,7 +122,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 
     newcoords=aia_autoselect_subroi(index[0],coords)
@@ -140,7 +140,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 
     ;restore,savefile+'.sav'
@@ -162,7 +162,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 
    ; restore,savefile+'.sav'
@@ -182,7 +182,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 
     newcoords=aia_autoselect_subroi(index[0],coords)
@@ -204,7 +204,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 
 newcoords=aia_autoselect_subroi(index[0],coords)
@@ -223,7 +223,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 
 ;restore,savefile+'.sav'
@@ -244,7 +244,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-aia_load_event,st,et,wav,index,data
+aia_load_event,st,et,coords,wav,index,data
 save,filename=savefile+'.sav',index,data
 
 newcoords=aia_autoselect_subroi(index[0],coords)
@@ -263,7 +263,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 
     ;restore,savefile+'.sav'
@@ -283,7 +283,7 @@ print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and 
 std=strsplit(st,'/ :',/extract)
 savefile=path+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
-    aia_load_event,st,et,wav,index,data
+    aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
 
     ;restore,savefile+'.sav'
