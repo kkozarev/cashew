@@ -7,10 +7,6 @@ FOLDERS:
 	examples - put sample implementations of the IDL procedures here.
 	studies - put the specific implementations of the procedures for specific events here.
 	temp - put temporary procedures, such as testing, here.
-	
-
-
-
 
 
 PROCEDURES:
