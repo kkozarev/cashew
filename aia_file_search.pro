@@ -1,7 +1,10 @@
-function aia_file_search, st, et, wave,path=path,loud=loud,missing=missing,cfa=cfa,jsoc=jsoc
+function aia_file_search, st, et, wave,path=path,loud=loud,missing=missing,cfa=cfa,jsoc=jsoc,remove_aec=remove_aec
 ;PURPOSE:
 ;Search for AIA fits files from the local CfA archive.
-;Assume searching on a single day only.
+;Assume searching on a single day only. Also, assume that the order of
+;files is always like this: 171, 211, 94, 335, 193, 131. So if there
+;is a 171 file immediately preceding the period, shift the period
+;itself to accomodate that file. This may be important for DEM calculations.
 ;
 ;CATEGORY:
 ;AIA/General
@@ -21,6 +24,8 @@ function aia_file_search, st, et, wave,path=path,loud=loud,missing=missing,cfa=c
 ;
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 02/2010   
+;10/01/2013, KAK - added a check for Automatic Exposure Control
+;                  exposure frames - keyword remove_aec
 ;
   if not keyword_set(path) then path='/Data/SDO/AIA/level1/'
   
@@ -93,6 +98,7 @@ function aia_file_search, st, et, wave,path=path,loud=loud,missing=missing,cfa=c
      endfor
   endelse
 
+
 err=-1
 ;do the searching for the files
 for h=0,n_elements(hmins[0,*])-1 do begin
@@ -137,6 +143,30 @@ if keyword_set(loud) and files[0] ne '' then begin
     print,''
 endif
 
+
+if keyword_set(remove_aec) then begin
+   read_sdo,files,ind,dat,/nodata
+   mask=where(ind.aectype eq 0)
+   if mask[0] ne -1 then begin
+      files=files[mask]
+      nfiles=n_elements(files)
+      ind=0
+      dat=0
+      if keyword_set(loud) then begin
+         print,''
+         print,'Checking for images with Automatic Exposure Control (AEC) - where index.AECTYPE != 0'
+         print,''
+         wait,0.1
+         print,'Updated list of files to load:'
+         print,files
+         print,''
+         print,'Number of files found: '+strtrim(string(nfiles),2)
+         print,''
+         print,'---------------------------------------------------'
+         print,''
+      endif
+   endif
+endif
 
 return,files
 

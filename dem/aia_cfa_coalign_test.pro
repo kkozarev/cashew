@@ -52,13 +52,14 @@ pro aia_cfa_coalign_test,st,et,teem_fname,wave_,io,ct,nsig,nsm,h,dx,dy
  for iw=0,nwave-1 do begin
     while strlen(wave_[iw]) lt 3 do wave_[iw]='0'+wave_[iw]
     aia_load_data,st,et,wave_[iw],index,data
+    index=index[0]
+    data=data[*,*,0]
     
     ;searchstring=fileset+'*'+wave_(iw)+'.fits'
     ;files =file_search(searchstring,count=nfiles)
     print,'Loading data for wavelength ',wave_[iw]
     ;read_sdo,files[0],index0,data0
     ;aia_prep,index0,data0,index,data
-
   
 
   cdelt1=index.cdelt1
@@ -85,7 +86,7 @@ pro aia_cfa_coalign_test,st,et,teem_fname,wave_,io,ct,nsig,nsm,h,dx,dy
   nx	=i2-i1+1
   ny	=j2-j1+1
   image =data(i1:i2,j1:j2)
-
+  
   dx   =0.9/float(4)
   x1_  =0.05+dx*ip
   x2_  =x1_+dx*0.8

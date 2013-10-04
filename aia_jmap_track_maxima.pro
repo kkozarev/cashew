@@ -251,7 +251,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
   
   
   
-;Do fitting for the maximum
+;Do second order polynomial fitting for the maximum
   print,''
   print,'Fitting a second-order polynomial to the wave peak positions...'
   raddist=rad[allmaxima[uinput,sp:ep].ind]
@@ -304,6 +304,13 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
   print,''
   xyouts,!P.position[0]+0.02,!P.position[3]-5*0.04,tmpstr,/norm,charsize=2  
   
+
+;Calculate the instantaneous Alfven velocity - this will be
+;                                              interesting to plot as
+;                                              a function of radial
+;                                              distance from the Sun,
+;                                              and compare with
+;                                              modeling results!
   
   
   

@@ -21,15 +21,17 @@ pro test_aia_cfa_teem_run
        '2010/06/12 01:04:00']
   
   er=8
-  aia_cfa_teem_run,st=sts[er],et=ets[er],arcoords=[coordX[er],coordY[er]],outpath=outpath
-  outpath='/Volumes/Backscratch/Users/kkozarev/AIA_data/studies/2011events/'+'e'+evnums[er]+'/dem/aschwanden/'
+  
+  outpath='/Volumes/Backscratch/Users/kkozarev/AIA/studies/2011events/'+'e'+evnums[er]+'/dem/aschwanden/'
+  aia_cfa_teem_run,st=sts[er],et=ets[er],arcoords=[coordX[er],coordY[er]],outpath=outpath,/remove_aec
+  
 end
 ;-==============================================================================
 
 
 
 ;+==============================================================================
-pro aia_cfa_teem_run,st=st,et=et,arcoords=arcoord,outpath=outpath,workdir=workdir,fileset=fileset,cfaarc=cfaarc
+pro aia_cfa_teem_run,st=st,et=et,arcoords=arcoord,outpath=outpath,workdir=workdir,fileset=fileset,cfaarc=cfaarc,remove_aec=remove_aec
 ;PURPOSE:
 ;Program which runs Marcus Aschwanden's DEM code on an AIA datacube
 ;
@@ -45,12 +47,14 @@ pro aia_cfa_teem_run,st=st,et=et,arcoords=arcoord,outpath=outpath,workdir=workdi
 ;
 ; 
 ;DEPENDENCIES:
-; aia_load_data, aia_augment_timestring(this file), aia_cfa_coalign_test
+; aia_load_data, aia_augment_timestring, aia_cfa_coalign_test
 ; aia_cfa_teem_table, aia_file_search, aia_cfa_teem_map, aia_cfa_teem_disp
 ;
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 07/2013
+;10/01/2013, KAK - added remove_aec keyword that does not load AEC exposures.
 ;
+set_plot,'x'
 resolve_routine,'aia_load_data',/either,/compile_full_file,/no_recompile
 
 if not keyword_set(fileset) then fileset ='AschDEM'
@@ -60,7 +64,6 @@ if not keyword_set(fileset) then fileset ='AschDEM'
 if not keyword_set(outpath) then $
    outpath='/Volumes/Backscratch/Users/kkozarev/testAIA/dem/'
 if not keyword_set(st) then st='2011-05-11 02:10:00'
-;et='2011-05-11 02:40:47'
 if not keyword_set(et) then et='2011-05-11 02:11:47'
 if not keyword_set(arcoords) then arcoords=[785,399] ; The AR coordinates in arcseconds for selecting a subframe
 
@@ -90,13 +93,11 @@ files=''
 tmp1=st
 tmp2=aia_augment_timestring(st,12)
 eet=tmp2
-print,tmp1
-print,tmp2
 print,''
 while anytim(tmp2) le anytim(et) do begin
    for w=0,n_elements(wave)-1 do begin
-      if w eq 0 then files=aia_file_search(tmp1,tmp2,wave[w],path=cfaarc) else $
-         files=[files,aia_file_search(tmp1,tmp2,wave[w],path=cfaarc)]
+      if w eq 0 then files=aia_file_search(tmp1,tmp2,wave[w],path=cfaarc,remove_aec=remove_aec) else $
+         files=[files,aia_file_search(tmp1,tmp2,wave[w],path=cfaarc,remove_aec=remove_aec)]
    endfor
    print,files
    
@@ -131,76 +132,5 @@ while anytim(tmp2) le anytim(et) do begin
 
 endwhile
 
-end
-;-==============================================================================
-
-
-
-
-
-;+==============================================================================
-function aia_augment_timestring,oldtime,nsec
-;a simple procedure that takes a date/time string, like '2011-05-11
-;02:26:00' and adds a certain number of SECONDS to the time,
-;taking care to augment it properly. It is only accurate to within a
-;day change...
-;_________________________________________________________________________
-newtime=''
-nsec=fix(nsec)
-
-;Record the times in string arrays
-st=strsplit(oldtime,' /:,.-T',/extract)
-if n_elements(st) eq 4 then st=[st,'00']
-if n_elements(st) eq 5 then st=[st,'00']
-
-
-;The seconds
-minsec=0
-dsec=nsec mod 60
-newsec=st[5]+dsec
-while newsec ge 60 do begin
-   minsec++
-   newsec-=60
-endwhile
-newsec=strtrim(string(newsec),2)
-if newsec lt 10 then newsec='0'+newsec
-
-
-;The minutes
-hrmin=0
-dmin=nsec/60
-newmin=st[4]+dmin+minsec
-while newmin ge 60 do begin
-   hrmin++
-   newmin-=60
-endwhile
-newmin=strtrim(string(newmin),2)
-if newmin lt 10 then newmin='0'+newmin
-
-
-;The hours
-dayhr=0
-dhr=(st[4]+dmin)/60
-newhr=st[3]+dhr+hrmin
-if newmin eq 0 then newhr++
-while newhr ge 24 do begin
-   dayhr++
-   newhr-=24
-endwhile
-newhr=strtrim(string(newhr),2)
-if newhr lt 10 then newhr='0'+newhr
-
-
-
-;The days
-dday=(st[3]+dhr)/24
-newday=st[2]+dday+dayhr
-newday=strtrim(string(newday),2)
-if newday lt 10 then newday='0'+newday
-
-
-newtime=st[0]+'-'+st[1]+'-'+newday+' '+newhr+':'+newmin+':'+newsec
-
-return, newtime
 end
 ;-==============================================================================

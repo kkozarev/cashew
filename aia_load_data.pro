@@ -129,8 +129,8 @@ if loud eq 1 then begin
 endif
 
 ;First search on the local archive in the CfA and JSOC formats
-files=aia_file_search(st,et,wave,loud=loud,missing=locmissing,path=locarc)
-if files[0] eq '' then files=aia_file_search(st,et,wave,loud=loud,missing=locmissing,/jsoc,path=locarc)
+files=aia_file_search(st,et,wave,loud=loud,missing=locmissing,path=locarc,remove_aec=remove_aec)
+if files[0] eq '' then files=aia_file_search(st,et,wave,loud=loud,missing=locmissing,/jsoc,path=locarc,remove_aec=remove_aec)
 
 
 ;Then check the cfa archive...
@@ -139,7 +139,7 @@ if files[0] eq '' then begin
       print, 'Nothing in the personal archive...'
       print,'Checking CfA archive at '+cfaarc+':'
    endif
-   files=aia_file_search(st,et,wave,loud=loud,missing=cfamissing,path=cfaarc)
+   files=aia_file_search(st,et,wave,loud=loud,missing=cfamissing,path=cfaarc,remove_aec=remove_aec)
 endif
 
 
@@ -190,7 +190,7 @@ if files[0] eq '' then begin
         if not keyword_set(nodata) then $
           sock_copy,rec.url,out_dir=locarc+st[0]+'/'+st[1]+'/'+st[2]+'/H'+st[3]+'00/'
     endelse
-    if not keyword_set(nodata) then files=aia_file_search(locarc,st,et,wave,loud=loud,missing=locmissing,/jsoc)
+    if not keyword_set(nodata) then files=aia_file_search(locarc,st,et,wave,loud=loud,missing=locmissing,/jsoc,remove_aec=remove_aec)
     
     if files[0] eq '' then begin
        if loud eq 1 then print,'There was a problem getting data from the remote archive!'
@@ -261,33 +261,7 @@ if not keyword_set(nodata) then begin
 ;2. Load and prep the files
 
    if keyword_set(first) then files=files[0]
-   if not keyword_set(remove_aec) then begin
-      read_sdo,files,ind,dat,/uncomp_delete
-   endif else begin
-      print,''
-      print,'Controlling for images with Automatic Exposure Control (AEC) - where index.aectype != 0'
-      print,''
-      read_sdo,files,ind,dat,/nodata
-      mask=where(ind.aectype eq 0)
-      if mask[0] ne -1 then begin 
-         files=files[mask]
-         nfiles=n_elements(files)
-         ind=0
-         dat=0
-         print,'Updated list of files to load:'
-         print,files
-         print,''
-         print,'Number of files found: '+strtrim(string(nfiles),2)
-         print,''
-         print,'---------------------------------------------------'
-         print,''
-         read_sdo,files,ind,dat,/uncomp_delete
-      endif else begin
-         print,'No AEC images found. Continuing.'
-         print,''
-         print,'---------------------------------------------------'
-      endelse
-   endelse
+   read_sdo,files,ind,dat,/uncomp_delete
    
    if keyword_set(noprep) then begin
         data=dat

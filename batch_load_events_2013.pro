@@ -40,14 +40,31 @@ pro batch_load_events_2013
        '2011/05/29 10:31:00','2012/01/05 07:10:00','2010/06/13 05:46:00',$
        '2010/06/12 01:04:00']
   
-  sts=['2011/05/11 02:20:00']
-  ets=['2011/05/11 02:23:00']
-
+  sts=['2013/04/23 18:00:00']
+  ets=['2013/04/23 18:30:00']
+  
+  sts=['2011/05/11 02:10:00']
+  ets=['2011/05/11 02:40:00']
+  
+  
   ;choose which of all the events to load data for
   ;events2run=[0,1,2,3,4,5,6,7,8,9] 
   events2run=[0]
   waves2run=[1]
+  
+  for w=0,n_elements(wave)-1 do begin
+     
+     files=aia_file_search(sts,ets,wave[w],loud=loud,path=path,/remove_aec)
+     read_sdo,files,ind,dat,/nodata
+     print,''
+     print,wave[w]+' (AIA BAND)'
+     print,ind.exptime
+     print,ind.aectype
+     stop
+  endfor
+  stop
 
+  
   for w=0,n_elements(waves2run)-1 do begin
      wav=wave[waves2run[w]]
      for j=0,n_elements(events2run)-1 do begin
@@ -66,6 +83,7 @@ pro batch_load_events_2013
            spawn,exec
         endif
         savefile=savepath+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
+        
         aia_load_event,st,et,coords,wav,index,data,/remove_aec
         
         save,filename=savefile+'.sav',index,data

@@ -28,6 +28,7 @@ pro aia_cfa_teem_disp,teem_fname,te_range,dateobs
 ;-
 
 ;________________________DISPLAY TE+EM MAP________________________
+set_plot,'x'
 teem_map=teem_fname+'.sav'
 restore,teem_map
 ind	=where(em_map ne 0)

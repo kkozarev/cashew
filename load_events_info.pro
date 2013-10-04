@@ -37,11 +37,13 @@ loop=[1,0,1,1,1,0,1,0,0,0,1,1,1,1,1]
 filament=[0,0,1,1,0,0,0,1,1,0,0,0,0,0,1]
 comment=['Loop catches up to initial shock wave','Lateral shock wave not visible in the radial direction','Shock wave tends southward','Huge shock wave originates inside the limb with clear lateral expansion','One of the largest shock waves I have seen, but inside limb','Large shock wave inside the limb propagates southward','Distinguished wave radially and laterally in front of filament','Faint, far inside the limb, possibly a loop in front of filament','Filament eruption & tornado, but there is definitely a wave','Shock behind limb, seen easier laterally, but still visible radially','Originates inside the limb and movie could be better, but clear wave','Wave fades radially very quickly with a loop immediately following','Double shock wave laterally with quick radial speed as well','Shock wave immediately in front of loop with clear circular expansion','Clear lateral expansion precedes filament and loop']
 flareclass=['','M1.3','','B8.1','M9.3','X6.9','M1.6','M1.1','C3.7','','M6.1','B9.6','C1.2','','']
+datapath='/Volumes/Backscratch/Users/kkozarev/AIA_data/'
+savepath='/Volumes/Backscratch/Users/kkozarev/AIA/studies/2011events/'
 ;----------------------------------------------------------------------------------------
 
 
 nevents=n_elements(name)
-event={name:'',st:'',et:'',coordX:0,coordY:0,flareclass:'',typeII:0,loop:0,filament:0,comment:''}
+event={name:'',st:'',et:'',coordX:0,coordY:0,flareclass:'',typeII:0,loop:0,filament:0,comment:'',datapath:'',savepath:''}
 events=replicate(event,nevents)
 
 for ev=0,nevents-1 do begin
@@ -55,6 +57,8 @@ events[ev].loop=loop[ev]
 events[ev].filament=filament[ev]
 events[ev].comment=comment[ev]
 events[ev].flareclass=flareclass[ev]
+events[ev].datapath=datapath
+events[ev].savepath=savepath
 endfor
 
 end
