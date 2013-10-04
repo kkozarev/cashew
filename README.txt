@@ -11,11 +11,6 @@ FOLDERS:
 
 PROCEDURES:
 
-
-
-
-
-
 PRO FOLDER
 
 pro aia_bdiff_circle_velextract,data,indices,framerange,proflocs,nms,checkbad=checkbad,titprefix=titprefix,outpath=outpath;a quick program to extract the velocity/acceleration of the CME/shock from a set of images. The point selection on the images is;done by hand.
