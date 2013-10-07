@@ -2,7 +2,7 @@ pro test_aia_annulus_interactive
 wav='193'
 load_events_info,events=events
 ring_width=550
-;The May 2011 event is index=
+;The May 2011 event is index=3
 files=aia_file_search(events[3].st,events[3].et,wav)
 thrange=[10,120]
 savepath='./'

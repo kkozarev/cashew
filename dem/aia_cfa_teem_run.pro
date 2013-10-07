@@ -7,7 +7,7 @@ pro test_aia_cfa_teem_run
   coordY=[-50,-76,100,-70,750,-150,163,545,399,-200,113,-422,390]
   sts=['2011/01/25 11:56:00','2011/01/27 11:50:00','2011/01/28 00:45:00',$
        '2011/02/11 12:30:00','2011/03/07 19:35:00','2011/03/08 03:30:00',$
-       '2011/03/12 15:20:00','2011/04/27 02:05:00','2011/05/11 02:10:00',$
+       '2011/03/12 15:20:00','2011/04/27 02:05:00','2011/05/11 02:10:38',$
        '2011/05/29 10:00:00','2012/01/05 06:56:00','2010/06/13 05:35:00',$
        '2010/06/12 00:55:00']
 
@@ -92,6 +92,7 @@ i=0
 files=''
 tmp1=st
 tmp2=aia_augment_timestring(st,12)
+
 eet=tmp2
 print,''
 while anytim(tmp2) le anytim(et) do begin
@@ -99,7 +100,7 @@ while anytim(tmp2) le anytim(et) do begin
       if w eq 0 then files=aia_file_search(tmp1,tmp2,wave[w],path=cfaarc,remove_aec=remove_aec) else $
          files=[files,aia_file_search(tmp1,tmp2,wave[w],path=cfaarc,remove_aec=remove_aec)]
    endfor
-   print,files
+
    
    tmpstr=tmp1[0]+tmp1[1]+tmp1[2]+'_'+tmp1[3]+tmp1[4]+tmp1[5]
    datstr=tmp1[0]+tmp1[1]+tmp1[2]
