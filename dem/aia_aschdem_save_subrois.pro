@@ -1,9 +1,9 @@
-pro batch_aschdem_save_subrois
-  save_aschdem_subrois;,event='e05'
+pro test_aia_aschdem_save_subrois
+  aia_aschdem_save_subrois;,event='e05'
 end
 
 
-pro aschdem_save_subrois, path=path, event=event,wav=wav
+pro aia_aschdem_save_subrois, path=path, event=event,wav=wav
 ;PURPOSE:
 ;This procedure will load all the Aschwanden DEM results, select the
 ;regions used for the ionization and save the datacubes in separate
@@ -25,7 +25,7 @@ pro aschdem_save_subrois, path=path, event=event,wav=wav
 ;Written by Kamen Kozarev, 02/2013
 ;
 
-if not keyword_set(path) then path='/Volumes/Backscratch/Users/kkozarev/AIA_data/studies/2011events/'
+if not keyword_set(path) then path='/Volumes/Backscratch/Users/kkozarev/AIA/studies/2011events/'
 if not keyword_set(event) then event='e37'
 if not keyword_set(wav) then wav='193'
 dempath=path+event+'/dem/aschwanden/'
