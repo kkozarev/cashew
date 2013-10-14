@@ -73,68 +73,71 @@ nwave =n_elements(wave)
 if not keyword_set(workdir) then workdir ='./'
 if not keyword_set(cfaarc) then cfaarc='/Data/SDO/AIA/level1/'
 
-;==================================
-;PHYSICAL PARAMETERS - DO NOT TOUCH
 io=3 ;   (0=screen, 3=color postscript file)
 ct=3 ;   (IDL color table) 
 nsig=3 ;   (contrast in number of standard deviations)
 nsm=7 ;   (smoothing boxcar of limb profiles)
-te_range=[0.5,10]*1.e6           ;   ([K], valid temperature range for DEM solutions)
+
+
+
+te_range=[0.5,10]*1.e6           ;   ([K], valid temperature range for DEM solutions) 
 tsig=0.1*(1+1*findgen(10))       ;   (values of Gaussian logarithmic temperature widths)
-q94=6.7                          ;   (correction factor for low-temperature 94 A response)
-fov=[0.5,0.5,1,1]*1.25           ;   (field-of-view [x1,y1,x2,y2] in solar radii)
-npix=1                           ;   (macropixel size=8x8 pixels, yields 512x512 map)
-;=================================
+q94=6.7                          ;   (correction factor for low-temperature 94 A response) 
+fov=[0.5,0.5,1,1]*1.25           ;   (field-of-view [x1,y1,x2,y2] in solar radii) 
+npix=1                           ;   (macropixel size=8x8 pixels, yields 512x512 map) 
+
+i=0
+;Loop over the data, augmenting the time strings by 12 seconds every
+;time.
+t_aug=12
+if keyword_set(remove_aec) then t_aug=24
+files=''
+tmp1=st
+tmp2=aia_augment_timestring(st,t_aug)
 
 
-;Obtain all the necessary filenames
-for w=0,nwave-1 do begin
-   ftmp=aia_file_search(st,et,wave[w],path=cfaarc,remove_aec=remove_aec,/check171)
-   ;Create the filename structure
-   if w eq 0 then begin
-      fstr={w131:'',w171:'',w193:'',w211:'',w335:'',w94:''}
-      nfiles=n_elements(ftmp)
-      files=replicate(fstr,nfiles)
-   endif
+eet=tmp2
+print,''
+
+while anytim(tmp2) le anytim(et) do begin
+   for w=0,n_elements(wave)-1 do begin
+                                ;,/check171
+      if w eq 0 then files=aia_file_search(tmp1,tmp2,wave[w],path=cfaarc,remove_aec=remove_aec) else $
+         files=[files,aia_file_search(tmp1,tmp2,wave[w],path=cfaarc,remove_aec=remove_aec)]
+   endfor
    
-   case w of
-      0: files.w131=ftmp
-      1: files.w171=ftmp
-      2: files.w193=ftmp
-      3: files.w211=ftmp
-      4: files.w335=ftmp
-      5: files.w94=ftmp
-   endcase   
-endfor
-
-
-;Loop over the data
-for ff=0,nfiles-1 do begin
-   stepfiles=[files[ff].w131,files[ff].w171,files[ff].w193,files[ff].w211,files[ff].w335,files[ff].w94]
-   
-   ;Get the file names of the resulting maps and tables
-   tmp=strsplit(files[ff].w171,'_',/extract)
-   mind=n_elements(tmp)-2
-   tmp=tmp[mind]
-   tmpstr=strmid(st,0,4)+strmid(st,5,2)+strmid(st,8,2)+'_'+strmid(tmp,0,2)+strmid(tmp,2,2)+strmid(tmp,4,2)
-   datstr=strmid(st,0,4)+strmid(st,5,2)+strmid(st,8,2)
+   ;tmpstr=tmp1[0]+tmp1[1]+tmp1[2]+'_'+tmp1[3]+tmp1[4]+tmp1[5]
+   ;datstr=tmp1[0]+tmp1[1]+tmp1[2]
+   tmpstr=strmid(tmp1,0,4)+strmid(tmp1,5,2)+strmid(tmp1,8,2)+'_'+strmid(tmp1,11,2)+strmid(tmp1,14,2)+strmid(tmp1,17,2)
+   datstr=strmid(tmp1,0,4)+strmid(tmp1,5,2)+strmid(tmp1,8,2)
    teem_fname=outpath+fileset+'_'+tmpstr+'_'+'teem'
    table_fname=outpath+fileset+'_'+datstr+'_'+'teem'
    teem_table=table_fname+'_table.sav' ; (savefile that contains DEM loopup table)
    teem_map=teem_fname+'_map'
+   
+   if i eq 0 then begin
+     ;aia_teem_table,wave,tsig,te_range,q94,fileset,teem_table
+      aia_cfa_teem_table,files,wave,tsig,te_range,q94,teem_table
 
-;Make some initial tests on the data for fitness determination   
-   if ff eq 0 then begin
-      aia_cfa_teem_table,stepfiles,wave,tsig,te_range,q94,teem_table
-      aia_cfa_coalign_test,stepfiles,table_fname,wave,io,ct,nsig,nsm,h_km,dx,dy
+     ;aia_coalign_test,fileset,wave,io,ct,nsig,nsm,h_km,dx,dy
+      aia_cfa_coalign_test,st,eet,table_fname,wave,io,ct,nsig,nsm,h_km,dx,dy
+      i=1
    endif
    
-   
-   aia_cfa_teem_map,stepfiles,arcoords,wave,npix,teem_table,teem_map
-   
+   aia_cfa_teem_map,files,arcoords,wave,npix,teem_table,teem_map
+
    aia_cfa_teem_disp,teem_map,te_range,st
-   
-endfor
+
+   st=aia_augment_timestring(st,t_aug)
+   files=''
+   tmp1=st
+   tmp2=aia_augment_timestring(st,t_aug)
+   eet=tmp2
+   print,tmp1
+   print,tmp2
+   print,''
+
+endwhile
 
 end
 ;-==============================================================================

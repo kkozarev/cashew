@@ -68,7 +68,7 @@ pro aia_define_rois,events,evdate,begstep,endstep,basepath=basepath,automatic=au
         print,''
         print,'Now loading file '+fname
         print,''
-        if find_file(basepath+event+'/'+fname) eq '' then begin
+        if file_search(basepath+event+'/'+fname) eq '' then begin
            print,''
            print,'File '+basepath+event+'/'+fname+' does not exist. Quitting...'
            print,''
@@ -87,7 +87,7 @@ pro aia_define_rois,events,evdate,begstep,endstep,basepath=basepath,automatic=au
            ;Load the 193 angstrom data,
            ;we're sure this will always be there
            ionizfile=basepath+event+'/ionization/rois_'+event+'_'+'193'+'.sav'
-           if find_file(ionizfile) eq '' then begin
+           if file_search(ionizfile) eq '' then begin
               print,''
               print,'File '+ionizfile+' does not exist. Rerun manually. Quitting...'
               print,''

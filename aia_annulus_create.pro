@@ -1,4 +1,4 @@
-pro test_aia_annulus_interactive
+pro test_aia_annulus_create
 wav='193'
 load_events_info,events=events
 ring_width=550
@@ -6,14 +6,13 @@ ring_width=550
 files=aia_file_search(events[3].st,events[3].et,wav)
 thrange=[10,120]
 savepath='./'
-
-aia_annulus_create,files,projdata,thrange=thrange,/diff,/plot,savepath=savepath
+rrange=[0.9,1.5] ;radial range from Sun center in Rs
+aia_annulus_create,files,projdata,thrange=thrange,/diff,/plot,savepath=savepath,rrange=rrange
 stop
 end
 
 
-
-pro aia_annulus_create, f, projdata, passband=passband, diff=diff, plot=plot, norm=norm, latzero=latzero, ring_width=ring_width,thrange=thrange,datascale=datascale,savename=savename,savepath=savepath
+pro aia_annulus_create, f, projdata, passband=passband, diff=diff, plot=plot, norm=norm, latzero=latzero, ring_width=ring_width,thrange=thrange,rrange=rrange,datascale=datascale,savename=savename,savepath=savepath
 ;PURPOSE:
 ; Routine to produce RD polar-deprojected data using an annulus technique applied to SDO
 ; images.
@@ -28,42 +27,60 @@ pro aia_annulus_create, f, projdata, passband=passband, diff=diff, plot=plot, no
 ;   PASSBAND: Passband being studied. Required for labelling and to
 ;             identify data.
 ;   DIFF: Set to produce windowed running difference images.
+;   RING_WIDTH - a width of the ring, in Rsun
+;   RRANGE - radial range from center of the sun, in Rsun
 ;
 ;OUTPUTS:
 ;
 ; 
 ;DEPENDENCIES:
-;
+; 
 ;
 ;MODIFICATION HISTORY:
 ;   Written 2013-Jul-07 by David Long using code from rd_annulus.pro.
 ;   2013/07/30 - Reworked for the CfA infrastructure by Kamen Kozarev
 ;   2013/09/30 - Added savename, savepath keywords - Kamen Kozarev
 ;
+
+
+  
   if not keyword_set(passband) then passband = '193'
   img_size = [1200., 800.]
   ang_step = 0.2                ; Angle step size (degree)
   res = 0.5                     ; Height step size (arcsec)
+
 ; Width of ring (effectively distance from limb to edge of aperture in arcsec)
-  if not keyword_set(ring_width) then ring_width = 400d            
+  if not keyword_set(ring_width) then ring_width = 400d $
+     else ring_width
   tot_ang = 360.                ; Looking at 360 degrees in steps of ang_step
   if not keyword_set(thrange) then thrang=[0,360.] else thrang=thrange
   thrang*=!PI/180.0
   
+  
+  
+
+
 ; Identify AEC-affected images.
   read_sdo, f, ind_arr, /nodata, only_tags = 'exptime,rsun_obs'
   fls = f[where(ind_arr.exptime gt 1.)]
   read_sdo, fls, ind_arr, /nodata
   
-  
+;Convert the radial range to arcsecs.
+  if keyword_set(rrange) then begin
+     rrang=(rrange-1)*ind_arr.rsun_obs
+  endif else begin
+     rrang=[0.0,ring_width]
+  endelse
+
+
 ; Setup Z-buffer for plotting 
   set_plot, 'z'
   Device, Set_Resolution=[img_size[0], img_size[1]], set_pixel_depth=24, decomposed = 1   
   !p.multi = 0
   
 ; Define inner and outer radius
-  r_in = ind_arr[0].rsun_obs-100d          ; Inner radius
-  r_out = ind_arr[0].rsun_obs + ring_width ; Outer radius
+  r_in = ind_arr[0].rsun_obs+rrang[0]    ; Inner radius
+  r_out = ind_arr[0].rsun_obs + rrang[1] ; Outer radius
   
 ; Get image coordinates
   aia_prep, fls[0], -1, ind, dat
@@ -140,7 +157,7 @@ pro aia_annulus_create, f, projdata, passband=passband, diff=diff, plot=plot, no
 ; Define x and y zero points for plotting     
      x_pos = thrang[0]*180./!PI
      y_pos = r_in-1.
-    
+     
   ;Select the angular coverage of the image
      plotimg=img
      if keyword_set(thrange) then begin
@@ -202,6 +219,6 @@ pro aia_annulus_create, f, projdata, passband=passband, diff=diff, plot=plot, no
   if not keyword_set(savepath) then savepath=''
   if not keyword_set(savename) then savname=savepath+'aia_deprojected_annulus_'+date+'_'+passband+'.sav' $
   else savname=savepath+savename
-  save,filename=savname,projdata,ring_width,thrang,passband,ang_step,res,ind_arr,new_theta
+  save,filename=savname,projdata,ring_width,thrang,passband,ang_step,res,ind_arr,new_theta,rrange
  
 end

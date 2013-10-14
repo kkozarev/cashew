@@ -14,7 +14,7 @@ function aia_get_arcoords, index, angular_coords, subroi_start, arlonlat=arlonla
 ;
 ;
 ;DEPENDENCIES:
-; fits2headwcs, wds_convert_from_coord, wcs_get_pixel
+; fits2headwcs, wcs_convert_from_coord, wcs_get_pixel
 ;
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 2011
@@ -28,10 +28,8 @@ acy=angular_coords[1]*1.0 ;arcsecs
 
 ;Convert to a WCS structure
 wcs=fitshead2wcs(index[0])
-;wcs_convert_from_coord,wcs,[acx,acy],'hg',lon,lat
-wcs_convert_from_coord,wcs,angular_coords,'hg',lon,lat
 pxcoords=wcs_get_pixel(wcs,[acx,acy])
-arlonlat=[lon,lat]
+arlonlat=arcmin2hel(acx/60.,acy/60.,date=index.date_obs)
 
 pcx=abs(pxcoords[0]-subroi_start[0])
 pcy=abs(pxcoords[1]-subroi_start[1])

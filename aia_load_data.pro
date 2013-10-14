@@ -38,7 +38,7 @@ end
 
 ;-----------------------------------------------------------------------
 
-pro aia_load_data,starttime,endtime,wave,index,data,savefile=savefile,nodata=nodata,map=map,norm=norm,noprep=noprep,quiet=quiet,local=local,archive=archive,first=first,remove_aec=remove_aec
+pro aia_load_data,stt,ett,wave,index,data,savefile=savefile,nodata=nodata,map=map,norm=norm,noprep=noprep,quiet=quiet,local=local,archive=archive,first=first,remove_aec=remove_aec
 ;PURPOSE
 ;This procedure reads in a sequence of AIA fits images from the CfA
 ;archive and returns/saves a prepped data cube and index
@@ -92,6 +92,9 @@ if keyword_set(quiet) then loud=0
 
 ;check if wave is an array or not...
 nwav=n_elements(wave)
+starttime=stt
+endtime=ett
+
 
 
 ;Record the times in string arrays
@@ -129,8 +132,8 @@ if loud eq 1 then begin
 endif
 
 ;First search on the local archive in the CfA and JSOC formats
-files=aia_file_search(st,et,wave,loud=loud,missing=locmissing,path=locarc,remove_aec=remove_aec)
-if files[0] eq '' then files=aia_file_search(st,et,wave,loud=loud,missing=locmissing,/jsoc,path=locarc,remove_aec=remove_aec)
+files=aia_file_search(starttime,endtime,wave,loud=loud,missing=locmissing,path=locarc,remove_aec=remove_aec)
+if files[0] eq '' then files=aia_file_search(starttime,endtime,wave,loud=loud,missing=locmissing,/jsoc,path=locarc,remove_aec=remove_aec)
 
 
 ;Then check the cfa archive...
@@ -190,7 +193,7 @@ if files[0] eq '' then begin
         if not keyword_set(nodata) then $
           sock_copy,rec.url,out_dir=locarc+st[0]+'/'+st[1]+'/'+st[2]+'/H'+st[3]+'00/'
     endelse
-    if not keyword_set(nodata) then files=aia_file_search(locarc,st,et,wave,loud=loud,missing=locmissing,/jsoc,remove_aec=remove_aec)
+    if not keyword_set(nodata) then files=aia_file_search(locarc,starttime,endtime,wave,loud=loud,missing=locmissing,/jsoc,remove_aec=remove_aec)
     
     if files[0] eq '' then begin
        if loud eq 1 then print,'There was a problem getting data from the remote archive!'
@@ -221,7 +224,7 @@ nfiles=n_elements(files)
 ;        for s=sec-2,sec+2 do begin
 ;            fname=aia_get_fname(s,stp,wv)
 ;                                ;print,dirpath+fname
-;            file=find_file(dirpath+fname)
+;            file=file_search(dirpath+fname)
 ;            if file ne '' then begin
 ;                print,dirpath+fname
 ;                if n gt 0 then files=[files,file]
@@ -289,7 +292,10 @@ if not keyword_set(nodata) then begin
         save,index,data,filename=savefile
      endif
     
-endif
+ endif else begin
+    if keyword_set(first) then files=files[0]
+    read_sdo,files,index,data,/nodata
+ endelse
 ;===========================================================
 
 ;smdata=rebin(data,1024,1024,n_elements(data[0,0,*]))

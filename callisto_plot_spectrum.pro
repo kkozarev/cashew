@@ -79,7 +79,7 @@ if not keyword_set(width_cutoff) then widthcutoff=0.2 else widthcutoff=width_cut
 ;Read the radio files
 for ff=0,nff-1 do begin
    for tf=0,ntf-1 do begin
-      if find_file(files[tf,ff]) eq '' then begin
+      if file_search(files[tf,ff]) eq '' then begin
          print,''
          print,'Error: File "'+ files[tf,ff]+'" was not found. Exiting...'
          print,''

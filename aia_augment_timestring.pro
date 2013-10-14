@@ -49,11 +49,12 @@ function aia_augment_timestring,oldtime,nsec
 ;Written by Kamen Kozarev, 2012
 ;10/01/2013, KAK - Generalized the routine to also be able to subtract seconds
 
+oldt=oldtime
 newtime=''
 nsec=fix(nsec)
 
 ;Record the times in string arrays
-st=strsplit(oldtime,' /:,.-T',/extract)
+st=strsplit(oldt,' /:,.-T',/extract)
 if n_elements(st) eq 4 then st=[st,'00']
 if n_elements(st) eq 5 then st=[st,'00']
 
@@ -84,7 +85,7 @@ if newsec lt 10 then newsec='0'+newsec
    if newday lt 10 then newday='0'+newday
    
 ;stop
-newtime=st[0]+'-'+st[1]+'-'+newday+' '+newhr+':'+newmin+':'+newsec
+newtime=st[0]+'/'+st[1]+'/'+newday+' '+newhr+':'+newmin+':'+newsec
 
 return, newtime
 end

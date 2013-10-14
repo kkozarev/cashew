@@ -1,4 +1,4 @@
-pro aia_cfa_coalign_test,st,et,teem_fname,wave_,io,ct,nsig,nsm,h,dx,dy
+pro aia_cfa_coalign_test,files,teem_fname,wave_,io,ct,nsig,nsm,h,dx,dy
 ;+
 ; Project     : AIA/SDO
 ;
@@ -51,15 +51,15 @@ pro aia_cfa_coalign_test,st,et,teem_fname,wave_,io,ct,nsig,nsm,h,dx,dy
  
  for iw=0,nwave-1 do begin
     while strlen(wave_[iw]) lt 3 do wave_[iw]='0'+wave_[iw]
-    aia_load_data,st,et,wave_[iw],index,data
-    index=index[0]
-    data=data[*,*,0]
+    ;aia_load_data,st,et,wave_[iw],index,data
+    ;index=index[0]
+    ;data=data[*,*,0]
     
     ;searchstring=fileset+'*'+wave_(iw)+'.fits'
     ;files =file_search(searchstring,count=nfiles)
     print,'Loading data for wavelength ',wave_[iw]
-    ;read_sdo,files[0],index0,data0
-    ;aia_prep,index0,data0,index,data
+    read_sdo,files[iw],index0,data0,/uncomp_delete
+    aia_prep,index0,data0,index,data
   
 
   cdelt1=index.cdelt1
