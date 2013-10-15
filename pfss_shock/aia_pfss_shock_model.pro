@@ -1,6 +1,6 @@
 pro test_aia_coronal_shock_model
 ;Test the shock modeling procedure
-
+  
   path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
   ev='37'
   outpath=path+ev+'/'
@@ -14,6 +14,7 @@ function bfield,rmag
 ;Return field as a function of radius from Gopalswamy paper
 return,0.409*rmag^(-1.3) * 1.0e-4
 end
+
 
 
 pro aia_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockcomp,outpath=outpath
@@ -43,6 +44,7 @@ pro aia_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockc
   print,''
   print,'Loading data...'
   
+  ;RESTORE THE FILE WITH AIA KINEMATICS INFORMATION
   restore, shockfile
   ;get some relevant info from the file name
   res=strsplit(shockfile,'_',/extract)
@@ -65,43 +67,17 @@ pro aia_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockc
   
   ;nsteps=fix((maxshockrad-minshockrad)/(shockthick*1.01))
   nsteps=n_elements(time)
-;  dt=(maxshockrad-minshockrad)*mpix/(nsteps*1.0)/vshock ;timestep in seconds
+  ;dt=(maxshockrad-minshockrad)*mpix/(nsteps*1.0)/vshock ;timestep in seconds
   dt=time[1:nsteps-1]-time[0:nsteps-2]
 
+  
+  ;RESTORE THE PFSS MODEL
   restore, pfssfile
   ;get relevant info from file name
   res=strsplit(pfssfile,'_',/extract)
   lowr=res[3]
   
-  tvlct,rr,gg,bb,/get  
-  
-;if not keyword_set(files) then begin
-;Figure out the name of the local machine.
-;  pcname=hostname()
-
-;for sloncho-2
-;  if pcname eq 'sloncho-2' then begin
-;restore,'/Users/kkozarev/AIA/algoTests/yaftawave/normalized_AIA_20110125_05_193_subdata.sav'
-     ;restore,'/Users/kkozarev/AIA/pfss_results_20110125_1.1Rs_dens_2.sav'
-;     restore,'/Users/kkozarev/AIA/pfss_results_20110125_1.1Rs.sav'
-;  endif else begin
-     
-;for arien
-;     if pcname eq 'arien' then begin
-;        datapath='/Volumes/Backscratch/Users/kkozarev/AIA/events/05/'
-        ;restore,datapath+'normalized_AIA_20110125_05_193_subdata.sav'
-;        shockfile=datapath+'AIA_20110125_05_193_shocklocations.sav'
-;        pfssfile=datapath+'pfss_results_20110125_1.0Rs.sav'
-;     endif else begin
-        ;restore,'/Users/kkozarev/AIA/pfss_results_20110125_1.0Rs_dens_1.sav'
-        ;restore,'/Users/kkozarev/AIA/pfss_results_20110125_1.1Rs_dens_2.sav'
-;        restore,'/Users/kkozarev/AIA/pfss_results_20110125_1.1Rs.sav'
-;     endelse
-;  endelse
-;endif else begin
-;   shockfile=files[0]
-;   pfssfile=
-;endelse
+  tvlct,rr,gg,bb,/get
 ;-==================================================================================
 
 
@@ -135,15 +111,17 @@ pro aia_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockc
   ;The ratio of the perpendicular to parallel diffusion.
   kperptokpar=0.01
   
+  ;________
   ;B. Shock
+  ;--------
   if not keyword_set(vupstream) then vshock=400 * 1000.0 $  ;upstream plasma speed in the shock frame, m/s
   else vshock=vupstream * 1000.0
   if not keyword_set(shockcomp) then shockjump=1.1 $    ;shock jump, r (bigger than 1)
   else shockjump=shockcomp
 
-
-
+  ;____________
   ;C. Particles
+  ;------------
   mfp=0.01 * minAU ;assume some parallel mean free path, in m.
   mine=0.01 ;minimum energy of protons, MeV
   maxe=100.0 ;maximum energy of protons, MeV; protons will escape at this energy.
@@ -170,10 +148,8 @@ pro aia_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockc
   cc=(pgrid/sqrt(mp))^2/(2*kboltz*Temp)
   initdist= aa * bb * exp(-cc)
 
-
   ;Get some proxy for the number of particles
   initparticles=initdist/min(initdist)
-
 
 ;Save the crossing points information
   allcrossPoints=fltarr(nsteps,3,10000)
@@ -267,7 +243,7 @@ pro aia_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockc
         Vertex_List, Polygon_List, $ ;lists of polygons and vertices
         Replicate(shockrad, 100, 100)  , $
         p3=-asin(shockrad/(2*sunrad))
-
+     
      
      sc=[xcenter+sunrad*SIN((lon+yrot_gen)*!PI/180.)*COS((lat+xrot_gen)*!PI/180.), $
          ycenter+sunrad*SIN((lon+yrot_gen)*!PI/180.)*SIN((lat+xrot_gen)*!PI/180.), $
@@ -286,7 +262,6 @@ pro aia_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockc
      nverts=n_elements(vertex_list[0,*])
 ;-============================================================================== 
 
-     ;stop
 
 ;+==============================================================================
 ;4. Determine the points where the field lines cross the shock
@@ -413,7 +388,14 @@ pro aia_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockc
         p0=allPartMomentum[where(fline eq allIndLines)] ;current initial momentum
         pt=allcrossPoints[sstep,*,ncr] ;the point location
         rmag=sqrt((pt[0]-xcenter)^2+(pt[1]-ycenter)^2+(pt[2]-zcenter)^2)/sunrad
-        local_B=bfield(rmag) ;The local magnetic field
+        
+        ;THIS IS THE NEW VERSION, USING PFSS LINEAR INTERPOLATION
+        sphpt=cart2sph([pt[0]-xcenter,pt[1]-ycenter,pt[2]-zcenter]/sunrad,sph_data)
+        local_B=bfield_pfss(sphpt)
+        
+        ;BELOW IS THE OLD VERSION, USING GOPALSWAMY ET AL., 2011 MODEL
+        ;local_B=bfield(rmag)       ;The local magnetic field
+
         rg=pgrid/(echarge*local_B) ;The particle's gyroradius
         thetabn=allcrossAngles[sstep,ncr]
         ;Calculate the diffusion coefficients

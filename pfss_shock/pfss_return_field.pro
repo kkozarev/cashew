@@ -1,4 +1,4 @@
-pro pfss_return_field,date,rstart=rstart,invdens=invdens,pfss_struct=pfss_struct,save=save
+pro pfss_return_field,date,rstart=rstart,invdens=invdens,pfss_struct=pfss_struct,save=save,savepath=savepath
 ;PURPOSE:
 ; Return the PFSS field model
 ;CATEGORY:
@@ -34,11 +34,11 @@ endif
 
 ;  starting points to be on a regular grid covering the full disk,
 ;  with a starting radius of r=1.00 Rsun
-  if not keyword_set (rstart) then rstart=1.05
+  if not keyword_set (rstart) then rstart=1.00
 ;  factor inverse to line density, i.e. lower values = more lines
-  if not keyword_set(invdens) then invdens = 1 
+  if not keyword_set(invdens) then invdens = 4 
   pfss_field_start_coord,5,invdens,radstart=rstart
-
+  
 ;  trace the field lines passing through the starting point arrays
   pfss_trace_field, kind
 @pfss_data_block
@@ -57,11 +57,8 @@ endif
 ;      photosphere and 2.5 (the radius of the source surface).
 ;      theta and phi are respectively the colatitude and
 ;      longitude in radians.
-  if keyword_set(pfss_struct) then begin 
-     pfss_to_spherical,pfssData
-     pfss_struct=pfssData
-  endif
-  
+     pfss_to_spherical,sph_data
+     if keyword_set(pfss_struct) then pfss_struct=sph_data
 ;pfss_data is a structure array of type
 ;{spherical_field_data, $
 ;  br:ptr_new(),bth:ptr_new(),bph:ptr_new(),bderivs:ptr_new(),$
@@ -86,11 +83,10 @@ endif
 ;print,carrCoords
 
 
-
 ;Save the structure and Carrington coordinates of SDO to a sav file:
-res=strsplit(date,'-',/extract)
-dat=strtrim(res[0]+res[1]+res[2],2)
-fname='pfss_results_'+dat+'_'+strtrim(string(rstart,format='(f3.1)'),2)+'Rs_dens_'+strtrim(string(invdens),2)+'.sav'
-if keyword_set(save) then save,filename=fname,kind,ptr,ptth,ptph,nstep,br,bph,bth
-
+   res=strsplit(date,'-',/extract)
+   dat=strtrim(res[0]+res[1]+res[2],2)
+   fname='pfss_results_'+dat+'_'+strtrim(string(rstart,format='(f3.1)'),2)+'Rs_dens_'+strtrim(string(invdens),2)+'.sav'
+   if keyword_set(savepath) then fname=savepath+fname
+   save,filename=fname,kind,ptr,ptth,ptph,nstep,br,bph,bth,sph_data
 end

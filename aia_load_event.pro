@@ -2,7 +2,7 @@ pro test_aia_load_event
 ;Test the loading of data
 
 ;Load the information about events
-load_events_info,events=events
+events=load_events_info()
 st=events[0].st
 ;Create a short interval - add 4 mins to the start time of the event
 et=aia_augment_timestring(events[0].st,240)
@@ -70,7 +70,6 @@ if keyword_set(subroi) then begin
    subindex=aia_update_subdata_index(index,[newcoords[0],newcoords[1]],1024,coords)
 endif
 
-stop
 
 if keyword_set(submap) then begin
       if not keyword_set(map) then begin
