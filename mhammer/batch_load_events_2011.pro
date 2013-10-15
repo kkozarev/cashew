@@ -106,7 +106,7 @@ pro batch_load_events_2011
         print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and '+et
         print,''
         std=strsplit(st,'/ :',/extract)
-        savepath=path+'e'+evnum+'/'
+        savepath=path+evnum+'/'
         if not file_exist(savepath) then begin
            exec='mkdir '+savepath
            spawn,exec

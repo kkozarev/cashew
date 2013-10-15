@@ -3,7 +3,7 @@ pro batch_load_events_newformat
 ;multiple events and wavelengths.
 ;Kamen Kozarev, 10/2011
   
-  path='/Volumes/Backscratch/Users/kkozarev/AIA_data/studies/2011events/'
+  path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
   wave=['171','193','211','335','094','131','304']
   
   evnums=['05','06','07','13','19','20','23','32','37','38','41','113','112']
@@ -41,7 +41,7 @@ pro batch_load_events_newformat
         print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and '+et
         print,''
         std=strsplit(st,'/ :',/extract)
-        savefile=path+'e'+evnum+'/normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
+        savefile=path+evnum+'/normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
         aia_load_event,st,et,coords,wav,index,data
         ;save,filename=savefile+'.sav',index,data
         ;restore,savefile+'.sav'

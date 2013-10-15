@@ -22,7 +22,7 @@ pro test_aia_cfa_teem_run
   
   er=8
   
-  outpath='/Volumes/Backscratch/Users/kkozarev/AIA/studies/2011events/'+'e'+evnums[er]+'/dem/aschwanden/'
+  outpath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'+evnums[er]+'/dem/aschwanden/'
   aia_cfa_teem_run,st=sts[er],et=ets[er],arcoords=[coordX[er],coordY[er]],outpath=outpath,/remove_aec
   
 end

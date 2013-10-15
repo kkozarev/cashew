@@ -1,12 +1,12 @@
 pro test_jmap_pfss_shock_model
 ;Test the shock modeling procedure
 
-  path='/Volumes/Backscratch/Users/kkozarev/AIA_data/studies/2011events/'
-  ev='e37'
+  path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
+  ev='37'
   outpath=path+ev+'/'
   pfssfile=path+ev+'/pfss_results_20110511_1.1Rs_dens_1.sav'
   shockfile=path+ev+'/AIA_20110511_37_193_shocklocations.sav'
-  shockfile='/home/kkozarev/Desktop/AIA/pro/e37_051111_193_jmap_measurements.sav'
+  shockfile='/home/kkozarev/svn/corwav/trunk/e37_051111_193_jmap_measurements.sav'
   aia_jmap_shock_model,shockfile,pfssfile,outpath=outpath
 end
 

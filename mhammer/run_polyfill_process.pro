@@ -49,7 +49,7 @@ if keyword_set(RESTORE) then begin
    year = '20' + strmid(date,4,2)
    if not keyword_set(path) then begin
       path = '/Volumes/Scratch/Users/mhammer/Polyfill_Data/' + year $
-             + '/e' + event_num + '/'
+             + '/' + event_num + '/'
    endif
    
    ; Set File Names

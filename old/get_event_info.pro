@@ -1,7 +1,7 @@
 function get_event_info,filename
 ; A function which reads a coronal shock event nugget and returns a structure containing the info
   
-  event={designation:'e01', $
+  event={designation:'01', $
              st:'2011/01/01 00:00:00',$
              et:'2011/01/01 00:01:00',$
              coordx:0.0,$
@@ -9,7 +9,7 @@ function get_event_info,filename
              flareclass:'N/A',$
              typeII:0,$
              typeIII:0,$
-             path:'/Volumes/PLUME/AIA_data/studies/2011events/e01/'}
+             path:'/Volumes/Backscratch/Users/kkozarev/AIA/events/01/'}
 
 ;read and parse the file contents
   openr,lun,filename,/get_lun

@@ -1,6 +1,6 @@
 pro test_plot_pfss_shock_energy_histogram
   evnum='113'
-  path='/Volumes/PLUME/AIA_data/studies/2011events/'
+  path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
   shockjumps=1.1
   plot_pfss_shock_energy_histogram,shockjumps=shockjumps,mine=mine,maxe=maxe,path=path
 end
@@ -35,7 +35,7 @@ pro pfss_shock_plot_energy_histogram,shockjumps=shockjumps,mine=mine,maxe=maxe,p
   if not keyword_set(maxe) then maxe=1000.0 ;MeV
   if not keyword_set(shockjumps) then shockjumps=4.0
   if not keyword_set(path) then path='./'
-  datapath=path+'e'+evnum+'/'
+  datapath=path+evnum+'/'
   njumps=n_elements(shockjumps)
   mp=1.67e-27                               ;proton mass in kg
   MeVinJ=1.6e-19                             ;conversion between MeV and Joules
@@ -102,7 +102,7 @@ pro pfss_shock_plot_energy_histogram,shockjumps=shockjumps,mine=mine,maxe=maxe,p
   oplot,gride,inithist,psym=10,color=0,thick=3.0
   
   image=tvrd(true=1)
-  write_png,datapath+'dsa_energy_histogram_e'+evnum+'.png',image,rr,gg,bb
+  write_png,datapath+'dsa_energy_histogram_'+evnum+'.png',image,rr,gg,bb
 ;-==============================================================================
   
 end

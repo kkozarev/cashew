@@ -3,7 +3,7 @@ WAVELENGTHS = wavelengths, START = start, FINISH = finish, $
 BAS_INDEX = base_index, RUN = run, BASE = base
 ; Parameters:
 ; Date: Write the date in MMDDYY format. (eg 042313)
-; Evnum: Each event has an a unique number. Leave off the initial 'e'
+; Evnum: Each event has an a unique label.
 ; Location: 'E' or 'W', namely east or west
 ;
 ; Path: If the path is not an expected path, include it as a keyword.
@@ -77,7 +77,7 @@ formatted_date = year + strmid(date,0,2) + strmid(date,2,2)
 ; Restore subdata from .sav file
 eventname='AIA_'+formatted_date+'_'+evnum+'_'+wavelength
 print, 'Loading '+wavelength+' channel AIA data for event #'+evnum
-restore,path+'e'+evnum+'/normalized_'+eventname+'_subdata.sav'
+restore,path+evnum+'/normalized_'+eventname+'_subdata.sav'
 
 ; Make copies of the data
 data = subdata

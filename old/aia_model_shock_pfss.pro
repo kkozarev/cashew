@@ -39,7 +39,7 @@ resolve_routine,'sym',/either,/compile_full_file
      
 ;for arien
      if pcname eq 'arien' then begin
-        datapath='/Volumes/PLUME/AIA_data/studies/2011events/e'+evnum+'/'
+        datapath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'+evnum+'/'
         ;goto,next
         print,'Loading AIA File '+datapath+'normalized_'+eventname+'_subdata.sav'
         restore,datapath+'normalized_'+eventname+'_subdata.sav'
@@ -615,7 +615,7 @@ end ; END AIA_MODEL_SHOCK_PFSS
 pro rungrid_aia_shock_pfss_model
 ; A small procedure to run several instances of the coronal shock
 ; model.
-  datapath='/Volumes/PLUME/AIA_data/studies/2011events/e113/'
+  datapath='/Volumes/Backscratch/Users/kkozarev/AIA/events/113/'
   
   compression=[1.12,2,4]     ;shock compression ratios.
 ;  compression=4

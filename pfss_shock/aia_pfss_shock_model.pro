@@ -1,8 +1,8 @@
 pro test_aia_coronal_shock_model
 ;Test the shock modeling procedure
 
-  path='/Volumes/Backscratch/Users/kkozarev/AIA_data/studies/2011events/'
-  ev='e37'
+  path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
+  ev='37'
   outpath=path+ev+'/'
   pfssfile=path+ev+'/pfss_results_20110511_1.1Rs_dens_1.sav'
   shockfile=path+ev+'/AIA_20110511_37_193_shocklocations.sav' 
@@ -88,7 +88,7 @@ pro aia_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockc
      
 ;for arien
 ;     if pcname eq 'arien' then begin
-;        datapath='/Volumes/PLUME/AIA_data/studies/2011events/e05/'
+;        datapath='/Volumes/Backscratch/Users/kkozarev/AIA/events/05/'
         ;restore,datapath+'normalized_AIA_20110125_05_193_subdata.sav'
 ;        shockfile=datapath+'AIA_20110125_05_193_shocklocations.sav'
 ;        pfssfile=datapath+'pfss_results_20110125_1.0Rs.sav'

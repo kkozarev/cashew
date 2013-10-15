@@ -1,11 +1,11 @@
 pro test_aia_annulus_create
 wav='193'
-load_events_info,events=events
+events=load_events_info()
 ring_width=550
 ;The May 2011 event is index=3
 files=aia_file_search(events[3].st,events[3].et,wav)
 thrange=[10,120]
-savepath='./'
+savepath=events[3].savepath
 rrange=[0.9,1.5] ;radial range from Sun center in Rs
 aia_annulus_create,files,projdata,thrange=thrange,/diff,/plot,savepath=savepath,rrange=rrange
 stop
@@ -205,9 +205,9 @@ pro aia_annulus_create, f, projdata, passband=passband, diff=diff, plot=plot, no
 ;     image[2,*,*] = b[snapshot]
         
         if keyword_set(diff) then $
-           write_png, 'rd_polar_plot_'+passband+'_' + $
+           write_png, 'rd_annulus_plot_'+passband+'_' + $
                       time2file(i_1.date_d$obs, /sec)+'.png', snapshot $
-        else write_png, 'plain_polar_plot_'+passband+'_' + $
+        else write_png, 'plain_annulus_plot_'+passband+'_' + $
                         time2file(i_0.date_d$obs, /sec)+'.png', snapshot
      endif
   endfor

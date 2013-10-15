@@ -21,7 +21,7 @@ pro test_aia_file_search
 end
 
 
-function aia_file_search, stss, etss, wave,path=path,loud=loud,missing=missing,cfa=cfa,jsoc=jsoc,remove_aec=remove_aec,check171=check171
+function aia_file_search, sts, ets, wave,path=path,loud=loud,missing=missing,cfa=cfa,jsoc=jsoc,remove_aec=remove_aec,check171=check171
 ;PURPOSE:
 ;Search for AIA fits files from the local CfA archive.
 ;Assume searching on a single day only.
@@ -52,18 +52,18 @@ function aia_file_search, stss, etss, wave,path=path,loud=loud,missing=missing,c
 ;10/01/2013, KAK - added a check for Automatic Exposure Control
 ;                  exposure frames - keyword remove_aec
 ;
-sts=stss
-ets=etss
+starttime=sts
+endtime=ets
   if not keyword_set(path) then path='/Data/SDO/AIA/level1/'
   
-  if n_elements(sts) eq 1 then begin
-     st=strsplit(sts,' /:,.-T',/extract)
+  if n_elements(starttime) eq 1 then begin
+     st=strsplit(starttime,' /:,.-T',/extract)
      if n_elements(st) eq 4 then st=[st,'00']
      if n_elements(st) eq 5 then st=[st,'00']
   endif
   
-  if n_elements(ets) eq 1 then begin
-     et=strsplit(ets,' /:,.-T',/extract)
+  if n_elements(endtime) eq 1 then begin
+     et=strsplit(endtime,' /:,.-T',/extract)
      if n_elements(et) eq 4 then et=[et,'00']
      if n_elements(et) eq 5 then et=[et,'00']
   endif

@@ -48,12 +48,12 @@ respath=testpath;+'test/'
 if not keyword_set(eventname) then eventname='event'
 
 ;restore,testpath+'normalized_AIA_20110125_05_211_subdata_testdata.sav'
-path='/Volumes/PLUME/AIA_data/studies/2011events/'
+path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
 enum='32'
 date='20110427'
 wav='193'
 file='normalized_AIA_'+date+'_'+enum+'_'+wav+'_subdata.sav'
-restore,path+'e'+enum+'/'+file
+restore,path+enum+'/'+file
 start_step=25
 nx = n_elements(subdata[*,0,0])
 ny = n_elements(subdata[0,*,0])

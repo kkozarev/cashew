@@ -37,7 +37,7 @@ pro test_pfss_shock_crossing,png=png,steps=steps,plot=plot
      
 ;for arien
      if pcname eq 'arien' then begin
-        datapath='/Volumes/PLUME/AIA_data/studies/2011events/e113/'
+        datapath='/Volumes/Backscratch/Users/kkozarev/AIA/events/113/'
                                 ;restore,datapath+'normalized_AIA_20110125_05_193_subdata.sav'
         ;restore,datapath+'pfss_results_20110125_1.0Rs.sav'
         ;restore,datapath+'pfss_results_20100613_1.1Rs_dens_2.sav'

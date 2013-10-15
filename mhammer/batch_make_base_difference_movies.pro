@@ -53,8 +53,8 @@ pro batch_make_base_difference_movies, CHECK_EXPOSURES = check_exposures
         print,''
         std=strsplit(st,'/ :',/extract)
         infname='normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
-        infile=path+'e'+evnum+'/'+infname
-        svfile=path+'e'+evnum+'/base/'+wav+'/'+infname
+        infile=path+evnum+'/'+infname
+        svfile=path+evnum+'/base/'+wav+'/'+infname
         restore,infile+'_subdata.sav'
         nsteps=n_elements(subindex)
         ;stop

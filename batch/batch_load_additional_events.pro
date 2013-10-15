@@ -1,6 +1,6 @@
 pro batch_load_additional_events
 
-path='/Volumes/PLUME/AIA_data/studies/2011events/'
+path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
 wave=['335']
 
 for i=0,n_elements(wave)-1 do begin
@@ -13,7 +13,7 @@ st='2011/04/27 02:05:00'
 et='2011/04/27 02:25:00'
 print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and '+et
 std=strsplit(st,'/ :',/extract)
-savefile=path+'e'+evnum+'/normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
+savefile=path+evnum+'/normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
     aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data
@@ -32,7 +32,7 @@ st='2011/05/29 10:00:00'
 et='2011/05/29 10:30:00'
 print,'Loading '+wav+' channel AIA data for event #'+evnum+' between '+st+' and '+et
 std=strsplit(st,'/ :',/extract)
-savefile=path+'e'+evnum+'/normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
+savefile=path+evnum+'/normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
 
     aia_load_event,st,et,coords,wav,index,data
     save,filename=savefile+'.sav',index,data

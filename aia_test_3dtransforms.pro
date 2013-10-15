@@ -1,7 +1,7 @@
 ;+=====================================================================
 pro test_aia_test_3dtransforms
-  path='/Volumes/Backscratch/Users/kkozarev/AIA_data/studies/2011events/'
-  ev='e37'
+  path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
+  ev='37'
   
   shockfile=path+ev+'/AIA_20110511_37_193_shocklocations.sav'
   restore,shockfile

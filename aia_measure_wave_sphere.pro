@@ -3,14 +3,15 @@ pro test_aia_measure_wave_sphere
 
   evindex=11
   profrange=[11,31]
-  datapath='/Volumes/PLUME/AIA_data/studies/2011events/'
+  datapath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
   wavelength=['193','211']
-  evnums=['05','06','07','13','19','20','23','32','37','38','41','113','112']
-  sts=['2011/01/25 11:56:00','2011/01/27 11:50:00','2011/01/28 00:45:00',$
-       '2011/02/11 12:30:00','2011/03/07 19:35:00','2011/03/08 03:30:00',$
-       '2011/03/12 15:20:00','2011/04/27 02:05:00','2011/05/11 02:10:00',$
-       '2011/05/29 10:00:00','2012/01/05 06:56:00','2010/06/13 05:35:00',$
-       '2010/06/12 00:55:00']
+;  evnums=['05','06','07','13','19','20','23','32','37','38','41','113','112']
+;  sts=['2011/01/25 11:56:00','2011/01/27 11:50:00','2011/01/28 00:45:00',$
+;       '2011/02/11 12:30:00','2011/03/07 19:35:00','2011/03/08 03:30:00',$
+;       '2011/03/12 15:20:00','2011/04/27 02:05:00','2011/05/11 02:10:00',$
+;       '2011/05/29 10:00:00','2012/01/05 06:56:00','2010/06/13 05:35:00',$
+;       '2010/06/12 00:55:00']
+
   wav=wavelength[0]
   evnum=evnums[evindex]
   st=sts[evindex]
@@ -52,7 +53,7 @@ pro aia_measure_wave_sphere,wav=wav,evnum=evnum,profrange=profrange,st=st,datapa
   if not keyword_set(profrange) then profrange=[11,31] ;The range of images to record
   init=profrange[0]
   fin=profrange[1]
-  if not keyword_set(datapath) then datapath='/Volumes/PLUME/AIA_data/studies/2011events/'
+  if not keyword_set(datapath) then datapath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
   if not keyword_set(evnum) then evnum='113'
 ;-========================================
 
@@ -64,7 +65,7 @@ pro aia_measure_wave_sphere,wav=wav,evnum=evnum,profrange=profrange,st=st,datapa
   date=std[0]+std[1]+std[2]
   eventname='AIA_'+date+'_'+evnum+'_'+wav
   print,'Loading '+wav+' channel AIA data for event #'+evnum
-  restore,datapath+'e'+evnum+'/normalized_'+eventname+'_subdata.sav'
+  restore,datapath+evnum+'/normalized_'+eventname+'_subdata.sav'
   ntimes=n_elements(subdata[0,0,*])
                                 ;fin=n_elements(subindex)-1
   nprofs=fin-init+1             ;The number of measurements
@@ -241,7 +242,7 @@ pro aia_measure_wave_sphere,wav=wav,evnum=evnum,profrange=profrange,st=st,datapa
   arcoords=[subindex[0].arx0,subindex[0].ary0]
   nruns=nrun
 
-  save,filename=datapath+'e'+evnum+'/'+eventname+'_shocklocations.sav',kmpx,nruns,subindex,$
+  save,filename=datapath+evnum+'/'+eventname+'_shocklocations.sav',kmpx,nruns,subindex,$
        centcirc,frontcirc,frontcircgcor,radius,time,jdfrac,init,fin,nprofs,$
        frontfitparams, frontfitparamssigma, frontfitlines, frontcircmoments, frontpossigma,$
        centfitparams,centfitparamssigma,centfitlines,centcircmoments,centpossigma,$

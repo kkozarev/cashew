@@ -19,10 +19,10 @@ end
 pro aia_aschdem_analyze,events,evdate,begstep,endstep,basepath=basepath
 ;This procedure will analyze the results from the ASCHWANDEN DEM
 ;calculations for the May 11, 2011 event.
-  if not keyword_set(basepath) then basepath='/Volumes/Backscratch/Users/kkozarev/AIA/studies/2011events/'
+  if not keyword_set(basepath) then basepath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
   
   for ii=0,n_elements(events)-1 do begin
-     event='e'+events[ii]
+     event=events[ii]
      
      inpath=basepath+event+'/dem/aschwanden/'
      infile='AschDEM_teem_map_subrois.sav'

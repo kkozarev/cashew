@@ -1,14 +1,13 @@
-pro batch_define_rois
+pro test_aia_define_rois
 ;The actual events and AIA channels to measure...
   er=[6]
-
-  evindex=['05','06','13','19','20','32','37','38']
+  evlabel=['05','06','13','19','20','32','37','38']
   evdate=['20110125','20110127','20110211','20110307',$
           '20110308','20110427','20110511','20110529']
   begstep=[25,30,10,30,20,5,35,1] ;these are the initial steps for which to run the algorithm
   endstep=[100,100,100,85,90,100,110,110] ;these are the final steps for which to run the algorithm
   
-  aia_define_rois,evindex[6],evdate[6],begstep[6],endstep[6];,waves=['94','131']
+  aia_define_rois,evlabel[er],evdate[er],begstep[er],endstep[er];,waves=['94','131']
 end
 
 
@@ -46,7 +45,7 @@ pro aia_define_rois,events,evdate,begstep,endstep,basepath=basepath,automatic=au
   ;aia_lct,rr,gg,bb,wavelnth=fix(wave[wav]),/load
 
   if not keyword_set(basepath) then $
-     basepath='/Volumes/Backscratch/Users/kkozarev/AIA_data/studies/2011events/'
+     basepath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
   if not keyword_set(numroi) then NUMROI=5
   if not keyword_set(roisize) then ROISIZE=50
   if not keyword_set(waves) then waves=['193','211','335','171','94','131']
@@ -58,7 +57,7 @@ pro aia_define_rois,events,evdate,begstep,endstep,basepath=basepath,automatic=au
   
 ;loop over the events
   for ii=0,n_elements(events)-1 do begin
-     event='e'+events[ii]
+     event=events[ii]
 ;loop over the wavelengths
      for wav=0,n_elements(waves)-1 do begin
         wave=waves[wav]

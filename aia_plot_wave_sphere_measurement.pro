@@ -37,7 +37,7 @@ pro aia_plot_wave_sphere_measurement
   std=strsplit(sts[evindex],'/ :',/extract)
   date=std[0]+std[1]+std[2]
   eventname='AIA_'+date+'_'+evnum+'_'+wav
-  datapath='/Volumes/PLUME/AIA_data/studies/2011events/e'+evnum+'/'
+  datapath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'+evnum+'/'
   outpath=datapath
   restore,datapath+eventname+'_shocklocations.sav'
   !P.charthick=1.8

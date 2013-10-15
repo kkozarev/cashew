@@ -166,7 +166,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
   
 ;record the image
   image=tvrd(/true)
-  savname='e'+data_evnum+'_'+data_date+'_'+wav+'emission_maxima_all.png'
+  savname=data_evnum+'_'+data_date+'_'+wav+'emission_maxima_all.png'
   if keyword_set(outpath) then savname=outpath+savname
   write_png,savname,image
   
@@ -316,7 +316,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
   
 ;record the image
   image=tvrd(/true)
-  savname='e'+data_evnum+'_'+data_date+'_'+wav+'emission_maxima.png'
+  savname=data_evnum+'_'+data_date+'_'+wav+'emission_maxima.png'
   if keyword_set(outpath) then savname=outpath+savname
   write_png,savname,image
   
@@ -327,7 +327,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
   ind=data_subindex[sp:ep]
   
   wave_data=data_thin_wave[sp:ep,allmaxima[uinput,sp].ind:allmaxima[uinput,ep].ind]
-  savname='e'+data_evnum+'_'+data_date+'_'+wav+'_jmap_measurements.sav'
+  savname=data_evnum+'_'+data_date+'_'+wav+'_jmap_measurements.sav'
   if keyword_set(outpath) then savname=outpath+savname
   save,filename=savname,time,rad,ind,wave_times,wave_rads,wave_indices,wave_data,$
        wave_frontedge,wave_backedge,r0,rf,v0,vf,errv0,accel,erraccel,wave_fits,$
@@ -358,7 +358,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
      endfor
      
      image=tvrd(/true)
-     savname='e'+data_evnum+'_'+data_date+'_'+wav+'_gaussfit_fwhm_timeseries.png'
+     savname=data_evnum+'_'+data_date+'_'+wav+'_gaussfit_fwhm_timeseries.png'
      if keyword_set(outpath) then savname=outpath+savname
      write_png,savname,image
   endif
@@ -389,7 +389,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
 ;,time[1:ntimes-1]-time[0:ntimes-2]
      endfor
      image=tvrd(/true)
-     savname='e'+data_evnum+'_'+data_date+'_'+wav+'_gaussfit_peak_intensities_timeseries.png'
+     savname=data_evnum+'_'+data_date+'_'+wav+'_gaussfit_peak_intensities_timeseries.png'
      if keyword_set(outpath) then savname=outpath+savname
      write_png,savname,image
   endif else begin
@@ -401,7 +401,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
      set_plot,'ps'
      !p.position[0]+=0.06 
      loadct,0,/silent   
-     savname='e'+data_evnum+'_'+data_date+'_'+wav+'peak_intensities_timeseries'     
+     savname=data_evnum+'_'+data_date+'_'+wav+'peak_intensities_timeseries'     
      device,file=savname+'.eps',/inches,xsize=9.0,ysize=7,$
             /encaps,/color,/helvetica
      
@@ -436,7 +436,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
 ;time steps.
 ;==================================================
 
-     savname='e'+data_evnum+'_'+data_date+'_'+wav+'integral_intensities_timeseries'     
+     savname=data_evnum+'_'+data_date+'_'+wav+'integral_intensities_timeseries'     
      device,file=savname+'.eps',/inches,xsize=9.0,ysize=7,$
             /encaps,/color,/helvetica
      
@@ -479,7 +479,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
 ;+=================================================
 ;Plot a time series of the wave thickness
 ;==================================================
-     savname='e'+data_evnum+'_'+data_date+'_'+wav+'wave_thickness_timeseries'     
+     savname=data_evnum+'_'+data_date+'_'+wav+'wave_thickness_timeseries'     
      device,file=savname+'.eps',/inches,xsize=9.0,ysize=7,$
             /encaps,/color,/helvetica
      

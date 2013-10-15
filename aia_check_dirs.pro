@@ -1,4 +1,4 @@
-pro aia_check_dirs,basepath,st,et
+pro aia_check_dirs,basepath,stt,ett
 ;PURPOSE:
 ;Check for existing archive AIA folders, create them if they don't exist
 ;
@@ -17,6 +17,25 @@ pro aia_check_dirs,basepath,st,et
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 09/23/2013   
 ;
+starttime=stt
+endtime=ett
+
+;Record the times in string arrays
+if n_elements(stattime) eq 1 then begin
+   st=strsplit(starttime,' /:,.-T',/extract)
+   if n_elements(st) eq 4 then st=[st,'00']
+   if n_elements(st) eq 5 then st=[st,'00']
+endif else begin
+   st=starttime
+endelse
+
+if n_elements(endtime) eq 1 then begin
+   et=strsplit(endtime,' /:,.-T',/extract)
+   if n_elements(et) eq 4 then et=[et,'00']
+   if n_elements(et) eq 5 then et=[et,'00']
+endif else begin
+   et=endtime
+endelse
 
 ;check for year
 if not dir_exist(basepath+st[0]) then begin

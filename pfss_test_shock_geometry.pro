@@ -37,7 +37,7 @@ pro pfss_test_shock_geometry,png=png,steps=steps
      
 ;for arien
      if pcname eq 'arien' then begin
-        datapath='/Volumes/PLUME/AIA_data/studies/2011events/e05/'
+        datapath='/Volumes/Backscratch/Users/kkozarev/AIA/events/05/'
                                 ;restore,datapath+'normalized_AIA_20110125_05_193_subdata.sav'
         restore,datapath+'pfss_results_20110125_1.1Rs.sav'
      endif else begin

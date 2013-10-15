@@ -1,5 +1,5 @@
 pro test_aia_aschdem_save_subrois
-  aia_aschdem_save_subrois;,event='e05'
+  aia_aschdem_save_subrois,event='37'
 end
 
 
@@ -25,8 +25,8 @@ pro aia_aschdem_save_subrois, path=path, event=event,wav=wav
 ;Written by Kamen Kozarev, 02/2013
 ;
 
-if not keyword_set(path) then path='/Volumes/Backscratch/Users/kkozarev/AIA/studies/2011events/'
-if not keyword_set(event) then event='e37'
+if not keyword_set(path) then path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
+if not keyword_set(event) then event='37'
 if not keyword_set(wav) then wav='193'
 dempath=path+event+'/dem/aschwanden/'
 ionizpath=path+event+'/ionization/'

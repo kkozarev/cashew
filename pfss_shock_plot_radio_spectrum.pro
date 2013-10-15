@@ -28,7 +28,7 @@ pro pfss_shock_plot_radio_spectrum;,datapath,fname
 
 
   evnum='113'
-  datapath='/Volumes/PLUME/AIA_data/studies/2011events/e'+evnum+'/'
+  datapath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'+evnum+'/'
   fname='aia_shock_pfss_r2.0.sav'
   
 

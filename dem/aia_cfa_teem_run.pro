@@ -22,7 +22,7 @@ pro test_aia_cfa_teem_run
   
   er=8
   
-  outpath='/Volumes/Backscratch/Users/kkozarev/AIA/studies/2011events/'+'e'+evnums[er]+'/dem/aschwanden/'
+  outpath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'+evnums[er]+'/dem/aschwanden/'
   aia_cfa_teem_run,st=sts[er],et=ets[er],arcoords=[coordX[er],coordY[er]],outpath=outpath,/remove_aec
   
 end
@@ -62,7 +62,7 @@ if not keyword_set(fileset) then fileset ='AschDEM'
 ;INPUTS
 ;
 if not keyword_set(outpath) then $
-   outpath='/Volumes/Backscratch/Users/kkozarev/testAIA/dem/'
+   outpath='/Volumes/Backscratch/Users/kkozarev/AIA/events/37/dem/aschwanden/'
 if not keyword_set(st) then st='2011/05/11 02:10:00'
 if not keyword_set(et) then et='2011/05/11 02:11:47'
 if not keyword_set(arcoords) then arcoords=[785,399] ; The AR coordinates in arcseconds for selecting a subframe

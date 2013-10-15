@@ -4,8 +4,8 @@ pro save_weber_subrois
 ;.sav files in the same folder. This was written to prepare subrois
 ;for Mark Weber to analyze.
 
-path='/Volumes/PLUME/AIA_data/studies/2011events/'
-event='e37'
+path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
+event='37'
 dempath=path+event+'/dem/aschwanden/'
 ionizpath=path+event+'/ionization/'
 

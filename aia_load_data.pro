@@ -79,7 +79,6 @@ pro aia_load_data,stt,ett,wave,index,data,savefile=savefile,nodata=nodata,map=ma
 ;Added a keyword remove_aec to check for automatic exposure control
 ;(AEC) images and remove them from the datacube - KAK 09/30/2013
 
-
 ;===========================================================
 ;Constants and definitions
 ;===========================================================
@@ -95,16 +94,22 @@ nwav=n_elements(wave)
 starttime=stt
 endtime=ett
 
-
-
 ;Record the times in string arrays
-st=strsplit(starttime,' /:,.-T',/extract)
-if n_elements(st) eq 4 then st=[st,'00']
-if n_elements(st) eq 5 then st=[st,'00']
+if n_elements(starttime) eq 1 then begin
+   st=strsplit(starttime,' /:,.-T',/extract)
+   if n_elements(st) eq 4 then st=[st,'00']
+   if n_elements(st) eq 5 then st=[st,'00']
+endif else begin
+   st=starttime
+endelse
 
-et=strsplit(endtime,' /:,.-T',/extract)
-if n_elements(et) eq 4 then et=[et,'00']
-if n_elements(et) eq 5 then et=[et,'00']
+if n_elements(endtime) eq 1 then begin
+   et=strsplit(endtime,' /:,.-T',/extract)
+   if n_elements(et) eq 4 then et=[et,'00']
+   if n_elements(et) eq 5 then et=[et,'00']
+endif else begin
+   et=endtime
+endelse
 
    if loud eq 1 then print,''
 

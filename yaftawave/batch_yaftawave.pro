@@ -2,8 +2,7 @@ pro batch_yaftawave
 
 ;This procedure will test the sensitivity of the threshold for yafta processing.
 
-;pngpath='/home/kkozarev/algoTests/yafta/test/test100311/'
-inpath='/Volumes/PLUME/AIA_data/studies/2011events/'
+inpath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
 pngpath=inpath
 e05w193='normalized_AIA_20110125_05_193_subdata.sav'
 e05w211='normalized_AIA_20110125_05_211_subdata.sav'
@@ -30,7 +29,7 @@ begstep=[25,30,10,30,20,5,35,1] ;these are the initial steps for which to run th
 endstep=[100,100,100,85,90,100,110,110] ;these are the final steps for which to run the algorithm
 
 for ev=3,n_elements(evindex)-1 do begin
-   event='e'+evindex[ev]
+   event=evindex[ev]
    for wav=0,1 do begin
       
 ;Load the data
@@ -42,7 +41,7 @@ for ev=3,n_elements(evindex)-1 do begin
       subindex=subindex[lim[0]:lim[1]]
       
       ;use a threshold of 0.2
-      evname='e'+evindex[ev]+'_'
+      evname=evindex[ev]+'_'
          yaftawave_track_features,subindex,subdata,baseim,features,allmasks,$
                                   level=0.2,eventname=evname,$
                                   ps=pngpath+event+'/png/'+evname,$

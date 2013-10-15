@@ -28,7 +28,7 @@ pro batch_load_aia_events,inspect=inspect
 ;6. Convert into a map, save that as well.
 ;7. Then, repeat this for different wavelengths.
 
-path='/Volumes/PLUME/AIA_data/studies/2011events/'
+path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
 wave=['193','211']
 
 

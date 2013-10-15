@@ -2,7 +2,7 @@ pro batch_make_movies
 ;This procedure will make png files for movies of wave events
 ;Kamen Kozarev, 01/2012
   
-  path	='/Volumes/Backscratch/Users/kkozarev/AIA_data/studies/2011events/'
+  path	='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
   wave=['171','193','211','335','094','131','304']
   
   evnums=['05','06','07','13','19','20','23','32','37','38','41']
@@ -31,7 +31,7 @@ pro batch_make_movies
         print,''
         std=strsplit(st,'/ :',/extract)
         infname='normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
-        infile=path+'e'+evnum+'/'+infname
+        infile=path+evnum+'/'+infname
         restore,infile+'_subdata.sav'
         nsteps=n_elements(subindex)
         ;stop
