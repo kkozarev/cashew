@@ -198,7 +198,7 @@ if files[0] eq '' then begin
         if not keyword_set(nodata) then $
           sock_copy,rec.url,out_dir=locarc+st[0]+'/'+st[1]+'/'+st[2]+'/H'+st[3]+'00/'
     endelse
-    if not keyword_set(nodata) then files=aia_file_search(locarc,starttime,endtime,wave,loud=loud,missing=locmissing,/jsoc,remove_aec=remove_aec)
+    if not keyword_set(nodata) then files=aia_file_search(starttime,endtime,wave,loud=loud,missing=locmissing,/jsoc,remove_aec=remove_aec,path=locarc)
     
     if files[0] eq '' then begin
        if loud eq 1 then print,'There was a problem getting data from the remote archive!'

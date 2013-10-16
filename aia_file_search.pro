@@ -60,13 +60,17 @@ endtime=ets
      st=strsplit(starttime,' /:,.-T',/extract)
      if n_elements(st) eq 4 then st=[st,'00']
      if n_elements(st) eq 5 then st=[st,'00']
-  endif
+  endif else begin
+     st=starttime
+  endelse
   
   if n_elements(endtime) eq 1 then begin
      et=strsplit(endtime,' /:,.-T',/extract)
      if n_elements(et) eq 4 then et=[et,'00']
      if n_elements(et) eq 5 then et=[et,'00']
-  endif
+  endif else begin
+     et=endtime
+  endelse
 
   if keyword_set(check171) then begin
      tim171=aia_file_search(aia_augment_timestring(sts,-6),aia_augment_timestring(sts,6),'171')
@@ -153,58 +157,39 @@ for h=0,n_elements(hmins[0,*])-1 do begin
 
 endfor
 if n_elements(err) gt 1 then err=err[1:*]
-if keyword_set(missing) and files[0] ne '' then missing=reform(hmins[*,err])
+
+if keyword_set(missing) and size(files,/type) gt 0 then missing=reform(hmins[*,err])
 
 ;Check that the image times conform to the range given, even in the
 ;seconds.
 ;1. extract the times and convert them to seconds for easier
 ;comparison with sts and ets - initial and final times
-times=dblarr(n_elements(files))
-cc=0
-for ii=0,n_elements(files)-1 do begin
-   if files[ii] ne '' then begin
-      tmp=strsplit(files[ii],'_',/extract)
-      mind=n_elements(tmp)-2
-      time=tmp[mind]
-      times[ii]=anytim(st[0]+'/'+st[1]+'/'+st[2]+' '+strmid(time,0,2)+':'+strmid(time,2,2)+':'+strmid(time,4,2))
-      cc++
-   endif
-endfor
-;compute the final time
-finind=where(((times-anytim(sts)) ge 0.0) and ((anytim(ets)-times) gt 0.0))
-files=files[finind]
-
-;stop
-fff=0
-if fff gt 0 then begin
-;Make sure the seconds are right too!
-if files[0] ne '' then begin
-   secind=intarr(n_elements(files))
-   nn=0
-   for i=0,n_elements(files)-1 do begin
-      tmp=strsplit(files[i],'_',/extract)
-      hr=strmid(tmp[1],0,2)
-      min=strmid(tmp[1],2,2)
-      sec=strmid(tmp[1],4,2)
-      if (hr eq st[3] and min eq st[4] and sec ge st[5]) or $
-      (hr eq et[3] and min eq et[4] and sec lt et[5]) then begin
-         print,st[3]+' '+hr+' '+et[3]
-         print,st[4]+' '+min+' '+et[4]
-         print,st[5]+' '+sec+' '+et[5]
-         print,''
-         secind[nn]=i
-         nn++
+if size(files,/type) gt 0 then begin
+   times=dblarr(n_elements(files))
+   cc=0
+   for ii=0,n_elements(files)-1 do begin
+      if files[ii] ne '' then begin
+         tmp=strsplit(files[ii],'_',/extract)
+         mind=n_elements(tmp)-2
+         time=tmp[mind]
+         times[ii]=anytim(st[0]+'/'+st[1]+'/'+st[2]+' '+strmid(time,0,2)+':'+strmid(time,2,2)+':'+strmid(time,4,2))
+         cc++
       endif
    endfor
-   if nn gt 0 then secind=secind[0:nn-1] else secind=-1
-   stop
-   if secind[0] ne -1 then begin
-      if n_elements(secind) eq n_elements(files) then remove,secind,files $
-      else files=['']
-   endif
-endif
-endif
 
+;compute the final time
+   finind=where(((times-anytim(sts)) ge 0.0) and ((anytim(ets)-times) ge 0.0))
+
+if finind[0] ne -1 then begin 
+   files=files[finind] 
+endif else begin
+   files=''
+endelse
+
+endif else begin
+   files=''
+   times=0
+endelse
 
 if keyword_set(loud) and files[0] ne '' then begin 
     print,files
@@ -214,7 +199,7 @@ if keyword_set(loud) and files[0] ne '' then begin
 endif
 
 
-if keyword_set(remove_aec) then begin
+if keyword_set(remove_aec) and files[0] ne '' then begin
    read_sdo,files,ind,dat,/nodata
    mask=where(ind.aectype eq 0)
    if mask[0] ne -1 then begin
