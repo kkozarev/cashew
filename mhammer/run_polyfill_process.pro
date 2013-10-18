@@ -1,4 +1,15 @@
-pro run_polyfill_process, date, event_num, wavelength, revision_num, PATH = path, DYNAMIC_RANGE = dynamic_range, TIME = time, RAD = rad, RESTORE = restore, DATA_THIN_WAVE = data_thin_wave, DATA_SUBINDEX = data_subindex, DATA_ROTATION_ANGLE = data_rotation_angle, DATA_DATE = data_date, DATA_EVNUM = data_evnum, START = data_start, INNER_X = data_inner_x_index
+pro test_run_polyfill_process
+  wave=['193']
+  events=load_events_info()
+  label='37'
+  event=events[where(events.label eq label)]
+  strin=strsplit(st,'-:/T .',/extract)
+  date=strin[0]+strin[1]+strin[2]
+  run_polyfill_process, date, event_num, wave, 1, PATH = event.datapath
+end
+
+
+pro run_polyfill_process, date, label, wavelength, revision_num, PATH = path, DYNAMIC_RANGE = dynamic_range, TIME = time, RAD = rad, RESTORE = restore, DATA_THIN_WAVE = data_thin_wave, DATA_SUBINDEX = data_subindex, DATA_ROTATION_ANGLE = data_rotation_angle, DATA_DATE = data_date, DATA_EVNUM = data_evnum, START = data_start, INNER_X = data_inner_x_index
 ;PURPOSE:
 ;
 ; This program runs polyfill_process on restored_data.
@@ -6,7 +17,7 @@ pro run_polyfill_process, date, event_num, wavelength, revision_num, PATH = path
 ; already made using the given data set.
 ;
 ;CATEGORY:
-; AIA/Kinematic
+; AIA/Kinematics
 ;
 ;INPUTS:
 ; Date: Write the date in MMDDYY format. (eg 042313)
@@ -18,7 +29,6 @@ pro run_polyfill_process, date, event_num, wavelength, revision_num, PATH = path
 ;
 ;KEYWORDS:
 ; 
-;
 ;OUTPUTS:
 ; There are two possibilities for running polyfill_process
 ; (1) You have not restored the data yet.
@@ -42,30 +52,32 @@ pro run_polyfill_process, date, event_num, wavelength, revision_num, PATH = path
 ;Written by Michael Hammer, 07/2013
 ;
 
-
 ; Restore Data
 if keyword_set(RESTORE) then begin
    ; Set Path
-   year = '20' + strmid(date,4,2)
-   if not keyword_set(path) then begin
-      path = '/Volumes/Scratch/Users/mhammer/Polyfill_Data/' + year $
-             + '/' + event_num + '/'
-   endif
+   if not keyword_set(path) then path = '/Volumes/Backscratch/Users/kkozarev/AIA/events/' + label + '/'
    
    ; Set File Names
-   revision_num_str = string(revision_num, FORMAT = '(I03)')
-   suffix = + event_num + '_' + wavelength + '_r' + revision_num_str + '.sav'
+   revision_num_str = strtrim(string(revision_num),2)
+   if revision_num lt 10 then revision_num_str='0'+revision_num_str
+   if revision_num lt 10 then revision_num_str='0'+revision_num_str
+   
+   suffix = + label + '_' + wavelength + '_r' + revision_num_str + '.sav'
    data_file = path + 'restore_me_' + suffix
    info_file = path + 'info_' + suffix
-   restore, data_file
-   ;restore, info_file ; Should not be necessary
+   if file_exist(data_file) then begin
+      restore, data_file
+   endif else begin
+      print,''
+      print,'File ' + data_file + 'not '
+   endelse
 endif
 
 if not keyword_set(DYNAMIC_RANGE) then dynamic_range = [-1000000, 1000000]
 
 if keyword_set(TIME) and keyword_set(RAD) then $
-   polyfill_process, data_thin_wave, data_subindex, data_rotation_angle, data_date, data_evnum, WAVELENGTH = data_wavelength, START = data_start, REVISION_NUM = data_revision_num_str, INNER_X = data_inner_x_index + 50, DYNAMIC_RANGE = dynamic_range, TIME = time, RAD = rad, EXTREME_START_RADIUS = 1.1, /REPLICA $
+   polyfill_process, data_thin_wave, data_subindex, data_rotation_angle, data_date, label, WAVELENGTH = data_wavelength, START = data_start, REVISION_NUM = data_revision_num_str, INNER_X = data_inner_x_index + 50, DYNAMIC_RANGE = dynamic_range, TIME = time, RAD = rad, EXTREME_START_RADIUS = 1.1, /REPLICA $
 else $
-   polyfill_process, data_thin_wave, data_subindex, data_rotation_angle, data_date, data_evnum, WAVELENGTH = data_wavelength, START = data_start, REVISION_NUM = data_revision_num_str, INNER_X = data_inner_x_index, DYNAMIC_RANGE = dynamic_range, TIME = time, RAD = rad, /REPLICA
+   polyfill_process, data_thin_wave, data_subindex, data_rotation_angle, data_date, label, WAVELENGTH = data_wavelength, START = data_start, REVISION_NUM = data_revision_num_str, INNER_X = data_inner_x_index, DYNAMIC_RANGE = dynamic_range, TIME = time, RAD = rad, /REPLICA
 
 end ; EOF

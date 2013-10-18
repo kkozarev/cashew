@@ -4,15 +4,15 @@ pro test_aia_track_jmap_maxima
 ;infofile='info_007.sav'
 set_plot,'x'
 path='/home/kkozarev/Desktop/AIA/pro/e37/'
-datafile=path+'restore_me_37_193_r000.sav'
-infofile=path+'info_37_193_r001.sav'
+datafile=path+'jmap_data_37_193_r000.sav'
+infofile=path+'jmap_info_37_193_r001.sav'
 
 
 radrange=[1.28,1.65] ;radial extent of the measurement
 numplotmax=2 ;number of maxima to track
 dynrange=[-90,45]
 
-aia_track_jmap_maxima_temp,datafile,infofile,path=path,numplotmax=numplotmax,allmaxima=allmaxima,nmax=nmax,allgfits=allgfits,time=time,distance=distance,dynrange=dynrange,radrange=radrange;/gaussfit,
+aia_track_jmap_maxima,datafile,infofile,path=path,numplotmax=numplotmax,allmaxima=allmaxima,nmax=nmax,allgfits=allgfits,time=time,distance=distance,dynrange=dynrange,radrange=radrange;/gaussfit,
 end
 
 
@@ -25,7 +25,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
 ;INPUTS:
 ;
 ;KEYWORDS:
-; 
+;
 ;
 ;OUTPUTS:
 ;
@@ -53,7 +53,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
   if not keyword_set(numplotmax) then numplotmax=2
   
 ;Plot the time-height map
-  polyfill_process, data_thin_wave, data_subindex, data_rotation_angle,data_date,data_evnum,time=time,rad=rad,dynrange=dynrange
+  polyfill_process, data_thin_wave, data_subindex, data_rotation_angle,data_date,data_evnum,time=time,rad=rad,dynamic_range=dynamic_range
   
   distance=rad
   loadct,0,/silent

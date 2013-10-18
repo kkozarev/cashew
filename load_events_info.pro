@@ -82,7 +82,7 @@ comment=['Loop catches up to initial shock wave',$
          'Shock wave immediately in front of loop with clear circular expansion',$
          'Clear lateral expansion precedes filament and loop',$
          'A nice event on the eastern limb with serious NRH emission and type II bursts']
-flareclass=['','M1.3','','B8.1','M9.3','X6.9','M1.6','M1.1','C3.7','','M6.1','B9.6','C1.2','','M3.2']
+flareclass=['','M1.3','','B8.1','M9.3','X6.9','M1.6','M1.1','C3.7','','M6.1','B9.6','C1.2','','','M3.2']
 datapath='/Volumes/Backscratch/Users/kkozarev/AIA_data/'
 savepath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
 ;----------------------------------------------------------------------------------------

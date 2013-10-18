@@ -1,19 +1,23 @@
 pro play_movie_subroutine, num, base_image, subdata, subindex, wavelength, img_array, good_exposures, START = start, FINISH = finish, RUN = run, BASE = base, ROTATION_ANGLE = rotation_angle, REFLECT = reflect, CENTER_X = center_x, CENTER_Y = center_y, HIDE_MOVIE = hide_movie, CHECK_EXPOSURES = check_exposures, PERMANENT = permanent
-; Parameters:
+;PURPOSE:
+; Displays movies of a specified type
+;
+;CATEGORY:
+; AIA/General
+;
+;INPUTS:
 ; Num: The number of times to play the movie
 ; Base_Image: The base to be subtracted should have already been set up
 ; Subdata: The restored subdata
 ; Start: The first frame to be plotted. The default is 0.
 ; Finish: The last frame to be plotted. The default is the last frame.
+; NOTE: If start = finish, only one frame is shown.
+;
 ; Img_array: The 'Return Image' if needed during a rotation
 ; Good_exposures: The indices of the frames that remain after bad
 ; exposures were deleted.
 ;
-; Note: If start = finish, only one frame is shown.
-;
-; Run: If run is set, a run difference image sequence will be used.
-; Base: If base is set, a base difference image sequence will be used.
-; 
+;KEYWORDS:
 ; Rotation_Angle: If rotation angle is set, the image will be rotated.
 ; Reflect = If reflect is set, the image will be reflected.
 ; Center_x: The x-cor of the center of a rotation, if there is one
@@ -21,9 +25,17 @@ pro play_movie_subroutine, num, base_image, subdata, subindex, wavelength, img_a
 ; Hide_Movie: If hide_movie is set, the movie will not be shown
 ; Check_Exposures: If check_exposures is set, bad exposures will be eliminated.
 ; Permanent: If permanent is set, subdata and subindex will be modified
+; Run: If run is set, a run difference image sequence will be used.
+; Base: If base is set, a base difference image sequence will be used.
 ;
-; What The Program Does:
-; Displays movies of a specified type
+;OUTPUTS:
+;
+;DEPENDENCIES:
+; check_exposures
+;
+;MODIFICATION HISTORY:
+;Written by Michael Hammer, 07/2013
+
 
 data = subdata
 index = subindex
@@ -74,11 +86,11 @@ for j=1,num do begin ; Replay
       if not keyword_set(HIDE_MOVIE) then begin
          tvscl,scimage
          polyfill,[0.01,0.4,0.4,0.01],[0.96,0.96,0.99,0.99],color=0
-         xyouts,0.011,0.97,index[i].date_obs+' / AIA'+wavelength $
-                ,charsize=2,charthick=2,color=255
+         xyouts,0.011,0.97,index[i].date_obs+' / AIA '+wavelength $
+                ,charsize=2,charthick=2,color=255,/norm
          polyfill,[0.93,0.99,0.99,0.93],[0.96,0.96,0.99,0.99],color=0
-         xyouts,0.94,0.97,ind,charsize=2,charthick=3,color=255
-         wait,0.3
+         xyouts,0.94,0.97,ind,charsize=2,charthick=3,color=255,/norm
+         wait,0.1
       endif
       img_array[*,*,i] = im     ; Store images if they need to be returned
    endfor

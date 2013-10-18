@@ -9,12 +9,12 @@ et=aia_augment_timestring(events[0].st,240)
 wav='193'
 coords=[events[0].coordX,events[0].coordY]
 ;run aia_load_event - remove AEC images, return the subdata array and index
-aia_load_event,st,et,coords,wav,index,data,subdata=subdata,subindex=subindex,/remove_aec,/subroi
+aia_load_event,st,et,wav,index,data,coords=coords,subdata=subdata,subindex=subindex,/remove_aec,/subroi
 end
 
 
 
-pro aia_load_event,st,et,coords,wave,index,data,savefile=savefile,map=map,subdata=subdata,subindex=subindex,submap=submap,remove_aec=remove_aec, subroi=subroi
+pro aia_load_event,st,et,wave,index,data,coords=coords,savefile=savefile,map=map,subdata=subdata,subindex=subindex,submap=submap,remove_aec=remove_aec, subroi=subroi,event=event
 ;PURPOSE:
 ;This procedure will load full AIA data for a wavelength and time interval,
 ;then allow the user to select a subregion, and create sub-arrays and submaps
@@ -51,15 +51,15 @@ pro aia_load_event,st,et,coords,wave,index,data,savefile=savefile,map=map,subdat
 ;1. Load the data, prep it. Use aia_data_load
 if keyword_set(savefile) then begin
    if keyword_set(map) then begin
-      aia_load_data,st,et,wave,index,data,savefile=savefile,map=map,/norm,remove_aec=remove_aec
+      aia_load_data,st,et,wave,index,data,savefile=savefile,map=map,/norm,remove_aec=remove_aec,event=event
    endif else begin
-      aia_load_data,st,et,wave,index,data,savefile=savefile,/norm,remove_aec=remove_aec
+      aia_load_data,st,et,wave,index,data,savefile=savefile,/norm,remove_aec=remove_aec,event=event
    endelse
 endif else begin
    if keyword_set(map) then begin
-      aia_load_data,st,et,wave,index,data,map=map,/norm,remove_aec=remove_aec
+      aia_load_data,st,et,wave,index,data,map=map,/norm,remove_aec=remove_aec,event=event
    endif else begin
-      aia_load_data,st,et,wave,index,data,/norm,remove_aec=remove_aec
+      aia_load_data,st,et,wave,index,data,/norm,remove_aec=remove_aec,event=event
    endelse
 endelse
 

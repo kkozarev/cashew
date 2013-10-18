@@ -84,7 +84,7 @@ pro batch_load_events_2013
         endif
         savefile=savepath+'normalized_AIA_'+std[0]+std[1]+std[2]+'_'+evnum+'_'+wav
         
-        aia_load_event,st,et,coords,wav,index,data,/remove_aec
+        aia_load_event,st,et,wav,index,data,coords=coords,/remove_aec
         
         save,filename=savefile+'.sav',index,data
 

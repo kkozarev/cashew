@@ -38,7 +38,7 @@ end
 
 ;-----------------------------------------------------------------------
 
-pro aia_load_data,stt,ett,wave,index,data,savefile=savefile,nodata=nodata,map=map,norm=norm,noprep=noprep,quiet=quiet,local=local,archive=archive,first=first,remove_aec=remove_aec
+pro aia_load_data,stt,ett,wave,index,data,savefile=savefile,nodata=nodata,map=map,norm=norm,noprep=noprep,quiet=quiet,local=local,archive=archive,first=first,remove_aec=remove_aec,event=event
 ;PURPOSE
 ;This procedure reads in a sequence of AIA fits images from the CfA
 ;archive and returns/saves a prepped data cube and index

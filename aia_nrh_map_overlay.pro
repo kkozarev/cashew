@@ -1,15 +1,15 @@
-pro test_nrh_plot_maps
+pro test_aia_nrh_map_overlay
 ;Load multiple NRH data files, plot them against AIA data.
   basepath='/Volumes/Backscratch/Users/kkozarev/NRH/'
   files=['2i110127.01','2i110214.01','2i110215.01','2i110216.01','2i110307.01','2i110309.01','2i110529.01','2i110923.01','2i130118.01','2i130319.01','2i130517.01']
   stimes=['12:05','13:00','08:52','14:22','14:17','10:32','10:20','12:11','09:38','13:55','08:47']
   etimes=['12:12','13:10','09:00','14:40','14:30','10:43','10:40','12:20','09:44','14:15','09:00']
   
-
+  
   ;TEST
-  files=['2i130319.01','2i130517.01']
-  stimes=['13:55','08:47']
-  etimes=['13:57','09:00']
+  files=['2i130517.01']
+  stimes=['08:47']
+  etimes=['09:00']
   ;TEST
   
 
@@ -17,10 +17,10 @@ pro test_nrh_plot_maps
   dates=strarr(nf)
   for i=0,nf-1 do begin
      tmp=strsplit(files[i],'i.',/extract)
-     dates[i]=tmp[1]
-     
+     dates[i]='20'+tmp[1]
+     ;print,'20'+dates[i]+' '+stimes[i]+'-'+etimes[i]
      ;Call the plotting routine
-     nrh_plot_maps,files[i],stimes[i],etimes[i],datapath=basepath+'NRH_data/',savepath=basepath+dates[i],/basediff
+     aia_nrh_map_overlay,files[i],stimes[i],etimes[i],datapath=basepath+'NRH_data/',savepath=basepath+dates[i]+'/',/basediff
   endfor
   
   
@@ -29,12 +29,45 @@ end
 
 
 
-pro nrh_plot_maps,file,stime,etime,datapath=datapath,savepath=savepath,basediff=basediff
-  
+pro aia_nrh_map_overlay,file,stime,etime,datapath=datapath,savepath=savepath,basediff=basediff
+;PURPOSE
+; This procedure loads NRH and AIA data, plotting full-disk AIA maps
+; with NRH contours overlaid.
+;
+;CATEGORY:
+;AIA/Radio.NRH
+;
+;INPUTS:
+;       file - the name of the NRH data file
+;       (Example: '2i130517.01')
+;	starttime - a string time
+;	(Example: '08:47')	
+;	endtime - a string time
+;	(Example: '09:05')
+;
+;
+;OPTIONAL INPUT:
+;
+;OUTPUT:
+;
+;       data - a datacube with the (prepped) data
+;       index - a structure of indices for the data
+;
+;OPTIONAL OUTPUT:
+;       savepath - path to save the output files.
+;
+;DEPENDENCIES:
+;read_nrh, aia_augment_timestring,aia_load_data, index2map, plot_map
+;
+;MODIFICATION HISTORY:
+;Written by Kamen Kozarev, 10/2013
+
+  set_plot,'z'
   if not keyword_set(savepath) then savepath='./'
   if not keyword_set(datapath) then datapath='./'
   ;read the NRH data
   read_nrh, file, nrh_ind, nrh_dat, HBEG=stime,HEND=etime,dir=datapath
+  nrh_max=max(nrh_dat)
   nnrh=n_elements(nrh_ind)
   
   ;Make base AIA map
@@ -42,7 +75,7 @@ pro nrh_plot_maps,file,stime,etime,datapath=datapath,savepath=savepath,basediff=
   et=aia_augment_timestring(nrh_ind[0].date_obs,30)
   aia_load_data,st,et,'193',aia_ind,aia_dat,/first,/remove_aec
   index2map,aia_ind,aia_dat,aia_basemap
-
+  
      ;MAIN LOOP
   for i=1,nnrh-1 do begin
      stri=strtrim(string(i),2)
@@ -61,21 +94,23 @@ pro nrh_plot_maps,file,stime,etime,datapath=datapath,savepath=savepath,basediff=
      index2map,aia_ind,aia_dat,aia_map
      wdef,0,1024
      ;Plot AIA map
-     ;aia_lct,r,g,b,wavelnth='193',/load
-     loadct,9,/silent
-     tvlct,rr,gg,bb,/get
+     ;
      if keyword_set(basediff) then begin
         aia_map.data=aia_map.data-aia_basemap.data
+        loadct,9,/silent
         plot_map,aia_map,/limb,dmin=-250,dmax=100
         file='AIA_NRH_basediff_map_overlay_'+strout
      endif else begin
+        aia_lct,r,g,b,wavelnth='193',/load
         plot_map,aia_map,/log,/limb,dmin=1,dmax=1000    
         file='AIA_NRH_map_overlay_'+strout
      endelse
+     tvlct,rr,gg,bb,/get
      ;Overplot contours of NRH data
-     plot_map,nrh_map,/over,/rotate,thick=2,color=0,levels=[0.15,0.25,0.35,0.45,0.55,0.65]*max(nrh_map.data)
+     plot_map,nrh_map,/over,/rotate,thick=3,color=0,levels=[0.15,0.25,0.35,0.45,0.55,0.65]*max(nrh_map.data)
      xyouts,0.36,0.875,'NRH '+nrh_ind[i].date_obs+' UT',/normal,color=255,charsize=1.4,charthick=1
      write_png,savepath+file+'.png',tvrd(),rr,gg,bb
+
   endfor
-  
+  set_plot,'x'
 end

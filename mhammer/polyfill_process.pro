@@ -1,4 +1,4 @@
-pro polyfill_process,subdata,subindex,rotation_angle,date,evnum,WAVELENGTH = wavelength, START = start, REVISION_NUM = revision_num, SIMPLE_TIME = simple_time, REPLICA = replica, COLOR_TABLE_TEST = color_table_test, INNER_X = inner_x, DYNAMIC_RANGE = dynamic_range, EXTREME_START_TIME = extreme_start_time, EXTREME_FINAL_TIME = extreme_final_time, EXTREME_START_RADIUS = extreme_start_radius, EXTREME_FINAL_RADIUS = extreme_final_radius, TIME = time, RAD = rad, SAVE_OPTION = save_option
+pro polyfill_process,subdata,subindex,rotation_angle,date,evnum,WAVELENGTH = wavelength, START = start, REVISION_NUM = revision_num, SIMPLE_TIME = simple_time, REPLICA = replica, COLOR_TABLE_TEST = color_table_test, INNER_X = inner_x, DYNAMIC_RANGE = dynamic_range, EXTREME_START_TIME = extreme_start_time, EXTREME_FINAL_TIME = extreme_final_time, EXTREME_START_RADIUS = extreme_start_radius, EXTREME_FINAL_RADIUS = extreme_final_radius, TIME = time, RAD = rad, SAVE_OPTION = save_option,PATH=PATH
 ;PURPOSE:
 ;
 ; This program takes an array of image data as a function of radius
@@ -23,8 +23,7 @@ pro polyfill_process,subdata,subindex,rotation_angle,date,evnum,WAVELENGTH = wav
 ; the keyword is not set, the program will prompt the user to type in
 ; a wavelength in the terminal.)
 ;      Start: The start frame of the event
-;      Revision_Num: A string of length 3 containing a number to be used in
-; the name of the file that will be saved. An integer is also acceptable.
+;      Revision_Num: A revision number to be used in the name of the file that will be saved.
 ; However, revision_num = 0 is bad. Use revision_num = '000'
 ;      Simple_Time: If this keyword is set, an even cadence of 12 seconds
 ; is assumed. If there are bad exposures, this is an unrealistic
@@ -91,8 +90,6 @@ endif else begin
               - anytim(index[i].date_obs)
       time[i+1] = time[i] + dt[i]
    endfor
-   print, dt
-   print, time
 endelse
 
 ; This is commented out because it doesn't work properly.
@@ -195,17 +192,15 @@ endfor
 
 im=tvrd(true=1)
 if keyword_set(COLOR_TABLE_TEST) then begin
-   write_png,'~/ColorTablesOmega/CT'+strtrim(string(a),1)+'.png',im,rr,gg,bb
+   write_png,'./CT'+strtrim(string(a),1)+'.png',im,rr,gg,bb
 endif else begin
-   scratch = '/Volumes/Scratch/Users/mhammer/'
-   year = '20' + strmid(date,4,2)
-   save_path = scratch + 'Polyfill_Plots/' + year + '/e' + evnum + '/'
+   if not keyword_set(path) then path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'+evnum+'/'
    if not keyword_set(REVISION_NUM) then begin
       next_revision = 1         ; Boolean
       revision_num = 0
       while next_revision eq 1 do begin
          revision_num_str = string(revision_num, FORMAT = '(I03)')
-         files = file_search(save_path + '*' + wave_str + '*' $
+         files = file_search(path + '*' + wave_str + '*' $
                              + revision_num_str + '*', $
                              count = count)
          if count gt 0 then begin
@@ -214,9 +209,9 @@ endif else begin
             revision_num += 1
          endelse
       endwhile
-      save_name = 'tracker_' + evnum + '_' + wave_str + '_'
+      save_name = 'jmap_' + evnum + '_' + wave_str + '_'
       save_num = 'r' + revision_num_str + '.png'
-      save_filename = save_path + save_name + save_num 
+      save_filename = path + save_name + save_num 
       print, save_filename
       stop
       write_png,save_filename,im,rr,gg,bb
@@ -237,7 +232,7 @@ endif else begin
          revision_letter_num = 0
          while next_revision eq 1 do begin
             revision_letter = letters[revision_letter_num]
-            files = file_search(save_path + '*' + wave_str + '*' $
+            files = file_search(path + '*' + wave_str + '*' $
                                 + revision_num_str $
                                 + revision_letter + '*', $
                                 count = count)
@@ -251,7 +246,7 @@ endif else begin
       endif else begin
          save_num = 'r' + revision_num + '.png'
       endelse
-      save_filename = save_path + save_name + save_num
+      save_filename = path + save_name + save_num
       print, save_filename
       stop
       write_png,save_filename,im,rr,gg,bb
