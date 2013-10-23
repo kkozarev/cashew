@@ -149,22 +149,22 @@ for h=0,n_elements(hmins[0,*])-1 do begin
    if keyword_set(jsoc) then file=file_search(locpath+'*'+strmid(wave,1,3)+'A*'+hmins[0,h]+'_'+hmins[1,h]+'*.fits')
    
    if strtrim(file[0],2) eq '' then begin
-      if size(err,/type) eq 0 then err=h else err=[err,h]
+      if not var_exist(err) then err=h else err=[err,h]
       continue
    endif else begin
-      if size(files,/type) eq 0 then files=file else files=[files,file]
+      if not var_exist(files) then files=file else files=[files,file]
    endelse
 
 endfor
 if n_elements(err) gt 1 then err=err[1:*]
 
-if keyword_set(missing) and size(files,/type) gt 0 then missing=reform(hmins[*,err])
+if keyword_set(missing) and var_exist(files) then missing=reform(hmins[*,err])
 
 ;Check that the image times conform to the range given, even in the
 ;seconds.
 ;1. extract the times and convert them to seconds for easier
 ;comparison with sts and ets - initial and final times
-if size(files,/type) gt 0 then begin
+if var_exist(files) then begin
    times=dblarr(n_elements(files))
    cc=0
    for ii=0,n_elements(files)-1 do begin

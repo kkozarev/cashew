@@ -3,13 +3,13 @@ pro test_run_polyfill_process
   events=load_events_info()
   label='37'
   event=events[where(events.label eq label)]
-  strin=strsplit(st,'-:/T .',/extract)
+  strin=strsplit(event.st,'-:/T .',/extract)
   date=strin[0]+strin[1]+strin[2]
-  run_polyfill_process, date, event_num, wave, 1, PATH = event.datapath
+  run_polyfill_process, date, label, wave, PATH = event.savepath,/restore,dynamic_range=[-10,100]
 end
 
 
-pro run_polyfill_process, date, label, wavelength, revision_num, PATH = path, DYNAMIC_RANGE = dynamic_range, TIME = time, RAD = rad, RESTORE = restore, DATA_THIN_WAVE = data_thin_wave, DATA_SUBINDEX = data_subindex, DATA_ROTATION_ANGLE = data_rotation_angle, DATA_DATE = data_date, DATA_EVNUM = data_evnum, START = data_start, INNER_X = data_inner_x_index
+pro run_polyfill_process, date, label, wavelength, REVISION_NUM=REVISION_NUM, PATH = path, DYNAMIC_RANGE = dynamic_range, TIME = time, RAD = rad, RESTORE = restore, DATA_THIN_WAVE = data_thin_wave, DATA_SUBINDEX = data_subindex, DATA_ROTATION_ANGLE = data_rotation_angle, DATA_DATE = data_date, DATA_EVNUM = data_evnum, START = data_start, INNER_X = data_inner_x_index
 ;PURPOSE:
 ;
 ; This program runs polyfill_process on restored_data.
@@ -58,18 +58,20 @@ if keyword_set(RESTORE) then begin
    if not keyword_set(path) then path = '/Volumes/Backscratch/Users/kkozarev/AIA/events/' + label + '/'
    
    ; Set File Names
+   if not keyword_set(REVISION_NUM) then revision_num=0
    revision_num_str = strtrim(string(revision_num),2)
    if revision_num lt 10 then revision_num_str='0'+revision_num_str
    if revision_num lt 10 then revision_num_str='0'+revision_num_str
    
    suffix = + label + '_' + wavelength + '_r' + revision_num_str + '.sav'
-   data_file = path + 'restore_me_' + suffix
-   info_file = path + 'info_' + suffix
+   data_file = path + 'jmap_data_' + suffix
+   info_file = path + 'jmap_info_' + suffix
    if file_exist(data_file) then begin
       restore, data_file
    endif else begin
       print,''
-      print,'File ' + data_file + 'not '
+      print,'File ' + data_file + ' does not exist! Quitting...'
+      print,''
    endelse
 endif
 

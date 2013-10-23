@@ -38,7 +38,9 @@ end
 
 ;-----------------------------------------------------------------------
 
-pro aia_load_data,stt,ett,wave,index,data,savefile=savefile,nodata=nodata,map=map,norm=norm,noprep=noprep,quiet=quiet,local=local,archive=archive,first=first,remove_aec=remove_aec,event=event
+pro aia_load_data,stt,ett,wave,index,data,savefile=savefile,nodata=nodata,map=map,$
+                  norm=norm,noprep=noprep,quiet=quiet,local=local,archive=archive,$
+                  first=first,remove_aec=remove_aec,event=event
 ;PURPOSE
 ;This procedure reads in a sequence of AIA fits images from the CfA
 ;archive and returns/saves a prepped data cube and index
@@ -140,14 +142,13 @@ endif
 files=aia_file_search(starttime,endtime,wave,loud=loud,missing=locmissing,path=locarc,remove_aec=remove_aec)
 if files[0] eq '' then files=aia_file_search(starttime,endtime,wave,loud=loud,missing=locmissing,/jsoc,path=locarc,remove_aec=remove_aec)
 
-
 ;Then check the cfa archive...
 if files[0] eq '' then begin
    if loud eq 1 then begin
       print, 'Nothing in the personal archive...'
       print,'Checking CfA archive at '+cfaarc+':'
    endif
-   files=aia_file_search(st,et,wave,loud=loud,missing=cfamissing,path=cfaarc,remove_aec=remove_aec)
+   files=aia_file_search(starttime,endtime,wave,loud=loud,missing=cfamissing,path=cfaarc,remove_aec=remove_aec)
 endif
 
 
@@ -175,10 +176,19 @@ if files[0] eq '' then begin
     endfor
     if not keyword_set(nodata) and loud eq 1 then print,'Downloading files from JSOC archive...'
     numrec=n_elements(rec)
-
-                                ;before writing the files, check that
-                                ;the directories exist, and make them
-                                ;if not.
+    
+    ;check if the record is a structure
+    if size(rec,/type) ne 8 then begin
+       print,''
+       print,'The record is incomplete! No data from JSOC.'
+       print,'---------------------------------------------'
+       print,''
+       return
+    endif
+    ;before writing the files, check that
+    ;the directories exist, and make them
+    ;if not.
+    
     aia_check_dirs,locarc,st,et
     ;copy files in their appropriate directories
     if st[3] ne et[3] then begin
@@ -205,6 +215,7 @@ if files[0] eq '' then begin
     endif
  endif
 endif
+
 if loud eq 1 then begin
 print,''
 print,'---------------------------------------------------'    
@@ -287,8 +298,7 @@ if not keyword_set(nodata) then begin
      endif
      
                                 ;optionally, prepare a map
-     tmp=size(map)
-     if tmp[1] gt 0 then begin
+     if var_exist(map) then begin
        if loud eq 1 then print,"making the map in aia_load_data"
        index2map,index,data,map
     endif

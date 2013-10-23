@@ -1,4 +1,4 @@
-pro polyfill_process,subdata,subindex,rotation_angle,date,evnum,WAVELENGTH = wavelength, START = start, REVISION_NUM = revision_num, SIMPLE_TIME = simple_time, REPLICA = replica, COLOR_TABLE_TEST = color_table_test, INNER_X = inner_x, DYNAMIC_RANGE = dynamic_range, EXTREME_START_TIME = extreme_start_time, EXTREME_FINAL_TIME = extreme_final_time, EXTREME_START_RADIUS = extreme_start_radius, EXTREME_FINAL_RADIUS = extreme_final_radius, TIME = time, RAD = rad, SAVE_OPTION = save_option,PATH=PATH
+pro polyfill_process_mhammer,subdata,subindex,rotation_angle,date,evnum,WAVELENGTH = wavelength, START = start, REVISION_NUM = revision_num, SIMPLE_TIME = simple_time, REPLICA = replica, COLOR_TABLE_TEST = color_table_test, INNER_X = inner_x, DYNAMIC_RANGE = dynamic_range, EXTREME_START_TIME = extreme_start_time, EXTREME_FINAL_TIME = extreme_final_time, EXTREME_START_RADIUS = extreme_start_radius, EXTREME_FINAL_RADIUS = extreme_final_radius, TIME = time, RAD = rad, SAVE_OPTION = save_option,PATH=PATH
 ;PURPOSE:
 ;
 ; This program takes an array of image data as a function of radius
@@ -126,8 +126,8 @@ if keyword_set(DYNAMIC_RANGE) then begin
 endif else begin
    if not keyword_set(EXTREME_START_TIME) then extreme_start_time = 0
    if not keyword_set(EXTREME_FINAL_TIME) then extreme_final_time = 10000
-   if not keyword_set(EXTREME_START_RADIUS) then extreme_start_radius = 1.0
-   if not keyword_set(EXTREME_FINAL_RADIUS) then extreme_final_radius = 2.5
+   if not keyword_set(EXTREME_START_RADIUS) then extreme_start_radius = 1.4
+   if not keyword_set(EXTREME_FINAL_RADIUS) then extreme_final_radius = 2.0
 
    ; Note: 't#' is a dummy variable. The parameter is the return value.
    t1 = min(abs(time - extreme_start_time), start_frame)
@@ -187,7 +187,7 @@ for t=0,frames-2 do begin
       polyfill,[xmin,xmax,xmax,xmin],[ymin,ymin,ymax,ymax],color=color,/data
       ;print, xmin,xmax,ymin,ymax
    endfor
-   ;stop
+   ;stop 
 endfor
 
 im=tvrd(true=1)
@@ -248,7 +248,7 @@ endif else begin
       endelse
       save_filename = path + save_name + save_num
       print, save_filename
-      stop
+      
       write_png,save_filename,im,rr,gg,bb
       print, 'Polyfill Plot Saved'
       ; Also Save Plot Data
@@ -258,7 +258,5 @@ endif else begin
 endelse
 
 endfor
-
-wait,0.3
 
 end ; EOF

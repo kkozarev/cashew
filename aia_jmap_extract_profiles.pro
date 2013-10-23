@@ -211,50 +211,41 @@ endif else base_image = data[*,*,base_index]
 
 ; Display images so that user knows which rotation angle to select.
 
-loadct,9,/silent
-wdef,0,1024
 
-print,''
-print,"Here is a preview of the image sequence!"
-print,''
-print,"While you are watching, figure out which frame you want to use " $
-      +"to select the rotation angle."
-print,''
-
-rp = 1 ; If debugging, rp = 1, Else rp = 2
+if keyword_set(preview) then begin
+   loadct,9,/silent
+   wdef,1,1024
+   
+   print,''
+   print,"Here is a preview of the image sequence!"
+   print,''
+   print,"While you are watching, figure out which frame you want to use " $
+         +"to select the rotation angle."
+   print,''
+   
+   rp = 1                       ; If debugging, rp = 1, Else rp = 2
 ; IDL Style Note: if then else should be on the same line (hence the '$'s)
-if keyword_set(RUN) then $
-  play_movie_subroutine,rp,base_image,data,index,wavelength, $
-  START=start,FINISH=finish,RUN=run, /CHECK_EXPOSURES $
-else if keyword_set(BASE) then $
-  play_movie_subroutine,rp,base_image,data,index,wavelength, $
-  START=start,FINISH=finish,BASE=base, /CHECK_EXPOSURES $
-else $
-  play_movie_subroutine,rp,base_image,data,index,wavelength, $
-  START=start,FINISH=finish, /CHECK_EXPOSURES
+   if keyword_set(RUN) then $
+      play_movie_subroutine,rp,base_image,data,index,wavelength, $
+                            START=start,FINISH=finish,RUN=run, /CHECK_EXPOSURES $
+   else if keyword_set(BASE) then $
+      play_movie_subroutine,rp,base_image,data,index,wavelength, $
+                            START=start,FINISH=finish,BASE=base, /CHECK_EXPOSURES $
+   else $
+      play_movie_subroutine,rp,base_image,data,index,wavelength, $
+                            START=start,FINISH=finish, /CHECK_EXPOSURES
+endif
 
-play_movie_again = 1 ; TRUE
-while play_movie_again do begin
+   loadct,9,/silent
+   wdef,1,1024
    user_input=''
    print,''
-   read,user_input,prompt="What frame do you want to use to select the angle of the shockwave? Do you want to see the movie again? (y/*Frame Number*) "
+   read,user_input,prompt="What frame do you want to use to select the angle of the shockwave? "
    print,''
-   if user_input eq 'y' then begin
-      if keyword_set(RUN) then $
-         play_movie_subroutine,1,base_image,data,index,wavelength, $
-         START=start,FINISH=finish,RUN=run, /CHECK_EXPOSURES $
-      else if keyword_set(BASE) then $
-         play_movie_subroutine,1,base_image,data,index,wavelength, $
-         START=start,FINISH=finish,BASE=base, /CHECK_EXPOSURES $
-      else $
-         play_movie_subroutine,1,base_image,data,index,wavelength, $
-         START=start,FINISH=finish, /CHECK_EXPOSURES
-   endif else begin
-      play_movie_again = 0 ; FALSE
-      chosen_frame = fix(user_input) ; int_of_string
-   endelse
-endwhile
-
+   chosen_frame = fix(user_input) ; int_of_string
+   
+   
+   
 ; Display the chosen frame and ask user to select the rotation angle.
 if keyword_set(RUN) then $
   play_movie_subroutine,1,base_image,data,index,wavelength, $
@@ -688,11 +679,11 @@ for i=0,num_points-1 do begin ; Points Loop
   
   print,''
   print,'Next, you should probably run run_polyfill_process'
-;  polyfill_process, thin_wave, index, adjusted_wave_angle[i], date, evnum, $
-;                    wavelength = wavelength, $
-;                    start = plot_start_frame_i, $
-;                   revision_num = revision_num_str, $
-;                    inner_x = plot_inner_x_index
+  polyfill_process_mhammer, thin_wave, index, adjusted_wave_angle[i], date, evnum, $
+                    wavelength = wavelength, $
+                    start = plot_start_frame_i, $
+                   revision_num = revision_num_str, $
+                    inner_x = plot_inner_x_index
 
 endfor ; Points Loop
 
