@@ -40,6 +40,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
 ;
   set_plot,'x'
   resolve_routine,'jmap_find_maxima',/either,/compile_full_file;,/no_recompile
+  resolve_routine,'gaussfit',/either,/compile_full_file;,/no_recompile
   !P.font=1
   !p.position=[0.1,0.13,0.93,0.92]
   RSUN=6.955e5 ;solar radius in km
@@ -47,7 +48,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
   if not keyword_set(path) then path = './'
   restore,datafile
   restore,infofile
-  data_subindex=data_subindex[plotted_frame_initial:plotted_frame_final]
+  data_subindex=data_subindex[0:plotted_frame_final-plotted_frame_initial]
   wav=strtrim(string(data_subindex[0].wavelnth),2)
   if not keyword_set(dynamic_range) then dynamic_range=[-100,100]
   
@@ -253,7 +254,9 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
   raddist=reform(rad[allmaxima[uinput,sp:ep].ind])
   times=time[sp:ep]
   bootstrap_sdo,raddist,times,fit_line, p1, p2, p3, s1, s2, s3
-  
+  print,''
+  print,''  
+
   tmp={main:0.0D,min:0.0D,max:0.0D}
   wave_fits=replicate(tmp,n_elements(times))
 

@@ -12,7 +12,6 @@ aia_jmap_extract_profiles, date, label, location, PATH = path, WAVELENGTHS = wav
 end
 
 
-
 pro aia_jmap_extract_profiles, date, evnum, location, PATH = path, $
 WAVELENGTHS = wavelengths, START = start, FINISH = finish, $
 BAS_INDEX = base_index, RUN = run, BASE = base
