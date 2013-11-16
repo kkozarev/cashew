@@ -1,16 +1,14 @@
 pro test_polyfill_process_simple
   wave=['193']
-  events=load_events_info()
-  label='37'
-  event=events[where(events.label eq label)]
+  event=load_events_info(label='110511_01')
   strin=strsplit(event.st,'-:/T .',/extract)
   date=strin[0]+strin[1]+strin[2]
   
-  run_polyfill_process_simple, date, label, wave, PATH = event.savepath
+  run_polyfill_process_simple, event, wave
 end
 
 
-pro run_polyfill_process_simple, date, label, wavelength, REVISION_NUM=REVISION_NUM, PATH = path, DYNAMIC_RANGE = dynamic_range, TIME = time, RAD = rad, RESTORE = restore, DATA_THIN_WAVE = data_thin_wave, DATA_SUBINDEX = data_subindex, DATA_ROTATION_ANGLE = data_rotation_angle, DATA_DATE = data_date, DATA_EVNUM = data_evnum, START = data_start, INNER_X = data_inner_x_index
+pro run_polyfill_process_simple, event, wavelength, REVISION_NUM=REVISION_NUM, PATH = path, DYNAMIC_RANGE = dynamic_range, TIME = time, RAD = rad, RESTORE = restore, DATA_THIN_WAVE = data_thin_wave, DATA_SUBINDEX = data_subindex, DATA_ROTATION_ANGLE = data_rotation_angle, DATA_DATE = data_date, DATA_EVNUM = data_evnum, START = data_start, INNER_X = data_inner_x_index
 ;PURPOSE:
 ;
 ; This program runs polyfill_process on restored_data.
@@ -41,8 +39,11 @@ pro run_polyfill_process_simple, date, label, wavelength, REVISION_NUM=REVISION_
 
 ; Restore Data
    ; Set Path
-   if not keyword_set(path) then path = '/Volumes/Backscratch/Users/kkozarev/AIA/events/' + label + '/'
-   
+   if not keyword_set(path) then path=event.savepath
+   strin=strsplit(event.st,'-:/T .',/extract)
+   date=strin[0]+strin[1]+strin[2]
+   label=event.label
+
    ; Set File Names
    if not keyword_set(REVISION_NUM) then revision_num=0
    revision_num_str = strtrim(string(revision_num),2)

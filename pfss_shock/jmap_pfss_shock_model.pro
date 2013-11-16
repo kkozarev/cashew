@@ -5,9 +5,8 @@ pro test_jmap_pfss_shock_model
   ev='37'
   outpath=path+ev+'/'
   pfssfile=path+ev+'/pfss_results_20110511_1.1Rs_dens_1.sav'
-  shockfile=path+ev+'/AIA_20110511_37_193_shocklocations.sav'
   shockfile='/home/kkozarev/svn/corwav/trunk/e37_051111_193_jmap_measurements.sav'
-  aia_jmap_shock_model,shockfile,pfssfile,outpath=outpath
+  jmap_pfss_shock_model,shockfile,pfssfile,outpath=outpath
 end
 
 function bfield,rmag

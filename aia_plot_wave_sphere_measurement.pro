@@ -1,4 +1,11 @@
-pro aia_plot_wave_sphere_measurement
+pro test_aia_plot_wave_sphere_measurement
+;Test this program
+event=load_events_info(label='110511_01')
+aia_plot_wave_sphere_measurement,event
+end
+
+
+pro aia_plot_wave_sphere_measurement,event,wav=wav
 ;PURPOSE:
 ;A quick-plot program for the circle measurements of AIA EUV waves 
 ;
@@ -20,29 +27,23 @@ pro aia_plot_wave_sphere_measurement
 ;Written by Kamen Kozarev, 01/16/2012
 
 ;+========================================
-  ;User Input Parameters
-  wav='193'
-  evindex=11 ;the index of the event. See 'evnums' below
-  init=62
-;-========================================
+ init=62
+ if not keyword_set(wav) then wav='193'
+ evnum=event.label
+ savepath=event.savepath
+ fname=evnum+'sphere_shocklocations.sav'
+ tmp=strsplit(event.date,'/',/extract)
+ date=tmp[0]+tmp[1]+tmp[2]
 
-
-  wavelength=['171','193','211','335','094','131','304']
-  evnums=['05','06','07','13','19','20','23','32','37','38','41','113']
-  sts=['2011/01/25 11:56:00','2011/01/27 11:50:00','2011/01/28 00:45:00',$
-       '2011/02/11 12:30:00','2011/03/07 19:35:00','2011/03/08 03:30:00',$
-       '2011/03/12 15:20:00','2011/04/27 02:05:00','2011/05/11 02:10:00',$
-       '2011/05/29 10:00:00','2012/01/05 06:56:00','2010/06/13 05:35:00']
-  evnum=evnums[evindex]
-  std=strsplit(sts[evindex],'/ :',/extract)
-  date=std[0]+std[1]+std[2]
-  eventname='AIA_'+date+'_'+evnum+'_'+wav
-  datapath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'+evnum+'/'
-  outpath=datapath
-  restore,datapath+eventname+'_shocklocations.sav'
-  !P.charthick=1.8
-
-;=================================================================================
+if file_exist(savepath+fname) then begin
+ restore,savepath+fname
+endif else begin
+ print,''
+print,'File '+savepath+fname+' does not exist. Quitting...'
+print,''
+return
+endelse
+ 
 ;1. Plot the resulting positions and velocities, show the parameters of the fit
   RSUN=6.96e5                   ;radius of the sun, in km.
 
@@ -87,7 +88,7 @@ pro aia_plot_wave_sphere_measurement
          strtrim(string(radiusfitparamssigma[2],format='(f15.2)'),2) + ' km/s!U2!N',charsize=1.8,/normal;,color=0
   
 
-  write_png,outpath+eventname+'shock_radius.png',tvrd(true=1),rr,gg,bb
+  write_png,event.savepath+'kinematics/'+eventname+'_shock_radius.png',tvrd(true=1),rr,gg,bb
   
 
 ;1.2 Plot the radial front location as a function of time.
@@ -130,7 +131,7 @@ pro aia_plot_wave_sphere_measurement
          strtrim(string(frontfitparamssigma[2],format='(f15.2)'),2) + ' km/s!U2!N',charsize=1.8,/normal;,color=0
   
 
-  write_png,outpath+eventname+'shock_front_positions.png',tvrd(true=1),rr,gg,bb
+  write_png,event.savepath+'kinematics/'+evnum+'_shock_front_positions.png',tvrd(true=1),rr,gg,bb
 
   stop
 
@@ -148,7 +149,7 @@ pro aia_plot_wave_sphere_measurement
         yrange=yrange,ystyle=1
   
   
-  write_png,outpath+eventname+'_shock_radius_expansion_rate.png',tvrd(true=1),rr,gg,bb
+  write_png,event.savepath+'kinematics/'+eventname+'_shock_radius_expansion_rate.png',tvrd(true=1),rr,gg,bb
 
   stop
 
@@ -165,7 +166,7 @@ pro aia_plot_wave_sphere_measurement
         xrange=xrange,xstyle=1,$
         yrange=yrange,ystyle=1
   
-  write_png,outpath+eventname+'_shock_radial_front_velocity.png',tvrd(true=1),rr,gg,bb
+  write_png,event.savepath+evnum+'_shock_radial_front_velocity.png',tvrd(true=1),rr,gg,bb
 ;=========================================================
 
 

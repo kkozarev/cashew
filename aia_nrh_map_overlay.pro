@@ -12,7 +12,7 @@ pro test_aia_nrh_map_overlay
   etimes=['12:12','13:10','09:00','14:30','10:43','10:40','09:44','14:15','09:00']
   ;TEST
   
-
+  
   nf=n_elements(files)
   dates=strarr(nf)
   for i=0,nf-1 do begin
@@ -20,11 +20,9 @@ pro test_aia_nrh_map_overlay
      dates[i]='20'+tmp[1]
      ;print,'20'+dates[i]+' '+stimes[i]+'-'+etimes[i]
      ;Call the plotting routine
-     aia_nrh_map_overlay,files[i],stimes[i],etimes[i],datapath=basepath+'NRH_data/',savepath=basepath+dates[i]+'/',/rundiff;/basediff
+     aia_nrh_map_overlay,files[i],stimes[i],etimes[i],datapath=event.nrhpath,savepath=basepath+dates[i]+'/',/rundiff;/basediff
   endfor
   
-  
-
 end
 
 
@@ -73,9 +71,13 @@ pro aia_nrh_map_overlay,file,stime,etime,datapath=datapath,savepath=savepath,bas
      print,''
      return
   endif
+  ;Load the NRH data
   read_nrh, file, nrh_ind, nrh_dat, HBEG=stime,HEND=etime,dir=datapath
+  index2map,nrh_ind,nrh_dat,nrh_map
   nrh_max=max(nrh_dat)
   nnrh=n_elements(nrh_ind)
+  
+  
   
   ;Make base AIA map
   if keyword_set(basediff) or keyword_set(rundiff) then begin
@@ -103,8 +105,7 @@ pro aia_nrh_map_overlay,file,stime,etime,datapath=datapath,savepath=savepath,bas
      strin=strsplit(nrh_ind[i].date_obs,'-:/T .',/extract)
      strout=strin[0]+strin[1]+strin[2]+'_'+strin[3]+strin[4]+strin[5]
      
-     ;select the NRH data map
-     index2map,nrh_ind[i],nrh_dat[*,*,i],nrh_map
+     ;select the AIA data map
      st=aia_augment_timestring(nrh_ind[i].date_obs,0) ;just reformat the string time
      et=aia_augment_timestring(nrh_ind[i].date_obs,60)
      aia_load_data,st,et,'193',aia_ind,aia_dat,/local,/first,/remove_aec

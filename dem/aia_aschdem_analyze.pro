@@ -1,30 +1,25 @@
 pro batch_aia_aschdem_analyze
 
 ;The actual events and AIA channels which to measure...
-  er=[6]
-
-  evindex=['05','06','13','19','20','32','37','38']
-  evdate=['20110125','20110127','20110211','20110307',$
-          '20110308','20110427','20110511','20110529']
   begstep=[25,30,10,30,20,5,35,1] ;these are the initial steps for which to run the algorithm
   endstep=[100,100,100,85,90,100,110,110] ;these are the final steps for which to run the algorithm
-  
-  
-  aia_aschdem_analyze,evindex[6],evdate[6],begstep[6],endstep[6]
+  trange=[begstep[6],endstep[6]]
+  event=load_events_info(label='110511_01')
+  aia_aschdem_analyze,event,trange=trange
   
 end
 
 
 
-pro aia_aschdem_analyze,events,evdate,begstep,endstep,basepath=basepath
+pro aia_aschdem_analyze,event,trange=trange,basepath=basepath
 ;This procedure will analyze the results from the ASCHWANDEN DEM
 ;calculations for the May 11, 2011 event.
   if not keyword_set(basepath) then basepath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
-  
-  for ii=0,n_elements(events)-1 do begin
-     event=events[ii]
+  tmp=strsplit(event.date,'/',/extract)
+  evdate=tmp[0]+tmp[1]+tmp[2]
+  if not keyword_set(trange) then trange=[0,100]
      
-     inpath=basepath+event+'/dem/aschwanden/'
+     inpath=event.savepath+'/dem/aschwanden/'
      infile='AschDEM_teem_map_subrois.sav'
 
 ;Restore the DEM results
@@ -224,8 +219,6 @@ pro aia_aschdem_analyze,events,evdate,begstep,endstep,basepath=basepath
         spawn,exec
         
      endfor
-
-  endfor  
 
 set_plot,'x'     
      

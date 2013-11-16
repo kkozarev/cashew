@@ -14,7 +14,7 @@ end
 
 
 
-pro aia_load_event,st,et,wave,index,data,coords=coords,savefile=savefile,map=map,subdata=subdata,subindex=subindex,submap=submap,remove_aec=remove_aec, subroi=subroi,event=event
+pro aia_load_event,st,et,wav,index,data,coords=coords,savefile=savefile,map=map,subdata=subdata,subindex=subindex,submap=submap,remove_aec=remove_aec, subroi=subroi,event=event,nodata=nodata,first=first,local=local
 ;PURPOSE:
 ;This procedure will load full AIA data for a wavelength and time interval,
 ;then allow the user to select a subregion, and create sub-arrays and submaps
@@ -47,27 +47,31 @@ pro aia_load_event,st,et,wave,index,data,coords=coords,savefile=savefile,map=map
 ;Added a keyword remove_aec to check for automatic exposure control
 ;(AEC) images and remove them from the datacube - KAK 09/30/2013
 ;Added the AR coordinates as a required parameter - KAK 09/30/2013
+;Added a nodata keyword - KAK 11/14/2013
+;
+  wave=wav
+  if keyword_set(event) then aiafov=event.aiafov else aiafov=[1024,1024]
 
 ;1. Load the data, prep it. Use aia_data_load
 if keyword_set(savefile) then begin
    if keyword_set(map) then begin
-      aia_load_data,st,et,wave,index,data,savefile=savefile,map=map,/norm,remove_aec=remove_aec,event=event
+      aia_load_data,st,et,wave,index,data,savefile=savefile,map=map,/norm,remove_aec=remove_aec,event=event,nodata=nodata,first=first,local=local
    endif else begin
-      aia_load_data,st,et,wave,index,data,savefile=savefile,/norm,remove_aec=remove_aec,event=event
+      aia_load_data,st,et,wave,index,data,savefile=savefile,/norm,remove_aec=remove_aec,event=event,nodata=nodata,first=first,local=local
    endelse
 endif else begin
    if keyword_set(map) then begin
-      aia_load_data,st,et,wave,index,data,map=map,/norm,remove_aec=remove_aec,event=event
+      aia_load_data,st,et,wave,index,data,map=map,/norm,remove_aec=remove_aec,event=event,nodata=nodata,first=first,local=local
    endif else begin
-      aia_load_data,st,et,wave,index,data,/norm,remove_aec=remove_aec,event=event
+      aia_load_data,st,et,wave,index,data,/norm,remove_aec=remove_aec,event=event,nodata=nodata,first=first,local=local
    endelse
 endelse
 
 ;2. Make 1k data array.
 if keyword_set(subroi) then begin
-   newcoords=aia_autoselect_subroi(index[0],coords)
-   subdata=aia_inspect_data(index,data,autoregion=newcoords)
-   subindex=aia_update_subdata_index(index,[newcoords[0],newcoords[1]],1024,coords)
+   newcoords=aia_autoselect_subroi(index[0],coords,event=event)
+   subdata=aia_inspect_data(index,data,autoregion=newcoords,event=event)
+   subindex=aia_update_subdata_index(index,[newcoords[0],newcoords[1]],aiafov,coords)
 endif
 
 

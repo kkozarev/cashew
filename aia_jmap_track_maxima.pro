@@ -2,13 +2,12 @@ pro test_aia_jmap_track_maxima
 ;Load the time height data and any additional information
 
 wave=['193']
-label='37'
+label='110511_01'
 event=load_events_info(label=label)
 path=event.savepath
 rev='000'
 datafile=path+'jmap_data_'+label+'_'+wave[0]+'_r'+rev+'.sav'
 infofile=path+'jmap_info_'+label+'_'+wave[0]+'_r'+rev+'.sav'
-
 
 radrange=[1.28,1.7] ;radial extent of the measurement
 numplotmax=2 ;number of maxima to track
@@ -16,6 +15,7 @@ dynamic_range=[-90,45]
 
 aia_jmap_track_maxima,datafile,infofile,path=path,numplotmax=numplotmax,allmaxima=allmaxima,nmax=nmax,allgfits=allgfits,time=time,distance=distance,dynamic_range=dynamic_range,radrange=radrange;/gaussfit,
 end
+
 
 
 PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,path=path,numplotmax=numplotmax,allmaxima=allmaxima,nmax=nmax,allgfits=allgfits,time=time,distance=distance,dynamic_range=dynamic_range,refine=refine

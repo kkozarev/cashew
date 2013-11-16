@@ -10,7 +10,7 @@ function aia_update_subdata_index,index,subroi_start,npx,coords
 ;INPUTS:
 ;      index - the index structure to be updated
 ;      subroi_start - the [x,y] pixel coords of lower left corner of the subroi.
-;
+;      npx - an array of [NX,NY] pixels of the subroi
 ;KEYWORDS:
 ; 
 ;
@@ -22,7 +22,7 @@ function aia_update_subdata_index,index,subroi_start,npx,coords
 ;
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 07/06/2011
-;
+;11/14/2013, Kamen Kozarev - changed npx to be 
 
   newind=index
   if n_elements(subroi_start) lt 2 then begin
@@ -31,8 +31,8 @@ function aia_update_subdata_index,index,subroi_start,npx,coords
   endif
   
 ;1. Update the image dimensions
-  newind=rep_tag_value(newind,npx*1L,'NAXIS1')
-  newind=rep_tag_value(newind,npx*1L,'NAXIS2')
+  newind=rep_tag_value(newind,npx[0]*1L,'NAXIS1')
+  newind=rep_tag_value(newind,npx[1]*1L,'NAXIS2')
   
   
 ;2. Update the pixel center of the sun

@@ -17,11 +17,11 @@ numrois=5
 ;events and wavelength ratios
 ionizTimes=fltarr(nevents,nratios,numrois)
 
-evlabels=['05','06','13','19','20','32','37','38']
-for e=0,n_elements(evlabels)-1 do begin   
-   event=load_events_info(evlabels[ev])
+events=load_events_info()
+for ev=0,n_elements(events)-1 do begin   
+   event=events[ev]
    for r=0,nratios-1 do begin
-      aia_calculate_ionization_times,event.label,ratios[r],iontimes,inpath=event.savepath
+      aia_calculate_ionization_times,event,ratios[r],iontimes,inpath=event.savepath
       ionizTimes[e,r,*]=iontimes
    endfor
 endfor
@@ -58,8 +58,9 @@ pro aia_calculate_ionization_times, event, ratio, obsIonizTimes,inpath=inpath
 ;
 
 ;Constants and definitions:
-if not keyword_set(inpath) then inpath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
+if not keyword_set(inpath) then inpath=event.savepath
 wave=['193','211']
+label=event.label
 
 ;The ratios of wavelengths:
 ; 1) 193/211
@@ -79,11 +80,11 @@ nwaves=n_elements(wave)
 ;positions off the solar limb for the two EUV channels.
 ;roi_subdata=fltarr(NUMROI,M,M,N)
 ;roi_subindex=fltarr(N)
-restore,inpath+event+'/ionization/rois_'+event+'_'+wave[0]+'.sav'
+restore,inpath+'ionization/rois_'+label+'_'+wave[0]+'.sav'
 index1=roi_subindex
 data1=roi_subdata
 
-restore,inpath+event+'/ionization/rois_'+event+'_'+wave[1]+'.sav'
+restore,inpath+'ionization/rois_'+label+'_'+wave[1]+'.sav'
 index2=roi_subindex
 data2=roi_subdata
 
@@ -167,15 +168,15 @@ for r=0,numroi-1 do begin
 ;Plot the flux ratio in a separate png plot.
    set_plot,'ps'
    ;set_plot,'x'
-   fname='ionization_ratio_'+event+'_subroi'+strtrim(string(r+1),2)+'_'+wave[0]+'_'+wave[1]
+   fname='ionization_ratio_'+label+'_subroi'+strtrim(string(r+1),2)+'_'+wave[0]+'_'+wave[1]
    ;tvlct,rr,gg,bb,/get
-device,file=inpath+event+'/ionization/'+fname+'.eps',$
+device,file=inpath+'ionization/'+fname+'.eps',$
           /inches,xsize=10.0,ysize=10.0,$
           /encaps,/color,/helvetica
    
    plot, times/60.0,ratios[r,*],$
          psym=0+5,symsize=1,$
-         title='Flux ratio, '+event+'; ROI# '+strtrim(string(r+1),2)+'; AIA '+wave[0]+'/'+wave[1],$
+         title='Flux ratio, '+label+'; ROI# '+strtrim(string(r+1),2)+'; AIA '+wave[0]+'/'+wave[1],$
          xtitle='Time relative to '+reltime+'UT, '+date+', [min]', $
          ytitle='AIA Intensity ratio',$
          thick=4,xthick=2,ythick=2,charsize=csize,charthick=3,$
@@ -190,7 +191,7 @@ device,file=inpath+event+'/ionization/'+fname+'.eps',$
    ;write_png,fname+'.png',image,rr,gg,bb
    device,/close
    set_plot,'x'
-   exec='convert -flatten '+inpath+event+'/ionization/'+fname+'.eps '+inpath+event+'/ionization/'+fname+'.png'
+   exec='convert -flatten '+inpath+'ionization/'+fname+'.eps '+inpath+'ionization/'+fname+'.png'
    spawn,exec
 ;------------------------------------------------------------------------------------------
 

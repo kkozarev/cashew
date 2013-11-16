@@ -2,8 +2,8 @@ pro test_model_coronal_shock
 ;Test the shock modeling procedure
 
   path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
-  ev='37'
-  shockfile=path+ev+'/AIA_20110511_37_193_shocklocations.sav'
+  ev='110511_01'
+  shockfile=path+ev+'/AIA_20110511_110511_01_193_shocklocations.sav'
   restore,shockfile
   
   pfssfile=path+ev+'/pfss_results_20110511_1.1Rs_dens_1.sav'

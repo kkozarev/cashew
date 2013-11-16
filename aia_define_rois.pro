@@ -1,18 +1,16 @@
 pro test_aia_define_rois
 ;The actual events and AIA channels to measure...
-  er=[6]
-  evlabel=['05','06','13','19','20','32','37','38']
-  evdate=['20110125','20110127','20110211','20110307',$
-          '20110308','20110427','20110511','20110529']
-  begstep=[25,30,10,30,20,5,35,1] ;these are the initial steps for which to run the algorithm
-  endstep=[100,100,100,85,90,100,110,110] ;these are the final steps for which to run the algorithm
   
-  aia_define_rois,evlabel[er],evdate[er],begstep[er],endstep[er];,waves=['94','131']
+  event=load_events_info(label='110511_01')
+  waves=['193']
+  for w=0,n_elements(waves)-1 do begin
+      aia_define_rois,event,wave=waves[0],numroi=8
+  endfor
 end
 
 
 
-pro aia_define_rois,events,evdate,begstep,endstep,basepath=basepath,automatic=automatic,waves=waves,numroi=numroi,roisize=roisize
+pro aia_define_rois,event,savepath=savepath,automatic=automatic,wave=wave,numroi=numroi,roisize=roisize
 ;PURPOSE:
 ;
 ;This procedure defines the ROIs for the ionization and DEM
@@ -36,6 +34,10 @@ pro aia_define_rois,events,evdate,begstep,endstep,basepath=basepath,automatic=au
 ;Written by Kamen Kozarev, 10/01/2011
 ;
 
+evlabel=event.label
+tmp=strsplit(event.date,'/',/extract)
+evdate=tmp[0]+tmp[1]+tmp[2]
+
 
 ;Kamen Kozarev, 
   
@@ -44,8 +46,8 @@ pro aia_define_rois,events,evdate,begstep,endstep,basepath=basepath,automatic=au
   ;tvlct,reverse(rr),reverse(gg),reverse(bb)
   ;aia_lct,rr,gg,bb,wavelnth=fix(wave[wav]),/load
 
-  if not keyword_set(basepath) then $
-     basepath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
+  if not keyword_set(savepath) then $
+     basepath=event.savepath
   if not keyword_set(numroi) then NUMROI=5
   if not keyword_set(roisize) then ROISIZE=50
   if not keyword_set(waves) then waves=['193','211','335','171','94','131']
@@ -55,44 +57,41 @@ pro aia_define_rois,events,evdate,begstep,endstep,basepath=basepath,automatic=au
   roiStart_y=roiStart_x
   roiEnd_y=roiStart_x
   
-;loop over the events
-  for ii=0,n_elements(events)-1 do begin
-     event=events[ii]
 ;loop over the wavelengths
      for wav=0,n_elements(waves)-1 do begin
         wave=waves[wav]
 
 ;Load the data
-        fname='normalized_AIA_'+evdate[ii]+'_'+events[ii]+'_'+wave+'_subdata.sav'
-        print,''
-        print,'Now loading file '+fname
-        print,''
-        if file_search(basepath+event+'/'+fname) eq '' then begin
-           print,''
-           print,'File '+basepath+event+'/'+fname+' does not exist. Quitting...'
-           print,''
-           return
-        endif
-        restore,basepath+event+'/'+fname
-        lim=[begstep[ii]+1,endstep[ii]]
-;determine the base image
-        baseim=subdata[*,*,begstep[ii]]
-        subdata=subdata[*,*,lim[0]:lim[1]]
-        subindex=subindex[lim[0]:lim[1]]
+        ;fname='normalized_AIA_'+evdate[ii]+'_'+events[ii]+'_'+wave+'_subdata.sav'
+        ;print,''
+        ;print,'Now loading file '+fname
+        ;print,''
+        ;if file_search(event.savepath+'/'+fname) eq '' then begin
+        ;   print,''
+        ;   print,'File '+basepath+event.savepath+'/'+fname+' does not exist. Quitting...'
+        ;   print,''
+        ;   return
+        ;endif
+        ;restore,basepath+event+'/'+fname
+        ;lim=[begstep[ii]+1,endstep[ii]]
+
+        aia_load_event,event.st,event.et,wave,index,data,coords=coords,$
+                  subdata=subdata,subindex=subindex,/remove_aec,/subroi
+        baseim=subdata[*,*,0]
         sunrad=subindex[0].R_SUN
         xcenter=subindex[0].X0_MP
         ycenter=subindex[0].Y0_MP
         if keyword_set(automatic) then begin
            ;Load the 193 angstrom data,
-           ;we're sure this will always be there
-           ionizfile=basepath+event+'/ionization/rois_'+event+'_'+'193'+'.sav'
+           ;We're sure this will always be there
+           ionizfile=savepath+'ionization/rois_'+evlabel+'_'+'193'+'.sav'
            if file_search(ionizfile) eq '' then begin
               print,''
               print,'File '+ionizfile+' does not exist. Rerun manually. Quitting...'
               print,''
               return
            endif
-           restore,basepath+event+'/ionization/rois_'+event+'_'+'193'+'.sav'
+           restore,savepath+'ionization/rois_'+evlabel+'_'+'193'+'.sav'
 
 ;Check if the tags exist, otherwise complain and quit.
            if not tag_exist(roi_subindex,'roiStart_x') then begin
@@ -125,9 +124,9 @@ pro aia_define_rois,events,evdate,begstep,endstep,basepath=basepath,automatic=au
               plots,[xrange[0],xrange[1]],[yrange[1],yrange[1]],/device,thick=3,color=255
               xyouts,xrange[0]+roisize/6.0,yrange[0]+roisize/4.0,roiname,/device,$
                                          charsize=3,charthick=4,color=255
-              if not file_exist(basepath+event+'/ionization/'+'rois_'+event+'.png') then begin
-                 image=tvrd(true=1)
-                 write_png,basepath+event+'/ionization/'+'rois_'+event+'.png',image,rr,gg,bb
+              if not file_exist(savepath+'ionization/'+'rois_'+evlabel+'.png') then begin
+                 image=tvrd(/true)
+                 write_png,savepath+'ionization/'+'rois_'+evlabel+'.png',image,rr,gg,bb
               endif
            endfor
 
@@ -180,8 +179,8 @@ pro aia_define_rois,events,evdate,begstep,endstep,basepath=basepath,automatic=au
                      charsize=3,charthick=4,color=255
            endfor
            tvlct,rr,gg,bb,/get
-           image=tvrd(true=1)
-           write_png,basepath+event+'/ionization/'+'rois_'+event+'.png',image,rr,gg,bb
+           image=tvrd(/true)
+           write_png,savepath+'ionization/'+'rois_'+evlabel+'.png',image,rr,gg,bb
            
         endif ;if wav eq 0
         
@@ -202,7 +201,7 @@ pro aia_define_rois,events,evdate,begstep,endstep,basepath=basepath,automatic=au
         
         
 ;Save the ROIs and updated index for each event and wavelength
-        save, filename=basepath+event+'/ionization/rois_'+event+'_'+wave+'.sav',roi_subindex,roi_subdata
+        save, filename=savepath+'ionization/rois_'+evlabel+'_'+wave+'.sav',roi_subindex,roi_subdata
         
      endfor
   endfor

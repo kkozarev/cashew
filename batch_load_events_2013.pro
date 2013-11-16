@@ -90,7 +90,7 @@ pro batch_load_events_2013
 
         newcoords=aia_autoselect_subroi(index[0],coords)
         subdata=aia_inspect_data(index,data,autoregion=newcoords)
-        subindex=aia_update_subdata_index(index,[newcoords[0],newcoords[1]],1024,coords)
+        subindex=aia_update_subdata_index(index,[newcoords[0],newcoords[1]],[1024,1024],coords)
         
         save,filename=savefile+'_subdata'+'.sav',subindex,subdata
      endfor

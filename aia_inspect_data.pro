@@ -1,4 +1,4 @@
-function aia_inspect_data,index,data,subcor=subcor,autoregion=autoregion,bdiff=bdiff,bratio=bratio
+function aia_inspect_data,index,data,subcor=subcor,autoregion=autoregion,bdiff=bdiff,bratio=bratio,event=event
 ;PURPOSE:
 ;This procedure converts the full 4k AIA data to 1k cube and shows a
 ;movie to the user, allowing an inspection of the data. 
@@ -17,6 +17,7 @@ function aia_inspect_data,index,data,subcor=subcor,autoregion=autoregion,bdiff=b
 ;                     pixel coordinates for the upper left(x1,y1) and lower
 ;                     right(x2,y2) corners of the ROI to be supplied, like   
 ;                     [x1,y1,x2,y2].
+;         event - the event structure
 ;
 ;KEYWORDS:
 ;         bdiff - make base difference images for the movies. Not used
@@ -38,11 +39,12 @@ function aia_inspect_data,index,data,subcor=subcor,autoregion=autoregion,bdiff=b
 
 result=0
 subcor=intarr(4)
+if keyword_set(event) then fov=event.aiafov else fov=[1024,1024]
 
-;Rebin the data to 1024 pixels
+;Rebin the data to X-Y pixels
 nt=n_elements(index)
-dat=fltarr(1024,1024,nt)
-for t=0, nt-1 do dat[*,*,t]=rebin(reform(data[*,*,t]),1024,1024)
+dat=fltarr(fov[0],fov[1],nt)
+for t=0, nt-1 do dat[*,*,t]=rebin(reform(data[*,*,t]),fov[0],fov[1])
 
 
 ;make a movie and show it until the user is satisfied
@@ -50,7 +52,7 @@ if not keyword_set(autoregion) then begin
 c=0
 uinput=''
 print,''
-wdef,0,1024
+wdef,0,fov[0],fov[1]
    while c eq 0 do begin
       if keyword_set(bdiff) then begin
          for t=0,nt-1 do tvscl,dat[*,*,t]-dat[*,*,0]

@@ -1,14 +1,15 @@
 pro test_aia_jmap_extract_profiles
 wave=['193']
 events=load_events_info()
-label='37'
-location='W'
+label='110511_01'
+
 event=events[where(events.label eq label)]
+hemisphere=event.hemisphere
 path=event.savepath
 st=event.st
 strin=strsplit(st,'-:/T .',/extract)
 date=strin[0]+strin[1]+strin[2]
-aia_jmap_extract_profiles, date, label, location, PATH = path, WAVELENGTHS = wave
+aia_jmap_extract_profiles, date, label, hemisphere, PATH = path, WAVELENGTHS = wave
 end
 
 
@@ -39,11 +40,11 @@ BAS_INDEX = base_index, RUN = run, BASE = base
 ; Sample Calls:
 ; ; (0)
 ; This call is the most basic. No keywords are used.
-; aia_jmap_extract, date, evnum, location
+; aia_jmap_extract_profiles, date, evnum, location
 ; Sample 1:
-; aia_jmap_extract, '050113', '0501E', 'E'
+; aia_jmap_extract_profiles, '050113', '0501E', 'E'
 ; Sample 2:
-; aia_jmap_extract, '080911', '45', 'W'
+; aia_jmap_extract_profiles, '080911', '45', 'W'
 ; (1)
 ; This call is more practical if you are already familiar with the
 ; event and know approximately when the event starts and ends.
@@ -163,7 +164,7 @@ BAS_INDEX = base_index, RUN = run, BASE = base
 ;
 ;MODIFICATION HISTORY:
 ;Written by Michael Hammer, 07/2013
-;10/17/2013, KAK - made some changes to include into the overall framework.
+;10/17/2013, KAK - made some changes to integrate into the framework.
 
 ; Global Variables
 RSUN = 6.96e5 ; radius of the Sun in km
@@ -208,9 +209,8 @@ if keyword_set(BASE) then begin
   base_image=avg/5.0
 endif else base_image = data[*,*,base_index]
 
+
 ; Display images so that user knows which rotation angle to select.
-
-
 if keyword_set(preview) then begin
    loadct,9,/silent
    wdef,1,1024

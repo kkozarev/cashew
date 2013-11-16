@@ -1,12 +1,10 @@
 pro test_aia_coronal_shock_model
 ;Test the shock modeling procedure
   
-  path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
-  ev='37'
-  outpath=path+ev+'/'
-  pfssfile=path+ev+'/pfss_results_20110511_1.1Rs_dens_1.sav'
-  shockfile=path+ev+'/AIA_20110511_37_193_shocklocations.sav' 
-  aia_coronal_shock_model,shockfile,pfssfile,outpath=outpath
+  ev='110511_01'
+  event=load_events_info(label=ev)
+  pfssfile=savepath+'pfss_results_20110511_1.1Rs_dens_1.sav'
+  aia_coronal_shock_model,event,pfssfile
 end
 
 
@@ -17,7 +15,7 @@ end
 
 
 
-pro aia_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockcomp,outpath=outpath
+pro aia_pfss_shock_model,event,pfssfile,wav=wav,vupstream=vupstream,shockcomp=shockcomp,outpath=outpath
 ;PURPOSE:
 ; An implementation of the pfss shock model
 ;
@@ -38,6 +36,11 @@ pro aia_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockc
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 11/08/2011
 ;
+if not keyword_set(wav) then wav='193'
+tmp=strsplit(event.date,'/',/extract)
+date=tmp[0]+tmp[1]+tmp[2]
+savepath=event.savepath
+shockfile=savepath+'AIA_'+date+'_'+event.label+'_'+wav+'sphere_shocklocations.sav'
 
 ;+==================================================================================
 ;LOAD DATA
@@ -57,12 +60,11 @@ pro aia_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockc
   lat=subindex[0].arlat
   stop
   ;Calculate the number of steps and their size.
-  winsize=1024
   shockthick=0.4                ;shock thickness, in pixels
   sunrad=subindex[0].r_sun
   shockrad=radius
-  xcenter=subindex[0].x0_mp ;winsize/2.0
-  ycenter=subindex[0].y0_mp ;winsize/2.0
+  xcenter=subindex[0].x0_mp 
+  ycenter=subindex[0].y0_mp
   zcenter=sunrad*cos(subindex[0].arlon*!PI/180.0)
   
   ;nsteps=fix((maxshockrad-minshockrad)/(shockthick*1.01))
@@ -201,7 +203,6 @@ pro aia_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shockc
         
 ;Apply the rotations and translations
         pfss_cartpos=fltarr(nlines,3,maxnpts)
-        ;Window, 0, Xsize=winsize, Ysize=winsize
         for ff=0.0,nlines-1 do begin
            npt=nstep[ff]        ;the number of points in this particular line.
            pos = transpose([[reform(pfss_px[0:npt-1,ff])],$

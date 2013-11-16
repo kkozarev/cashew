@@ -1,8 +1,6 @@
 pro test_polyfill_process
   wave=['193']
-  events=load_events_info()
-  label='37'
-  event=events[where(events.label eq label)]
+  event=load_events_info(label='110511_01')
   strin=strsplit(event.st,'-:/T .',/extract)
   date=strin[0]+strin[1]+strin[2]
   path=event.savepath

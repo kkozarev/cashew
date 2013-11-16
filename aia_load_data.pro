@@ -38,9 +38,10 @@ end
 
 ;-----------------------------------------------------------------------
 
-pro aia_load_data,stt,ett,wave,index,data,savefile=savefile,nodata=nodata,map=map,$
+pro aia_load_data,stt,ett,wav,index,data,savefile=savefile,nodata=nodata,map=map,$
                   norm=norm,noprep=noprep,quiet=quiet,local=local,archive=archive,$
-                  first=first,remove_aec=remove_aec,event=event
+                  first=first,remove_aec=remove_aec,event=event,coords=coords,$
+                  force=force,archive=archive
 ;PURPOSE
 ;This procedure reads in a sequence of AIA fits images from the CfA
 ;archive and returns/saves a prepped data cube and index
@@ -49,9 +50,9 @@ pro aia_load_data,stt,ett,wave,index,data,savefile=savefile,nodata=nodata,map=ma
 ;AIA/General
 ;
 ;INPUTS:
-;	starttime - a string date
+;	stt - a string date
 ;	(Example: '2011/01/15 00:00:10')	
-;	endtime - a string date
+;	ett - a string date
 ;	(Example: '2011/01/15 00:00:50')
 ;       NOTE - any format is accepted, as long as the numbers are ordered as
 ;       YYYY MM DD hh mm ss, and the delimiters are ' /:,.-T'.
@@ -90,8 +91,32 @@ if keyword_set(archive) then locarc=archive
 ;===========================================================
 loud=1
 if keyword_set(quiet) then loud=0
+if not keyword_set(coords) then if keyword_set(event) then $
+       coords=[event.coordX,event.coordY] else coords=[0.0,0.0]
+if not keyword_set(event) then label='event' else label=event.label
+if keyword_set(event) then tmp=strsplit(event.date,'/ ',/extract) else tmp=strsplit(stt,'/ ',/extract)
+date=tmp[0]+tmp[1]+tmp[2]
+
+;First thing to do is check if the data has already been loaded into data cubes.
+
+if keyword_set(event) then path=event.savepath else path='./'
+datfname='normalized_AIA_'+date+'_'+label+'_'+wav+'.sav'
+subfname='normalized_AIA_'+date+'_'+label+'_'+wav+'_subdata.sav'
+
+if not keyword_set(force) and keyword_set(subroi) and file_exist(path+subfname) then begin
+restore,path+subfname
+if keyword_set(submap) then index2map,subindex,subdata,submap
+return
+endif
+
+if not keyword_set(force) and file_exist(path+datfname) then begin
+restore,path+datfname
+endif else begin
+
+
 
 ;check if wave is an array or not...
+wave=wav
 nwav=n_elements(wave)
 starttime=stt
 endtime=ett
@@ -274,14 +299,18 @@ nfiles=n_elements(files)
 
 
 ;===========================================================
+;Load the data
+   if keyword_set(first) then begin
+      files=files[0]
+      nfiles=1
+   endif
 
-if not keyword_set(nodata) then begin
-   
-;2. Load and prep the files
-
-   if keyword_set(first) then files=files[0]
+if keyword_set(nodata) then begin
+    read_sdo,files,index,data,/nodata
+endif else begin   
    read_sdo,files,ind,dat,/uncomp_delete
-   
+endelse
+
    if keyword_set(noprep) then begin
         data=dat
         index=ind
@@ -292,30 +321,54 @@ if not keyword_set(nodata) then begin
         ind=0
         dat=0
      endelse
-                                ;optionally, normalize the exposures to one second
+
+endelse ;This if-else statement is the fits vs. save file loading     
+
+     if keyword_set(first) then begin
+         data=data[*,*,0]
+         index=index[0]
+     endif
+
+     ;optionally, normalize the exposures to one second
      if keyword_set(norm) then begin
         for i=0,nfiles-1 do data[*,*,i]/=index[i].exptime
      endif
      
-                                ;optionally, prepare a map
-     if var_exist(map) then begin
+    if keyword_set(map) then begin
        if loud eq 1 then print,"making the map in aia_load_data"
        index2map,index,data,map
     endif
-                                ;optionally, save everything 
+
+if keyword_set(subroi) then begin
+;Make subroi data array.
+if keyword_set(subroi) then begin
+   if keyword_set(event) then fov=event.aiafov else fov=[1024,1024]
+   newcoords=aia_autoselect_subroi(index[0],coords)
+   subdata=aia_inspect_data(index,data,autoregion=newcoords)
+   subindex=aia_update_subdata_index(index,[newcoords[0],newcoords[1]],fov,coords)
+endif
+
+if keyword_set(submap) then begin
+      if not keyword_set(map) then begin
+      print,''
+      print,'The /map keyword should be selected! Making map for you...'
+      index2map,index,data,map
+      aia_inspect_map,map,submap=submap
+   endif else begin
+      aia_inspect_map,map,submap=submap
+   endelse
+endif
+
+    ;optionally, save everything 
     if keyword_set(savefile) then begin
+        if savefile eq '' then savefile='tmp.sav'
         save,index,data,filename=savefile
      endif
     
- endif else begin
-    if keyword_set(first) then files=files[0]
-    read_sdo,files,index,data,/nodata
- endelse
-;===========================================================
-
-;smdata=rebin(data,1024,1024,n_elements(data[0,0,*]))
-;vmaps=changedet(smdata,6,20)
-;save,smdata,vmaps,filename='test_allsun_changedet.sav'
+   if keyword_set(archive) then begin
+       save,index,data,filename=path+datfname
+       if keyword_set(subroi) then save,subindex,subdata,filename=path+subfname
+   endif
 
 ;stop
 

@@ -1,38 +1,27 @@
 pro test_aia_measure_wave_sphere
 ;this procedure tests aia_measure_wave_sphere
 
-  evindex=11
   profrange=[11,31]
-  datapath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
   wavelength=['193','211']
-;  evnums=['05','06','07','13','19','20','23','32','37','38','41','113','112']
-;  sts=['2011/01/25 11:56:00','2011/01/27 11:50:00','2011/01/28 00:45:00',$
-;       '2011/02/11 12:30:00','2011/03/07 19:35:00','2011/03/08 03:30:00',$
-;       '2011/03/12 15:20:00','2011/04/27 02:05:00','2011/05/11 02:10:00',$
-;       '2011/05/29 10:00:00','2012/01/05 06:56:00','2010/06/13 05:35:00',$
-;       '2010/06/12 00:55:00']
-
   wav=wavelength[0]
-  evnum=evnums[evindex]
-  st=sts[evindex]
-  
-  
+  event=load_events_info(label='110511_01')
+aia_measure_wave_sphere,event,wav=wav
 end
 
-pro aia_measure_wave_sphere,wav=wav,evnum=evnum,profrange=profrange,st=st,datapath=datapath
+
+
+pro aia_measure_wave_sphere,event,wav=wav,profrange=profrange
 ;PURPOSE:
 ; Measure the radius of a wave event interactively
 ;CATEGORY:
 ; AIA/Kinematics
 ;
 ;INPUTS:
-;
+;  event - the current event for which to measure kinematics
 ;KEYWORDS:
 ; wav
-; evnum
 ; profrange
-; st
-; datapath
+; savepath
 ;
 ;OUTPUTS:
 ;
@@ -42,31 +31,26 @@ pro aia_measure_wave_sphere,wav=wav,evnum=evnum,profrange=profrange,st=st,datapa
 ;
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 11/2011
-
+;2013/11/15, Kamen Kozarev - changed the inputs to work with the event structure
 
 ;+========================================
   ;User Input Parameters
-  if not keyword_set(wav) then wav='193'
-  if not keyword_set(st) then st='2010/06/13 05:35:00'
-  ;The range of images to measure - this is currently
+  if not keyword_set(wav) then wav='193' 
+;The range of images to measure - this is currently
   ;determined by visual inspection of the subdataset
   if not keyword_set(profrange) then profrange=[11,31] ;The range of images to record
   init=profrange[0]
   fin=profrange[1]
-  if not keyword_set(datapath) then datapath='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
-  if not keyword_set(evnum) then evnum='113'
+  evnum=event.label
+  if not keyword_set(savepath) then savepath=event.savepath
 ;-========================================
 
 
 ;+========================================
-;0. Load the subdata
-
-  std=strsplit(st,'/ :',/extract)
-  date=std[0]+std[1]+std[2]
-  eventname='AIA_'+date+'_'+evnum+'_'+wav
-  print,'Loading '+wav+' channel AIA data for event #'+evnum
-  restore,datapath+evnum+'/normalized_'+eventname+'_subdata.sav'
+;0. Load the data
+  aia_load_event,event.st,event.et,wav,index,data,event=event,coords=coords,subdata=subdata,subindex=subindex,/remove_aec,/subroi
   ntimes=n_elements(subdata[0,0,*])
+  print,'Loading '+wav+' channel AIA data for event '+evnum
                                 ;fin=n_elements(subindex)-1
   nprofs=fin-init+1             ;The number of measurements
 ;-========================================
@@ -242,7 +226,7 @@ pro aia_measure_wave_sphere,wav=wav,evnum=evnum,profrange=profrange,st=st,datapa
   arcoords=[subindex[0].arx0,subindex[0].ary0]
   nruns=nrun
 
-  save,filename=datapath+evnum+'/'+eventname+'_shocklocations.sav',kmpx,nruns,subindex,$
+  save,filename=savepath+evnum+'sphere_shocklocations.sav',kmpx,nruns,subindex,$
        centcirc,frontcirc,frontcircgcor,radius,time,jdfrac,init,fin,nprofs,$
        frontfitparams, frontfitparamssigma, frontfitlines, frontcircmoments, frontpossigma,$
        centfitparams,centfitparamssigma,centfitlines,centcircmoments,centpossigma,$

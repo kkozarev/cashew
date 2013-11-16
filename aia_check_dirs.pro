@@ -21,13 +21,14 @@ starttime=stt
 endtime=ett
 
 ;Record the times in string arrays
-if n_elements(stattime) eq 1 then begin
+if n_elements(starttime) eq 1 then begin
    st=strsplit(starttime,' /:,.-T',/extract)
    if n_elements(st) eq 4 then st=[st,'00']
    if n_elements(st) eq 5 then st=[st,'00']
 endif else begin
    st=starttime
 endelse
+
 
 if n_elements(endtime) eq 1 then begin
    et=strsplit(endtime,' /:,.-T',/extract)

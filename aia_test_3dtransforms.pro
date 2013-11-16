@@ -1,9 +1,9 @@
 ;+=====================================================================
 pro test_aia_test_3dtransforms
   path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
-  ev='37'
+  ev='110511_01'
   
-  shockfile=path+ev+'/AIA_20110511_37_193_shocklocations.sav'
+  shockfile=path+ev+'/AIA_20110511_110511_01_193_sphere_shocklocations.sav'
   restore,shockfile
   radius=reform(radius[0,*])
   lon=subindex[0].arlon
