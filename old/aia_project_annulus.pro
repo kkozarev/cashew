@@ -12,7 +12,7 @@ files=aia_file_search(st,et,wav)
   fls = files[tmp]
   ind_arr=ind_arr[tmp]
 
-aia_project_annulus_2,fls,ring_width,projdata,/rawplot
+aia_project_annulus,fls,ring_width,projdata,/rawplot
 stop
 
 ;Explore the lateral expansion speed

@@ -21,7 +21,7 @@ pro test_aia_file_search
 end
 
 
-function aia_file_search, sts, ets, wave,path=path,loud=loud,missing=missing,cfa=cfa,jsoc=jsoc,remove_aec=remove_aec,check171=check171
+function aia_file_search, sts, ets, wav,path=path,loud=loud,missing=missing,cfa=cfa,jsoc=jsoc,remove_aec=remove_aec,check171=check171
 ;PURPOSE:
 ;Search for AIA fits files from the local CfA archive.
 ;Assume searching on a single day only.
@@ -31,7 +31,7 @@ function aia_file_search, sts, ets, wave,path=path,loud=loud,missing=missing,cfa
 ;
 ;INPUTS:
 ;sts, ets - start and end time (Example: '2011/01/15 00:00:10')
-;wave - wavelength string
+;wav - wavelength string
 ;
 ;KEYWORDS:
 ; path=path,loud=loud,missing=missing,cfa=cfa,jsoc=jsoc
@@ -54,6 +54,7 @@ function aia_file_search, sts, ets, wave,path=path,loud=loud,missing=missing,cfa
 ;
 starttime=sts
 endtime=ets
+wave=wav
   if not keyword_set(path) then path='/Data/SDO/AIA/level1/'
   
   if n_elements(starttime) eq 1 then begin

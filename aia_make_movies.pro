@@ -1,10 +1,10 @@
 pro test_aia_make_movies
 
   ;You can run this for a single event, like so
-  label='110125_01'
-  label='131029_01'
+  label='110511_01'
+;  label='110125_01'
   event=load_events_info(label=label)
-  movie_type='run'
+  movie_type='arun'
   wavelength='193'
   aia_make_movies, event, movie_type=movie_type, wav=wavelength, FRAMES_PER_SECOND = frames_per_second,/force
   stop
@@ -59,8 +59,7 @@ pro aia_make_movies, event, wav=wav, FRAMES_PER_SECOND = frames_per_second, PATH
 ;
 
 ; Determine Frames Per Second
-if not keyword_set(FRAMES_PER_SECOND) then frames_per_second = '10'
-
+if not keyword_set(FRAMES_PER_SECOND) then fps = '10' else fps=frames_per_second
 if not keyword_set(wav) then wavelength = '193' else wavelength=wav
 if not keyword_set(movie_type) then movie_type = 'raw'
 
@@ -69,20 +68,19 @@ if not keyword_set(PATH) then path=event.savepath
 movie_path=path
 
 
-
-
 ;Prepare the date string
 tmp=strsplit(event.date,'/',/extract)
 date=tmp[0]+tmp[1]+tmp[2]
 
 process = '/usr/local/bin/ffmpeg -y -f image2 -r '
-fps = frames_per_second
 path_call = ' -i '
 full_path = path
 filetype = movie_type + '_'
 
-random1 = ' -an -pix_fmt "yuv420p" -vcodec "libx264" -level 41 -crf 18.0 -b "28311k" -r '
-random2 = ' -bufsize "28311k" -maxrate "28311k" -g "100" -coder 1 -profile main -preset faster -qdiff 4 -qcomp 0.7 -directpred 3 -flags +loop+mv4 -cmp +chroma -partitions +parti4x4+partp8x8+partb8x8 -subq 7 -me_range 16 -keyint_min 1 -sc_threshold 40 -i_qfactor 0.71 -rc_eq ''blurCplx^(1-qComp)'' -b_strategy 1 -bidir_refine 1 -refs 6 -deblockalpha 0 -deblockbeta 0 -trellis 1 -x264opts keyint=10:min-keyint=1:bframes=1 -threads 2 '
+
+
+ffmpeg_params1 = ' -an -pix_fmt "yuv420p" -vcodec "libx264" -level 41 -crf 18.0 -b "28311k" -r '
+ffmpeg_params2 = ' -bufsize "28311k" -maxrate "28311k" -g "100" -coder 1 -profile main -preset faster -qdiff 4 -qcomp 0.7 -directpred 3 -flags +loop+mv4 -cmp +chroma -partitions +parti4x4+partp8x8+partb8x8 -subq 7 -me_range 16 -keyint_min 1 -sc_threshold 40 -i_qfactor 0.71 -rc_eq ''blurCplx^(1-qComp)'' -b_strategy 1 -bidir_refine 1 -refs 6 -deblockalpha 0 -deblockbeta 0 -trellis 1 -x264opts keyint=10:min-keyint=1:bframes=1 -threads 2 '
 
 savepath=path+'png/'
 movie_path=path+'movies/'
@@ -96,7 +94,6 @@ if movie_type eq 'araw' or movie_type eq 'arun' or movie_type eq 'abase' then be
 endif
 
 
-
 ;The png image files
 imgfnames = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_%03d.png'
 imgsearch = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_*.png'
@@ -107,6 +104,7 @@ print,''
 print,'----'
 print,'Creating movie ' + moviefname
 print,''
+
 if not file_exist(imgsearch) then begin
    print,'Required PNG files do not exist: '+imgsearch
    print,'Quitting...'
@@ -114,17 +112,39 @@ if not file_exist(imgsearch) then begin
    return
 endif
 
+;Create symbolic links in which the files are ordered starting from 1. 
+;This is necessary because of issues with different versions of ffmpeg
+imgs=file_search(imgsearch)
+for ii=0,n_elements(imgs)-1 do begin
+   img_strind=strtrim(string(ii+1),2)
+   if img_strind lt 100 then img_strind='0'+img_strind
+   if img_strind lt 10 then img_strind='0'+img_strind
+   tmpdir="$HOME/tmpdir_"+strtrim(string(fix(floor(randomn(2)*100000))),2)+'/'
+   if not dir_exist(tmpdir) then spawn,'mkdir '+tmpdir+'&> /dev/null'
+   command='ln -s '+imgs[ii]+' '+tmpdir+'tmpim_'+img_strind+'.png'
+   spawn,command
+;tmp=strsplit(imgs[ii],'_.',/extract)
+endfor
+imgfnames=tmpdir+'tmpim_%03d.png'
+
+
 if file_exist(moviefname) and not keyword_set(force) then begin
    print,'This movie file exists. To overwrite, rerun with /force. Quitting...'
    print,'----'
    return
 endif
 
-command = process + fps + path_call + imgfnames + random1 + fps + random2 + moviefname
+;DEBUG!!!!
+command = process + fps + path_call + imgfnames + ffmpeg_params1 + fps + ffmpeg_params2 + moviefname
+;DEBUG!!!!
 spawn, command
 
 print,'Success.'
 print,'----'
+
+;Remove the temporary folder
+spawn,'rm -rf '+tmpdir
+
 end                             ; EOF
 
 

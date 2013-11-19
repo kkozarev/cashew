@@ -177,7 +177,8 @@ num_waves = n_elements(wavelengths)
 wavelength = wavelengths[0] ; set wavelength
 
 ; Determine Path
-scratch = '/Volumes/Backscratch/Users/kkozarev/AIA/events/'
+scratch = getenv('CORWAV')
+scratch = scratch+'events/'
 year = strmid(date,0,4)
 if not keyword_set(PATH) then path=scratch+evnum+'/'
 

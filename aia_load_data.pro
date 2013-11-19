@@ -41,7 +41,7 @@ end
 pro aia_load_data,stt,ett,wav,index,data,savefile=savefile,nodata=nodata,map=map,$
                   norm=norm,noprep=noprep,quiet=quiet,local=local,archive=archive,$
                   first=first,remove_aec=remove_aec,event=event,coords=coords,$
-                  force=force,archive=archive
+                  force=force
 ;PURPOSE
 ;This procedure reads in a sequence of AIA fits images from the CfA
 ;archive and returns/saves a prepped data cube and index
@@ -86,7 +86,7 @@ pro aia_load_data,stt,ett,wav,index,data,savefile=savefile,nodata=nodata,map=map
 ;Constants and definitions
 ;===========================================================
 cfaarc='/Data/SDO/AIA/level1/'
-locarc='/Volumes/Backscratch/Users/kkozarev/AIA_data/'
+locarc=getenv('CORWAV')+'AIA_data/'
 if keyword_set(archive) then locarc=archive
 ;===========================================================
 loud=1
@@ -266,7 +266,7 @@ nfiles=n_elements(files)
 ;            fname=aia_get_fname(s,stp,wv)
 ;                                ;print,dirpath+fname
 ;            file=file_search(dirpath+fname)
-;            if file ne '' then begin
+;     e       if file ne '' then begin
 ;                print,dirpath+fname
 ;                if n gt 0 then files=[files,file]
 ;                if n eq 0 then begin
@@ -339,7 +339,7 @@ endelse ;This if-else statement is the fits vs. save file loading
        index2map,index,data,map
     endif
 
-if keyword_set(subroi) then begin
+
 ;Make subroi data array.
 if keyword_set(subroi) then begin
    if keyword_set(event) then fov=event.aiafov else fov=[1024,1024]
@@ -349,7 +349,7 @@ if keyword_set(subroi) then begin
 endif
 
 if keyword_set(submap) then begin
-      if not keyword_set(map) then begin
+   if not keyword_set(map) then begin
       print,''
       print,'The /map keyword should be selected! Making map for you...'
       index2map,index,data,map
