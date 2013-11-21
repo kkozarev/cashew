@@ -1,18 +1,18 @@
 pro test_aia_annulus_create
 
 ;You can run for one event, like this.
-  one=0
+  one=1
   if one eq 1 then begin
      event=load_events_info(label='110511_01')
      rrange=[0.9,1.25]          ;radial range from Sun center in Rs
      ;aia_annulus_create,event,rrange=rrange,/force
-     aia_annulus_create,event,/run,rrange=rrange
+     aia_annulus_create,event,/raw,rrange=rrange
      ;aia_annulus_create,event,/plot,rrange=rrange
   endif
 
   
 ;Alternatively, run for all events
-  all=1
+  all=0
   if all eq 1 then begin
      events=load_events_info()
      rrange=[0.9,1.25]          ;radial range from Sun center in Rs
@@ -125,7 +125,7 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, 
 ; Identify AEC-affected images.
      read_sdo, fls, ind_arr, /nodata
   ;aia_load_event,event.st,event.et,wav,ind_arr,data,/remove_aec,/nodata
-
+     
 ;Convert the radial range to arcsecs.
      if keyword_set(rrange) then begin
         rrang=(rrange-1)*ind_arr.rsun_obs
@@ -137,7 +137,7 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, 
      r_in = ind_arr[0].rsun_obs+rrang[0] ; Inner radius
      r_out = ind_arr[0].rsun_obs + rrang[1] ; Outer radius
      
-     ; Define x and y zero points for plotting     
+     ; Define x and y zero points for plotting
      x_pos = thrang[0]*180./!PI
      y_pos = r_in-1.
      
@@ -223,7 +223,7 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, 
            dat_1 = dat_1/i_1.exptime
 ; Difference image    
            d_img = dat_1 - dat_0
-        endif    
+        endif
         
 ;    Base difference 
         if keyword_set(base) then begin
@@ -267,7 +267,7 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, 
         projdata[img_no-lwr_img,*,*]=img
         subprojdata[img_no-lwr_img,*,*]=plotimg
 
-     endelse ;END OF RESTORED IF STATEMENT
+     endelse ;END OF RESTORED IF/ELSE STATEMENT
      
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;START PLOTTING
@@ -298,7 +298,7 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, 
            else: int_range = [min(plotimg), max(plotimg)]
         endcase
      endif else begin
-        int_range = [min(plotimg), max(plotimg)]
+        int_range = [0,30]
      endelse
    
 ; Setup Z-buffer for plotting
@@ -325,6 +325,8 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, 
         endif
         
 ; Plot the image
+        if keyword_set(raw) then plotimg=sqrt(plotimg)
+        
         plot_image, plotimg, xtitle = '!5Theta [degrees from solar north]', $
                     ytitle = '!5Radius [arcsec from Sun centre]', $
                     charsize = chsize, title = img_tit, max = int_range[1], $
