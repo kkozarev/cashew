@@ -32,7 +32,7 @@ pro jmap_find_maxima,zb,x,y,xrange=xrange,yrange=yrange,gaussfit=gaussfit,allgfi
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 09/11/2013   
   
-  resolve_routine,'gaussfit',/either,/compile_full_file,/no_recompile
+  if keyword_set(gaussfit) then resolve_routine,'gaussfit',/either,/compile_full_file,/no_recompile
   
   nx=n_elements(x)
   ny=n_elements(y)

@@ -6,9 +6,9 @@ pro jmap_return_maxima,arr,x,allmaxima=allmaxima,numplotmax=numplotmax
 ;AIA/Kinematics/jmap
 ;
 ;INPUTS:
-; arr - 1D array of values.
+;       arr - 1D array of values.
 ;KEYWORDS:
-;
+; 
 ;OUTPUTS:
 ;
 ;DEPENDENCIES:

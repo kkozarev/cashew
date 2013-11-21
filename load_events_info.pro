@@ -26,6 +26,7 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
 
 ;----------------------------------------------------------------------------------------
 ; THIS IS THE LIST OF 'GOOD' EVENTS THAT MICHAEL HAMMER CREATED IN 08/2013
+;- Continuously updated list of events.
 ;----------------------------------------------------------------------------------------
   basepath=GETENV('CORWAV');Usually, it will be /Volumes/Backscratch/Users/kkozarev/corwav/ or similar
   labels=['110125_01','110128_01','110211_02','110511_01','110804_01','110809_01','111020_01','111109_01','120424_01','120526_01','120728_01','120915_01','121007_01','130423_01','130501_01','130517_01','131106_01','131029_01']
