@@ -1,61 +1,74 @@
 pro test_aia_make_movies
 
   ;You can run this for a single event, like so
-  label='110511_01'
+  one=0
+  if one eq 1 then begin
+     label='110511_01'
 ;  label='110125_01'
-  event=load_events_info(label=label)
-  movie_type='arun'
-  wavelength='193'
-  aia_make_movies, event, movie_type=movie_type, wav=wavelength, FRAMES_PER_SECOND = frames_per_second,/force
-  stop
-  stop
+     event=load_events_info(label=label)
+     movie_type='araw'
+     wavelength='193'
+     aia_make_movies, event, movie_type=movie_type, wav=wavelength, FRAMES_PER_SECOND = frames_per_second,/force
+  endif
   
   ;Alternatively, run it for all/multiple events
-  events=load_events_info()
-  wavelengths=['193','211']
-  movie_types=['raw','base','run']
-  nevents=n_elements(events)
-  for ev=0,nevents-1 do begin
-     event=events[ev]
-     for w=0,n_elements(wavelengths)-1 do begin
-        wavelength=wavelengths[w]
-        for mt=0,n_elements(movie_types)-1 do begin
-           movie_type=movie_types[mt]
-           aia_make_movies, event, movie_type=movie_type, wav=wavelength, FRAMES_PER_SECOND = frames_per_second,/force
+  all=1
+  if all eq 1 then begin
+     events=load_events_info()
+     wavelengths=['193','211']
+    ; movie_types=['raw','base','run']
+     movie_types=['araw']
+     nevents=n_elements(events)
+     for ev=0,nevents-1 do begin
+        event=events[ev]
+        for w=0,n_elements(wavelengths)-1 do begin
+           wavelength=wavelengths[w]
+           for mt=0,n_elements(movie_types)-1 do begin
+              movie_type=movie_types[mt]
+              aia_make_movies, event, movie_type=movie_type, wav=wavelength,/force
+           endfor
         endfor
      endfor
-  endfor
+  endif
 end
 
 
 pro aia_make_movies, event, wav=wav, FRAMES_PER_SECOND = frames_per_second, PATH = path, force=force, movie_type=movie_type
 ;PURPOSE:
-; This procdure will turn a set of numbered png files in the same
-; directory into a movie with a specified name based on the the type
+; This procedure will turn a set of numbered png files 
+; into a movie with a specified name based on the the type
 ; of movie and the details of the event.
 ;
 ;CATEGORY:
 ; AIA/General
 ;
 ;INPUTS:
-;	event - the event structure returned by load_events_info()
-;       movie_type - 'raw', 'base', 'run'
-;	wavelength - wavelength of the AIA channel, string - 94,131,171,193,211,304,335
-;       force - force the program to overwrite movies
+;	EVENT - the event structure returned by load_events_info()
 ;
 ;KEYWORDS:
-; Frames_per_second: The number of frames per second to be used when
-; creating the movie. The default is 10.
-; Path: If the path is not an expected path, include it as a keyword 
+;       MOVIE_TYPE:
+;            'raw', 'base', 'run' - raw or base/running difference from
+;                             original data
+;            'araw', 'abase', 'arun' - raw or base/running difference from
+;                                the deprojected data
+;            Default is 'raw'
+;	WAV: wavelength of the AIA channel, 
+;              string - 94,131,171,193,211,304,335
+;            Default is '193'
+;       FORCE: force the program to overwrite movies even if they exist
+;       FRAMES_PER_SECOND: The number of frames per second to be used when
+;            creating the movie. Default is 10.
+;       PATH: If the path is not an expected path, include it as a keyword 
 ;
 ;OUTPUTS:
-;
+;       
 ;DEPENDENCIES:
-;
+; ffmpeg, 
 ;
 ;MODIFICATION HISTORY:
 ;Written by Michael Hammer - 07/2013
-;Kamen Kozarev, 11/2013 - Integrated into the framework
+;Kamen Kozarev, 11/20/2013 - Integrated into the framework, added
+;                            event structure
 ;
 
 ; Determine Frames Per Second
@@ -64,7 +77,7 @@ if not keyword_set(wav) then wavelength = '193' else wavelength=wav
 if not keyword_set(movie_type) then movie_type = 'raw'
 
 ; Determine Path
-if not keyword_set(PATH) then path=event.savepath
+if not keyword_set(path) then path=event.savepath
 movie_path=path
 
 
@@ -105,7 +118,7 @@ print,'----'
 print,'Creating movie ' + moviefname
 print,''
 
-if not file_exist(imgsearch) then begin
+if not file_test(imgsearch) then begin
    print,'Required PNG files do not exist: '+imgsearch
    print,'Quitting...'
    print,'----'
@@ -120,26 +133,24 @@ for ii=0,n_elements(imgs)-1 do begin
    if img_strind lt 100 then img_strind='0'+img_strind
    if img_strind lt 10 then img_strind='0'+img_strind
    tmpdir="$HOME/tmpdir_"+strtrim(string(fix(floor(randomn(2)*100000))),2)+'/'
-   if not dir_exist(tmpdir) then spawn,'mkdir '+tmpdir+'&> /dev/null'
+   if not file_test(tmpdir,/directory) then spawn,'mkdir '+tmpdir+'&> /dev/null'
    command='ln -s '+imgs[ii]+' '+tmpdir+'tmpim_'+img_strind+'.png'
    spawn,command
-;tmp=strsplit(imgs[ii],'_.',/extract)
 endfor
 imgfnames=tmpdir+'tmpim_%03d.png'
 
 
-if file_exist(moviefname) and not keyword_set(force) then begin
+if file_test(moviefname) and not keyword_set(force) then begin
    print,'This movie file exists. To overwrite, rerun with /force. Quitting...'
    print,'----'
    return
 endif
 
-;DEBUG!!!!
 command = process + fps + path_call + imgfnames + ffmpeg_params1 + fps + ffmpeg_params2 + moviefname
-;DEBUG!!!!
 spawn, command
 
-print,'Success.'
+print,''
+print,'Success!'
 print,'----'
 
 ;Remove the temporary folder
