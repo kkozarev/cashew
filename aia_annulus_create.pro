@@ -1,31 +1,29 @@
 pro test_aia_annulus_create
 
 ;You can run for one event, like this.
-  one=1
+  one=0
   if one eq 1 then begin
      event=load_events_info(label='110511_01')
-     rrange=[0.9,1.25]          ;radial range from Sun center in Rs
-     ;aia_annulus_create,event,rrange=rrange,/force
-     aia_annulus_create,event,/raw,rrange=rrange
+     ;aia_annulus_create,event,/force
+     aia_annulus_create,event,/force
      ;aia_annulus_create,event,/plot,rrange=rrange
   endif
-
+  
   
 ;Alternatively, run for all events
-  all=0
+  all=1
   if all eq 1 then begin
      events=load_events_info()
-     rrange=[0.9,1.25]          ;radial range from Sun center in Rs
      wavelengths=['193','211']
 ;n_elements(events)-1
      for ev=0,n_elements(events)-1 do begin
         event=events[ev]
         for w=0,n_elements(wavelengths)-1 do begin
            wavelength=wavelengths[w]
-           aia_annulus_create,event,rrange=rrange,wav=wavelength,/force
-           aia_annulus_create,event,/run,rrange=rrange,wav=wavelength
-           aia_annulus_create,event,/base,rrange=rrange,wav=wavelength
-           aia_annulus_create,event,/raw,rrange=rrange,wav=wavelength
+           aia_annulus_create,event,wav=wavelength,/force
+           aia_annulus_create,event,/run,wav=wavelength
+           aia_annulus_create,event,/base,wav=wavelength
+           aia_annulus_create,event,/raw,wav=wavelength
         endfor
      endfor
   endif
@@ -74,13 +72,12 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, 
      else arlat=90.0-event.arlat
   endif else arlat=centerlat
   
+  maxrad=1330. ;maximum radial distance 
   img_size = [1200., 800.]
   ang_step = 0.2                ; Angle step size (degree)
   res = 0.5                     ; Height step size (arcsec)
   
-; Width of ring (effectively distance from limb to edge of aperture in
-; arcsec)
-  if not keyword_set(ring_width) then ring_width = 500d
+
   tot_ang = 360.                ; Looking at 360 degrees in steps of ang_step
   if not keyword_set(thrange) then thrang=[arlat-60.,arlat+60.] else thrang=thrange
   if keyword_set(full) then thrang=[0.,360.]
@@ -88,7 +85,7 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, 
   if thrang[0] lt 0. then thrang[0]=0.
   if thrang[1] gt 360. then thrang[1]=360.
   thrang*=!PI/180.0
-
+  
 ; If differencing normal cadence images, use running window of N
 ; images.
   lwr_img = 0
@@ -124,8 +121,10 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, 
      nsteps=size(fls,/n_elements)
 ; Identify AEC-affected images.
      read_sdo, fls, ind_arr, /nodata
-  ;aia_load_event,event.st,event.et,wav,ind_arr,data,/remove_aec,/nodata
+      ;aia_load_event,event.st,event.et,wav,ind_arr,data,/remove_aec,/nodata
      
+; Width of ring (effectively distance from limb to edge of aperture in arcsec)
+     if not keyword_set(ring_width) then ring_width = (maxrad-ind_arr[0].rsun_obs)
 ;Convert the radial range to arcsecs.
      if keyword_set(rrange) then begin
         rrang=(rrange-1)*ind_arr.rsun_obs
@@ -153,7 +152,7 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, 
      h = float(reform(sqrt((crd[0,*,*] - 0.)^2. + (crd[1,*,*] - 0.)^2.), sz[1], sz[2]))  
      
 ; Identify pixels that we're interested in
-     arc_out = where(h gt (r_in-1.))
+     arc_out = where((h gt (r_in-1.))); and (h le r_out-1.0))
      arc_in = where(h le (r_in-1.))
      
 ; Using code from nrgf.pro by Huw Morgan to try and histogram out the
@@ -215,7 +214,7 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, 
         aia_prep, fls[img_no-lwr_img], -1, i_0, dat_0
         dat_0 = dat_0/i_0.exptime
         d_img = dat_0
-        
+
 ; Second image     
 ;    Running difference
         if keyword_set(run) then begin
@@ -333,6 +332,7 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, 
                     origin = [x_pos[0], y_pos], charthick = chthick, $
                     scale = [ang_step, res/ind_arr[img_no].cdelt1], $
                     pos = [0.1, 0.1, 0.95, 0.95], min = int_range[0]
+
 ; Save the image as a PNG
               
         if keyword_set(run) then begin
@@ -360,7 +360,7 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, 
   endfor  ;ENDFOR TIMESTEP LOOP
   
   set_plot, 'x'
-  
+
   
   ;SAVE THE DATA!
   if (not keyword_set(run)) and (not keyword_set(base)) then begin

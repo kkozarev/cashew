@@ -1,10 +1,30 @@
 pro test_aia_annulus_analyze
 ;Procedure to run and test aia_annulus_analyze
 
-event=load_events_info(label='110511_01')
-;event=load_events_info(label='110125_01')
-wav='193'
-aia_annulus_analyze,event,wave=wav;,/interactive
+;You can run for one event, like this.
+  one=0
+  if one eq 1 then begin
+     wav='193'
+     event=load_events_info(label='110511_01')
+     aia_annulus_analyze,event,wave=wav ;,/interactive
+  endif
+  
+  
+;Alternatively, run for all events
+  all=1
+  if all eq 1 then begin
+     events=load_events_info()
+     wavelengths=['193','211']
+;n_elements(events)-1
+     for ev=0,n_elements(events)-1 do begin
+        event=events[ev]
+        for w=0,n_elements(wavelengths)-1 do begin
+           wavelength=wavelengths[w]
+           aia_annulus_analyze,event,wave=wavelength ;,/interactive
+        endfor
+     endfor
+  endif
+
 
 end
 
@@ -82,10 +102,10 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   wdef,0,1200,800
   if keyword_set(interactive) then begin
   
-   img=reform(projdata[fix(nsteps/2),*,*]-projdata[fix(nsteps/2)-1,*,*])
+     img=reform(projdata[fix(nsteps/2),*,*]-projdata[fix(nsteps/2)-1,*,*])
      plot_image, img, xtitle = '!5Theta [degrees from solar north]', $
                  ytitle = '!5Radius [arcsec from Sun center]', $
-                 charsize = 4, title = 'AIA deprojected image, '+data, max = 50, $
+                 title = 'AIA deprojected image, '+data, max = 50, $
                  origin = [0,0], charthick = 1.2, $
                  scale = [ang_step, res/ind_arr[0].cdelt1], $
                  pos = [0.1, 0.1, 0.95, 0.95], min = -40
@@ -94,14 +114,18 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
      img=reform(subprojdata[fix(nsteps/3),*,*]-subprojdata[fix(nsteps/3)-1,*,*])
      plot_image, img, xtitle = '!5Theta [degrees from solar north]', $
                  ytitle = '!5Radius [arcsec from Sun center]', $
-                 charsize = 4, title = 'AIA deprojected image', max = 50, $
+                 title = 'AIA deprojected image', max = 50, $
                  origin = [thrang[0]*180./!PI,r_in], charthick = 1.2, $
                  scale = [ang_step, res/ind_arr[0].cdelt1], $
                  pos = [0.1, 0.1, 0.95, 0.95], min = -40, font_name='Hershey 5'
   endelse
   
+  htlimits=rad_height_limits(degarray=x_deg_array)
+  oplot,x_deg_array,htlimits,color=255,thick=2;,/data
+  
   limb=ind_arr[0].rsun_obs ;Limb position in arcsec
-  ;oplot,thrang*180./!PI,[limb,limb] ;Overplot the limb position
+  limbind=min(where(y_arcsec_array ge limb))
+  ;oplot,thrang*180./!PI,[limb,limb],linestyle=2,thick=2,color=255 ;Overplot the limb position
   
   if not keyword_set(thrange) then begin
      if keyword_set(interactive) then begin
@@ -129,15 +153,20 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
         else arlat=90.0-event.arlat
      endif else arlat=centerlat
      
-;DEBUG!!!
-;     arlat=arlat-3.
-;DEBUG!!!
-
-     oplot,[arlat,arlat],[min(y_arcsec_array),max(y_arcsec_array)],thick=2
-  
+     ;Find the radial outward limit/edge for which there's data
+     yradlimit=rad_height_limits(angle=arlat)
+     yradlimind=min(where(y_arcsec_array ge yradlimit))
+     
+     
+     oplot,[arlat,arlat],[ind_arr[0].rsun_obs,yradlimit],thick=2
+     
+     ;The index of the AR latitude
      arxcentind=min(where(x_deg_array ge arlat))
      
-     lat_heights=[1.02,1.07,1.12]
+     ;The heights in (Rsun), for which to measure the waves, automatically set
+     ;based on the height limit.
+     
+     lat_heights=(limb+[0.25,0.55,0.85]*(yradlimit-limb))/ind_arr[0].rsun_obs
      htind=intarr(n_elements(lat_heights))
      for ii=0,2 do begin
         htind[ii]=min(where(y_rsun_array ge lat_heights[ii]))   
@@ -158,6 +187,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
         wait,0.1
      endwhile
      
+     ;Arrays that hold the measurement heights/indices thereof
      lat_heights=dblarr(uinput)
      htind=dblarr(uinput)
      
@@ -200,7 +230,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
      andata=subprojdata[*,*,htind]
   endelse
   nlatmeas=n_elements(htind)
-
+  
   ;Save the tangential data into a structure
   left_tan_data=reform(subfovdata[*,0:arxcentind-1,htind])
   right_tan_data=subfovdata[*,arxcentind:subncols-1,htind]
@@ -213,17 +243,20 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
                   plotinfo:replicate({p:!P, x:!X, y:!Y},nlatmeas)},$
            scale:[24./60.,ang_step],origin:[0,0],$
            xtitle:'Minutes since start',ytitle:'Degrees from AR center',$
-           winsize:[1200,800],multi:[0,nlatmeas,1]}    
+           winsize:[1200,800],multi:[0,nlatmeas,1]$
+           }
   
   
   tmp=subfovdata[*,arxcentind-2:arxcentind+2,*]
-  rad_data={data:total(tmp,2),scale:[24./60./60,res/ind_arr[0].cdelt1/ind_arr[0].rsun_obs],$
-            origin:[0,y_rsun_array[0]],winsize:[600,800],multi:0,winind:3,$
-            xtitle:'Hours since start',ytitle:'Rsun from Sun center',$
-            savename:'annplot_'+date+'_'+event.label+'_'+wav+'_radial.png'}
+  tmp=total(tmp,2)
   
-
-
+  rad_data={$
+           data:tmp,bdiff:tmp,rdiff:tmp,scale:[24./60./60.,res/ind_arr[0].cdelt1/ind_arr[0].rsun_obs],$
+           origin:[0,y_rsun_array[0]],winsize:[800,600],multi:0,winind:3,difforigin:[0,y_rsun_array[htind[0]]],$
+           xtitle:'Hours since start',ytitle:'Rsun from Sun center',$
+           savename:'annplot_'+date+'_'+event.label+'_'+wav+'_radial.png'$
+           }
+  
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;MORE PLOTTING
@@ -233,25 +266,25 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
 ;Plot the Radial Data!
 ;;;;;;;;;;;;;;;;;;;;;;;;
   !p.multi=rad_data.multi
+;Plot the Radial positions
+  wdef,rad_data.winind,rad_data.winsize[0],rad_data.winsize[1]
+  
   tmpdata=rad_data.data
   base=total(tmpdata[0:4,*,*],1)/5.0
   for tt=0,nsteps-1 do tmpdata[tt,*,*]=reform(tmpdata[tt,*,*]-base)
-  
-;Plot the Radial positions
-  wdef,rad_data.winind,rad_data.winsize[0],rad_data.winsize[1]
-                                ;DESPIKE THE IMAGE
+;DESPIKE THE IMAGE
   tmp=despike_gen(tmpdata)
-  
-  plot_image,tmp,scale=rad_data.scale,min=-40,max=50,charsize=1.6,charthick=1.2,origin=rad_data.origin, $
-             title='Radial Positions !C Start at '+ind_arr[0].date_obs,font_name='Hershey 5',$
+  rad_data.bdiff=tmp
+ 
+
+  plot_image,rad_data.bdiff[*,htind[0]:yradlimind],scale=rad_data.scale,min=-40,max=50,charsize=1.6,$
+             charthick=1.2,origin=rad_data.difforigin, $
+             title='BDiff Radial Positions !C Start at '+ind_arr[0].date_obs,font_name='Hershey 5',$
              xtitle=rad_data.xtitle,ytitle=rad_data.ytitle
   
-  write_png,savepath+rad_data.savename,tvrd(/true),ct_rr,ct_gg,ct_bb  
+  write_png,savepath+rad_data.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
 
-  stop
-  
-  
-  
+
   
   
 ;;;;;;;;;;;;;;;;;;;;;;;;
@@ -330,6 +363,78 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   endfor
     tan_data.right.bdiff=tmpdata
     write_png,savepath+tan_data.right.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
-
-
+    
  end
+
+
+
+
+
+function rad_height_limits,angle=angle,degarray=degarray
+;Calculate the limits to which the radial heights are physical in the
+;images. This is useful when creating the j-maps
+
+;If the keyword angle is supplied (in degrees from solar north),
+;return the height for that angle.
+;You can optionally supply the degrees array (again in degrees)
+;Returns the height limit in arcsec
+
+;Angle array at 1 arcmin resolution
+  degarr=findgen(360.*60.)/60.*!PI/180.
+                                         
+  ndeg=n_elements(degarr)
+;Corresponding height array
+  htarr=fltarr(ndeg)
+  
+;Pick some radius of the circle and the size of the square
+  n=1170.                       ;n is half the side of the square, in arcsec
+  r=1370.                       ;r is the radius of the outer circle of good data
+  
+;calculate special degrees
+  degs=fltarr(8)
+  anr=acos(n/r)
+  degs[0]=anr
+  degs[1]=!pi/2.-anr
+  degs[2]=!pi/2.+anr
+  degs[3]=!pi-anr
+  degs[4]=!pi+anr
+  degs[5]=(3./2.)*!pi-anr
+  degs[6]=(3./2.)*!pi+anr
+  degs[7]=(2.)*!pi-anr
+
+;Find their corresponding indices in the angle array
+  dginds=intarr(8)
+  for i=0,7 do dginds[i]=min(where(degarr ge degs[i]))
+  
+;Calculate the heights in the 12 different regions
+  htarr[0:dginds[0]-1]=n/cos(degarr[0:dginds[0]-1]) ; region I
+  htarr[dginds[0]:dginds[1]-1]=r
+  htarr[dginds[1]:dginds[2]-1]=n/sin(degarr[dginds[1]:dginds[2]-1]) ; regions II and III
+  htarr[dginds[2]:dginds[3]-1]=r
+  htarr[dginds[3]:dginds[4]-1]=n/abs(cos(degarr[dginds[3]:dginds[4]-1])) ; regions IV and V
+  htarr[dginds[4]:dginds[5]-1]=r
+  htarr[dginds[5]:dginds[6]-1]=n/abs(sin(degarr[dginds[5]:dginds[6]-1])) ; regions VI and VII
+  htarr[dginds[6]:dginds[7]-1]=r
+  htarr[dginds[7]:ndeg-1]=n/abs(cos(degarr[dginds[7]:ndeg-1])) ; region VIII
+  
+  if keyword_set(angle) then begin
+     ang=angle
+     while ang lt 0. do ang+=360.
+     while ang gt 360. do ang-=360.
+     ang=ang*!pi/180.     
+     angind=min(where(degarr ge ang))
+     tmp=htarr[angind]
+     
+     return, tmp[0]
+  endif
+  
+  if keyword_set(degarray) then begin
+     numinds=n_elements(degarray)
+     beg=min(where(degarr ge degarray[0]*!pi/180.))
+     fin=min(where(degarr ge degarray[numinds-1]*!pi/180.))
+     newhts=congrid(htarr[beg:fin],numinds)
+     return,newhts
+  endif
+  
+  return, htarr
+end
