@@ -2,12 +2,9 @@ pro test_aia_rhessi_map_overlay
   datapath="/Users/kkozarev/Desktop/Antonia/"
   rhessipath=datapath+'RHESSI/'
   aiapath=datapath+'AIA/'
-  hsi_dates=['2010/08/07',$
-             '2012/05/08']
-  hsi_start_times=[['18:01:00','18:40:00'],$
-                   ['09:40:00','09:27:00']]
-  hsi_end_times=[['18:13:00','18:45:00'],$
-                 ['09:50:00','09:40:00']]
+  hsi_dates=['2010/08/07']
+  hsi_start_times=[['18:01:00']]
+  hsi_end_times=[['18:02:00']]
   min_augment=1                 ;by how many minutes to augment the array
   aia_rhessi_map_overlay,ps=ps,datapath=datapath, rhessipath=rhessipath, aiapath=aiapath, hsi_dates=hsi_dates, hsi_start_times=hsi_start_times, hsi_end_times=hsi_end_times, minaugment=minaugment
 end
@@ -42,7 +39,7 @@ pro aia_rhessi_map_overlay,ps=ps,datapath=datapath, rhessipath=rhessipath, aiapa
   
 ;------------------------------
 ;INPUTS
- if not keyword_set(datapath) then datapath="/Users/kkozarev/Desktop/Antonia/"
+ if not keyword_set(datapath) then datapath="/Users/kkozarev/Desktop/AIA/AIA_RHESSI/"
  if not keyword_set(rhessipath) then rhessipath=datapath+'RHESSI/'
  if not keyword_set(aiapath) then aiapath=datapath+'AIA/'
  if not keyword_set(hsi_dates) then hsi_dates=['2010/08/07','2012/05/08']

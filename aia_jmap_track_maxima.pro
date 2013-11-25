@@ -89,7 +89,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
 ;Part 2. Find and fit the time-height maxima
 ;============================================
   wdef,1,900,500
-
+  
   ;Find the first numplotmax maxima for every time, return them.
   jmap_find_maxima,data,time,rad,xrange=[time[timrng[0]],time[timrng[1]]],yrange=radrange,$
                    allgfits=allgfits,allmaxima=allmaxima,$

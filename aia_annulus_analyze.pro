@@ -2,7 +2,7 @@ pro test_aia_annulus_analyze
 ;Procedure to run and test aia_annulus_analyze
 
 ;You can run for one event, like this.
-  one=0
+  one=1
   if one eq 1 then begin
      wav='193'
      event=load_events_info(label='110511_01')
@@ -11,7 +11,7 @@ pro test_aia_annulus_analyze
   
   
 ;Alternatively, run for all events
-  all=1
+  all=0
   if all eq 1 then begin
      events=load_events_info()
      wavelengths=['193','211']
@@ -66,11 +66,11 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   tmp=strsplit(event.date,'/',/extract)
   date=tmp[0]+tmp[1]+tmp[2]
   if not keyword_set(wave) then wav='193' else wav=wave
-  if not keyword_set(savepath) then savepath=event.savepath+'annulusplot/'
-  if not keyword_set(datapath) then datapath=savepath
+  if not keyword_set(savepath) then savepath='./' ;event.savepath+'annulusplot/'
+  if not keyword_set(datapath) then datapath='./' ;savepath
+  ;aia_deprojected_annulus_20110511_110511_01_193.sav
   fname='aia_deprojected_annulus_'+date+'_'+event.label+'_'+wav+'.sav'
   restore, datapath+fname
-  
   
   nsteps=n_elements(projdata[*,0,0])
   ncols=n_elements(projdata[0,*,0])
@@ -90,6 +90,10 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   if keyword_set(interactive) then x_deg_array=findgen(ncols)*ang_step $
   else x_deg_array=findgen(ncols)*ang_step+thrang[0]*180./!PI
   
+;The relative times
+  rad_times=findgen(nsteps)*24./60./60.
+  tan_times=findgen(nsteps)*24./60.
+
   set_plot,'x'
   loadct,0,/silent
   tvlct,ct_rr,ct_gg,ct_bb,/get
@@ -105,8 +109,8 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
      img=reform(projdata[fix(nsteps/2),*,*]-projdata[fix(nsteps/2)-1,*,*])
      plot_image, img, xtitle = '!5Theta [degrees from solar north]', $
                  ytitle = '!5Radius [arcsec from Sun center]', $
-                 title = 'AIA deprojected image, '+data, max = 50, $
-                 origin = [0,0], charthick = 1.2, $
+                 title = 'Annulusplot, AIA/'+wav+' '+date, max = 50, $
+                 origin = [0,0], charthick = 1.2, charsize=4, $
                  scale = [ang_step, res/ind_arr[0].cdelt1], $
                  pos = [0.1, 0.1, 0.95, 0.95], min = -40
   endif else begin
@@ -114,8 +118,8 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
      img=reform(subprojdata[fix(nsteps/3),*,*]-subprojdata[fix(nsteps/3)-1,*,*])
      plot_image, img, xtitle = '!5Theta [degrees from solar north]', $
                  ytitle = '!5Radius [arcsec from Sun center]', $
-                 title = 'AIA deprojected image', max = 50, $
-                 origin = [thrang[0]*180./!PI,r_in], charthick = 1.2, $
+                 title = 'Annulusplot, AIA/'+wav+' '+date, max = 50, $
+                 origin = [thrang[0]*180./!PI,r_in], charthick = 1.2, charsize=4,$
                  scale = [ang_step, res/ind_arr[0].cdelt1], $
                  pos = [0.1, 0.1, 0.95, 0.95], min = -40, font_name='Hershey 5'
   endelse
@@ -233,7 +237,8 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   
   ;Save the tangential data into a structure
   left_tan_data=reform(subfovdata[*,0:arxcentind-1,htind])
-  right_tan_data=subfovdata[*,arxcentind:subncols-1,htind]
+  right_tan_data=reform(subfovdata[*,arxcentind:subncols-1,htind])
+  
   tan_data={$
            left:{data:left_tan_data,bdiff:left_tan_data,winind:1,$
                  savename:'annplot_'+date+'_'+event.label+'_'+wav+'_tangential_left.png',$
@@ -275,11 +280,13 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
 ;DESPIKE THE IMAGE
   tmp=despike_gen(tmpdata)
   rad_data.bdiff=tmp
- 
-
-  plot_image,rad_data.bdiff[*,htind[0]:yradlimind],scale=rad_data.scale,min=-40,max=50,charsize=1.6,$
+  
+  
+  plot_image,rad_data.bdiff[*,htind[0]:yradlimind],scale=rad_data.scale,$
+             min=-40,max=50,charsize=1.6,$
              charthick=1.2,origin=rad_data.difforigin, $
-             title='BDiff Radial Positions !C Start at '+ind_arr[0].date_obs,font_name='Hershey 5',$
+             title='AIA/'+wav+' BDiff Radial Positions !C Start at '+ind_arr[0].date_obs,$
+             font_name='Hershey 5',$
              xtitle=rad_data.xtitle,ytitle=rad_data.ytitle
   
   write_png,savepath+rad_data.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
@@ -292,19 +299,17 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
 ;;;;;;;;;;;;;;;;;;;;;;;;
   !p.multi=tan_data.multi
   tmpdata=tan_data.left.data
-  base=total(tmpdata[0:4,*,*],1)/5.0
+  nbase=5
+  base=total(tmpdata[0:nbase-1,*,*],1)/(nbase*1.0)
   for tt=0,nsteps-1 do tmpdata[tt,*,*]=reform(tmpdata[tt,*,*]-base)
-
-;testdata[tt,*,*]=reform(testdata[tt,*,*]-base)
-;    testdata[tt,*,*]=reform(testdata[tt,*,*]-testdata[0,*,*])
   
 ;Plot the Left Tangential positions
   wdef,tan_data.left.winind,tan_data.winsize[0],tan_data.winsize[1]
   for rr=0,nlatmeas-1 do begin
      tmp=reform(tmpdata[*,*,rr])
-                                ;REVERSE THE IMAGE COLUMNS SO THE AR IS ALWAYS IN THE BOTTOM
+     ;REVERSE THE IMAGE COLUMNS SO THE AR IS ALWAYS IN THE BOTTOM
      tmp=reverse(tmp,2)
-                                ;DESPIKE THE IMAGE
+     ;DESPIKE THE IMAGE
      tmp=despike_gen(tmp)
      tmpdata[*,*,rr]=tmp
      height=strtrim(string(lat_heights[rr],format='(f5.3)'),2)
@@ -312,7 +317,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
                                 ;The middle height index
      midind=fix(median(indgen(nlatmeas)))
      if rr eq midind then $
-        imgtit='Left Tangential Positions | Start at '+ind_arr[0].date_obs+'!C R = '+height+' R!Ds!N' $
+        imgtit='AIA/'+wav+' Left Tan Positions | Start at '+ind_arr[0].date_obs+'!C R = '+height+' R!Ds!N' $
      else imgtit='R = '+height+' R!Ds!N'
      
      plot_image,tmp,scale=tan_data.scale,min=-40,max=50,charsize=4,charthick=1.2,origin=tan_data.origin, $
@@ -350,10 +355,10 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
     ;The middle
      midind=fix(median(indgen(nlatmeas)))
      if rr eq midind then $
-        imgtit='Right Tangential Positions | Start at '+ind_arr[0].date_obs+'!C R = '+height+' R!Ds!N' $
+        imgtit='AIA/'+wav+' Right Tangential Positions | Start at '+ind_arr[0].date_obs+'!C R = '+height+' R!Ds!N' $
      else imgtit='R = '+height+' R!Ds!N'
      
-     plot_image,tmp,scale=tan_data.scale,min=-40,max=50,charsize=4,charthick=1.2,origin=tan_data.origin, $
+     plot_image,tmp,scale=tan_data.scale,min=-40,max=50,charsize=4,charthick=1.2,origin=tan_data.origin,$
                 title=imgtit,font_name='Hershey 5',$
                 xtitle=tan_data.xtitle,ytitle=tan_data.ytitle
      ;if rr eq 0 then rightplotinfo=replicate({p:!P, x:!X, y:!Y},nlatmeas)
@@ -363,6 +368,17 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   endfor
     tan_data.right.bdiff=tmpdata
     write_png,savepath+tan_data.right.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
+    
+
+    
+    
+;Fit the maxima and overplot them...
+    jmap_find_maxima,rad_data.bdiff,findgen(nsteps)*24./60./60.,y_rsun_array,mymaxima=mymaxima,yrange=[1.13,1.35]
+    maxinds=reform([mymaxima[0,*].ind])
+    wset,rad_data.winind
+    loadct,8,/silent
+    oplot,rad_times,y_rsun_array[maxinds],psym=2,color=200,thick=2,symsize=2
+    stop
     
  end
 

@@ -1,0 +1,101 @@
+{
+	"label": "110511_01",
+	"coordX": "785",
+	"coordY": "186",
+	"hemisphere": "W",
+	"date": "20110511",
+	"arlat": "",
+	"arlon": "",
+	"st": "2011/05/11 02:10:00",
+	"et": "2011/05/11 02:40:00",
+	"typeII": "1",
+	"loop": "1",
+	"filament": "1",
+	"flareclass": "B8.1",
+	"comment": "Huge shock wave originates inside the limb with
+	clear lateral expansion",
+	"savepath": "",
+	"Instruments": [
+		    {
+			"type": "AIA",
+	      	     	"fov": "[1024,2014]",
+	       	    	 "datapath": "",
+	       	    	 "savepath": "",
+		     },
+		     {
+			"type": "SWAP",
+	      	    	"fov": "[1024,2014]",
+	   	     	"datapath": "",
+	 	     	"savepath": "",
+		     },
+		     {
+			"type": "EUVI",
+			"fov": "[1024,2014]",
+	       		"datapath": "",
+	       		"savepath": "",
+		    },
+		    {
+			"type": "NRH",
+	       		"fov": "",
+	       		"datapath": "",
+	       		"savepath": "",
+		    },
+		    {
+			"type": "IPS",
+	       		"fov": "",
+	       		"datapath": "",
+	       		"savepath": "",
+		    },
+		    {
+			"type": "RHESSI",
+			"fov": "",
+	       		"datapath": "",
+	       		"savepath": "",
+		    },
+		    {
+			"type": "PFSS",
+	     	    	"fov": "",
+	       	    	"datapath": "",
+	       	    	"savepath": "",
+		    }
+	],
+	"path": [
+		{
+			"type": "movies",
+			"value": "",
+		},
+		{
+			"type": "radio",
+			"value": "",
+		},
+		{
+			"type": "annulusplot",
+			"value": "",
+		},
+		{
+			"type": "yaftawave",
+			"value": "",
+		},
+		{
+			"type": "kinematics",
+			"value": "",
+		},
+		{
+			"type": "ionization",
+			"value": "",
+		},
+		{
+			"type": "dem",
+			"value": "",
+		},
+		{
+			"type": "aschdem",
+			"value": "",
+		},
+		{
+			"type": "weber",
+			"value": "",
+		}
+	]
+}
+	
