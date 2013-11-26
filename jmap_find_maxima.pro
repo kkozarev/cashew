@@ -9,9 +9,6 @@ return,[[aa[0]*exp(-0.5*zz^2)+aa[3]+x*aa[4]+x^2*aa[5]],$  ;function
         [x^2]]                              ;function derivative wrt aa[5]
 end
 
-
-
-
 pro jmap_find_maxima,zb,x,y,xrange=xrange,yrange=yrange,gaussfit=gaussfit,allgfits=allgfits,allmaxima=allmaxima,mymaxima=mymaxima,nmax=nmax,flipyaxes=flipyaxes,numplotmax=numplotmax
 ;PURPOSE:
 ;procedure to find maxima in a time-Y image, where Y can be physical distance, or frequency.
@@ -23,14 +20,14 @@ pro jmap_find_maxima,zb,x,y,xrange=xrange,yrange=yrange,gaussfit=gaussfit,allgfi
 ;INPUTS:
 ;
 ;KEYWORDS:
-;
+; 
 ;OUTPUTS:
 ;
 ;DEPENDENCIES:
-;lclxtrem.pro, badpar.pro, lmfit, gaussfit
+;   lclxtrem.pro, badpar.pro, lmfit, gaussfit
 ;
 ;MODIFICATION HISTORY:
-;Written by Kamen Kozarev, 09/11/2013   
+;Written by Kamen Kozarev, 09/11/2013
   
   resolve_routine,'gaussfit',/either,/compile_full_file,/no_recompile
   

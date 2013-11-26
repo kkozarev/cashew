@@ -83,8 +83,8 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
   
 ;Find the radial range index
   radrng=[min(where(rad-radrange[0] ge -1.e-6)),min(where(rad-radrange[1] ge -1.0e-6))]
- 
-
+  
+  
 ;============================================
 ;Part 2. Find and fit the time-height maxima
 ;============================================
@@ -159,8 +159,6 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
   cursor,x,y,/down,/data
   plots,x,y,psym=5,symsize=2,thick=2,color=100
   sp=min(where(fix(time-x) gt 0.0))-1
-  ;print,sp,time[sp]
-  
   
   print,'Select ending point:'
   cursor,x,y,/down,/data
@@ -210,6 +208,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
         endif
      endif
      
+
 ;Find the front edge of the wave
      y=reform(data[ii,allmaxima[uinput,ii].ind:*])
      tmp=min(where(y le 0.2*max(y)))
