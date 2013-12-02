@@ -91,8 +91,9 @@ for iw=0,nwave-1 do begin
   y	=j1+(npix*findgen(nyy)+0.5)
   images=fltarr(nxx,nyy,nwave)
  endif
- if (npix eq 1) then images(*,*,iw)=float(image(0:nxx-1,0:nyy-1))/texp
- if (npix gt 1) then images(*,*,iw)=rebin(float(image[0:i3,0:j3]),nxx,nyy)/texp
+ 
+ if (npix eq 1) then images[*,*,iw]=float(image(0:nxx-1,0:nyy-1))/texp
+ if (npix gt 1) then images[*,*,iw]=rebin(float(image[0:i3,0:j3]),nxx,nyy)/texp
  texp_[iw]=texp
 endfor
 

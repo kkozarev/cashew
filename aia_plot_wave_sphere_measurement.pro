@@ -1,7 +1,32 @@
 pro test_aia_plot_wave_sphere_measurement
 ;Test this program
-event=load_events_info(label='110511_01')
-aia_plot_wave_sphere_measurement,event
+
+
+;You can run for one event, like this.
+  one=0
+  if one eq 1 then begin
+     event=load_events_info(label='110511_01')
+     aia_plot_wave_sphere_measurement,event
+  endif
+  
+  
+;Alternatively, run for all events
+  all=1
+  if all eq 1 then begin
+     events=load_events_info()
+     wavelengths=['193','211']
+;n_elements(events)-1
+     for ev=0,n_elements(events)-1 do begin
+        event=events[ev]
+        for w=0,n_elements(wavelengths)-1 do begin
+           wavelength=wavelengths[w]
+           aia_plot_wave_sphere_measurement,event,wav=wavelength
+        endfor
+     endfor
+  endif
+end
+
+
 end
 
 
@@ -32,8 +57,7 @@ pro aia_plot_wave_sphere_measurement,event,wav=wav
  evnum=event.label
  savepath=event.savepath
  fname=evnum+'sphere_shocklocations.sav'
- tmp=strsplit(event.date,'/',/extract)
- date=tmp[0]+tmp[1]+tmp[2]
+ date=event.date
 
 if file_exist(savepath+fname) then begin
  restore,savepath+fname

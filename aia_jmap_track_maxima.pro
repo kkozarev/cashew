@@ -2,23 +2,22 @@ pro test_aia_jmap_track_maxima
 ;Load the time height data and any additional information
 
 wave=['193']
-label='110511_01'
-event=load_events_info(label=label)
+event=load_events_info(label='110511_01')
 path=event.savepath
-rev='000'
-datafile=path+'jmap_data_'+label+'_'+wave[0]+'_r'+rev+'.sav'
-infofile=path+'jmap_info_'+label+'_'+wave[0]+'_r'+rev+'.sav'
 
-radrange=[1.28,1.7] ;radial extent of the measurement
+
+radrange=[1.31,1.75] ;radial extent of the measurement
 numplotmax=2 ;number of maxima to track
-dynamic_range=[-90,45]
+dynamic_range=[-100,40]
 
-aia_jmap_track_maxima,datafile,infofile,path=path,numplotmax=numplotmax,allmaxima=allmaxima,nmax=nmax,allgfits=allgfits,time=time,distance=distance,dynamic_range=dynamic_range,radrange=radrange;/gaussfit,
+aia_jmap_track_maxima,event,wav=wav,numplotmax=numplotmax,allmaxima=allmaxima,$
+                      nmax=nmax,allgfits=allgfits,time=time,distance=distance,$
+                      dynamic_range=dynamic_range,radrange=radrange ;/gaussfit,
 end
 
 
 
-PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,path=path,numplotmax=numplotmax,allmaxima=allmaxima,nmax=nmax,allgfits=allgfits,time=time,distance=distance,dynamic_range=dynamic_range,refine=refine
+PRO aia_jmap_track_maxima,event,wav=wav,gaussfit=gaussfit,radrange=radrange,path=path,numplotmax=numplotmax,allmaxima=allmaxima,nmax=nmax,allgfits=allgfits,time=time,distance=distance,dynamic_range=dynamic_range,refine=refine
 ;PURPOSE:
 ;Detect and fit the AIA emission maxima
 ;CATEGORY:
@@ -37,26 +36,35 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
 ;
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 07/2013
-;
+;Updated by Kamen Kozarev, 11/29/2013 - integrate with event structure concept.
+  
+  
   set_plot,'x'
   resolve_routine,'jmap_find_maxima',/either,/compile_full_file;,/no_recompile
   resolve_routine,'gaussfit',/either,/compile_full_file;,/no_recompile
   !P.font=1
   !p.position=[0.1,0.13,0.93,0.92]
+  !P.background=255
+  !P.color=0
   RSUN=6.955e5 ;solar radius in km
   cols=[0,120,100,160,200,230] ;an array of color values to use for plotting
-  if not keyword_set(path) then path = './'
+  if not keyword_set(path) then path = event.savepath+'kinematics/'
+  if not keyword_set(wav) then wave='193' else wave=wav
+  label=event.label
+  date=event.date
+  datafile=path+'jmap_data_'+event.date+'_'+event.label+'_'+wave[0]+'.sav'
+  infofile=path+'jmap_info_'+event.date+'_'+event.label+'_'+wave[0]+'.sav'
   restore,datafile
   restore,infofile
   data_subindex=data_subindex[0:plotted_frame_final-plotted_frame_initial]
-  wav=strtrim(string(data_subindex[0].wavelnth),2)
-  if not keyword_set(dynamic_range) then dynamic_range=[-100,100]
-  
+  if not keyword_set(dynamic_range) then dynamic_range=[-50,50]
+  imgprefix='jmap_'+date+'_'+label+'_'+wave[0]  
+
 ;How many maxima to track
   if not keyword_set(numplotmax) then numplotmax=2
   
 ;Plot the time-height map
-  polyfill_process, data_thin_wave, data_subindex, data_rotation_angle,data_date,data_evnum,time=time,rad=rad,dynamic_range=dynamic_range
+  polyfill_process, data_thin_wave, data_subindex, data_rotation_angle,data_date,label,time=time,rad=rad,dynamic_range=dynamic_range
   
   distance=rad
   loadct,0,/silent
@@ -100,7 +108,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
   
 ;Overplot the time-height diagram again, with the maxima as points.
   wset,0
-  polyfill_process, data_thin_wave, data_subindex, data_rotation_angle,data_date,data_evnum,dynamic_range=dynamic_range
+  polyfill_process, data_thin_wave, data_subindex, data_rotation_angle,data_date,label,dynamic_range=dynamic_range
   loadct,39,/silent
 
 ;plot horizontal lines for the range of radial heights
@@ -167,77 +175,14 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
   
 ;record the image
   image=tvrd(/true)
-  savname=data_evnum+'_'+data_date+'_'+wav+'emission_maxima_all.png'
-  write_png,path+savname,image
-  
-;Search for the edges of the wave
-  tmp={val:0.0D,ind:0L}
-  wave_frontedge=replicate(tmp,ep-sp+1);dblarr(ep-sp+1)
-  wave_backedge=replicate(tmp,ep-sp+1)
-  ;wave_backedge=dblarr(ep-sp+1)
-  for ii=sp,ep do begin
-     x=rad[allmaxima[uinput,ii].ind:*]
-    ;y=smooth(reform(data[ii,allmaximind[uinput,ii]:*]),40,/edge_truncate)
-     
-     if keyword_set(refine) then begin
-        if ii gt sp then begin
-           if rad[allmaxima[uinput,ii].ind] lt wave_backedge[ii-sp-1] or rad[allmaxima[uinput,ii].ind] lt rad[allmaxima[uinput,ii-1].ind] - 20./data_subindex[0].r_sun then begin
-             ;Refine the positions of the maxima
-              print,''
-              print,'Refining the positions of the maximum...'
-              
-              tmp=rad[allmaxima[0:nmax[ii]-1,ii].ind] 
-              res=where(tmp ge wave_backedge[ii-sp-1].val and tmp le wave_frontedge[ii-sp-1].val)
-              if res[0] eq -1 then begin
-                 cnt=0
-                 print,'res[0]=-1'
-                 while res[0] eq -1 do begin
-                    res=where(tmp ge wave_backedge[ii-sp-1].val-cnt*2.0 and tmp le wave_frontedge[ii-sp-1].val+cnt*2.0)
-                    cnt++
-                 endwhile
-                 
-              endif else begin
-                 tmp=rad[allmaxima[res,ii].ind]
-                 maxy=max(tmp,ind)
-                 maxind=allmaxima[res[ind],ii].ind
-                 allmaxima[uinput,ii].ind=maxind
-                 allmaxima[uinput,ii].val=maxy
-              endelse
-           endif
-           
-        endif
-     endif
-     
-
-;Find the front edge of the wave
-     y=reform(data[ii,allmaxima[uinput,ii].ind:*])
-     tmp=min(where(y le 0.2*max(y)))
-     
-     wave_frontedge[ii-sp].val=rad[allmaxima[uinput,ii].ind+tmp]
-     wave_frontedge[ii-sp].ind=allmaxima[uinput,ii].ind+tmp
-                                ;plots,time[ii]+dt/2.0,rad[allmaximind[uinput,ii]+tmp],$
-                                ;      color=colors[uinput],psym=4,symsize=1,thick=1
-     
-;Find the back edge of the wave
-     y=reform(data[ii,0:allmaxima[uinput,ii].ind])
-     tmp=max(where(y le 0.2*max(y)))
-     wave_backedge[ii-sp].val=rad[tmp]
-     wave_backedge[ii-sp].ind=tmp
-                                ;plots,time[ii]+dt/2.0,rad[tmp],$
-                                ;      color=colors[uinput],psym=4,symsize=1,thick=1
-     
-     oplot,[time[ii]+dt/2.0,time[ii]+dt/2.0],[wave_backedge[ii-sp].val,wave_frontedge[ii-sp].val],$
-           color=colors[uinput],thick=1
-  endfor
-  
-  
-;Overplot just the points to be fitted.
-  polyfill_process, data_thin_wave, data_subindex, data_rotation_angle,data_date,data_evnum,dynamic_range=dynamic_range
   loadct,39,/silent
 ;plot horizontal lines for the range of radial heights
   oplot,[min(time),max(time)],[radrange[0],radrange[0]],thick=3,linestyle=2,color=255
   oplot,[min(time),max(time)],[radrange[1],radrange[1]],thick=3,linestyle=2,color=255
 
+    ;Search for the edges of the wave
+  wave_frontedge=replicate({val:0.0D,ind:0L},ep-sp+1)
+  wave_backedge=wave_frontedge
   
   for ii=sp,ep do begin
      plots,time[ii]+dt/2.0,rad[allmaxima[uinput,ii].ind],$
@@ -304,7 +249,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
   
 ;record the image
   image=tvrd(/true)
-  savname=data_evnum+'_'+data_date+'_'+wav+'emission_maxima.png'
+  savname=imgprefix+'_emission_maxima.png'
   write_png,path+savname,image
   
 ;Save the output:
@@ -314,7 +259,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
   ind=data_subindex[sp:ep]
   
   wave_data=data_thin_wave[sp:ep,allmaxima[uinput,sp].ind:allmaxima[uinput,ep].ind]
-  savname=data_evnum+'_'+data_date+'_'+wav+'_jmap_measurements.sav'
+  savname=imgprefix+'_analyzed.sav'
   save,filename=path+savname,time,rad,ind,wave_times,wave_rads,wave_indices,wave_data,$
        wave_frontedge,wave_backedge,r0,rf,v0,vf,errv0,accel,erraccel,wave_fits,$
        allgfits,allmaxima
@@ -327,7 +272,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
 ;distance from the Sun, and compare with
 ;modeling results!
 ;==========================================
-  savname=path+data_evnum+'_'+data_date+'_'+wav+'_instantaneous_velocity'
+  savname=path+imgprefix+'_instantaneous_velocity'
   set_plot,'ps'
   device,file=savname+'.eps',/inches,xsize=9.0,ysize=7,$
          /encaps,/color,/helvetica
@@ -364,7 +309,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
                                 ;           /nohat,color=col,thick=2
      endfor
      image=tvrd(/true)
-     savname=data_evnum+'_'+data_date+'_'+wav+'_gaussfit_fwhm_timeseries.png'
+     savname=imgprefix+'_gaussfit_fwhm_timeseries.png'
      write_png,path+savname,image
   endif
 ;-==========================================
@@ -394,7 +339,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
 ;,time[1:ntimes-1]-time[0:ntimes-2]
      endfor
      image=tvrd(/true)
-     savname=data_evnum+'_'+data_date+'_'+wav+'_gaussfit_peak_intensities_timeseries.png'
+     savname=imgprefix+'_gaussfit_peak_intensities_timeseries.png'
      write_png,path+savname,image
   endif else begin
      
@@ -405,7 +350,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
      set_plot,'ps'
      !p.position[0]+=0.06 
      loadct,0,/silent   
-     savname=path+data_evnum+'_'+data_date+'_'+wav+'_peak_intensities_timeseries'     
+     savname=path+imgprefix+'_peak_intensities_timeseries'     
      device,file=savname+'.eps',/inches,xsize=9.0,ysize=7,$
             /encaps,/color,/helvetica
      
@@ -441,7 +386,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
 ;time steps.
 ;==================================================
 
-     savname=path+data_evnum+'_'+data_date+'_'+wav+'_integral_intensities_timeseries'
+     savname=path+imgprefix+'_integral_intensities_timeseries'
      set_plot,'ps'
      device,file=savname+'.eps',/inches,xsize=9.0,ysize=7,$
             /encaps,/color,/helvetica
@@ -484,7 +429,7 @@ PRO aia_jmap_track_maxima,datafile,infofile,gaussfit=gaussfit,radrange=radrange,
 ;+=================================================
 ;Plot a time series of the wave thickness
 ;==================================================
-     savname=data_evnum+'_'+data_date+'_'+wav+'_wave_thickness_timeseries'     
+     savname=path+imgprefix+'_wave_thickness_timeseries'     
      device,file=savname+'.eps',/inches,xsize=9.0,ysize=7,$
             /encaps,/color,/helvetica
      

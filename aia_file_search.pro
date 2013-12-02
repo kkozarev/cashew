@@ -3,7 +3,8 @@ pro test_aia_file_search
   st='2013/01/15 01:01:07'
   et='2013/01/15 01:03:10'
   wave='171'
-  files=aia_file_search(st, et, wave,missing=missing,/check171)
+  event=load_events_info(label='110511_01')
+  files=aia_file_search(st, et, wave,missing=missing,/check171,path=event.aia_datapath)
   print,files
   
   ;ff=aia_file_search(st, et, '171',/check171)
@@ -21,7 +22,8 @@ pro test_aia_file_search
 end
 
 
-function aia_file_search, sts, ets, wav,path=path,loud=loud,missing=missing,cfa=cfa,jsoc=jsoc,remove_aec=remove_aec,check171=check171
+function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=missing,$
+                          cfa=cfa,jsoc=jsoc,remove_aec=remove_aec,check171=check171,first=first
 ;PURPOSE:
 ;Search for AIA fits files from the local CfA archive.
 ;Assume searching on a single day only.
@@ -51,10 +53,12 @@ function aia_file_search, sts, ets, wav,path=path,loud=loud,missing=missing,cfa=
 ;Written by Kamen Kozarev, 02/2010   
 ;10/01/2013, KAK - added a check for Automatic Exposure Control
 ;                  exposure frames - keyword remove_aec
+;11/30/2013, KAK - integrated with the event structure, 
 ;
 starttime=sts
 endtime=ets
 wave=wav
+
   if not keyword_set(path) then path='/Data/SDO/AIA/level1/'
   
   if n_elements(starttime) eq 1 then begin
@@ -72,9 +76,11 @@ wave=wav
   endif else begin
      et=endtime
   endelse
-
+  
   if keyword_set(check171) then begin
-     tim171=aia_file_search(aia_augment_timestring(sts,-6),aia_augment_timestring(sts,6),'171')
+     tmpst=aia_augment_timestring(sts,-6)
+     tmpet=aia_augment_timestring(ets,6)
+     tim171=aia_file_search(tmpst,tmpet,'171',path=path)
      if tim171[0] ne '' then begin
         tmp=strsplit(tim171[0],'_',/extract)
         mind=n_elements(tmp)-2
@@ -82,9 +88,8 @@ wave=wav
         st=[st[0],st[1],st[2],strmid(time,0,2),strmid(time,2,2),strmid(time,4,2)]
         sts=st[0]+'/'+st[1]+'/'+st[2]+' '+st[3]+':'+st[4]+':'+st[5]
      endif
+     ntotfiles=n_elements(tim171)
   endif
-  
-  
   mins=st[4]
   basepath=path+st[0]+'/'+st[1]+'/'+st[2]+'/'
   
@@ -177,10 +182,10 @@ if var_exist(files) then begin
          cc++
       endif
    endfor
-
+   
 ;compute the final time
    finind=where(((times-anytim(sts)) ge 0.0) and ((anytim(ets)-times) ge 0.0))
-
+   
 if finind[0] ne -1 then begin 
    files=files[finind] 
 endif else begin
@@ -197,6 +202,16 @@ if keyword_set(loud) and files[0] ne '' then begin
     print,''
     print,'Number of files found: '+strtrim(string(n_elements(files)),2)
     print,''
+ endif
+
+if keyword_set(check171) then begin 
+   if ntotfiles ne n_elements(files) then begin
+      print,''
+      print,'There are files missing for band '+wav+'!'
+      print,'Total number of files is '+strtrim(string(n_elements(files)),2)
+      print,'Total number of files for reference band 171 is '+strtrim(string(ntotfiles),2)
+      print,'Consider manually reviewing the data files in '+path
+   endif
 endif
 
 
@@ -226,7 +241,7 @@ endif
 
 
 
-
-return,files
+if keyword_set(first) then return,files[0] $
+else return,files
 
 end

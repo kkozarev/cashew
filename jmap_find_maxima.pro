@@ -33,7 +33,7 @@ pro jmap_find_maxima,zb,x,y,xrange=xrange,yrange=yrange,gaussfit=gaussfit,allgfi
   
   nx=n_elements(x)
   ny=n_elements(y)
-  if not keyword_set(numplotmax) then numplotmax=2
+  if not keyword_set(numplotmax) then numplotmax=1
   
 ;Select the X-Y ranges
   if keyword_set(xrange) then xrang=xrange else $
@@ -70,7 +70,7 @@ pro jmap_find_maxima,zb,x,y,xrange=xrange,yrange=yrange,gaussfit=gaussfit,allgfi
 ;oplot,[freqrng[0],freqrng[1]],[mean(arr),mean(arr)],thick=2
 
 ;This function finds the local minima
-
+     
      ind=lclxtrem(arr-smooth(arr,20,/edge_truncate),10)
      
 ;Record the maxima in each of the intervals set by the minima
@@ -125,6 +125,13 @@ pro jmap_find_maxima,zb,x,y,xrange=xrange,yrange=yrange,gaussfit=gaussfit,allgfi
            cc++
         endif
      endfor
+     if cc le 0 then begin
+        print,''
+        print,'No Maxima found. Exiting...'
+        print,''
+        return
+     endif
+
      nmax[xx-xind[0]]=cc
      maxima=maxima[0:cc-1]
      indmaxima=indmaxima[0:cc-1]
@@ -147,7 +154,6 @@ pro jmap_find_maxima,zb,x,y,xrange=xrange,yrange=yrange,gaussfit=gaussfit,allgfi
      if xx eq xind[0] then begin
         mymaxima[0:cc-1,xx-xind[0]].ind=ordindmaxima
         mymaxima[0:cc-1,xx-xind[0]].val=ordmaxima
-        
      endif else begin
                                 ;1. Check if the Nth maximum is within +/-thresh/2.0 pixels of the position of the
                                 ;Nth maximum from last step.

@@ -1,9 +1,25 @@
 pro test_aia_aschdem_save_subrois
-  aia_aschdem_save_subrois,event='37'
+ ;You can run for one event, like this.
+  one=1
+  if one eq 1 then begin
+     event=load_events_info(label='110511_01')
+     aia_aschdem_save_subrois,event
+  endif
+  
+  
+;Alternatively, run for all events
+  all=0
+  if all eq 1 then begin
+     events=load_events_info()
+     for ev=0,n_elements(events)-1 do begin
+        event=events[ev]
+        aia_aschdem_save_subrois,event
+     endfor
+  endif
 end
 
 
-pro aia_aschdem_save_subrois, path=path, event=event,wav=wav
+pro aia_aschdem_save_subrois,event, path=path, wav=wav
 ;PURPOSE:
 ;This procedure will load all the Aschwanden DEM results, select the
 ;regions used for the ionization and save the datacubes in separate
@@ -25,12 +41,13 @@ pro aia_aschdem_save_subrois, path=path, event=event,wav=wav
 ;Written by Kamen Kozarev, 02/2013
 ;
 
-if not keyword_set(path) then path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
-if not keyword_set(event) then event='37'
+if not keyword_set(path) then path=event.savepath
+label=event.label
+date=event.date
 if not keyword_set(wav) then wav='193'
-dempath=path+event+'/dem/aschwanden/'
-ionizpath=path+event+'/ionization/'
-ionfile=ionizpath+'rois_'+event+'_'+wav+'.sav'
+dempath=event.aschdempath
+ionizpath=event.ionizationpath
+ionfile=ionizpath+'rois_'+date+'_'+label+'_'+wav+'.sav'
 if find_file(ionfile) eq '' then begin
    print,''
    print,'File '+ionfile+' does not exist. Quitting...'
@@ -38,7 +55,7 @@ if find_file(ionfile) eq '' then begin
    return
 endif
 
-
+;Strings for the different wave bands
 waves=['131','171','193','211','335','94']
 nwaves=n_elements(waves)
 
@@ -97,7 +114,7 @@ for t=0,ntimes-1 do begin
 endfor
 
 
-save,filename=dempath+'AschDEM_teem_map_subrois.sav',chidata,emdata,sigdata,tedata,times
+save,filename=dempath+'aschdem_'+date+'_'+label+'_teem_map_subrois.sav',chidata,emdata,sigdata,tedata,times,waves
 
 
 

@@ -30,7 +30,7 @@ pro test_aia_annulus_create
 end
 
 
-pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, centerlat=centerlat, ring_width=ring_width,thrange=thrange,rrange=rrange,datascale=datascale,savename=savename,savepath=savepath,annulus_data=annulus_data,full=full,force=force
+pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, centerlat=centerlat, ring_width=ring_width,thrange=thrange,rrange=rrange,datascale=datascale,savename=savename,savepath=savepath,annulus_data=annulus_data,full=full,force=force,remove_aec=remove_aec
 ;PURPOSE:
 ; Routine to produce RD polar-deprojected data using an annulus technique applied to SDO
 ; images.
@@ -63,8 +63,7 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, 
 ;   2013/09/30, Kamen Kozarev - Added savename, savepath keywords
 ;   2013/11/13, Kamen Kozarev - Integrated the event structure
   
-  tmp=strsplit(event.date,'/',/extract)
-  date=tmp[0]+tmp[1]+tmp[2]
+  date=event.date
   if not keyword_set(wav) then passband = '193' else passband = wav
   if not keyword_set(savepath) then savepath=event.savepath+'annulusplot/'
   if not keyword_set(centerlat) then begin
@@ -116,10 +115,9 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, norm=norm, 
      endif
 
   endif else begin
-     
-     fls=aia_file_search(event.st,event.et,passband,missing=locmissing,/remove_aec)
+     fls=aia_file_search(event.st,event.et,passband,missing=locmissing,remove_aec=remove_aec)
      nsteps=size(fls,/n_elements)
-; Identify AEC-affected images.
+
      read_sdo, fls, ind_arr, /nodata
       ;aia_load_event,event.st,event.et,wav,ind_arr,data,/remove_aec,/nodata
      

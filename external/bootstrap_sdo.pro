@@ -1,4 +1,4 @@
-pro bootstrap_sdo, distance, time, error=error, fit_line, p1, p2, p3, s1, s2, s3
+pro bootstrap_sdo, distance, time, error=error, fit_line, p1, p2, p3, s1, s2, s3, _extra=_extra
 ;+
 ; NAME:
 ;       bootstrap_sdo
@@ -57,7 +57,7 @@ if not keyword_set(error) then error=fltarr(n_elements(time))+1.0e-33
   
   
   fit = mpfitexpr(fit_model, time, distance, h_error, [0., 0.2, 0.00005], perror=perror, $
-                  bestnorm = bestnorm, /quiet)
+                  bestnorm = bestnorm, /quiet, _extra=_extra)
   
   ;original model when Dave sent me this code (Kamen)
   ;yfit = fit[1]*(time-fit[0]) + (1./2.)*fit[2]*(time-fit[0])^2.

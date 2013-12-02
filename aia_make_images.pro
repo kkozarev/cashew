@@ -59,8 +59,7 @@ pro aia_make_images, event, wave, savepath=savepath,force=force,raw=raw,base=bas
   label=event.label
   sts=event.st
   ets=event.et
-  tmp=strsplit(event.date,'/',/extract)
-  date=tmp[0]+tmp[1]+tmp[2]
+  date=event.date
   
   ;The default type is 'raw'
   image_type=''

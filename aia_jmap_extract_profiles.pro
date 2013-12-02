@@ -1,20 +1,12 @@
 pro test_aia_jmap_extract_profiles
-wave=['193']
-events=load_events_info()
-label='110511_01'
-
-event=events[where(events.label eq label)]
-hemisphere=event.hemisphere
-path=event.savepath
-st=event.st
-strin=strsplit(st,'-:/T .',/extract)
-date=strin[0]+strin[1]+strin[2]
-aia_jmap_extract_profiles, date, label, hemisphere, PATH = path, WAVELENGTHS = wave
+  wave=['193']
+  event=load_events_info(label='110511_01')
+  aia_jmap_extract_profiles, event, WAV = wave
 end
 
 
-pro aia_jmap_extract_profiles, date, evnum, location, PATH = path, $
-WAVELENGTHS = wavelengths, START = start, FINISH = finish, $
+pro aia_jmap_extract_profiles, event, PATH = path, $
+WAV = wav, START = start, FINISH = finish, $
 BAS_INDEX = base_index, RUN = run, BASE = base
 ;PURPOSE:
 ; This program rotates the Sun by a user-selected angle
@@ -40,7 +32,7 @@ BAS_INDEX = base_index, RUN = run, BASE = base
 ; Sample Calls:
 ; ; (0)
 ; This call is the most basic. No keywords are used.
-; aia_jmap_extract_profiles, date, evnum, location
+; aia_jmap_extract_profiles, date, evnum, hemisphere
 ; Sample 1:
 ; aia_jmap_extract_profiles, '050113', '0501E', 'E'
 ; Sample 2:
@@ -48,7 +40,7 @@ BAS_INDEX = base_index, RUN = run, BASE = base
 ; (1)
 ; This call is more practical if you are already familiar with the
 ; event and know approximately when the event starts and ends.
-; aia_jmap_extract, date, evnum, location, start = *START*, end = *END*
+; aia_jmap_extract, date, evnum, hemisphere, start = *START*, end = *END*
 ; Sample 1:
 ; aia_jmap_extract, '042313', '0423W', 'W', start = 50, end = 100
 ; Sample 2:
@@ -69,7 +61,7 @@ BAS_INDEX = base_index, RUN = run, BASE = base
 ; (3)
 ; This call is basic, except that you don't want the wavelength
 ; to be 193. You probably want it to be 211, but there are other options.
-; aia_jmap_extract, date, evnum, location, wavelength = *WAVELENGTH*
+; aia_jmap_extract, date, evnum, hemisphere, wavelength = *WAVELENGTH*
 ; Sample 1:
 ; aia_jmap_extract, '042313', '0423W', 'W', wavelength = 171
 ; Sample 2:
@@ -78,7 +70,7 @@ BAS_INDEX = base_index, RUN = run, BASE = base
 ; This call is basic, except that there is a problem with frame 0 in
 ; your data. Thus, you want to choose a different frame to subtract
 ; when calculating the base difference images.
-; aia_jmap_extract, date, evnum, location, bas_index = *BAS_INDEX*
+; aia_jmap_extract, date, evnum, hemisphere, bas_index = *BAS_INDEX*
 ; Sample 1:
 ; aia_jmap_extract, '042313', '0423W', 'W', bas_index = 40
 ; Sample 2:
@@ -86,7 +78,7 @@ BAS_INDEX = base_index, RUN = run, BASE = base
 ; (5)
 ; This call is basic, except that you don't like base
 ; difference images. You want run difference images.
-; aia_jmap_extract, date, evnum, location, /RUN
+; aia_jmap_extract, date, evnum, hemisphere, /RUN
 ; Sample 1:
 ; aia_jmap_extract, '042313', '0423W', 'W', /RUN
 ; Sample 2:
@@ -94,7 +86,7 @@ BAS_INDEX = base_index, RUN = run, BASE = base
 ; (6)
 ; This call is basic, except that you want a strong base image.
 ; Instead of frame 0, you want an average of 5 frames, 0-4.
-; aia_jmap_extract, date, evnum, location, /BASE
+; aia_jmap_extract, date, evnum, hemisphere, /BASE
 ; Sample 1:
 ; aia_jmap_extract, '042313', '0423W', 'W', /BASE
 ; Sample 2:
@@ -104,7 +96,7 @@ BAS_INDEX = base_index, RUN = run, BASE = base
 ; choose a different set of 5 frames to average for the base.
 ; This can be done by setting bas_index to i. Then, the frames that
 ; will be averaged are i, i+1, i+2, i+3, & i+4
-; aia_jmap_extract, date, evnum, location, bas_index = *BAS_INDEX*, /BASE
+; aia_jmap_extract, date, evnum, hemisphere, bas_index = *BAS_INDEX*, /BASE
 ; Sample 1:
 ; aia_jmap_extract, '042313', '0423W', 'W', bas_index = 48, /BASE
 ; Sample 2:
@@ -112,7 +104,7 @@ BAS_INDEX = base_index, RUN = run, BASE = base
 ; (8)
 ; This call is basic, except that you are not on my computer. Thus,
 ; the path needs to be changed so that it actually exists.
-; aia_jmap_extract, date, evnum, location, path = *PATH*
+; aia_jmap_extract, date, evnum, hemisphere, path = *PATH*
 ; Sample 1:
 ; aia_jmap_extract, '042313', '0423W', 'W', path = '~/Documents/events/'
 ; Sample 2:
@@ -134,7 +126,7 @@ BAS_INDEX = base_index, RUN = run, BASE = base
 ;INPUTS:
 ; Date: Write the date in MMDDYY format. (eg 042313)
 ; Evnum: Each event has a unique label.
-; Location: 'E' or 'W', namely east or west
+; Hemisphere: 'E' or 'W', namely east or west
 ;
 ;KEYWORDS:
 ; Path: If the path is not an expected path, include it as a keyword.
@@ -166,13 +158,18 @@ BAS_INDEX = base_index, RUN = run, BASE = base
 ;Written by Michael Hammer, 07/2013
 ;10/17/2013, KAK - made some changes to integrate into the framework.
 
+date=event.date
+label=event.label
+hemisphere=event.hemisphere
+
 ; Global Variables
 RSUN = 6.96e5 ; radius of the Sun in km
 !P.thick = 3 ; thickness of lines that will be drawn
 
+
 ; Determine Wavelength
 ; Possible Wavelengths: 171, 193, 211, 335, 094, 131, 304
-if not keyword_set(WAVELENGTHS) then wavelengths = '193'
+if not keyword_set(WAV) then wavelengths = '193' else wavelengths=wav
 num_waves = n_elements(wavelengths)
 wavelength = wavelengths[0] ; set wavelength
 
@@ -180,15 +177,15 @@ wavelength = wavelengths[0] ; set wavelength
 scratch = getenv('CORWAV')
 scratch = scratch+'events/'
 year = strmid(date,0,4)
-if not keyword_set(PATH) then path=scratch+evnum+'/'
+if not keyword_set(PATH) then path=event.savepath
 
 
 ; Set Date: Places date in YYYYMMDD that is used in file names
 formatted_date = date
 
 ; Restore subdata from .sav file
-eventname='AIA_'+formatted_date+'_'+evnum+'_'+wavelength
-print, 'Loading '+wavelength+' channel AIA data for event #'+evnum
+eventname='AIA_'+formatted_date+'_'+label+'_'+wavelength
+print, 'Loading '+wavelength+' channel AIA data for event #'+label
 restore,path+'/normalized_'+eventname+'_subdata.sav'
 
 ; Make copies of the data
@@ -238,12 +235,12 @@ endif
 
    loadct,9,/silent
    wdef,1,1024
-   user_input=''
-   print,''
-   read,user_input,prompt="What frame do you want to use to select the angle of the shockwave? "
-   print,''
-   chosen_frame = fix(user_input) ; int_of_string
-   
+   ;user_input=''
+   ;print,''
+   ;read,user_input,prompt="What frame do you want to use to select the angle of the shockwave? "
+   ;print,''
+   ;chosen_frame = fix(user_input) ; int_of_string
+   chosen_frame=frames/3
    
    
 ; Display the chosen frame and ask user to select the rotation angle.
@@ -267,17 +264,21 @@ print,''
 print,'Select a point to mark the active region on the Sun. This point will also help determine the rotation angle.'
 print,''
 
-cursor,active_x,active_y,/device
+cursor,active_x,active_y,/device,/down
 print, 'You selected ' + strtrim(active_x,1) + ' ' + strtrim(active_y,1)
 
 ; Draw a radial line through the active region.
-aia_oplot_radial,index,[active_x,active_y],location
+aia_oplot_radial,index,[active_x,active_y],hemisphere
 
-print,''
-read,num_angles_str, $
-     prompt = 'How many other non-radial angles on the shock wave do you want to select? '
-print,''
-num_angles = fix(num_angles_str)
+;DEBUG - KAK 11/29/2013
+;print,''
+;read,num_angles_str, $
+;     prompt = 'How many other non-radial angles on the shock wave do you want to select? '
+;print,''
+;num_angles = fix(num_angles_str)
+num_angles=0
+;DEBUG
+
 num_points = 2*num_angles+1
 ; Initialize Arrays
 wavepoint_x = fltarr(num_points)
@@ -289,36 +290,42 @@ for i=0,num_angles do begin
    i_str = strtrim(string(i),1)
    num_points_str = strtrim(string(num_points),1)
    num_angles_str = strtrim(string(num_angles),1)
-   print, ''
-   print, 'Select a point on the shock wave through which to determine the rotation angle. This will be angle ' + i_str + ' out of ' + num_angles_str + ' angles that you will select.'
-   print, ''
-   if i eq 0 then begin
-      print, 'NOTE: Since this is your 0th angle, select the radial direction. Do it regardless of any reason not to!'
-      print, ''
-   endif else begin
-      print, 'NOTE: Since this is NOT your 0th angle, an angle symmetric to the one you selected will also be selected. This angle will pass through the selected point after it has been reflected over the radial axis.'
-      print,''
-   endelse
+ ;  print, ''
+ ;  print, 'Select a point on the shock wave through which to determine the rotation angle. This will be angle ' + i_str + ' out of ' + num_angles_str + ' angles that you will select.'
+ ;  print, ''
+ ;  if i eq 0 then begin
+ ;     print, 'NOTE: Since this is your 0th angle, select the radial direction. Do it regardless of any reason not to!'
+ ;     print, ''
+ ;  endif else begin
+ ;     print, 'NOTE: Since this is NOT your 0th angle, an angle symmetric to the one you selected will also be selected. This angle will pass through the selected point after it has been reflected over the radial axis.'
+  ;    print,''
+  ; endelse
    
-   cursor,x,y,/down,/device
+   ;cursor,x,y,/down,/device
+   x=active_x
+   y=active_y
    x_str = string(x)
    y_str = string(y)
-   print, 'You selected ' + strtrim(x_str,1) + ' ' + strtrim(y_str,1)
+   ;print, 'You selected ' + strtrim(x_str,1) + ' ' + strtrim(y_str,1)
    if i eq 0 then begin
-      wavepoint_x[0] = x
-      wavepoint_y[0] = y
+      wavepoint_x[0] = active_x
+      wavepoint_y[0] = active_y
    endif else begin
       wavepoint_x[2*i-1] = x
       wavepoint_y[2*i-1] = y
    endelse
 
    ; Draw Lines through Points
-   plots, [x,active_x], [y,active_y], /device, color = 55 
-   rad_angle = atan(float(y - active_y)/float(x - active_x))
-   angle = round(100*rad_angle * 180 /!PI)/100.0
-   print, 'This yields an angle of ' + strtrim(angle,1) + ' degrees'
-   print, 'In radians, this is ' + strtrim(rad_angle,1) 
-
+   ;plots, [x,active_x], [y,active_y], /device, color = 55 
+   ;rad_angle = atan(float(y - active_y)/float(x - active_x))
+   rad_angle=atan((y_c-active_y)/(x_c-active_x))
+   ;rad_angle = atan(float(0 - active_y)/float(0 - active_x))
+   angle = round(rad_angle * 180. /!PI)
+   ;print, 'This yields an angle of ' + strtrim(angle,1) + ' degrees'
+   ;print, 'In radians, this is ' + strtrim(rad_angle,1) 
+   
+   
+   
    if i eq 0 then begin
       wavepoint_x[0] = x
       wavepoint_y[0] = y
@@ -342,7 +349,7 @@ for i=0,num_angles do begin
       d_squared = (x - active_x)^2 + (y - active_y)^2
       d = sqrt(d_squared) ; distance to active region
 
-      if location eq 'W' then begin
+      if hemisphere eq 'W' then begin
          sym_x = active_x + d*cos(sym_rad_angle)
          sym_y = active_y + d*sin(sym_rad_angle)
       endif else begin
@@ -361,6 +368,7 @@ for i=0,num_angles do begin
       wave_angle[2*i] = sym_angle
    endelse
 endfor
+
 
 ; Calculate rotation angles relative to the radial rotation angle
 adjusted_wave_angle = wave_angle - radial_rotation_angle
@@ -391,9 +399,9 @@ wavelength = wavelengths[w]
 
 if w ne 0 then begin ; If w ne 0, then the data has not been loaded yet.
    ; Restore subdata from .sav file
-   eventname='AIA_'+formatted_date+'_'+evnum+'_'+wavelength
-   print, 'Loading '+wavelength+' channel AIA data for event #'+evnum
-   restore,path+'e'+evnum+'/normalized_'+eventname+'_subdata.sav'
+   eventname='AIA_'+formatted_date+'_'+label+'_'+wavelength
+   print, 'Loading '+wavelength+' channel AIA data for event #'+label
+   restore,path+'e'+label+'/normalized_'+eventname+'_subdata.sav'
 
    ; Make copies of the data
    data = subdata
@@ -428,7 +436,7 @@ for i=0,num_points-1 do begin ; Points Loop
 
   ; If the event is on the east limb, reflect the image.
   ; This will happen only in the final plot.
-  if location eq 'E' then reflector = 1 else reflector = 0
+  if hemisphere eq 'E' then reflector = 1 else reflector = 0
 
   ; If the user doesn't want to see the rotated images, then
   ; you should still show one image so that the user can select
@@ -530,48 +538,48 @@ for i=0,num_points-1 do begin ; Points Loop
          [middle, middle], $
          /device, color = 55
 
-  print,''
-  print, 'Select an x-cor to indicate one solar radius'
-  cursor,x,y,/down,/device
-  plot_oneRSUN = x
-  print, '1 Solar Radius: ' + strtrim(string(plot_oneRSUN),1)
+  ;print,''
+  ;print, 'Select an x-cor to indicate one solar radius'
+  ;cursor,x,y,/down,/device
+  plot_oneRSUN = abs(x_c)
+  print, '1 Solar Radius: ' + strtrim(string(plot_oneRSUN),1)+' px'
   
 
-  print,''
-  plot_inner_x=''
-  read,plot_inner_x,prompt='Do you want to select an innermost x-position for the plot? (y/n) '
-  print,''
+  ;print,''
+  plot_inner_x='n'
+  ;read,plot_inner_x,prompt='Do you want to select an innermost x-position for the plot? (y/n) '
+  ;print,''
 
-  if plot_inner_x eq 'n' then plot_inner_x = plot_oneRSUN $
-  else begin
-     print, 'Select an innermost x-position to start the plot'
-     cursor,x,y,/down,/device
-     plot_inner_x = x
-     print, 'Inner x: ' + strtrim(string(x),1)
-  endelse
+  if plot_inner_x eq 'n' then plot_inner_x = plot_oneRSUN ;$
+  ;else begin
+  ;   print, 'Select an innermost x-position to start the plot'
+  ;   cursor,x,y,/down,/device
+  ;   plot_inner_x = x
+  ;   print, 'Inner x: ' + strtrim(string(x),1)
+  ;endelse
   
-  print,''
-  plot_outer_x=''
-  read,plot_outer_x,prompt='Do you want to select an outermost x-position for the plot? (y/n) '
-  print,''
+  ;print,''
+  plot_outer_x='n'
+  ;read,plot_outer_x,prompt='Do you want to select an outermost x-position for the plot? (y/n) '
+  ;print,''
 
   if plot_outer_x eq 'n' then begin
-     if location eq 'W' then plot_outer_x = n_elements(expanse[*,0,0]) - 1 $
-     else if location eq 'E' then plot_outer_x = 0
-  endif else begin
-     print, 'Select an outermost x-position to start the plot'
-     cursor,x,y,/down,/device
-     plot_outer_x = x
-     print, 'Outer x: ' + strtrim(string(x),1)
-  endelse
+     if hemisphere eq 'W' then plot_outer_x = n_elements(expanse[*,0,0]) - 1 $
+     else if hemisphere eq 'E' then plot_outer_x = 0
+  endif ;else begin
+     ;print, 'Select an outermost x-position to start the plot'
+     ;cursor,x,y,/down,/device
+     ;plot_outer_x = x
+     ;print, 'Outer x: ' + strtrim(string(x),1)
+  ;endelse
 
-  wait,3.0 ; Pause so that you have time to see the rotation
+  wait,1.0 ; Pause so that you have time to see the rotation
   offset = 5
   ; For 1-D shock wave array, use the y-cor of the active region, not N/2
   ; Actually, N/2 is the new y-cor of the active region
   shock_y = middle
 
-  ; If location eq 'E' then that is bad since outer_x < inner_x
+  ; If hemisphere eq 'E' then that is bad since outer_x < inner_x
   if plot_outer_x ge plot_oneRSUN then begin
      plot_left_x = plot_oneRSUN
      plot_right_x = plot_outer_x
@@ -627,22 +635,23 @@ for i=0,num_points-1 do begin ; Points Loop
   data_subindex = index
   data_rotation_angle = adjusted_wave_angle[i]
   data_date = date
-  data_evnum = evnum
+  data_label = label
   data_inner_x_index = plot_inner_x_index
   data_start = plot_start_frame_i
   data_wavelength = wavelength
   data_revision_num_str = revision_num_str
 
   ; Save the duplicate variables
-  save_path = path
-  save_name = 'jmap_data_' + evnum + '_' + wave_str + '_'
-  save_num = 'r' + revision_num_str + '.sav'
+  save_path = path+'kinematics/'
+  save_name = 'jmap_data_' + label + '_' + wave_str ; + '_'
+  ;save_num = 'r' + revision_num_str + '.sav'
+  save_num = '.sav'
   save_filename = save_path + save_name + save_num
   save,data_thin_wave,data_subindex,data_rotation_angle,$
-       data_date,data_evnum,data_inner_x_index,data_start,$
+       data_date,data_label,data_inner_x_index,data_start,$
        data_wavelength,data_revision_num_str,$
        filename = save_filename
-
+  
   ; Save Information so that user knows what is in the plot
   ; Be careful not to use repeat names
   ; These names are for reference and probably will not be restored
@@ -660,11 +669,12 @@ for i=0,num_points-1 do begin ; Points Loop
   plot_x_innermost = plot_inner_x
   plot_x_outermost = plot_outer_x
   good_exposure_indices = good_exposures
-
+  
   ; Save the duplicate variables
   info_path = save_path
-  info_name = 'jmap_info_' + evnum + '_' + wave_str + '_'
-  info_num = 'r' + revision_num_str + '.sav'
+  info_name = 'jmap_info_' + label + '_' + wave_str ; + '_'
+  ;info_num = 'r' + revision_num_str + '.sav'
+  info_num = '.sav'
   info_filename = info_path + info_name + info_num
   save,active_region_x,active_region_y,$
        plotted_frame_initial,plotted_frame_final,$
@@ -677,13 +687,13 @@ for i=0,num_points-1 do begin ; Points Loop
        filename = info_filename
   print, 'J-map Data and Info have been saved'
   
-  print,''
-  print,'Next, you should probably run run_polyfill_process'
-  polyfill_process_mhammer, thin_wave, index, adjusted_wave_angle[i], date, evnum, $
-                    wavelength = wavelength, $
-                    start = plot_start_frame_i, $
-                   revision_num = revision_num_str, $
-                    inner_x = plot_inner_x_index
+ ; print,''
+ ; print,'Next, you should probably run run_polyfill_process'
+ ; polyfill_process_mhammer, thin_wave, index, adjusted_wave_angle[i], date, label, $
+ ;                   wavelength = wavelength, $
+ ;                   start = plot_start_frame_i, $
+ ;                  revision_num = revision_num_str, $
+ ;                   inner_x = plot_inner_x_index
 
 endfor ; Points Loop
 

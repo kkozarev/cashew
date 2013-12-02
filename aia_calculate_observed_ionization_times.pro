@@ -1,5 +1,5 @@
 ;+============================================================================
-pro test_calculate_observed_ionization_times
+pro test_aia_calculate_ionization_times
 ;This procedure runs the aia_calculate_observed_ionization_times procedure for multiple events
 ;Kamen Kozarev, 10/31/2011
 ;This is made for the 2011 events - needs to be updated.
@@ -10,21 +10,39 @@ pro test_calculate_observed_ionization_times
 ; 2) 193/335
 ; 3) 211/335
 ;more to come later...
-ratios=[1,2,3]
-nratios=n_elements(ratios)
-numrois=5
+  ratios=[1]
+  nratios=n_elements(ratios)
+  numrois=8
 ;This array contains the observed ionization timescales for various
 ;events and wavelength ratios
-ionizTimes=fltarr(nevents,nratios,numrois)
+  
+;You can run for one event, like this.
+  one=1
+  if one eq 1 then begin
+     event=load_events_info(label='110511_01')
+     ionizTimes=fltarr(nratios,numrois)
+     for r=0,nratios-1 do begin
+        aia_calculate_ionization_times,event,ratios[r],iontimes
+        ionizTimes[r,*]=iontimes
+     endfor
+  endif
+  
+ 
+;Alternatively, run for all events
+  all=0
+  if all eq 1 then begin
+     ionizTimes=fltarr(nevents,nratios,numrois)
+     events=load_events_info()
+     for ev=0,n_elements(events)-1 do begin   
+        event=events[ev]
+        for r=0,nratios-1 do begin
+           aia_calculate_ionization_times,event,ratios[r],iontimes
+           ionizTimes[e,r,*]=iontimes
+        endfor
+     endfor
+  endif
 
-events=load_events_info()
-for ev=0,n_elements(events)-1 do begin   
-   event=events[ev]
-   for r=0,nratios-1 do begin
-      aia_calculate_ionization_times,event,ratios[r],iontimes,inpath=event.savepath
-      ionizTimes[e,r,*]=iontimes
-   endfor
-endfor
+stop
 end
 ;-============================================================================
 
@@ -58,10 +76,10 @@ pro aia_calculate_ionization_times, event, ratio, obsIonizTimes,inpath=inpath
 ;
 
 ;Constants and definitions:
-if not keyword_set(inpath) then inpath=event.savepath
+if not keyword_set(inpath) then inpath=event.ionizationpath
 wave=['193','211']
 label=event.label
-
+date=event.date
 ;The ratios of wavelengths:
 ; 1) 193/211
 ; 2) 193/335
@@ -80,11 +98,11 @@ nwaves=n_elements(wave)
 ;positions off the solar limb for the two EUV channels.
 ;roi_subdata=fltarr(NUMROI,M,M,N)
 ;roi_subindex=fltarr(N)
-restore,inpath+'ionization/rois_'+label+'_'+wave[0]+'.sav'
+restore,inpath+'rois_'+date+'_'+label+'_'+wave[0]+'.sav'
 index1=roi_subindex
 data1=roi_subdata
 
-restore,inpath+'ionization/rois_'+label+'_'+wave[1]+'.sav'
+restore,inpath+'rois_'+date+'_'+label+'_'+wave[1]+'.sav'
 index2=roi_subindex
 data2=roi_subdata
 
@@ -129,7 +147,7 @@ xrange=[min(times)/60.0-0.1,max(times)/60.0+0.1]
 
 if minind eq 0 then minind=index1 else minind=index2
 reltime=strmid(minind[0].date_obs,11,8)
-date=strmid(minind[0].date_obs,0,10)
+date=event.date ;strmid(minind[0].date_obs,0,10)
 csize=2.4
 
 ;Plot the ratio'd time series for every ROI. Smooth if need be...
@@ -141,7 +159,7 @@ for r=0,numroi-1 do begin
 
    plot, times/60.0,ratios[r,*],$
          psym=0+5,symsize=1,$
-         title='Flux ratio time series, AIA '+wave[0]+'/'+wave[1],$
+         title='Flux ratio time series, AIA '+wave[0]+'/'+wave[1]+' R'+strtrim(string(r+1),2),$
          xtitle='Time relative to '+reltime+'UT, '+date+', [min]', $
          ytitle='AIA Intensity ratio',$
          thick=4,xthick=2,ythick=2,charsize=csize,charthick=3,$
@@ -150,9 +168,10 @@ for r=0,numroi-1 do begin
   
 ;Ask the user to select the start of the event by clicking on the
 ;graph.
-   print,'SUBROI #'+string(r+1)
+   print,'SUBROI #'+strtrim(string(r+1),2)
    print,'Select the start of the ratio increase on the plot:'
    cursor,x,y,/data
+   xind=min(where(times/60. ge x))
    startTime=x*60.0
 
 ; Overplot a vertical line on that position.
@@ -160,17 +179,17 @@ for r=0,numroi-1 do begin
    wait,0.3
 
 ;Find the peak of the ratio time series automatically. 
-   tmp=max(ratios[r,*],ind)
-   peaktime=times[ind]
+   tmp=max(ratios[r,xind:*],ind)
+   peaktime=times[xind+ind]
    plots,[peaktime/60.0,peaktime/60.0],[yrange[0],yrange[1]],/data,color=0,linestyle=2,thick=2
 
 ;------------------------------------------------------------------------------------------
 ;Plot the flux ratio in a separate png plot.
    set_plot,'ps'
    ;set_plot,'x'
-   fname='ionization_ratio_'+label+'_subroi'+strtrim(string(r+1),2)+'_'+wave[0]+'_'+wave[1]
+   fname='ionization_ratio_'+date+'_'+label+'_r'+strtrim(string(r+1),2)+'_'+wave[0]+'_'+wave[1]
    ;tvlct,rr,gg,bb,/get
-device,file=inpath+'ionization/'+fname+'.eps',$
+device,file=inpath+fname+'.eps',$
           /inches,xsize=10.0,ysize=10.0,$
           /encaps,/color,/helvetica
    
@@ -191,17 +210,19 @@ device,file=inpath+'ionization/'+fname+'.eps',$
    ;write_png,fname+'.png',image,rr,gg,bb
    device,/close
    set_plot,'x'
-   exec='convert -flatten '+inpath+'ionization/'+fname+'.eps '+inpath+'ionization/'+fname+'.png'
+   exec='convert -flatten '+inpath+fname+'.eps '+inpath+fname+'.png; rm '+inpath+fname+'.eps'
    spawn,exec
 ;------------------------------------------------------------------------------------------
 
 ;The time difference is the observed ionization time scale.
    obsIonizTimes[r]=peaktime-starttime
-   print,'The observed ionization timescale (in seconds) is:'
-   print,obsIonizTimes[r]
+   print,''
+   print,'The observed ionization timescale is '+ strtrim(string(obsIonizTimes[r]),2)+ ' seconds.'
    print,''
    wait,0.5
 endfor	;The SUBROI loop
+
+save,filename=inpath+'ionization_'+date+'_'+label+'_'+wave[0]+'_'+wave[1]+'_timescales.sav',obsIonizTimes,wave,times,ratios
 
 end
 ;-============================================================================

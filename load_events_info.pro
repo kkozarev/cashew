@@ -35,7 +35,7 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
      if tmp[0] eq -1 then begin
         if not keyword_set(quiet) then begin
            print,''
-           print,'Event "'+label+'" does not exist! Quitting...' 
+           print,'Event "'+label+'" does not exist! Quitting...'
            print,''
         endif
         return,-1
@@ -146,7 +146,8 @@ events[ev].hemisphere=hemisphere[ev]
 ;An attempt to get the AR coordinates in degrees
 tmp=strsplit(sts[ev],' ',/extract)
 dat=tmp[0]
-events[ev].date=dat
+tmp=strsplit(dat,'/',/extract)
+events[ev].date=tmp[0]+tmp[1]+tmp[2]
 res=arcmin2hel(coordX[ev]/60.,coordY[ev]/60.,date=dat)
 events[ev].arlat=res[0]
 events[ev].arlon=res[1]

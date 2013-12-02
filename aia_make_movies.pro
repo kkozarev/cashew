@@ -82,8 +82,7 @@ movie_path=path
 
 
 ;Prepare the date string
-tmp=strsplit(event.date,'/',/extract)
-date=tmp[0]+tmp[1]+tmp[2]
+date=event.date
 
 process = '/usr/local/bin/ffmpeg -y -f image2 -r '
 path_call = ' -i '

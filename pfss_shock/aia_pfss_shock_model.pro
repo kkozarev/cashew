@@ -1,10 +1,9 @@
 pro test_aia_coronal_shock_model
 ;Test the shock modeling procedure
   
-  ev='110511_01'
-  event=load_events_info(label=ev)
-  pfssfile=savepath+'pfss_results_20110511_1.1Rs_dens_1.sav'
-  aia_coronal_shock_model,event,pfssfile
+  event=load_events_info(label='110511_01')
+  ;pfssfile=savepath+'pfss_results_20110511_110511_01_1.1Rs_dens_1.sav'
+  aia_coronal_shock_model,event;,pfssfile=pfssfile
 end
 
 
@@ -15,7 +14,7 @@ end
 
 
 
-pro aia_pfss_shock_model,event,pfssfile,wav=wav,vupstream=vupstream,shockcomp=shockcomp,outpath=outpath
+pro aia_pfss_shock_model,event,wav=wav,vupstream=vupstream,shockcomp=shockcomp,outpath=outpath,pfssfile=pfssfile
 ;PURPOSE:
 ; An implementation of the pfss shock model
 ;
@@ -37,10 +36,11 @@ pro aia_pfss_shock_model,event,pfssfile,wav=wav,vupstream=vupstream,shockcomp=sh
 ;Written by Kamen Kozarev, 11/08/2011
 ;
 if not keyword_set(wav) then wav='193'
-tmp=strsplit(event.date,'/',/extract)
-date=tmp[0]+tmp[1]+tmp[2]
+date=event.date
+label=event.label
 savepath=event.savepath
-shockfile=savepath+'AIA_'+date+'_'+event.label+'_'+wav+'sphere_shocklocations.sav'
+shockfile=savepath+'AIA_'+date+'_'+label+'_'+wav+'sphere_shocklocations.sav'
+if not keyword_set(pfssfile) then pfssfile=event.pfsspath+'pfss_results_'+date+'_'+label+'_1.1Rs_dens_1.sav'
 
 ;+==================================================================================
 ;LOAD DATA
