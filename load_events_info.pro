@@ -29,6 +29,7 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
 ;- Continuously updated list of events.
 ;----------------------------------------------------------------------------------------
   basepath=GETENV('CORWAV');Usually, it will be /Volumes/Backscratch/Users/kkozarev/corwav/ or similar
+  webbasepath=GETENV('CORWAV_WEB')
   labels=['110125_01','110128_01','110211_02','110511_01','110804_01','110809_01','111020_01','111109_01','120424_01','120526_01','120728_01','120915_01','121007_01','130423_01','130501_01','130517_01','131106_01','131029_01']
   if keyword_set(label) then begin
      tmp=where(labels eq label)
@@ -41,7 +42,7 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
         return,-1
      endif
   endif
-  
+  ;785,399 (710) for event 110511_01
 ;AR arcsecond coordinates
   coordX=[-955,777,-1073,785,564,883,1005,-752,-1019,899,-745,806,-932,999,-865,-576,-576,990]
   coordY=[-248,391,11,399,186,269,374,580,247,416,-662,422,378,-399,237,192,-269,38]
@@ -70,7 +71,7 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
 ets=['2011/01/25 12:26:00',$
      '2011/01/28 01:15:00',$
      '2011/02/11 13:00:00',$
-     '2011/05/11 02:40:00',$    ;02:40:00'
+     '2011/05/11 02:40:00',$
      '2011/08/04 04:20:00',$
      '2011/08/09 08:20:00',$
      '2011/10/20 03:35:00',$
@@ -109,12 +110,36 @@ comment=['Loop catches up to initial shock wave',$
 flareclass=['','M1.3','','B8.1','M9.3','X6.9','M1.6','M1.1','C3.7','','M6.1','B9.6','C1.2','','','M3.2','M3.8','X2.3']
 aiafov=[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
 
-
+nrh_lookup=['','','','','',$
+            'http://secchirh.obspm.fr/survey.php?hour=0800&dayofyear=20110809&composite=2','',$
+            'http://secchirh.obspm.fr/survey.php?hour=1300&dayofyear=20111109&composite=2','','','','','','','',$
+            '','','']
+callisto_lookup=['','','','',$
+                 'http://soleil.i4ds.ch/solarradio/qkl/2011/08/04/OOTY_20110804_034501_59.fit.gz.png',$
+                 'http://soleil.i4ds.ch/solarradio/qkl/2011/08/09/ALMATY_20110809_080000_59.fit.gz.png',$
+                 'http://soleil.i4ds.ch/solarradio/qkl/2011/10/20/GAURI_20111020_030000_59.fit.gz.png',$
+                 'http://soleil.i4ds.ch/solarradio/qkl/2011/11/09/BIR_20111109_130000_02.fit.gz.png',$
+                 'http://soleil.i4ds.ch/solarradio/qkl/2012/04/24/DARO_20120424_074502_58.fit.gz.png','','','','',$
+                 'http://soleil.i4ds.ch/solarradio/qkl/2013/04/23/BIR_20130423_181500_01.fit.gz.png','',$
+                 '','','']
+ips_site='http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/'
+ips_lookup=['',$
+            ips_site+'culgoora/images/11/20110128spectrograph.gif','',$
+            ips_site+'learmonth/images/11/20110511spectrograph.gif',$
+            ips_site+'culgoora/images/11/20110804spectrograph.gif','','','',$
+            ips_site+'learmonth/images/12/20120424spectrograph.gif',$
+            ips_site+'culgoora/images/12/20120527spectrograph.gif',$
+            ips_site+'culgoora/images/12/20120729spectrograph.gif',$
+            ips_site+'learmonth/images/12/20120916spectrograph.gif',$
+            ips_site+'culgoora/images/12/20121008spectrograph.gif','',$
+            ips_site+'learmonth/images/13/20130501spectrograph.gif',$
+            '','','']
 
 ;DATAPATHS
 aia_datapath=basepath+'AIA_data/'
 nrh_datapath=basepath+'NRH_data/'
 ips_datapath=basepath+'IPS_data/'
+callisto_datapath=basepath+'Callisto_data/'
 rhessi_datapath=basepath+'RHESSI_data/'
 euvi_datapath=basepath+'EUVI_data/'
 swap_datapath=basepath+'SWAP_data/'
@@ -122,7 +147,7 @@ pfss_datapath=basepath+'PFSS_data/'
 
 ;SAVEPATHS
 savepath=basepath+'events/' ;The base savepath
-
+webpath=webbasepath+'events/'
 ;FILENAMES
 
 ;----------------------------------------------------------------------------------------
@@ -130,11 +155,12 @@ savepath=basepath+'events/' ;The base savepath
 
 nevents=n_elements(labels)
 event={label:'',st:'',et:'',coordX:0,coordY:0,aiafov:intarr(2),hemisphere:'',date:'',$
-       arlon:0.,arlat:0.,flareclass:'',typeII:0,loop:0,filament:0,comment:'',$
-       aia_datapath:'',nrh_datapath:'',rhessi_datapath:'',ips_datapath:'',$
-       euvi_datapath:'',swap_datapath:'',pfss_datapath:'',savepath:'',$
-       moviepath:'',radiopath:'',nrhpath:'',ipspath:'',annuluspath:'',pfsspath:'',$
-       swappath:'',ionizationpath:'',aschdempath:'',weberpath:'',$
+       arlon:0.,arlat:0.,geomcorfactor:0.,flareclass:'',typeII:0,loop:0,filament:0,comment:'',$
+       aia_datapath:'',nrh_datapath:'',rhessi_datapath:'',ips_datapath:'',callisto_datapath:'',$
+       ips_lookup:'',callisto_lookup:'',nrh_lookup:'',$
+       euvi_datapath:'',swap_datapath:'',pfss_datapath:'',savepath:'',webpath:'',$
+       moviepath:'',radiopath:'',nrhpath:'',ipspath:'',callistopath:'',annuluspath:'',pfsspath:'',$
+       swappath:'',ionizationpath:'',aschdempath:'',weberpath:'',particlespath:'',$
       euvipath:'',dempath:'',pngpath:'',yaftawavepath:'',kinematicspath:''}
 events=replicate(event,nevents)
 
@@ -151,6 +177,8 @@ events[ev].date=tmp[0]+tmp[1]+tmp[2]
 res=arcmin2hel(coordX[ev]/60.,coordY[ev]/60.,date=dat)
 events[ev].arlat=res[0]
 events[ev].arlon=res[1]
+events[ev].geomcorfactor=1.0/sin(events[ev].arlon*!PI/180.)
+;if ev eq 3 then print,res[0]
 events[ev].st=sts[ev]
 events[ev].et=ets[ev]
 events[ev].typeII=typeII[ev]
@@ -158,9 +186,14 @@ events[ev].loop=loop[ev]
 events[ev].filament=filament[ev]
 events[ev].comment=comment[ev]
 events[ev].flareclass=flareclass[ev]
+events[ev].nrh_lookup=nrh_lookup[ev]
+events[ev].callisto_lookup=callisto_lookup[ev]
+events[ev].ips_lookup=ips_lookup[ev]
+
 ;datapaths
 events[ev].aia_datapath=aia_datapath
 events[ev].nrh_datapath=nrh_datapath
+events[ev].callisto_datapath=callisto_datapath
 events[ev].rhessi_datapath=rhessi_datapath
 events[ev].ips_datapath=ips_datapath
 events[ev].swap_datapath=swap_datapath
@@ -169,10 +202,12 @@ events[ev].pfss_datapath=pfss_datapath
 
 ;savepaths
 events[ev].savepath=savepath+events[ev].label+'/'
+events[ev].webpath=webpath+events[ev].label+'/'
 events[ev].moviepath=events[ev].savepath+'movies/'
 events[ev].radiopath=events[ev].savepath+'radio/'
 events[ev].nrhpath=events[ev].radiopath+'NRH/'
 events[ev].ipspath=events[ev].radiopath+'IPS/'
+events[ev].callistopath=events[ev].radiopath+'Callisto/'
 events[ev].annuluspath=events[ev].savepath+'annulusplot/'
 events[ev].pfsspath=events[ev].savepath+'pfss/'
 events[ev].swappath=events[ev].savepath+'swap/'
@@ -184,6 +219,7 @@ events[ev].weberpath=events[ev].dempath+'weber/'
 events[ev].pngpath=events[ev].savepath+'png/'
 events[ev].yaftawavepath=events[ev].savepath+'yaftawave/'
 events[ev].kinematicspath=events[ev].savepath+'kinematics/'
+events[ev].particlespath=events[ev].savepath+'particles/'
 
 ;Field of view, in pixels
 events[ev].aiafov=[1024,1024]
