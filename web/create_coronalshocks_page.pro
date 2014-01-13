@@ -98,7 +98,7 @@ pro create_coronalshocks_page, fname
         printf,lun,'<td><a href='+event.nrh_lookup+' target="_blank">NRH</a></td>'
      if event.ips_lookup eq '' then printf,lun,'<td>&nbsp;</td>' else $
         printf,lun,'<td><a href='+event.ips_lookup+' target="_blank">IPS</a></td>'
-
+ 
      ;The Raw movie
      movname='events/'+event.label+'/movies/raw_193_'+event.label+'.mp4'
      if file_exist(event.webpath+'movies/raw_193_'+event.label+'.mp4') then $
@@ -135,8 +135,8 @@ pro create_coronalshocks_page, fname
            printf,lun,'<td>&nbsp;</td>'
      
      ;The PFSS/Shock movie
-     movname='events/'+event.label+'/movies/AIA_PFSS_SHOCK.mov'
-     if file_exist(event.webpath+'movies/AIA_PFSS_SHOCK.mov') then $
+     movname='events/'+event.label+'/movies/aia_pfss_shock_'+event.date+'_'+event.label+'.mp4'
+     if file_exist(event.webpath+'movies/aia_pfss_shock_'+event.date+'_'+event.label+'.mp4') then $
         printf,lun,'<td><a href="'+movname+'" target="_blank">PSHOCK</a></td>' else $
            printf,lun,'<td>&nbsp;</td>'
      
