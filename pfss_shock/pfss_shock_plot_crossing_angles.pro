@@ -1,4 +1,4 @@
-pro pfss_shock_plot_crossing_angles,allcrossPoints,nsteps,allcrosses,radiusfitlines,vertex_list,allcrossangles,subindex,suncenter,vert_rotmat,vert_transmat,sc,datapath=datapath
+pro pfss_shock_plot_crossing_angles,event,infile
 ;PURPOSE:
 ;Plot the crossing points on the polar projection of the shock
 ;surface with their color signifying the crossing angle.
@@ -13,7 +13,7 @@ pro pfss_shock_plot_crossing_angles,allcrossPoints,nsteps,allcrosses,radiusfitli
 ;INPUTS:
 ;
 ;KEYWORDS:
-; 
+;  
 ;
 ;OUTPUTS:
 ;
@@ -23,11 +23,18 @@ pro pfss_shock_plot_crossing_angles,allcrossPoints,nsteps,allcrosses,radiusfitli
 ;
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 2011
-;
-
+;Updated by Kamen Kozarev on 12/06/2013
+  
+  savepath=event.pfsspath
+  
+  print,''
+  print,'Loading file '+infile
+  print,''
+  restore,infile
+  
   deproj_cross_points = allcrossPoints
   sunrad=subindex[0].r_sun+10
-  kmpx=subindex[0].IMSCL_MP*subindex[0].RSUN_REF/(1000.0*subindex[0].RSUN_OBS)
+  KMPX=subindex[0].IMSCL_MP*subindex[0].RSUN_REF/(1000.0*subindex[0].RSUN_OBS)
   minshockrad = radiusfitlines[0]/kmpx
   maxshockrad = radiusfitlines[nsteps-1]/kmpx
   xcenter=suncenter[0]
@@ -85,7 +92,6 @@ pro pfss_shock_plot_crossing_angles,allcrossPoints,nsteps,allcrosses,radiusfitli
 
   for sstep=0,nsteps-1 do begin
 
-
      shockrad=radiusfitlines[sstep]/kmpx
      shscale=maxshockrad/shockrad
      pos=reform(allcrossPoints[sstep,*,0:allcrosses[sstep]-1])
@@ -117,30 +123,30 @@ pro pfss_shock_plot_crossing_angles,allcrossPoints,nsteps,allcrosses,radiusfitli
      
      ;Contour data on regular grid
      PLOTS,flx,fly,psym=sym(1),symsize=1.8,color=(th-minn)/(maxx-minn)*254.,/data
-     
  
+     fcolorbar, MIN=minn,MAX=maxx,Divisions=4, $
+                Color=0,VERTICAL=1,RIGHT=1, TITLE=thlet+'!DBN!N [deg]',$
+                CHARSIZE=3, format='(i)',Position=[0.9, 0.4, 0.93, 0.8]
+     
      if sstep lt nsteps-1 then begin
         image=tvrd(true=1)
         in=strtrim(string(sstep),2)
         if sstep lt 100 then in='0'+in
         if sstep lt 10 then in='0'+in
-        fname=datapath+'thetabn_orientation_'+in+'.png'
+        fname=datapath+'thetabn_'+event.date+'_'+event.label+'_'+in+'.png'
         write_png,fname,image,rr,gg,bb
      endif
 
   endfor
   
+ 
   
-  fcolorbar, MIN=minn,MAX=maxx,Divisions=4, $
-             Color=0,VERTICAL=1,RIGHT=1, TITLE=thlet+'!DBN!N [deg]',$
-             CHARSIZE=3, format='(i)',Position=[0.9, 0.4, 0.93, 0.8]
-  
-  image=tvrd(true=1)
-  in=strtrim(string(sstep),2)
-  if sstep lt 100 then in='0'+in
-  if sstep lt 10 then in='0'+in
-  fname=datapath+'thetabn_orientation_'+in+'.png'
-  write_png,fname,image,rr,gg,bb
+ ; image=tvrd(true=1)
+ ; in=strtrim(string(sstep),2)
+ ; if sstep lt 100 then in='0'+in
+ ; if sstep lt 10 then in='0'+in
+ ; fname=datapath+'thetabn_orientation_'+in+'.png'
+ ; write_png,fname,image,rr,gg,bb
 
 ;---------------------------------------------------------------------------------------
 
