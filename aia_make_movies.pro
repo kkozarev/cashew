@@ -1,23 +1,24 @@
 pro test_aia_make_movies
 
   ;You can run this for a single event, like so
-  one=0
+  one=1
   if one eq 1 then begin
      label='110511_01'
 ;  label='110125_01'
      event=load_events_info(label=label)
-     movie_type='araw'
+     movie_type='pfss_shock'
      wavelength='193'
      aia_make_movies, event, movie_type=movie_type, wav=wavelength, FRAMES_PER_SECOND = frames_per_second,/force
   endif
   
   ;Alternatively, run it for all/multiple events
-  all=1
+  all=0
   if all eq 1 then begin
      events=load_events_info()
      wavelengths=['193','211']
-    ; movie_types=['raw','base','run']
-     movie_types=['araw']
+     ;movie_types=['raw','base','run']
+     movie_types=['araw','abase','arun']
+    ; movie_types=['araw']
      nevents=n_elements(events)
      for ev=0,nevents-1 do begin
         event=events[ev]
@@ -51,6 +52,11 @@ pro aia_make_movies, event, wav=wav, FRAMES_PER_SECOND = frames_per_second, PATH
 ;                             original data
 ;            'araw', 'abase', 'arun' - raw or base/running difference from
 ;                                the deprojected data
+;            'teem' - The Aschwanden DEM maps.
+;            'pfss_shock' - the PFSS/Shock model images
+;            'thetabn' - A movie showing the ThetaBN angle as a
+;                         function of the shock surface position
+;
 ;            Default is 'raw'
 ;	WAV: wavelength of the AIA channel, 
 ;              string - 94,131,171,193,211,304,335
@@ -83,6 +89,7 @@ movie_path=path
 
 ;Prepare the date string
 date=event.date
+label=event.label
 
 process = '/usr/local/bin/ffmpeg -y -f image2 -r '
 path_call = ' -i '
@@ -97,19 +104,54 @@ ffmpeg_params2 = ' -bufsize "28311k" -maxrate "28311k" -g "100" -coder 1 -profil
 savepath=path+'png/'
 movie_path=path+'movies/'
 pngfname='normalized_AIA_'+date + '_' + event.label + '_' + wavelength + "_subdata_" + movie_type
+;The png image files
+imgfnames = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_%03d.png'
+imgsearch = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_*.png'
+moviefname = movie_path + movie_type + '_' + wavelength + '_' + label + '.mp4'
+
 
 if movie_type eq 'araw' or movie_type eq 'arun' or movie_type eq 'abase' then begin
    savepath=path+'annulusplot/'
    movie_path=path+'movies/'
    tp=strmid(movie_type,1)
    pngfname='annplot_'+date+'_'+event.label+'_'+wavelength+'_'+tp
+;The png image files
+   imgfnames = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_%03d.png'
+   imgsearch = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_*.png'
+   moviefname = movie_path + movie_type + '_' + wavelength + '_' + label + '.mp4'
 endif
 
 
-;The png image files
-imgfnames = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_%03d.png'
-imgsearch = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_*.png'
-moviefname = movie_path + movie_type + '_' + wavelength + '_' + event.label + '.mp4'
+if movie_type eq 'teem' then begin
+   savepath=event.aschdempath
+   movie_path=event.moviepath
+   pngfname='aschdem_'+date+'_'+label
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%06d_teem_map.png'
+   imgsearch = savepath + pngfname + '_*_teem_map.png'
+   moviefname = movie_path + pngfname + '.mp4'
+endif
+
+
+if movie_type eq 'pfss_shock' then begin
+   savepath=event.pfsspath
+   movie_path=event.moviepath
+   pngfname='aia_pfss_shock_'+date+'_'+label
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%03d.png'
+   imgsearch = savepath + pngfname + '_*.png'
+   moviefname = movie_path + pngfname + '.mp4'
+endif
+
+if movie_type eq 'thetabn' then begin
+   savepath=event.pfsspath
+   movie_path=event.moviepath
+   pngfname='thetabn_'+date+'_'+label
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%03d.png'
+   imgsearch = savepath + pngfname + '_*.png'
+   moviefname = movie_path + pngfname + '.mp4'
+endif
 
 
 print,''
@@ -127,12 +169,17 @@ endif
 ;Create symbolic links in which the files are ordered starting from 1. 
 ;This is necessary because of issues with different versions of ffmpeg
 imgs=file_search(imgsearch)
+
+;Create a temporary folder to order the images properly.
+tmpdir="$HOME/tmpdir_"+strtrim(string(fix(floor(randomn(2)*100000))),2)+'/'
+res=file_test(tmpdir,/directory)
+if res then spawn,'rm '+tmpdir+'*' $
+else spawn,'mkdir '+tmpdir+'&> /dev/null'
+
 for ii=0,n_elements(imgs)-1 do begin
    img_strind=strtrim(string(ii+1),2)
    if img_strind lt 100 then img_strind='0'+img_strind
    if img_strind lt 10 then img_strind='0'+img_strind
-   tmpdir="$HOME/tmpdir_"+strtrim(string(fix(floor(randomn(2)*100000))),2)+'/'
-   if not file_test(tmpdir,/directory) then spawn,'mkdir '+tmpdir+'&> /dev/null'
    command='ln -s '+imgs[ii]+' '+tmpdir+'tmpim_'+img_strind+'.png'
    spawn,command
 endfor
