@@ -1,7 +1,7 @@
 pro test_aia_annulus_create
 
 ;You can run for one event, like this.
-  one=0
+  one=1
   if one eq 1 then begin
      event=load_events_info(label='110511_01')
      ;aia_annulus_create,event,/force
@@ -11,7 +11,7 @@ pro test_aia_annulus_create
   
   
 ;Alternatively, run for all events
-  all=1
+  all=0
   if all eq 1 then begin
      events=load_events_info()
      wavelengths=['193','211']
@@ -122,7 +122,7 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, centerlat=c
       ;aia_load_event,event.st,event.et,wav,ind_arr,data,/remove_aec,/nodata
      
 ; Width of ring (effectively distance from limb to edge of aperture in arcsec)
-     if not keyword_set(ring_width) then ring_width = (maxrad-ind_arr[0].rsun_obs)
+     if not keyword_set(ring_width) then ring_width = 400.;(maxrad-ind_arr[0].rsun_obs)
 ;Convert the radial range to arcsecs.
      if keyword_set(rrange) then begin
         rrang=(rrange-1)*ind_arr.rsun_obs
