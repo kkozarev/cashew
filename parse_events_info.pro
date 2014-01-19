@@ -1,3 +1,11 @@
+pro test_parse_events_info
+
+parse_events_info,'dat/events.json'
+
+end
+
+
+
 pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=sts, ets=ets, typeII=typeII, loop=loop, filament=filament, comment=comment, flareclass=flareclass, aiafov=aiafov, nrh_lookup=nrh_lookup, callisto_lookup=callisto_lookup, ips_lookup=ips_lookup
 ;PURPOSE:
 ;
@@ -43,6 +51,10 @@ pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=s
 
 ;           'st': if cc eq 0 then sts=tmp[1]+':'+tmp[2]+':'+tmp[3] else sts=[sts,tmp[1]+':'+tmp[2]+':'+tmp[3]]
 ;           'et': if cc eq 0 then ets=tmp[1]+':'+tmp[2]+':'+tmp[3] else ets=[ets,tmp[1]+':'+tmp[2]+':'+tmp[3]]     
+
+;THIS NEEDS TO BE DEBUGGED!!!!
+;WRITE SEPARATE IF STATEMENTS FOR THE DIFFERENT TYPES OF ELEMENTS,
+;SINCE THEY NEED TO BE PARSED DIFFERENTLY!!!
 
      if inObj eq 1 then begin
         case tmp[0] of
