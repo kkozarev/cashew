@@ -17,7 +17,7 @@ pro test_pfss_bfield_estimation,png=png,steps=steps
 ;Test the estimation of B-field magnitude from the PFSS model
 ;
 ;CATEGORY:
-;PFSS_Shock
+;PFSS_Shock 
 ;
 ;INPUTS:
 ;
@@ -37,11 +37,11 @@ pro test_pfss_bfield_estimation,png=png,steps=steps
 ;LOAD DATA
   print,''
   print,'Loading data...'
-  datapath='/Volumes/Backscratch/Users/kkozarev/AIA/events/37/'
+  datapath='/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/'
   
   ;pfss_return_field,'2011-05-11',invdens=1,rstart=1.1,savepath=datapath
   ;stop
-  restore,datapath+'pfss_results_20110511_1.1Rs_dens_8.sav'
+  restore,datapath+'pfss/pfss_results_20110511_110511_01_1.1Rs_dens_8.sav'
   
 ;  calculate value of Br,Bth,Bph at current point: ptc=[r,theta,phi]
 ;  in degrees
@@ -50,7 +50,7 @@ pro test_pfss_bfield_estimation,png=png,steps=steps
   
   print,bfield_pfss(ptc,sph_data)
   
-  stop
+  
 
 ;--------------------------------------------------------------
 
@@ -73,8 +73,8 @@ pro test_pfss_bfield_estimation,png=png,steps=steps
   tvlct,rr,gg,bb,/get
 
 ;Loop over all the steps
-for i=0,steps-1 do begin
-
+for i=0,nsteps-1 do begin
+   
    if keyword_set(steps) then $
       shockrad=(winsize*0.14)*(1+i)/(nsteps+1)
 
@@ -89,8 +89,8 @@ for i=0,steps-1 do begin
   zrot_pfss=0+zrot_gen
 
 ;Latitude and longitude for the shock location
-  lat=-20.0
-  lon=-70.0
+  lat=40.0
+  lon=80.0
 
 ;Rotation angles for the shock surface points
   xrot_shock=-lat+xrot_gen
@@ -99,8 +99,10 @@ for i=0,steps-1 do begin
 
 ;--------------------------------------------------------------
 
-
-
+  ;SAMPLE VALUES!!!
+  l=340.
+  b=-3.4
+  
 
       Window, 0, Xsize=winsize, Ysize=winsize
 
@@ -110,6 +112,7 @@ for i=0,steps-1 do begin
 
 ;Convert the spherical to x,y,z coordinates. 
 ;Switch y and z axes to make the coord. system right-handed.
+      
   pfss_sphtocart,ptr,ptth,ptph,l,b,pfss_px,pfss_pz,pfss_py
   nlines=n_elements(pfss_px[0,*])
   
