@@ -74,7 +74,7 @@ roi_subindex=0
 
 
 ;Find all of the files from the Aschwanden DEM run.
-demfiles=file_search(dempath,'*_map.sav')
+demfiles=file_search(dempath,'aschdem_'+date+'_'+label+'*_teem_map.sav')
 if demfiles[0] eq '' then begin
    print,''
    print,'File '+ionfile+' does not exist. Quitting...'

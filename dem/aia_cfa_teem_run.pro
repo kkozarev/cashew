@@ -4,7 +4,7 @@ pro test_aia_cfa_teem_run
  ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
-     event=load_events_info(label='110511_01')
+     event=load_events_info(label='130423_01')
      aia_cfa_teem_run,event,/remove_aec
   endif
   
@@ -15,7 +15,7 @@ pro test_aia_cfa_teem_run
      events=load_events_info()
      for ev=0,n_elements(events)-1 do begin
         event=events[ev]
-        aia_cfa_teem_run,event
+        aia_cfa_teem_run,event,/remove_aec
      endfor
   endif
   
@@ -83,6 +83,7 @@ npix=1                           ;   (macropixel size=8x8 pixels, yields 512x51
 ;Obtain all the necessary filenames
 for w=0,nwave-1 do begin
    ftmp=aia_file_search(st,et,wave[w],remove_aec=remove_aec,/check171,path=event.aia_datapath)
+
    ;Create the filename structure
    if w eq 0 then begin
       fstr={w131:'',w171:'',w193:'',w211:'',w335:'',w94:''}
