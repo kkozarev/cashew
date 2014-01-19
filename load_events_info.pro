@@ -30,7 +30,9 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
 ;----------------------------------------------------------------------------------------
   basepath=GETENV('CORWAV');Usually, it will be /Volumes/Backscratch/Users/kkozarev/corwav/ or similar
   webbasepath=GETENV('CORWAV_WEB')
-  labels=['110125_01','110128_01','110211_02','110511_01','110804_01','110809_01','111020_01','111109_01','120424_01','120526_01','120728_01','120915_01','121007_01','130423_01','130501_01','130517_01','131106_01','131029_01']
+;DEBUG
+parse_events_info,'dat/events.json', labels=labels, coordX=coordX, coordY=coordY, sts=sts, ets=ets, typeII=typeII, loop=loop, filament=filament, comment=comment, flareclass=flareclass, aiafov=aiafov, nrh_lookup=nrh_lookup, callisto_lookup=callisto_lookup, ips_lookup=ips_lookup
+;DEBUG
   if keyword_set(label) then begin
      tmp=where(labels eq label)
      if tmp[0] eq -1 then begin
@@ -42,98 +44,10 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
         return,-1
      endif
   endif
-  ;785,399 (710) for event 110511_01
-;AR arcsecond coordinates
-  coordX=[-955,777,-1073,785,564,883,1005,-752,-1019,899,-745,806,-932,999,-865,-576,-576,990]
-  coordY=[-248,391,11,399,186,269,374,580,247,416,-662,422,378,-399,237,192,-269,38]
+
   hemisphere=strarr(n_elements(labels))
   hemisphere[where(coordX lt 0.)]='E'
   hemisphere[where(coordX ge 0.)]='W'
-  sts=['2011/01/25 11:56:00',$
-       '2011/01/28 00:45:00',$
-       '2011/02/11 12:30:00',$
-       '2011/05/11 02:10:00',$
-       '2011/08/04 03:50:00',$
-       '2011/08/09 08:00:00',$
-       '2011/10/20 03:05:00',$
-       '2011/11/09 13:00:00',$
-       '2012/04/24 07:25:00',$
-       '2012/05/26 20:30:00',$
-       '2012/07/28 20:35:00',$
-       '2012/09/15 22:50:00',$
-       '2012/10/07 20:15:00',$
-       '2013/04/23 18:05:00',$
-       '2013/05/01 02:15:00',$
-       '2013/05/17 08:40:00',$
-       '2013/11/06 13:40:00',$
-       '2013/10/29 21:40:00']
- 
-ets=['2011/01/25 12:26:00',$
-     '2011/01/28 01:15:00',$
-     '2011/02/11 13:00:00',$
-     '2011/05/11 02:40:00',$
-     '2011/08/04 04:20:00',$
-     '2011/08/09 08:20:00',$
-     '2011/10/20 03:35:00',$
-     '2011/11/09 13:30:00',$
-     '2012/04/24 07:55:00',$
-     '2012/05/26 21:00:00',$
-     '2012/07/28 21:05:00',$
-     '2012/09/15 23:20:00',$
-     '2012/10/07 20:45:00',$
-     '2013/04/23 18:35:00',$
-     '2013/05/01 02:45:00',$
-     '2013/05/17 09:15:00',$
-     '2013/11/06 14:10:00',$
-     '2013/10/29 22:10:00']
-typeII=[0,0,0,1,1,1,0,1,1,0,1,1,0,0,0,1,1,1]
-loop=[1,0,1,1,1,0,1,0,0,0,1,1,1,1,1,1,0,1]
-filament=[0,0,1,1,0,0,0,1,1,0,0,0,0,0,1,1,1,1]
-comment=['Loop catches up to initial shock wave',$
-         'Lateral shock wave not visible in the radial direction',$
-         'Shock wave tends southward',$
-         'Huge shock wave originates inside the limb with clear lateral expansion',$
-         'One of the largest shock waves I have seen, but inside limb',$
-         'Large shock wave inside the limb propagates southward',$
-         'Distinguished wave radially and laterally in front of filament',$
-         'Faint, far inside the limb, possibly a loop in front of filament',$
-         'Filament eruption & tornado, but there is definitely a wave',$
-         'Shock behind limb, seen easier laterally, but still visible radially',$
-         'Originates inside the limb and movie could be better, but clear wave',$
-         'Wave fades radially very quickly with a loop immediately following',$
-         'Double shock wave laterally with quick radial speed as well',$
-         'Shock wave immediately in front of loop with clear circular expansion',$
-         'Clear lateral expansion precedes filament and loop',$
-         'A nice event on the eastern limb with serious NRH emission and type II bursts',$
-         'Eastern event with interesting type III and type II bursts',$
-         'Western event, nice coronal wave running parallel to the limb, X2.3 flare']
-flareclass=['','M1.3','','B8.1','M9.3','X6.9','M1.6','M1.1','C3.7','','M6.1','B9.6','C1.2','','','M3.2','M3.8','X2.3']
-aiafov=[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]
-
-nrh_lookup=['','','','','',$
-            'http://secchirh.obspm.fr/survey.php?hour=0800&dayofyear=20110809&composite=2','',$
-            'http://secchirh.obspm.fr/survey.php?hour=1300&dayofyear=20111109&composite=2','','','','','','','',$
-            '','','']
-callisto_lookup=['','','','',$
-                 'http://soleil.i4ds.ch/solarradio/qkl/2011/08/04/OOTY_20110804_034501_59.fit.gz.png',$
-                 'http://soleil.i4ds.ch/solarradio/qkl/2011/08/09/ALMATY_20110809_080000_59.fit.gz.png',$
-                 'http://soleil.i4ds.ch/solarradio/qkl/2011/10/20/GAURI_20111020_030000_59.fit.gz.png',$
-                 'http://soleil.i4ds.ch/solarradio/qkl/2011/11/09/BIR_20111109_130000_02.fit.gz.png',$
-                 'http://soleil.i4ds.ch/solarradio/qkl/2012/04/24/DARO_20120424_074502_58.fit.gz.png','','','','',$
-                 'http://soleil.i4ds.ch/solarradio/qkl/2013/04/23/BIR_20130423_181500_01.fit.gz.png','',$
-                 '','','']
-ips_site='http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/'
-ips_lookup=['',$
-            ips_site+'culgoora/images/11/20110128spectrograph.gif','',$
-            ips_site+'learmonth/images/11/20110511spectrograph.gif',$
-            ips_site+'culgoora/images/11/20110804spectrograph.gif','','','',$
-            ips_site+'learmonth/images/12/20120424spectrograph.gif',$
-            ips_site+'culgoora/images/12/20120527spectrograph.gif',$
-            ips_site+'culgoora/images/12/20120729spectrograph.gif',$
-            ips_site+'learmonth/images/12/20120916spectrograph.gif',$
-            ips_site+'culgoora/images/12/20121008spectrograph.gif','',$
-            ips_site+'learmonth/images/13/20130501spectrograph.gif',$
-            '','','']
 
 ;DATAPATHS
 aia_datapath=basepath+'AIA_data/'
