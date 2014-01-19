@@ -6,8 +6,11 @@ pro test_aia_aschdem_define_rois
  ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
-     event=load_events_info(label='110511_01')
-     aia_aschdem_define_rois,event,numroi=8,/automatic
+     event=load_events_info(label='111020_01')
+     aia_aschdem_define_rois,event,numroi=8;,/automatic
+     stop
+     event=load_events_info(label='130423_01')
+     aia_aschdem_define_rois,event,numroi=8;,/automatic
   endif
   
   
@@ -137,7 +140,7 @@ ionizpath=event.ionizationpath
         ycenter=subindex[0].Y0_MP
         
         wdef,0,event.aiafov[0],event.aiafov[1]
-        tvscl,bytscl(subdata[*,*,fix(n_elements(subindex)/2.0)]-baseim,-60,30)
+        tvscl,bytscl(subdata[*,*,fix(n_elements(subindex)/2.0)]-baseim,-50,50)
         circ=aia_circle(xcenter,ycenter,sunrad,/plot)
         
         for roi=0,NUMROI-1 do begin
@@ -173,7 +176,9 @@ ionizpath=event.ionizationpath
            print,''
            tvscl,bytscl(subdata[*,*,fix(n_elements(subindex)/2.0)]-baseim,-60,30)
            circ=aia_circle(xcenter,ycenter,sunrad,/plot)
+           plots,[xcenter,1024],[ycenter,1024*tan(event.arlat*!PI/180.)],/device,thick=1.6,linestyle=2
            
+           roi_radheight=dblarr(NUMROI) ;The average distance of the ROI from Sun center.
            for roi=0,NUMROI-1 do begin
               print,'----------------------------------------------'
               print,'Please select ROI #'+string(roi+1)
@@ -182,6 +187,7 @@ ionizpath=event.ionizationpath
               roiEnd_x[roi]=xr[1]
               roiStart_y[roi]=yr[0]
               roiEnd_y[roi]=yr[1]
+              roi_radheight[roi]=sqrt((avg(xr)-xcenter)^2+(avg(yr)-ycenter)^2)/sunrad
            endfor
            print,''
            print,'We have all the necessary information, thank you!'
@@ -219,14 +225,15 @@ ionizpath=event.ionizationpath
      roi_subindex=newind
      
 ;Crop the ROIs
-     roi_subdata=fltarr(NUMROI,ROISIZE,ROISIZE,n_elements(subindex))
+     roi_subdata=dblarr(NUMROI,ROISIZE,ROISIZE,n_elements(subindex))
      for roi=0,NUMROI-1 do begin
         roi_subdata[roi,*,*,*]=subdata[roiStart_x[roi]:roiEnd_x[roi],roiStart_y[roi]:roiEnd_y[roi],*]
+        
      endfor
      
      
 ;Save the ROIs and updated index for each event and wavelength
-     save, filename=ionizpath+'rois_'+evdate+'_'+evlabel+'_'+wave+'.sav',roi_subindex,roi_subdata
+     save, filename=ionizpath+'rois_'+evdate+'_'+evlabel+'_'+wave+'.sav',roi_subindex,roi_subdata,roi_radheight
      
   endfor
 end

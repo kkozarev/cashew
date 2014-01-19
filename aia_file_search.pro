@@ -211,6 +211,7 @@ if keyword_set(check171) then begin
       print,'Total number of files is '+strtrim(string(n_elements(files)),2)
       print,'Total number of files for reference band 171 is '+strtrim(string(ntotfiles),2)
       print,'Consider manually reviewing the data files in '+path
+      return,-1
    endif
 endif
 
