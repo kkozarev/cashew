@@ -1,6 +1,6 @@
 pro test_create_coronalshocks_page
   path='/var/www/personal/kkozarev/www/'
-  fname='coronalshocks.content'
+  fname='coronalwaves.content'
   create_coronalshocks_page,path+fname
   
 end
@@ -14,22 +14,23 @@ pro create_coronalshocks_page, fname
   nev=n_elements(events)
   
 ;Order the events by time
-  tmpind=sort(anytim(events.st,/sec))
+  tmpind=reverse(sort(anytim(events.st,/sec)))
   events=events[tmpind]
   
   
 ;Write the first part of the HTML
   openw,lun,fname,/get_lun
   printf,lun,"<table border=1 cellpadding=1 cellspacing=0 width=920 style='table-layout:fixed'>"
-  printf,lun,"<col width=55>"
+  printf,lun,'<font size="3">'
+  printf,lun,"<col width=70>"
+  printf,lun,"<col width=40>"
   printf,lun,"<col width=40>"
   printf,lun,"<col width=40>"
   printf,lun,"<col width=40>"
   printf,lun,"<col width=30>"
-  printf,lun,"<col width=30>"
+  printf,lun,"<col width=50>"
   printf,lun,"<col width=45>"
-  printf,lun,"<col width=40>"
-  printf,lun,"<col width=45>"
+  printf,lun,"<col width=50>"
   printf,lun,"<col width=45>"
   printf,lun,"<col width=35>"
   printf,lun,"<col width=40>"
@@ -48,7 +49,7 @@ pro create_coronalshocks_page, fname
   printf,lun,'<th rowspan=2>Start (UT)</th>'
   printf,lun,'<th rowspan=2>End (UT)</th>'
   printf,lun,'<th rowspan=2>Flare Class</th>'
-  printf,lun,'<th rowspan=2>X (&quot;)</th>'
+  printf,lun,'<th rowspan=2>X (&quot;) <font color="red">E</font>/<font color="blue">W</font></th>'
   printf,lun,'<th rowspan=2>Y (&quot;)</th>'
   printf,lun,'<th rowspan=2>Filament Erupt</th>'
   printf,lun,'<th rowspan=2>Loop Erupt</th>'
@@ -84,7 +85,8 @@ pro create_coronalshocks_page, fname
      printf,lun,'<td>'+et+'</td>'
      if event.flareclass eq '' then printf,lun,'<td>&nbsp;</td>' else $
         printf,lun,'<td><a href="http://www.solarmonitor.org/goes_pop.php?date='+event.date+'&amp;type=xray" target="_blank">'+event.flareclass+'</a></td>'
-     printf,lun,'<td>'+strtrim(string(event.coordx),2)+'</td>'
+     if event.coordx lt 0 then color='red' else color='blue'
+     printf,lun,'<td><font color="'+color+'">'+strtrim(string(event.coordx),2)+'</font></td>'
      printf,lun,'<td>'+strtrim(string(event.coordy),2)+'</td>'
      if event.filament eq 1 then printf,lun,'<td>Yes</td>' else $
         printf,lun,'<td>No</td>'
@@ -142,6 +144,7 @@ pro create_coronalshocks_page, fname
      
      printf,lun,'</tr>'
   endfor
+  printf,lun,'</font>'
   printf,lun,'</table>'
   close,/all
 end

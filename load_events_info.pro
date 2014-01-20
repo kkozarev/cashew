@@ -30,6 +30,7 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
 ;----------------------------------------------------------------------------------------
   basepath=GETENV('CORWAV');Usually, it will be /Volumes/Backscratch/Users/kkozarev/corwav/ or similar
   webbasepath=GETENV('CORWAV_WEB')
+
 ;DEBUG
 parse_events_info,'dat/events.json', labels=labels, coordX=coordX, coordY=coordY, sts=sts, ets=ets, typeII=typeII, loop=loop, filament=filament, comment=comment, flareclass=flareclass, aiafov=aiafov, nrh_lookup=nrh_lookup, callisto_lookup=callisto_lookup, ips_lookup=ips_lookup
 ;DEBUG
@@ -98,6 +99,8 @@ events[ev].et=ets[ev]
 events[ev].typeII=typeII[ev]
 events[ev].loop=loop[ev]
 events[ev].filament=filament[ev]
+;Field of view, in pixels
+events[ev].aiafov=aiafov[*,ev]
 events[ev].comment=comment[ev]
 events[ev].flareclass=flareclass[ev]
 events[ev].nrh_lookup=nrh_lookup[ev]
@@ -135,9 +138,6 @@ events[ev].yaftawavepath=events[ev].savepath+'yaftawave/'
 events[ev].kinematicspath=events[ev].savepath+'kinematics/'
 events[ev].particlespath=events[ev].savepath+'particles/'
 
-;Field of view, in pixels
-events[ev].aiafov=[1024,1024]
-if aiafov[ev] eq 2 then events[ev].aiafov=[1024,2048]
 endfor
 
 if keyword_set(printlabels) then print,events.label

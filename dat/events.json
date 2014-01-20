@@ -9,7 +9,7 @@
 	"typeII": true,
 	"loop": true,
 	"filament": true,
-	"comment": "Huge shock wave originates inside the limb with clear lateral expansion",
+	"comment": "Huge shock wave originates inside the limb, with clear lateral expansion.",
 	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/culgoora/images/11/20110804spectrograph.gif",
 	"callisto_lookup": "",
 	"nrh_lookup": ""
@@ -25,7 +25,7 @@
 	"typeII": false,
 	"loop": true,
 	"filament": false,
-	"comment": "Loop catches up to initial shock wave",
+	"comment": "Loop catches up to initial shock wave.",
 	"ips_lookup": "",
 	"callisto_lookup": "",
 	"nrh_lookup": ""
@@ -41,7 +41,7 @@
 	"typeII": false,
 	"loop": false,
 	"filament": false,
-	"comment": "Lateral shock wave not visible in the radial direction",
+	"comment": "Lateral shock wave not visible in the radial direction.",
 	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/culgoora/images/11/20110128spectrograph.gif",
 	"callisto_lookup": "",
 	"nrh_lookup": ""
@@ -57,7 +57,7 @@
 	"typeII": false,
 	"loop": true,
 	"filament": true,
-	"comment": "Shock wave tends southward",
+	"comment": "Shock wave tends southward.",
 	"ips_lookup": "",
 	"callisto_lookup": "",
 	"nrh_lookup": ""
@@ -73,7 +73,7 @@
 	"typeII": true,
 	"loop": true,
 	"filament": false,
-	"comment": "One of the largest shock waves I have seen, but inside limb",
+	"comment": "One of the largest shock waves I have seen, but inside limb.",
 	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/culgoora/images/11/20110804spectrograph.gif",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2011/08/04/OOTY_20110804_034501_59.fit.gz.png",
 	"nrh_lookup": ""
@@ -89,7 +89,7 @@
 	"typeII": true,
 	"loop": false,
 	"filament": false,
-	"comment": "Large shock wave inside the limb propagates southward",
+	"comment": "Large shock wave inside the limb propagates southward.",
 	"ips_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2011/08/09/ALMATY_20110809_080000_59.fit.gz.png",
 	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=0800&dayofyear=20110809&composite=2"
@@ -105,7 +105,7 @@
 	"typeII": true,
 	"loop": true,
 	"filament": false,
-	"comment": "Distinguished wave radially and laterally in front of filament",
+	"comment": "Distinguished wave radially and laterally in front of filament.",
 	"ips_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2011/10/20/GAURI_20111020_030000_59.fit.gz.png",
 	"nrh_lookup": ""
@@ -121,7 +121,7 @@
 	"typeII": true,
 	"loop": false,
 	"filament": true,
-	"comment": "Faint; far inside the limb; possibly a loop in front of filament",
+	"comment": "Faint, far inside the limb, possibly a loop in front of filament.",
 	"ips_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2011/11/09/BIR_20111109_130000_02.fit.gz.png",
 	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=1300&dayofyear=20111109&composite=2"
@@ -137,7 +137,7 @@
 	"typeII": true,
 	"loop": false,
 	"filament": true,
-	"comment": "Filament eruption & tornado, but there is definitely a wave",
+	"comment": "Filament eruption and tornado, but there is definitely a wave.",
 	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/learmonth/images/12/20120424spectrograph.gif",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2012/04/24/DARO_20120424_074502_58.fit.gz.png",
 	"nrh_lookup": ""
@@ -153,7 +153,7 @@
 	"typeII": true,
 	"loop": false,
 	"filament": false,
-	"comment": "Shock behind limb, seen easier laterally, but still visible radially",
+	"comment": "Shock behind limb, seen easier laterally, but still visible radially.",
 	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/culgoora/images/12/20120527spectrograph.gif",
 	"callisto_lookup": "",
 	"nrh_lookup": ""
@@ -169,7 +169,7 @@
 	"typeII": true,
 	"loop": true,
 	"filament": false,
-	"comment": "Originates inside the limb and movie could be better, but clear wave",
+	"comment": "Originates inside the limb and movie could be better, but clear wave.",
 	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/culgoora/images/12/20120729spectrograph.gif",
 	"callisto_lookup": "",
 	"nrh_lookup": ""
@@ -185,7 +185,7 @@
 	"typeII": true,
 	"loop": true,
 	"filament": false,
-	"comment": "Wave fades radially very quickly with a loop immediately following",
+	"comment": "Wave fades radially very quickly, with a loop immediately following.",
 	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/learmonth/images/12/20120916spectrograph.gif",
 	"callisto_lookup": "",
 	"nrh_lookup": ""
@@ -201,7 +201,7 @@
 	"typeII": true,
 	"loop": true,
 	"filament": false,
-	"comment": "Double shock wave laterally with quick radial speed as well",
+	"comment": "Double shock wave laterally with large radial speed as well.",
 	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/culgoora/images/12/20121008spectrograph.gif",
 	"callisto_lookup": "",
 	"nrh_lookup": ""
@@ -217,7 +217,7 @@
 	"typeII": true,
 	"loop": true,
 	"filament": false,
-	"comment": "Shock wave immediately in front of loop with clear circular expansion",
+	"comment": "Shock wave immediately in front of loop with clear circular expansion.",
 	"ips_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/04/23/BIR_20130423_181500_01.fit.gz.png",
 	"nrh_lookup": ""
@@ -233,7 +233,7 @@
 	"typeII": true,
 	"loop": true,
 	"filament": true,
-	"comment": "Clear lateral expansion precedes filament and loop",
+	"comment": "Clear lateral expansion precedes filament and loop.",
 	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/learmonth/images/13/20130501spectrograph.gif",
 	"callisto_lookup": "",
 	"nrh_lookup": ""
@@ -249,7 +249,7 @@
 	"typeII": true,
 	"loop": true,
 	"filament": true,
-	"comment": "A nice event on the eastern limb with serious NRH emission and type II bursts",
+	"comment": "A nice event on the eastern limb with serious NRH emission and type II bursts.",
 	"ips_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/05/17/BIR_20130517_083946_02.fit.gz.png",
 	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=0800&dayofyear=20130517&composite=2"
@@ -265,7 +265,7 @@
 	"typeII": true,
 	"loop": false,
 	"filament": true,
-	"comment": "Eastern event with interesting type III and type II bursts",
+	"comment": "Eastern event with interesting type III and type II bursts.",
 	"ips_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/11/06/BIR_20131106_134500_03.fit.gz.png",
 	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=day&dayofyear=20131106&composite=2"
@@ -281,7 +281,7 @@
 	"typeII": true,
 	"loop": true,
 	"filament": true,
-	"comment": "Western event; nice coronal wave running parallel to the limb; X2.3 flare; very weak radio signatures",
+	"comment": "Western event with nice coronal wave running parallel to the limb, an X2.3 flare, and very weak radio signatures.",
 	"ips_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/10/29/ROSWELL-NM_20131029_214500_59.fit.gz.png",
 	"nrh_lookup": ""
@@ -297,7 +297,7 @@
 	"typeII": true,
 	"loop": true,
 	"filament": false,
-	"comment": "Southeast event from an AR; with a nice long-lasting wave propagating along the south limb and interesting type II/III bursts",
+	"comment": "Southeast event from an AR, with a nice long-lasting wave propagating along the south limb and interesting type II/III bursts.",
 	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/learmonth/images/13/20131106spectrograph.gif",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/11/05/ROSWELL-NM_20131105_220000_59.fit.gz.png",
 	"nrh_lookup": ""
@@ -313,7 +313,7 @@
 	"typeII": true,
 	"loop": true,
 	"filament": false,
-	"comment": "Event started behind eastern limb - accompanies a big CME and a nice wave along the eastern limb. There is a distinct	type II starting after the wave shows up",
+	"comment": "Event started behind eastern limb, accompanying a big CME and a nice wave along the eastern limb. There is a distinct	type II starting after the wave shows up.",
 	"ips_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/11/07/BIR_20131107_101500_02.fit.gz.png",
 	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=1000&dayofyear=20131107&composite=2"
@@ -329,7 +329,7 @@
 	"typeII": true,
 	"loop": true,
 	"filament": false,
-	"comment": "A nice event on the southwest limb; very fast; strong type II/III bursts",
+	"comment": "A nice event on the southwest limb, very fast, with strong type II/III bursts.",
 	"ips_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/11/19/BIR_20131119_101500_02.fit.gz.png",
 	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=1000&dayofyear=20131119&composite=2"
@@ -345,7 +345,7 @@
 	"typeII": true,
 	"loop": true,
 	"filament": false,
-	"comment": "A wonderful dome-like bright front above a flaring sigmoid on the southwest limb; a nice type II/II combo too",
+	"comment": "A wonderful dome-like bright front above a flaring sigmoid on the southwest limb, and a nice type II/II combo too.",
 	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/learmonth/images/13/20131207spectrograph.gif",
 	"callisto_lookup": "",
 	"nrh_lookup": ""
@@ -361,7 +361,7 @@
 	"typeII": true,
 	"loop": false,
 	"filament": true,
-	"comment": "A very strong filament eruption clearly showing a kink instability drives a dome bright front; a nice type II burst too",
+	"comment": "A very strong filament eruption clearly showing a kink instability drives a dome bright front, with a nice type II burst accompanying the event.",
 	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/learmonth/images/13/20131212spectrograph.gif",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/12/12/SSRT_20131212_031500_59.fit.gz.png",
 	"nrh_lookup": ""

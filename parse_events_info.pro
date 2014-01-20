@@ -36,25 +36,24 @@ pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=s
   openr,lun,fname,/get_lun
   while not eof(lun) do begin
      readf, lun, line
-     if line eq '{' then inObj=1
+
+;THIS WILL NEED TO BE CHANGED IN CASE THE CURLY BRACKETS ARE NOT ON
+;SEPARATE LINES FROM THE ACTUAL ELEMENTS. SUBSTITUTE 'EQ' WITH STH. ELSE!
+     if line eq '{' then begin
+        inObj=1
+        continue
+     endif
      if line eq '}' then begin
         inObj=0
         cc++
+        continue
      endif
-
-; First, remove the quotation marks and white space:
-     line=strjoin(strsplit(strtrim(line,2),'":',/extract,/regex),',')
-     line=strjoin(strsplit(strtrim(line,2),'"',/extract),'')
-     ;print,line
-     ;Then, separate into a name and a value, divide and conquer-style
-     tmp=strsplit(line,',[]',/extract)
-
-;           'st': if cc eq 0 then sts=tmp[1]+':'+tmp[2]+':'+tmp[3] else sts=[sts,tmp[1]+':'+tmp[2]+':'+tmp[3]]
-;           'et': if cc eq 0 then ets=tmp[1]+':'+tmp[2]+':'+tmp[3] else ets=[ets,tmp[1]+':'+tmp[2]+':'+tmp[3]]     
-
-;THIS NEEDS TO BE DEBUGGED!!!!
-;WRITE SEPARATE IF STATEMENTS FOR THE DIFFERENT TYPES OF ELEMENTS,
-;SINCE THEY NEED TO BE PARSED DIFFERENTLY!!!
+     
+     ;Do the parsing of the lines using regex:
+     tmp=strsplit(line,'"[ /t]*:',/extract,/regex)
+     tmp[0]=strtrim(strjoin(strsplit(tmp[0],'"',/extract),''),2)
+     tmp[1]=strsplit(tmp[1],',$',/extract,/regex)
+     tmp[1]=strtrim(strjoin(strsplit(tmp[1],'"',/extract),''),2)
 
      if inObj eq 1 then begin
         case tmp[0] of
@@ -63,7 +62,7 @@ pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=s
            'et': if cc eq 0 then ets=tmp[1] else ets=[ets,tmp[1]]
            'coordX': if cc eq 0 then coordX=tmp[1] else coordX=[coordX,tmp[1]]
            'coordY': if cc eq 0 then coordY=tmp[1] else coordY=[coordY,tmp[1]]
-           'aiafov': if cc eq 0 then aiafov=tmp[2] else aiafov=[aiafov,tmp[2]]
+           'aiafov': if cc eq 0 then aiafov=strsplit(tmp[1],'[],',/extract) else aiafov=[[aiafov],[strsplit(tmp[1],'[],',/extract)]]
            'flareclass': if cc eq 0 then flareclass=tmp[1] else flareclass=[flareclass,tmp[1]]
            'typeII': if cc eq 0 then typeII=tmp[1] else typeII=[typeII,tmp[1]]
            'loop': if cc eq 0 then loop=tmp[1] else loop=[loop,tmp[1]]
@@ -77,23 +76,10 @@ pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=s
      endif  
   endwhile
   close,/all
-  labels=strtrim(labels,1)
-  sts=strtrim(sts,1)
-  ets=strtrim(ets,1)
-  coordX=strtrim(coordX,1)
+
   coordX=fix(coordX)
-  coordY=strtrim(coordY,1)
   coordY=fix(coordY)
-  ;aiafov=strtrim(aiafov,1)
-  comment=strtrim(comment,1)
-  flareclass=strtrim(flareclass,1)
-  ips_lookup=strtrim(ips_lookup,1)
-  callisto_lookup=strtrim(callisto_lookup,1)
-  nrh_lookup=strtrim(nrh_lookup,1)
-  typeII=strtrim(typeII,2)
-  loop=strtrim(loop,2)
-  filament=strtrim(filament,2)
-  
+  aiafov=fix(aiafov)
   
   ind=where(typeII eq 'true')
   if ind[0] ne -1 then typeII[ind]=1
@@ -111,28 +97,22 @@ pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=s
   if ind[0] ne -1 then filament[ind]=0
   filament=fix(filament)
   
-  ind=where(aiafov eq 1024)
-  if ind[0] ne -1 then aiafov[ind]=1
-  ind=where(aiafov eq 2048)
-  if ind[0] ne -1 then aiafov[ind]=2
-  aiafov=fix(aiafov)
-  
 ;Finally, printous for test purposes.
 ;DEBUG
-  print,'|'+labels+'|'
-  print,'|'+sts+'|'
-  print,'|'+ets+'|'
-  print,coordX
-  print,coordY
-  print,aiafov
-  print,flareclass
-  print,typeII
-  print,loop
-  print,filament
-  print,'|'+comment+'|'
-  print,'|'+ips_lookup+'|'
-  print,'|'+callisto_lookup+'|'
-  print,'|'+nrh_lookup+'|'
+;  print,'|'+labels+'|'
+;  print,'|'+sts+'|'
+;  print,'|'+ets+'|'
+;  print,coordX
+;  print,coordY
+;  print,aiafov
+;  print,flareclass
+;  print,typeII
+;  print,loop
+;  print,filament
+;  print,'|'+comment+'|'
+;  print,'|'+ips_lookup+'|'
+;  print,'|'+callisto_lookup+'|'
+;  print,'|'+nrh_lookup+'|'
 ;DEBUG
 
 end
