@@ -19,20 +19,20 @@ pro batch_archive_local_data,force=force
 ;Written by Kamen Kozarev, 09/23/2013   
 ;
   cfaarc='/Data/SDO/AIA/level1/'
-  locarc='/Volumes/Backscratch/Users/kkozarev/AIA_data/'
+  ;locarc='/Volumes/Backscratch/Users/kkozarev/AIA_data/'
   wave=['171','193','211','335','094','131','304']
   
   events=load_events_info()
   
   for ev=0,n_elements(events)-1 do begin
      event=events[ev]
+     locarc=event.aia_datapath
      print,''
      for w=0,n_elements(wave)-1 do begin
         wav=wave[w]
         print,'EVENT '+event.label+' - Copying '+wav+' channel AIA data between '+event.st+' and '+event.et
         files=aia_file_search(event.st,event.et,wav,loud=loud,missing=cfamissing,path=cfaarc)
         aia_check_dirs,locarc,event.st,event.et ;check whether the local folders exist
-        
         aia_archive_local_data,files,locarc
      endfor
      print,''

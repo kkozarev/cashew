@@ -30,9 +30,10 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
 ;----------------------------------------------------------------------------------------
   basepath=GETENV('CORWAV');Usually, it will be /Volumes/Backscratch/Users/kkozarev/corwav/ or similar
   webbasepath=GETENV('CORWAV_WEB')
+  trunk=GETENV('CORWAV_TRUNK')
 
 ;DEBUG
-parse_events_info,'dat/events.json', labels=labels, coordX=coordX, coordY=coordY, sts=sts, ets=ets, typeII=typeII, loop=loop, filament=filament, comment=comment, flareclass=flareclass, aiafov=aiafov, nrh_lookup=nrh_lookup, callisto_lookup=callisto_lookup, ips_lookup=ips_lookup
+parse_events_info,trunk+'dat/events.json', labels=labels, coordX=coordX, coordY=coordY, sts=sts, ets=ets, typeII=typeII, loop=loop, filament=filament, comment=comment, flareclass=flareclass, aiafov=aiafov, nrh_lookup=nrh_lookup, callisto_lookup=callisto_lookup, ips_lookup=ips_lookup
 ;DEBUG
   if keyword_set(label) then begin
      tmp=where(labels eq label)

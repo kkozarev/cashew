@@ -55,15 +55,15 @@ pro aia_load_event,st,et,wav,index,data,coords=coords,savefile=savefile,map=map,
 ;1. Load the data, prep it. Use aia_data_load
 if keyword_set(savefile) then begin
    if keyword_set(map) then begin
-      aia_load_data,st,et,wave,index,data,savefile=savefile,map=map,/norm,remove_aec=remove_aec,event=event,nodata=nodata,first=first,local=local
+      aia_load_data,st,et,wave,index,data,savefile=savefile,map=map,remove_aec=remove_aec,event=event,nodata=nodata,first=first,local=local
    endif else begin
-      aia_load_data,st,et,wave,index,data,savefile=savefile,/norm,remove_aec=remove_aec,event=event,nodata=nodata,first=first,local=local
+      aia_load_data,st,et,wave,index,data,savefile=savefile,remove_aec=remove_aec,event=event,nodata=nodata,first=first,local=local
    endelse
 endif else begin
    if keyword_set(map) then begin
-      aia_load_data,st,et,wave,index,data,map=map,/norm,remove_aec=remove_aec,event=event,nodata=nodata,first=first,local=local
+      aia_load_data,st,et,wave,index,data,map=map,remove_aec=remove_aec,event=event,nodata=nodata,first=first,local=local
    endif else begin
-      aia_load_data,st,et,wave,index,data,/norm,remove_aec=remove_aec,event=event,nodata=nodata,first=first,local=local
+      aia_load_data,st,et,wave,index,data,remove_aec=remove_aec,event=event,nodata=nodata,first=first,local=local
    endelse
 endelse
 

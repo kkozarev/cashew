@@ -1,25 +1,32 @@
 pro test_aia_make_images
-
-wave=['193','211']
-events=load_events_info()
-nevents=n_elements(events)
-label='131029_01'
-event=events[where(events.label eq label)]
-;sts=event.st
-;ets=event.et
-aia_make_images,event,wave[0],/force,/base,/run
-stop
-;stop
-;nevents-1
-
-for ev=3,nevents-1 do begin
-   event=events[ev]
-   sts=event.st
-   ets=event.et
-   for w=0,n_elements(wave)-1 do $
-   aia_make_images,event,wave[w],/force,/raw,/base,/run
-endfor
+;Test the procedure aia_make_images
+  
+  ;You can run this for a single event, like so
+  one=0
+  if one eq 1 then begin
+     wavelengths=['193','211']
+     label='110511_01'
+     event=load_events_info(label=label)
+     wavelength='193'
+     aia_make_images,event,wavelength,/raw,/base,/run
+  endif
+  
+  ;Alternatively, run it for all/multiple events
+  all=1
+  if all eq 1 then begin
+     events=load_events_info()
+     wavelengths=['193','211']
+     nevents=n_elements(events)
+     for ev=0,nevents-1 do begin
+        event=events[ev]
+        for w=0,n_elements(wavelengths)-1 do begin
+           wavelength=wavelengths[w]
+           aia_make_images,event,wavelength,/raw,/base,/run
+        endfor
+     endfor
+  endif
 end
+
 
 
 pro aia_make_images, event, wave, savepath=savepath,force=force,raw=raw,base=base,run=run

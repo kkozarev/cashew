@@ -1,7 +1,7 @@
 pro test_aia_annulus_create
 
 ;You can run for one event, like this.
-  one=1
+  one=0
   if one eq 1 then begin
      event=load_events_info(label='110511_01')
      ;aia_annulus_create,event,/force
@@ -11,7 +11,7 @@ pro test_aia_annulus_create
   
   
 ;Alternatively, run for all events
-  all=0
+  all=1
   if all eq 1 then begin
      events=load_events_info()
      wavelengths=['193','211']
@@ -20,7 +20,7 @@ pro test_aia_annulus_create
         event=events[ev]
         for w=0,n_elements(wavelengths)-1 do begin
            wavelength=wavelengths[w]
-           aia_annulus_create,event,wav=wavelength,/force
+           ;aia_annulus_create,event,wav=wavelength,/force
            aia_annulus_create,event,/run,wav=wavelength
            aia_annulus_create,event,/base,wav=wavelength
            aia_annulus_create,event,/raw,wav=wavelength
