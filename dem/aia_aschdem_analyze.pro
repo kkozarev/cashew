@@ -114,7 +114,7 @@ pro aia_aschdem_analyze,event,trange=trange,savepath=savepath
         device,file=fname+'.eps',/inches,xsize=8.0,ysize=8.0,$
                /encaps,/color,/helvetica
         
-        tit='log(T!DMAX!N) and log(EM!DMAX!N) (grey), R'+rst+', '+evdate
+        tit='log(T!DMAX!N)(black) and log(EM!DMAX!N)(grey), R'+rst;+', '+event.label
         plot,tm,te[r,*],$
              title=tit,$
              xtitle=xtit,ytitle=ytit,$

@@ -1,4 +1,4 @@
-pro aia_cfa_teem_map,files,arcoords,wave_,npix,teem_table,teem_fname
+pro aia_cfa_teem_map,files,arcoords,wave_,npix,teem_table,teem_fname,event=event
 ;+
 ; Project     : AIA/SDO
 ;
@@ -57,7 +57,7 @@ for iw=0,nwave-1 do begin
  rpix    =rsun/cdelt1
 
 ;ADDED BY Kamen A. Kozarev, 03/19/2012
- newcoords=aia_autoselect_subroi(index,arcoords)
+ newcoords=aia_autoselect_subroi(index,arcoords,event=event)
  i1=newcoords[0]
  i2=newcoords[2]
  j1=newcoords[1]

@@ -13,7 +13,7 @@ pro aia_cfa_teem_disp,teem_fname,te_range,dateobs
 ; Syntax      : IDL>aia_teem_disp,teem_fname,te_range,dateobs
 ;
 ; Inputs      : fileset  = initial part of filename 
-;               wave_	 = strarr(6) with wavelengths in Angstroem
+;               wave_	 = strarr(6) with wavelengths in Angstrom
 ;		te_range(2) = min and max of valid DEM temperature range [K]
 ;		dateobs  = date and time of image
 ;               teem_fname = the filename to save the output in.
@@ -28,7 +28,7 @@ pro aia_cfa_teem_disp,teem_fname,te_range,dateobs
 ;-
 
 ;________________________DISPLAY TE+EM MAP________________________
-set_plot,'x'
+set_plot,'z'
 teem_map=teem_fname+'.sav'
 restore,teem_map
 ind	=where(em_map ne 0)
@@ -60,7 +60,9 @@ i3	=long(nx*0.95)
 for j=0,ny-1 do te_map(i3:nx-1,j)=te1+(te2-te1)*float(j)/float(ny-1)
 
 ;display
-window,0,xsize=nx*2,ysize=ny
+;window,0,xsize=nx*2,ysize=ny
+device, set_resolution=[nx*2,ny], SET_PIXEL_DEPTH=24, DECOMPOSED=0
+!p.font=0
 tvlct,rr,gg,bb,/get
 loadct,3
 !p.position=[0,0,1,1]
@@ -80,13 +82,12 @@ xyouts,1.95*nx,0.01*ny,t1str,size=2,color=255
 xyouts,1.95*nx,0.97*ny,t2str,size=2,color=0
 xyouts,1.95*nx,  q3*ny,t3str,size=2,color=255
 xyouts,1.95*nx,  q4*ny,t4str,size=2,color=255
-xyouts,1.05*nx,0.95*ny,'log(T)',size=4,color=255
-xyouts,0.05*nx,0.95*ny,'log(EM)',size=4,color=255
+xyouts,1.05*nx,0.95*ny,'log(T!Dmax!N)',size=3,color=255
+xyouts,0.05*nx,0.95*ny,'log(EM!Dmax!N)',size=3,color=255
 xyouts,0.01*nx,0.01*ny,dateobs,size=2,color=255
 
 ;PNG file
 image_tv=tvrd(true=1)
 write_png,teem_fname+'.png',image_tv,rr,gg,bb
 print,'file written : ',teem_fname+'.png'
-
 end
