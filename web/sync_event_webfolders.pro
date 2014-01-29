@@ -1,15 +1,22 @@
 pro test_sync_event_webfolders
   ;Run for a single event like this:
-  ;label='110511_01'
-  ;event=load_events_info(label=label)
-  ;sync_event_webfolders,event
-  
+ one=0
+ if one eq 1 then begin
+  label='131212_01'
+  event=load_events_info(label=label)
+  sync_event_webfolders,event
+ endif
+
+ 
   ;Alternatively, run for all the events:
+ all=1
+ if all eq 1 then begin
   events=load_events_info()
   for ev=0,n_elements(events)-1 do begin
      event=events[ev]
      sync_event_webfolders,event
   endfor
+ endif
 end
 
 pro sync_event_webfolders,event
@@ -18,7 +25,7 @@ pro sync_event_webfolders,event
 ;
 ;CATEGORY:
 ; AIA/General
-;
+; 
 ;INPUTS:
 ;	event - an event structure, returned from load_events(info)
 ;
