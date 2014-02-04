@@ -92,9 +92,14 @@ pro create_coronalshocks_page, fname
         printf,lun,'<td>No</td>'
      if event.loop eq 1 then printf,lun,'<td>Yes</td>' else $
         printf,lun,'<td>No</td>'
+
 ;This will be replaced by self-generated Callisto plots soon.
-     if event.callisto_lookup eq '' then printf,lun,'<td>&nbsp;</td>' else $
-        printf,lun,'<td><a href='+event.callisto_lookup+' target="_blank">eCallisto</a></td>'
+;     if event.callisto_lookup eq '' then printf,lun,'<td>&nbsp;</td>' else $
+;        printf,lun,'<td><a href='+event.callisto_lookup+' target="_blank">eCallisto</a></td>'
+     pngname='events/'+event.label+'/radio/Callisto/callisto_'+event.date+'_'+event.label+'_spectrum.png'
+     if file_exist(event.webpath+'radio/Callisto/callisto_'+event.date+'_'+event.label+'_spectrum.png') then $
+        printf,lun,'<td><a href="'+pngname+'" target="_blank">eCallisto</a></td>' else $
+           printf,lun,'<td>&nbsp;</td>'
 
      if event.nrh_lookup eq '' then printf,lun,'<td>&nbsp;</td>' else $
         printf,lun,'<td><a href='+event.nrh_lookup+' target="_blank">NRH</a></td>'

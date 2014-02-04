@@ -16,7 +16,7 @@ pro test_aia_annulus_analyze
   if all eq 1 then begin
      events=load_events_info()
      wavelengths=['193','211']
-     rrange=[1.1,1.34]
+     rrange=[1.1,1.37]
 ;n_elements(events)-1
      for ev=0,n_elements(events)-1 do begin
         event=events[ev]
@@ -69,7 +69,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   if not keyword_set(wave) then wav='193' else wav=wave
   if not keyword_set(savepath) then savepath=event.savepath+'annulusplot/' ;'./'
   if not keyword_set(datapath) then datapath=savepath ;'./'
-  
+
   fname='aia_deprojected_annulus_'+date+'_'+event.label+'_'+wav+'.sav'
   restore, datapath+fname
   
@@ -87,8 +87,8 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   endif
   
 ;Pixel coordinates in arcseconds from the center of the sun. How do I convert them to km?
-  y_arcsec_array=res/ind_arr[0].cdelt1*findgen(nrows)+r_in
-  y_rsun_array=y_arcsec_array/ind_arr[0].rsun_obs
+  y_arcsec_array=(res/ind_arr[0].cdelt1*findgen(nrows)+r_in)
+  y_rsun_array=y_arcsec_array/ind_arr[0].rsun_obs*event.geomcorfactor
   
 ;The X-angular array (distance along the limb from the pole).
   if keyword_set(interactive) then x_deg_array=findgen(ncols)*ang_step $
@@ -96,7 +96,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   
 ;The relative times
   DT=anytim(ind_arr[1].date_obs)-anytim(ind_arr[0].date_obs) ;The imaging cadence
-
+  
   rad_times=findgen(nsteps)*dt/60./60.
   lat_times=findgen(nsteps)*dt/60.
   
@@ -173,7 +173,8 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
      ;The index of the AR latitude
      arxcentind=min(where(x_deg_array ge arlat))
      
-     lat_heights=(limb+[0.25,0.55,0.85]*(yradlimit-limb))/ind_arr[0].rsun_obs
+     lat_heights=(limb+[0.25,0.55,0.85]*(yradlimit-limb))/ind_arr[0].rsun_obs*event.geomcorfactor
+     print,lat_heights
      nlatmeas=n_elements(lat_heights)
      htind=intarr(nlatmeas)
      goodlats=fltarr(nlatmeas,ncols)-10.
@@ -260,24 +261,44 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   
   lat_deg_array=findgen(arxcentind)*ang_step ;The lateral angle positions  
   
+;DEBUG
+  ;make sure there are no negative values in the data.
+  ind=where(subfovdata le 0.0)
+  if ind[0] ne -1 then subfovdata[ind]=1.0e-10 ;Set to very nearly zero  
+;DEBUG  
+
 ;Set the Lateral data
 ;  tmp=subfovdata[*,*,htind]
-  tmpdata=subfovdata[*,*,htind]
+  tmpdata=subfovdata[*,*,htind]  
   for ii=0,nlatmeas-1 do begin
-;To improve the S/N for lateral data, add five rows of data
+;To improve the S/N for lateral data, sum five rows of data
 ;for each height.
      tmp=subfovdata[*,*,htind[ii]-2:htind[ii]+2]
-
      ;Set the pixels that are outside the detector FOV
      tt=where(goodlats[ii,*] lt 0.)
-     ;if tt[0] ne -1 then tmp[*,tt,ii]=-1000.
-     if tt[0] ne -1 then tmp[*,tt,*]=-1000.
+     ;if tt[0] ne -1 then tmp[*,tt,ii]=-1.0e-10
+     if tt[0] ne -1 then tmp[*,tt,*]=1.0e-10
      tmpdata[*,*,ii]=total(tmp,3)
   endfor
   ;left_lat_data=reform(tmp[*,0:arxcentind-1,*])
   ;right_lat_data=reform(tmp[*,arxcentind:subncols-1,*])
-  left_lat_data=reform(tmpdata[*,0:arxcentind-1,*])
+  left_lat_data=reform(tmpdata[*,0:arxcentind-1,*]) 
   right_lat_data=reform(tmpdata[*,arxcentind:subncols-1,*])
+
+
+;Remove horizontal streaks in the image - divide image by the average of the
+;        first AVGST columns
+;DEBUG
+;  avgst=20
+;  for ii=0,nlatmeas-1 do begin
+;     datavg=reform(total(left_lat_data[0:avgst-1,*,ii],1)/(1.*avgst))
+;     for tt=0,nsteps-1 do left_lat_data[tt,*,ii]/=(datavg*max(datavg))
+;     
+;     datavg=reform(total(right_lat_data[0:avgst-1,*,ii],1)/(1.*avgst))
+;     for tt=0,nsteps-1 do right_lat_data[tt,*,ii]/=(datavg*max(datavg))
+;  endfor
+;DEBUG
+;stop
   
   ;Save the Lateral data into a structure
   lat_data_left={$
@@ -288,15 +309,16 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
                 savename:'annplot_'+date+'_'+event.label+'_'+wav+'_lateral_left.png',$
                 plotinfo:replicate({p:!P, x:!X, y:!Y},nlatmeas),$
                 kinquantity:['Th!D0!N','Th!D1!N','V!Dth,0!N','V!Dth,1!N','a'],$
-                kinunit:['!Uo!N','!Uo!N',' km/s',' km/s',' m/s'],$
+                kinunit:['!Uo!N','!Uo!N',' km/s',' km/s',' km/s!U2!N'],$
                 kinvalue:replicate({front:0.0, max:0.0, back:0.0},nlatmeas,5),$
                 kinsigma:replicate({front:0.0, max:0.0, back:0.0},nlatmeas,5),$
                 fitparams:replicate({front:0.0, max:0.0, back:0.0},nlatmeas,3),$
                 fitsigma:replicate({front:0.0, max:0.0, back:0.0},nlatmeas,3),$
+                
                 maxinds:intarr(nlatmeas,nsteps),$
                 frontinds:intarr(nlatmeas,nsteps),$
                 backinds:intarr(nlatmeas,nsteps),$
-                time:lat_times/60.0,$
+                time:lat_times,$
                 xfitrange:[0,0],yfitrange:[0,arxcentind-1],$ ;The indices of the start/end fitting times/heights
                 scale:[dt/60.,ang_step],origin:[0,0],difforigin:[0,0],$
                 xtitle:'Minutes since start',ytitle:'Degrees from AR center',$
@@ -318,7 +340,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
                  savename:'annplot_'+date+'_'+event.label+'_'+wav+'_lateral_right.png',$
                  plotinfo:replicate({p:!P, x:!X, y:!Y},nlatmeas),$
                  kinquantity:['Th!D0!N','Th!D1!N','V!Dth,0!N','V!Dth,1!N','a'],$
-                 kinunit:['!Uo!N','!Uo!N',' km/s',' km/s',' m/s'],$
+                 kinunit:['!Uo!N','!Uo!N',' km/s',' km/s',' km/s!U2!N'],$
                  kinvalue:replicate({front:0.0, max:0.0, back:0.0},nlatmeas,5),$
                  kinsigma:replicate({front:0.0, max:0.0, back:0.0},nlatmeas,5),$
                  fitparams:replicate({front:0.0, max:0.0, back:0.0},nlatmeas,3),$
@@ -326,7 +348,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
                  maxinds:intarr(nlatmeas,nsteps),$
                  frontinds:intarr(nlatmeas,nsteps),$
                  backinds:intarr(nlatmeas,nsteps),$
-                 time:lat_times/60.0,$
+                 time:lat_times,$
                  xfitrange:[0,0],yfitrange:[0,arxcentind-1],$
                  scale:[dt/60.,ang_step],origin:[0,0],difforigin:[0,0],$
                  xtitle:'Minutes since start',ytitle:'Degrees from AR center',$
@@ -354,7 +376,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
            difforigin:[0,y_rsun_array[htind[0]]],xfitrange:[0,0],yfitrange:[htind[0],yradlimind],$
            plotinfo:{p:!P, x:!X, y:!Y},$
            kinquantity:['R!D0!N','R!D1!N','V!DR,0!N','V!DR,1!N','a'],$
-           kinunit:[' R!DS!N',' R!DS!N',' km/s',' km/s',' m/s!U2!N'],$
+           kinunit:[' R!DS!N',' R!DS!N',' km/s',' km/s',' km/s!U2!N'],$
            kinvalue:replicate({front:0.0, max:0.0, back:0.0},1,5),$
            kinsigma:replicate({front:0.0, max:0.0, back:0.0},1,5),$
            fitparams:replicate({front:0.0, max:0.0, back:0.0},1,3),$
@@ -365,10 +387,11 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
            xtitle:'Hours since start',ytitle:'Rsun from Sun center',$
            imgtit:'AIA/'+wav+' BDiff Radial Positions !C Start at '+ind_arr[0].date_obs,$
            savename:'annplot_'+date+'_'+event.label+'_'+wav+'_radial.png',$
-           time:rad_times/3600.0 $
+           time:rad_times $
            }
 
   if keyword_set(rrange) then begin
+     rrange*=event.geomcorfactor
      rind=min(where(y_rsun_array gt rrange[0]))
      if rind ne -1 then rad_data.yfitrange[0]=rind
      rind=min(where(y_rsun_array gt rrange[1]))
@@ -435,7 +458,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   rad_data.bdiff=tmp
   
   ;All the rest of the work is done here.
-  annplot_fit_maxima,rad_data.bdiff,rad_data,rad_times,y_rsun_array
+  annplot_fit_maxima,event,rad_data.bdiff,rad_data,rad_times,y_rsun_array
   
   rad_data.plotinfo.p=!P
   rad_data.plotinfo.x=!X
@@ -444,7 +467,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
+stop
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Plot the Left Lateral Data!
@@ -467,17 +490,19 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
      tmpdata[*,*,rr]=tmp
      lat_data_left.bdiff[*,*,rr]=tmp
      ;glind=where(goodlats[rr,*] ge 0.0)   
-    ; 
+     
     ; dat=reform(tmp)
     ; dat2=gmascl(dat,gamma=4)
     ; dat2=double(dat2)
   endfor
 ;Everything else is here
-  annplot_fit_maxima,lat_data_left.bdiff,lat_data_left,lat_times,lat_deg_array,/lateral
+  annplot_fit_maxima,event,lat_data_left.bdiff,lat_data_left,lat_times,lat_deg_array,/lateral
 
   write_png,savepath+lat_data_left.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -502,9 +527,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
      ;dat2=double(dat2)
   endfor
      ;Everything else is here
-  annplot_fit_maxima,lat_data_right.bdiff,lat_data_right,lat_times,lat_deg_array,/lateral
-  
-  
+  annplot_fit_maxima,event,lat_data_right.bdiff,lat_data_right,lat_times,lat_deg_array,/lateral
   
   write_png,savepath+lat_data_right.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -589,7 +612,7 @@ end
 
 
 
-pro annplot_fit_maxima,indata,datastruct,tim,yarr,lateral=lateral
+pro annplot_fit_maxima,event,indata,datastruct,tim,yarr,lateral=lateral
 
   RSUN=6.96e5  ;Solar radius in km.
   nlatmeas=n_elements(datastruct.imgtit)
@@ -620,7 +643,7 @@ pro annplot_fit_maxima,indata,datastruct,tim,yarr,lateral=lateral
   endelse
   time_sec=tim*TIME_FACTOR
   
-
+  
   parinfo[1].value=100.
   parinfo[1].limited=[1,1]
   parinfo[1].limits=[0.0,2000.0]
@@ -667,44 +690,93 @@ pro annplot_fit_maxima,indata,datastruct,tim,yarr,lateral=lateral
  ; loadct,0,/silent
 
 ;Filter the maxima positions here for physicality
-  outliers=1
-  maxinds=jmap_filter_maxima(time_sec,ht_km,mymaxima,fitrange=datastruct.xfitrange,lateral=lateral,outliers=outliers)
+  ;outliers=1
+  maxinds=jmap_filter_maxima(time_sec,ht_km,mymaxima,fitrange=datastruct.xfitrange);,outliers=outliers
   good_ind_pos=where(maxinds ge 0)
   good_max_inds=maxinds[good_ind_pos]
   
   oplot,time,reform(yarray[datastruct.maxinds[mind,*]]),psym=1,color=200,thick=4,symsize=2
   loadct,8,/silent
   ;oplot,time[sp:ep],yarray[datastruct.maxinds[mind,sp:ep]],psym=1,color=200,thick=4,symsize=2
-  oplot,time[sp+good_ind_pos],yarray[datastruct.maxinds[mind,sp+good_ind_pos]],psym=1,color=200,thick=4,symsize=2
+  oplot,time[sp+good_ind_pos],yarray[datastruct.maxinds[mind,sp+good_ind_pos]]/event.geomcorfactor,psym=1,color=200,thick=4,symsize=2
   oplot,[time[sp],time[sp]],[yarray[0],yarray[n_elements(yarray)-1]],color=255
   oplot,[time[ep],time[ep]],[yarray[0],yarray[n_elements(yarray)-1]],color=255
-    
+  
   for ii=sp,ep do begin
      if maxinds[ii-sp] gt 0.0 then begin
-;Find the front edge of the wave
-        y=reform(datastruct.bdiff[ii,mymaxima[0,ii].ind:*])
-        y=smooth(y,4)
-        np=n_elements(y)
-        tmp=min(where(y le 0.2*max(y)))
-        if tmp[0] eq -1 then tmp=np-1
-        wave_frontedge[ii-sp].val=yarray[mymaxima[0,ii].ind+tmp]
-        wave_frontedge[ii-sp].ind=mymaxima[0,ii].ind+tmp
-        datastruct.frontinds[mind,ii]=mymaxima[0,ii].ind+tmp
         
+;+--------------------------------------------------------------
+;Find the front edge of the wave
+        oldv=1
+        if oldv gt 0 then begin
+;OLD VERSION, SEARCHING DOWN FROM INTENSITY PEAK
+           y=reform(datastruct.bdiff[ii,mymaxima[0,ii].ind:*])
+           y=smooth(y,4,/edge_truncate)
+           np=n_elements(y)
+           tmp=min(where(y le 0.2*max(y)))
+           if tmp[0] eq -1 then tmp=np-1
+           wave_frontedge[ii-sp].val=yarray[mymaxima[0,ii].ind+tmp]
+           wave_frontedge[ii-sp].ind=mymaxima[0,ii].ind+tmp
+           datastruct.frontinds[mind,ii]=mymaxima[0,ii].ind+tmp
+        endif
+        
+        newv=0
+        if newv gt 0 then begin
+;NEW VERSION,SEARCHING UP FROM BACKGROUND 
+           maxind=mymaxima[0,ii].ind-datastruct.yfitrange[0]
+           ylim=datastruct.yfitrange[1]
+           y=reform(datastruct.bdiff[ii,maxind:ylim])
+           y=smooth(y,4,/edge_truncate)
+           np=n_elements(y)
+           y=reverse(y)
+                                ;y[where(y le 0.0)]=1.0e-10
+           bind=20
+           bckg=abs(avg(y[0:bind-1]))
+           tmp=min(where(y gt (y[np-1]-bckg)*0.2)) ;look for 20% increase above background
+           tmp=np-tmp                              ;since data is reversed, reverse the index as well.
+           if tmp[0] eq -1 then tmp=0
+           wave_frontedge[ii-sp].val=yarray[mymaxima[0,ii].ind+tmp]
+           wave_frontedge[ii-sp].ind=mymaxima[0,ii].ind+tmp
+           datastruct.frontinds[mind,ii]=mymaxima[0,ii].ind+tmp
+        endif
+;---------------------------------------------------------------
+        
+        
+;+--------------------------------------------------------------
 ;Find the back edge of the wave
-        y=reform(datastruct.bdiff[ii,0:mymaxima[0,ii].ind])
-        y=smooth(y,4)
-        np=n_elements(y)
-        y=reverse(y,1)          ;reverse the array so the search is the same
-        tmp=min(where(y le 0.2*max(y)))
-        if tmp[0] eq -1 then tmp=np-1
-        wave_backedge[ii-sp].val=yarray[mymaxima[0,ii].ind-tmp]
-        wave_backedge[ii-sp].ind=mymaxima[0,ii].ind-tmp
-        datastruct.backinds[mind,ii]=mymaxima[0,ii].ind-tmp
+        oldv=1
+        if oldv gt 0 then begin
+;OLD VERSION, SEARCHING DOWN FROM INTENSITY PEAK
+           y=reform(datastruct.bdiff[ii,0:mymaxima[0,ii].ind])
+           y=smooth(y,4,/edge_truncate)
+           np=n_elements(y)
+           y=reverse(y,1)       ;reverse the array so the search is the same
+           tmp=min(where(y le 0.2*max(y)))
+           if tmp[0] eq -1 then tmp=np-1
+           wave_backedge[ii-sp].val=yarray[mymaxima[0,ii].ind-tmp]
+           wave_backedge[ii-sp].ind=mymaxima[0,ii].ind-tmp
+           datastruct.backinds[mind,ii]=mymaxima[0,ii].ind-tmp
+        endif
+        
+        newv=0
+        if newv gt 0 then begin    
+;NEW VERSION, SEARCHING UP FROM BACKGROUND
+           y=reform(datastruct.bdiff[ii,0:maxind])
+           y=reverse(y,1)
+           y=smooth(y,4,/edge_truncate)
+           np=n_elements(y)
+           tmp=min(where(y gt 2.*bckg)) ;look for 20% increase above background
+           stop
+           if tmp[0] eq -1 then tmp=np-1
+           wave_backedge[ii-sp].val=yarray[mymaxima[0,ii].ind+tmp]
+           wave_backedge[ii-sp].ind=mymaxima[0,ii].ind+tmp
+           datastruct.backinds[mind,ii]=mymaxima[0,ii].ind+tmp
+        endif
+;---------------------------------------------------------------        
         
         oplot,[time[ii],time[ii]],$
               [wave_backedge[ii-sp].val,wave_frontedge[ii-sp].val],$
-              color=200,thick=2
+              color=200,thick=1
      endif
   endfor
   loadct,0,/silent
@@ -729,6 +801,7 @@ pro annplot_fit_maxima,indata,datastruct,tim,yarr,lateral=lateral
   datastruct.fitsigma[mind,0].front=s1[0]
   datastruct.fitsigma[mind,1].front=s2[0]
   datastruct.fitsigma[mind,2].front=s3[0]
+;  wave_rads=rad_data.fitparams[0,0].front+rad_data.fitparams[0,1].front*wave_times+0.5*(rad_data.fitparams[0,2].front)^2
 ;--------------------------------------------------
   ;oplot,time[sp:ep],wave_fits,thick=3
   oplot,time[sp+good_ind_pos],wave_fits,thick=3
@@ -742,7 +815,7 @@ pro annplot_fit_maxima,indata,datastruct,tim,yarr,lateral=lateral
   dist=reform(ht_km[mymaxima[0,sp+good_ind_pos].ind])
   time_good=time_sec[sp+good_ind_pos]-time_sec[sp+good_ind_pos[0]]
   dist=smooth(dist,2)
-  bootstrap_sdo,dist,time_good,fit_line, p1, p2, p3, s1, s2, s3,parinfo=parinfo
+  ;bootstrap_sdo,dist,time_good,fit_line, p1, p2, p3, s1, s2, s3,parinfo=parinfo
   print,''
   print,''
   wave_fits=p1[0] + p2[0] * (time_good)+ 0.5 * p3[0] * (time_good)^2
@@ -766,7 +839,7 @@ pro annplot_fit_maxima,indata,datastruct,tim,yarr,lateral=lateral
   dist=reform(wave_backedge[good_ind_pos].val)*DIST_FACTOR*height
   time_good=time_sec[sp+good_ind_pos]-time_sec[sp+good_ind_pos[0]]
   dist=smooth(dist,2)
-  bootstrap_sdo,dist,time_good,fit_line, p1, p2, p3, s1, s2, s3,parinfo=parinfo
+  ;bootstrap_sdo,dist,time_good,fit_line, p1, p2, p3, s1, s2, s3,parinfo=parinfo
   print,''
   print,''
   wave_fits=p1[0] + p2[0] * (time_good)+ 0.5 * p3[0] * (time_good)^2
@@ -785,9 +858,9 @@ pro annplot_fit_maxima,indata,datastruct,tim,yarr,lateral=lateral
   ;Print out the results of the fitting
 ;initial position angle/Radial position
   ;r0=yarray[mymaxima[0,sp].ind]
-  r0=datastruct.fitparams[mind,0].front
-  sr0=datastruct.fitsigma[mind,0].front
-  tmpstr=datastruct.kinquantity[0]+' = '+strtrim(string(r0,format='(f9.3)'),2)+' +/-'+strtrim(string(sr0,format='(f11.3)'),2)+datastruct.kinunit[mind,0]
+  r0=datastruct.fitparams[mind,0].front/DIST_FACTOR/height
+  sr0=datastruct.fitsigma[mind,0].front/DIST_FACTOR/height
+  tmpstr=datastruct.kinquantity[0]+' = '+strtrim(string(r0,format='(f9.2)'),2)+datastruct.kinunit[mind,0]     ;+' +/-'+strtrim(string(sr0,format='(f11.3)'),2)+datastruct.kinunit[mind,0]
   datastruct.kinvalue[mind,0].max=r0
   datastruct.kinsigma[mind,0].max=s1[0]
   print,tmpstr
@@ -796,7 +869,7 @@ pro annplot_fit_maxima,indata,datastruct,tim,yarr,lateral=lateral
 ;final height
 ;  rf=yarray[mymaxima[0,ep].ind]
   rf=wave_frontedge[ep-sp].val
-  tmpstr=datastruct.kinquantity[1]+' = '+strtrim(string(rf,format='(f9.3)'),2)+datastruct.kinunit[1]
+  tmpstr=datastruct.kinquantity[1] +' = '+strtrim(string(rf,format='(f9.2)'),2)+datastruct.kinunit[1]
   datastruct.kinvalue[mind,1].max=rf
   print,tmpstr
   xyouts,!x.window[0]+xmargin,!P.position[3]-2*ymargin,tmpstr,/norm,charsize=1.4,color=255
@@ -811,7 +884,7 @@ pro annplot_fit_maxima,indata,datastruct,tim,yarr,lateral=lateral
 ;     v0=p2[0]*RSUN
 ;     errv0=s2[0]*RSUN
 ;  endelse
-  tmpstr=datastruct.kinquantity[2]+' = '+strtrim(string(v0,format='(f9.3)'),2)+' +/-'+strtrim(string(errv0,format='(f9.3)'),2)+datastruct.kinunit[2]
+  tmpstr=datastruct.kinquantity[2]+' = '+strtrim(string(v0,format='(f9.2)'),2)+datastruct.kinunit[2];' +/-'+strtrim(string(errv0,format='(f9.2)'),2)+datastruct.kinunit[2]
   datastruct.kinvalue[mind,2].max=v0
   datastruct.kinsigma[mind,2].max=errv0
   print,tmpstr
@@ -822,14 +895,14 @@ pro annplot_fit_maxima,indata,datastruct,tim,yarr,lateral=lateral
   vf=(v0+accel*(time_sec[ep]-time_sec[sp]))
 ;  if keyword_set(lateral) then vf=tmp[n_elements(tmp)-1]*height*RSUN*!PI/180. $
 ;  else vf=tmp[n_elements(tmp)-1]*RSUN
-  tmpstr=datastruct.kinquantity[3]+' = '+strtrim(string(vf,format='(f9.3)'),2)+datastruct.kinunit[3]
+  tmpstr=datastruct.kinquantity[3]+' = '+strtrim(string(vf,format='(f9.2)'),2)+datastruct.kinunit[3]
   datastruct.kinvalue[mind,3].max=vf
   print,tmpstr
   xyouts,!x.window[0]+xmargin,!P.position[3]-4*ymargin,tmpstr,/norm,charsize=1.4,color=255
   
 ;acceleration
-  accel=accel*1000.
-  erraccel=datastruct.fitsigma[mind,2].front*1000.
+  accel=accel
+  erraccel=datastruct.fitsigma[mind,2].front
 ;  if keyword_set(lateral) then begin
 ;     accel=p3[0]*RSUN*1000.0*!PI/180.
 ;     erraccel=s3[0]*RSUN*1000.0*!PI/180.
@@ -837,8 +910,7 @@ pro annplot_fit_maxima,indata,datastruct,tim,yarr,lateral=lateral
 ;     accel=p3[0]*RSUN*1000.0
 ;     erraccel=s3[0]*RSUN*1000.0
 ;  endelse
-  tmpstr=datastruct.kinquantity[4]+' = '+strtrim(string(accel,format='(f9.3)'),2)+' +/-'+strtrim(string(erraccel,format='(f9.3)'),2)+$
-         datastruct.kinunit[4]
+  tmpstr=datastruct.kinquantity[4]+' = '+strtrim(string(accel,format='(f9.2)'),2)+datastruct.kinunit[4] ;' +/-'+strtrim(string(erraccel,format='(f9.2)'),2)+datastruct.kinunit[4]
   datastruct.kinvalue[mind,4].max=accel
   datastruct.kinsigma[mind,4].max=erraccel
   print,tmpstr
@@ -901,7 +973,7 @@ function jmap_filter_maxima,time,height,mymaxima,fitrange=fitrange,lateral=later
   endif
 
 ;DEBUG
-  return,maxinds[0,*].ind*outliers
+  return,maxinds[0,tr[0]:tr[1]].ind;*outliers
 ;DEBUG
   
 

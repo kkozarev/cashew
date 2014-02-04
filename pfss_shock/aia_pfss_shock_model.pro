@@ -11,7 +11,7 @@ function bfield,rmag
 ;Return field as a function of radius from Gopalswamy paper
 return,0.409*rmag^(-1.3) * 1.0e-4
 end
-
+ 
 
 
 pro aia_pfss_shock_model,event,wav=wav,vupstream=vupstream,shockcomp=shockcomp,outpath=outpath,pfssfile=pfssfile
@@ -217,9 +217,7 @@ if not keyword_set(pfssfile) then pfssfile=event.pfsspath+'pfss_results_'+date+'
            
            pfss_cartpos[ff,*,0:npt-1]=pos
         endfor
-        
-     
-        
+  
         ;Free some memory
         pfss_px=0
         pfss_pz=0

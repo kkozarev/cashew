@@ -1,4 +1,31 @@
-pro pfss_return_field,date,rstart=rstart,invdens=invdens,pfss_struct=pfss_struct,save=save,savepath=savepath
+pro test_pfss_return_field
+;Test the procedure pfss_return_field
+
+;You can run for one event, like this.
+  one=0
+  if one eq 1 then begin
+     event=load_events_info(label='110125_01')
+     date=event.st
+     pfss_return_field,date,invdens=1,/save,path=event.pfsspath,event=event
+  endif
+  
+  
+;Alternatively, run for all events
+  all=1
+  if all eq 1 then begin
+     events=load_events_info()
+     for ev=0,n_elements(events)-1 do begin
+        event=events[ev]
+        date=event.st
+        pfss_return_field,date,invdens=1,/save,path=event.pfsspath,event=event
+     endfor
+  endif
+
+
+
+end
+
+pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct=pfss_struct,save=save,path=path
 ;PURPOSE:
 ; Return the PFSS field model
 ;CATEGORY:
@@ -25,16 +52,16 @@ pro pfss_return_field,date,rstart=rstart,invdens=invdens,pfss_struct=pfss_struct
 ;Set up the common block variables
 ;@pfss_data_block
 ;spherical_to_pfss,pfssData
-if n_elements(date) eq 0 then begin
-   print,'You need to supply a date string, like "2011-01-25"'
-   return
-endif
+  if n_elements(date) eq 0 then begin
+     print,'You need to supply a date string, like "2011-01-25"'
+     return
+  endif
 ;Restore B-field model
   pfss_restore,pfss_time2file(date,/ssw_cat,/url)
-
+  
 ;  starting points to be on a regular grid covering the full disk,
 ;  with a starting radius of r=1.00 Rsun
-  if not keyword_set (rstart) then rstart=1.00
+  if not keyword_set (rstart) then rstart=1.0001
 ;  factor inverse to line density, i.e. lower values = more lines
   if not keyword_set(invdens) then invdens = 4 
   pfss_field_start_coord,5,invdens,radstart=rstart
@@ -42,14 +69,14 @@ endif
 ;  trace the field lines passing through the starting point arrays
   pfss_trace_field, kind
 @pfss_data_block
-     ind=where(ptph lt 0.0)
-     if ind[0] gt -1 then ptph[ind]+=2*!PI
-     ind=where(ptph ge 2*!PI)
-     if ind[0] gt -1 then ptph[ind]-=2*!PI
-     ind=where(ptth lt 0.0)
-     if ind[0] gt -1 then ptth[ind]+=2*!PI
-     ind=where(ptth ge 2*!PI)
-     if ind[0] gt -1 then ptth[ind]-=2*!PI
+  ind=where(ptph lt 0.0)
+  if ind[0] gt -1 then ptph[ind]+=2*!PI
+  ind=where(ptph ge 2*!PI)
+  if ind[0] gt -1 then ptph[ind]-=2*!PI
+  ind=where(ptth lt 0.0)
+  if ind[0] gt -1 then ptth[ind]+=2*!PI
+  ind=where(ptth ge 2*!PI)
+  if ind[0] gt -1 then ptth[ind]-=2*!PI
 ;Create a structure to hold the results. The data are in 
 ;(r,theta,phi) spherical/heliographic coordinate system:
 ;r is the distance away from sun-center in units of solar
@@ -57,8 +84,8 @@ endif
 ;      photosphere and 2.5 (the radius of the source surface).
 ;      theta and phi are respectively the colatitude and
 ;      longitude in radians.
-     pfss_to_spherical,sph_data
-     if keyword_set(pfss_struct) then pfss_struct=sph_data
+  pfss_to_spherical,sph_data
+  if keyword_set(pfss_struct) then pfss_struct=sph_data
 ;pfss_data is a structure array of type
 ;{spherical_field_data, $
 ;  br:ptr_new(),bth:ptr_new(),bph:ptr_new(),bderivs:ptr_new(),$
@@ -74,7 +101,7 @@ endif
 ;      Thus, field line i (where i is between 0 and N-1) is
 ;      represented by the points ptr(0:nstep(i)-1,i), and likewise
 ;      for ptth and ptph.
-
+  
 ;Get the Carrington coordinates. Returns an array [R,lon,lat] at
 ;specified time.
 ;Note: AIA's index already has the carrington coordinates in
@@ -82,11 +109,18 @@ endif
 ;carrCoords=get_stereo_lonlat(date,'Earth',/degrees,system='Carrington')
 ;print,carrCoords
 
-
+  
 ;Save the structure and Carrington coordinates of SDO to a sav file:
-   res=strsplit(date,'-',/extract)
-   dat=strtrim(res[0]+res[1]+res[2],2)
-   fname='pfss_results_'+dat+'_'+strtrim(string(rstart,format='(f3.1)'),2)+'Rs_dens_'+strtrim(string(invdens),2)+'.sav'
-   if keyword_set(savepath) then fname=savepath+fname
-   save,filename=fname,kind,ptr,ptth,ptph,nstep,br,bph,bth,sph_data
+  if keyword_set(save) then begin
+     if not keyword_set(event) then begin
+        res=strsplit(date,'/ ',/extract)
+        dat=strtrim(res[0]+res[1]+res[2],2)
+        fname='pfss_results_'+dat+'_'+strtrim(string(rstart,format='(f3.1)'),2)+'Rs_dens_'+strtrim(string(invdens),2)+'.sav'
+     endif else begin
+        dat=event.date
+        fname='pfss_results_'+dat+'_'+strtrim(string(rstart,format='(f3.1)'),2)+'Rs_dens_'+strtrim(string(invdens),2)+'.sav'
+     endelse
+     if keyword_set(path) then fname=path+fname
+     save,filename=fname,kind,ptr,ptth,ptph,nstep,br,bph,bth,sph_data
+  endif
 end

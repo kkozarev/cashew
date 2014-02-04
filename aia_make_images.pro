@@ -1,17 +1,17 @@
 pro test_aia_make_images
 ;Test the procedure aia_make_images
   
-  ;You can run this for a single event, like so
+  ;You can run this for a single or few events, like so
   one=0
   if one eq 1 then begin
      wavelengths=['193','211']
-     label='110511_01'
-     event=load_events_info(label=label)
-     wavelength='193'
-     aia_make_images,event,wavelength,/raw,/base,/run
+     label=['131107_01','131119_01']
+     events=load_events_info(label=label)
+     for w=0,n_elements(wavelengths)-1 do for ev=0,n_elements(events)-1 do $
+        aia_make_images,events[ev],wavelengths[w],/base,/run;,/raw
   endif
   
-  ;Alternatively, run it for all/multiple events
+  ;Alternatively, run it for all events
   all=1
   if all eq 1 then begin
      events=load_events_info()
@@ -21,7 +21,7 @@ pro test_aia_make_images
         event=events[ev]
         for w=0,n_elements(wavelengths)-1 do begin
            wavelength=wavelengths[w]
-           aia_make_images,event,wavelength,/raw,/base,/run
+           aia_make_images,event,wavelength,/raw,/base,/run,/force
         endfor
      endfor
   endif
@@ -130,8 +130,9 @@ pro aia_make_images, event, wave, savepath=savepath,force=force,raw=raw,base=bas
   set_plot,'z'
   device, set_resolution=event.aiafov, SET_PIXEL_DEPTH=24, DECOMPOSED=0
   !P.font=0
-  chsize=1.2
-  chthick=1.0
+  text_scaling=avg(event.aiafov)/1024.0
+  chsize=1.2*text_scaling
+  chthick=1.0*text_scaling
 
   for it=0,n_elements(image_type)-1 do begin
      imgtype=image_type[it]
@@ -147,10 +148,10 @@ pro aia_make_images, event, wave, savepath=savepath,force=force,raw=raw,base=bas
            tvlct,reverse(rr),reverse(gg),reverse(bb)
            scimage = (bytscl(sqrt(subdata[*,*,i]), max=50, min=0)+0)
            tvscl,scimage
-           polyfill,[0.0,0.315,0.315,0.0],[0.98,0.98,1.0,1.0],color=255
-           polyfill,[0.968,1.0,1.0,0.968],[0.98,0.98,1.0,1.0],color=255
-           xyouts,0.005,0.985,subindex[i].date_obs+' / AIA:'+wav,charsize=chsize,charthick=chthick,color=0
-           xyouts,0.970,0.985,ind,charsize=chsize,charthick=chthick,color=0
+           polyfill,[0.0,0.315*text_scaling,0.315*text_scaling,0.0],[0.98,0.98,1.0,1.0],color=255,/norm
+           polyfill,[0.968-(1.0-0.968)/text_scaling,1.0,1.0,0.968-(1-0.968)/text_scaling],[0.98,0.98,1.0,1.0],color=255,/norm
+           xyouts,0.005,0.985,subindex[i].date_obs+' / AIA:'+wav,charsize=chsize,charthick=chthick,color=0,/norm
+           xyouts,0.970-(1.-0.97)/text_scaling,0.985,ind,charsize=chsize,charthick=chthick,color=0,/norm
            image=tvrd(/true)
            loadct,0,/silent
         endif
@@ -160,11 +161,10 @@ pro aia_make_images, event, wave, savepath=savepath,force=force,raw=raw,base=bas
            tvlct,rr,gg,bb,/get
            scimage = (bytscl((subdata[*,*,i])-base, max=30, min=-50)+0)
            tvscl,scimage
-           polyfill,[0.0,0.315,0.315,0.0],[0.98,0.98,1.0,1.0],color=0
-           polyfill,[0.968,1.0,1.0,0.968],[0.98,0.98,1.0,1.0],color=0
-           xyouts,0.005,0.985,subindex[i].date_obs+' / AIA:'+wav+' B',charsize=chsize,charthick=chthick,color=255
-           xyouts,0.970,0.985,ind,charsize=chsize,charthick=chthick,color=255
-
+           polyfill,[0.0,0.315*text_scaling,0.315*text_scaling,0.0],[0.98,0.98,1.0,1.0],color=0,/norm
+           polyfill,[0.968-(1.0-0.968)/text_scaling,1.0,1.0,0.968-(1-0.968)/text_scaling],[0.98,0.98,1.0,1.0],color=0,/norm
+           xyouts,0.005,0.985,subindex[i].date_obs+' / AIA:'+wav+' B',charsize=chsize,charthick=chthick,color=255,/norm
+           xyouts,0.970-(1.-0.97)/text_scaling,0.985,ind,charsize=chsize,charthick=chthick,color=255,/norm
            image=tvrd()
            loadct,0,/silent
         endif
@@ -174,10 +174,10 @@ pro aia_make_images, event, wave, savepath=savepath,force=force,raw=raw,base=bas
            tvlct,rr,gg,bb,/get
            scimage = (bytscl((subdata[*,*,i])-(subdata[*,*,i-1]), max=30, min=-50)+0)
            tvscl,scimage
-           polyfill,[0.0,0.315,0.315,0.0],[0.98,0.98,1.0,1.0],color=0
-           polyfill,[0.968,1.0,1.0,0.968],[0.98,0.98,1.0,1.0],color=0
-           xyouts,0.005,0.985,subindex[i].date_obs+' / AIA:'+wav+' R',charsize=chsize,charthick=chthick,color=255
-           xyouts,0.970,0.985,ind,charsize=chsize,charthick=chthick,color=255
+           polyfill,[0.0,0.315*text_scaling,0.315*text_scaling,0.0],[0.98,0.98,1.0,1.0],color=0,/norm
+           polyfill,[0.968-(1.0-0.968)/text_scaling,1.0,1.0,0.968-(1-0.968)/text_scaling],[0.98,0.98,1.0,1.0],color=0,/norm
+           xyouts,0.005,0.985,subindex[i].date_obs+' / AIA:'+wav+' R',charsize=chsize,charthick=chthick,color=255,/norm
+           xyouts,0.970-(1.-0.97)/text_scaling,0.985,ind,charsize=chsize,charthick=chthick,color=255,/norm
            image=tvrd()
            loadct,0,/silent              ; set color table
         endif
@@ -186,7 +186,7 @@ pro aia_make_images, event, wave, savepath=savepath,force=force,raw=raw,base=bas
         if not dir_exist(finsavpath) then spawn,'mkdir '+finsavpath   
         infname='normalized_AIA_'+date+'_'+event.label+'_'+wav+'_subdata_'+imgtype+'_'+ind+'.png'
         write_png,finsavpath+infname,image,rr,gg,bb
-       ; stop
+       ;stop
      endfor
   endfor
 set_plot,'x'

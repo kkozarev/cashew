@@ -23,6 +23,7 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 09/30/2013
 ;11/18/2013, Kamen Kozarev - added various folder elements
+;01/28/2014, Kamen Kozarev - added the ability to specify multiple events via the label keyword.
 
 ;----------------------------------------------------------------------------------------
 ; THIS IS THE LIST OF 'GOOD' EVENTS THAT MICHAEL HAMMER CREATED IN 08/2013
@@ -33,23 +34,49 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
   trunk=GETENV('CORWAV_TRUNK')
 
 ;DEBUG
-parse_events_info,trunk+'dat/events.json', labels=labels, coordX=coordX, coordY=coordY, sts=sts, ets=ets, typeII=typeII, loop=loop, filament=filament, comment=comment, flareclass=flareclass, aiafov=aiafov, nrh_lookup=nrh_lookup, callisto_lookup=callisto_lookup, ips_lookup=ips_lookup
+  parse_events_info,trunk+'dat/events.json', labels=labels, coordX=coordX, coordY=coordY, sts=sts, ets=ets, typeII=typeII, loop=loop, filament=filament, comment=comment, flareclass=flareclass, aiafov=aiafov, nrh_lookup=nrh_lookup, callisto_lookup=callisto_lookup, ips_lookup=ips_lookup
 ;DEBUG
   if keyword_set(label) then begin
-     tmp=where(labels eq label)
-     if tmp[0] eq -1 then begin
-        if not keyword_set(quiet) then begin
-           print,''
-           print,'Event "'+label+'" does not exist! Quitting...'
-           print,''
-        endif
-        return,-1
-     endif
+     nerr=0
+     for ll=0,n_elements(label)-1 do begin
+        tmp=where(labels eq label[ll])
+        if tmp[0] eq -1 then begin
+           if not keyword_set(quiet) then begin
+              print,''
+              print,'Event "'+label[ll]+'" does not exist!'
+              print,''
+              nerr++
+           endif
+           if nerr eq n_elements(label) then begin
+              print,'Quitting...'
+              return,-1
+           endif
+        endif else begin
+           if var_exist(lind) then lind=[lind,tmp] else lind=tmp
+        endelse
+     endfor
+     if n_elements(lind) lt n_elements(label) then print,'Running with existing event label(s).'
+     
+     labels=labels[lind]
+     coordX=coordX[lind]
+     coordY=coordY[lind]
+     sts=sts[lind]
+     ets=ets[lind]
+     typeII=typeII[lind]
+     loop=loop[lind]
+     filament=filament[lind]
+     comment=comment[lind]
+     flareclass=flareclass[lind]
+     aiafov=aiafov[*,lind]
+     nrh_lookup=nrh_lookup[lind]
+     callisto_lookup=callisto_lookup[lind]
+     ips_lookup=ips_lookup[lind]
   endif
-
-  hemisphere=strarr(n_elements(labels))
-  hemisphere[where(coordX lt 0.)]='E'
-  hemisphere[where(coordX ge 0.)]='W'
+  
+  nevents=n_elements(labels)
+  
+  hemisphere=strarr(nevents)
+  for ll=0,nevents-1 do if coordX[ll] lt 0. then hemisphere[ll]='E' else hemisphere[ll]='W'
 
 ;DATAPATHS
 aia_datapath=basepath+'AIA_data/'
@@ -68,8 +95,6 @@ webpath=webbasepath+'events/'
 
 ;----------------------------------------------------------------------------------------
 
-
-nevents=n_elements(labels)
 event={label:'',st:'',et:'',coordX:0,coordY:0,aiafov:intarr(2),hemisphere:'',date:'',$
        arlon:0.,arlat:0.,geomcorfactor:0.,flareclass:'',typeII:0,loop:0,filament:0,comment:'',$
        aia_datapath:'',nrh_datapath:'',rhessi_datapath:'',ips_datapath:'',callisto_datapath:'',$
@@ -93,7 +118,7 @@ events[ev].date=tmp[0]+tmp[1]+tmp[2]
 res=arcmin2hel(coordX[ev]/60.,coordY[ev]/60.,date=dat)
 events[ev].arlat=res[0]
 events[ev].arlon=res[1]
-events[ev].geomcorfactor=1.0/sin(events[ev].arlon*!PI/180.)
+events[ev].geomcorfactor=abs(1.0/sin(events[ev].arlon*!PI/180.))
 ;if ev eq 3 then print,res[0]
 events[ev].st=sts[ev]
 events[ev].et=ets[ev]
@@ -142,12 +167,12 @@ events[ev].particlespath=events[ev].savepath+'particles/'
 endfor
 
 if keyword_set(printlabels) then print,events.label
-if keyword_set(label) then begin
-   ind=where(events.label eq label)
-   single_event=events[ind]   
-   return, single_event
-endif else begin
+;if keyword_set(label) then begin
+;   ind=where(events.label eq label)
+;   single_event=events[ind]   
+;   return, single_event
+;endif else begin
    return,events
-endelse
+;endelse
 
 end

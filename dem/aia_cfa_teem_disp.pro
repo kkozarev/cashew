@@ -90,4 +90,6 @@ xyouts,0.01*nx,0.01*ny,dateobs,size=2,color=255
 image_tv=tvrd(true=1)
 write_png,teem_fname+'.png',image_tv,rr,gg,bb
 print,'file written : ',teem_fname+'.png'
+
+set_plot,'x'
 end

@@ -2,7 +2,7 @@ pro test_sync_event_webfolders
   ;Run for a single event like this:
  one=0
  if one eq 1 then begin
-  label='131212_01'
+  label='131119_01'
   event=load_events_info(label=label)
   sync_event_webfolders,event
  endif
@@ -19,7 +19,7 @@ pro test_sync_event_webfolders
  endif
 end
 
-pro sync_event_webfolders,event
+pro sync_event_webfolders,event,force=force
 ;PURPOSE:
 ;This procedure will sync the event webfolders and subfolders
 ;
@@ -51,23 +51,28 @@ pro sync_event_webfolders,event
      if not dir_exist(path+folder) then spawn,'mkdir '+path+folder
      
      if folder eq 'kinematics' then begin
-        spawn,'cp '+event.kinematicspath+'*.png '+path+folder
+        if file_search(path+folder+'*.png') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.kinematicspath+'*.png '+path+folder
      endif
      
      if folder eq 'pfss' then begin
-        spawn,'cp '+event.pfsspath+'*.png '+path+folder
+        if file_search(path+folder+'*.png') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.pfsspath+'*.png '+path+folder
      endif
      
      if folder eq 'swap' then begin
-        spawn,'cp '+event.swappath+'*.png '+path+folder
+        if file_search(path+folder+'*.png') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.swappath+'*.png '+path+folder
      endif
      
      if folder eq 'swap' then begin
-        spawn,'cp '+event.euvipath+'*.png '+path+folder
+        if file_search(path+folder+'*.png') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.euvipath+'*.png '+path+folder
      endif
      
      if folder eq 'particles' then begin
-        spawn,'cp '+event.particlespath+'*.png '+path+folder
+        if file_search(path+folder+'*.png') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.particlespath+'*.png '+path+folder
      endif
      
      ;sync the radio subfolders
@@ -75,25 +80,36 @@ pro sync_event_webfolders,event
         for i=0,n_elements(subfolders.radio)-1 do $
            if not dir_exist(path+folder+'/'+subfolders.radio[i]) then $
               spawn,'mkdir '+path+folder+'/'+subfolders.radio[i]
-        spawn,'cp '+event.nrhpath+'*.png '+path+folder+'/'+subfolders.radio[0]
-        spawn,'cp '+event.ipspath+'*.png '+path+folder+'/'+subfolders.radio[1]
-        spawn,'cp '+event.callistopath+'*.png '+folder+'/'+subfolders.radio[2]
+
+        if file_search(path+folder+'/'+subfolders.radio[0]+'*.png') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.nrhpath+'*.png '+path+folder+'/'+subfolders.radio[0]
+        if file_search(path+folder+'/'+subfolders.radio[1]+'*.png') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.ipspath+'*.png '+path+folder+'/'+subfolders.radio[1]
+        if file_search(path+folder+'/'+subfolders.radio[2]+'*.png') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.callistopath+'*.png '+path+folder+'/'+subfolders.radio[2]
         
      endif
      
      ;sync the annulusplot subfolders
      if folder eq 'annulusplot' then begin
-        spawn,'cp '+event.annuluspath+'*.png '+path+folder
+        if file_search(path+folder+'*.png') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.annuluspath+'*.png '+path+folder
      endif
      
      ;sync the movies subfolders
      if folder eq 'movies' then begin
-        spawn,'cp '+event.moviepath+'arun*193*.mp4 '+path+folder
-        spawn,'cp '+event.moviepath+'araw*193*.mp4 '+path+folder
-        spawn,'cp '+event.moviepath+'run*193*.mp4 '+path+folder
-        spawn,'cp '+event.moviepath+'raw*193*.mp4 '+path+folder
-        spawn,'cp '+event.moviepath+'aschdem*.mp4 '+path+folder
-        spawn,'cp '+event.moviepath+'pfss_shock*.mp4 '+path+folder
+        if file_search(path+folder+'arun*193*.mp4') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.moviepath+'arun*193*.mp4 '+path+folder
+        if file_search(path+folder+'araw*193*.mp4') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.moviepath+'araw*193*.mp4 '+path+folder
+        if file_search(path+folder+'run*193*.mp4') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.moviepath+'run*193*.mp4 '+path+folder
+        if file_search(path+folder+'raw*193*.mp4') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.moviepath+'raw*193*.mp4 '+path+folder
+        if file_search(path+folder+'aschdem*.mp4') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.moviepath+'aschdem*.mp4 '+path+folder
+        if file_search(path+folder+'pfss_shock*.mp4') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.moviepath+'pfss_shock*.mp4 '+path+folder
      endif
      
      ;sync the dem subfolders
@@ -101,7 +117,9 @@ pro sync_event_webfolders,event
         for i=0,n_elements(subfolders.dem)-1 do $
            if not dir_exist(path+folder+'/'+subfolders.dem[i]) then $
               spawn,'mkdir '+path+folder+'/'+subfolders.dem[i]
-        spawn,'cp '+event.aschdempath+'aschdem*series*.png '+path+folder+'/'+subfolders.dem[0]
+        if file_search(path+folder+'/'+subfolders.dem[0]+'aschdem*series*.png') eq '' or keyword_set(force) then $
+           spawn,'cp '+event.aschdempath+'aschdem*series*.png '+path+folder+'/'+subfolders.dem[0]
+        if file_search(path+folder+'/'+subfolders.dem[1]+'aschdem*series*.png') eq '' or keyword_set(force) then $
         spawn,'cp '+event.weberpath+'aschdem*series*.png '+path+folder+'/'+subfolders.dem[1]
      endif
   endfor

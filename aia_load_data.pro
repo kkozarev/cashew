@@ -1,11 +1,28 @@
 pro test_aia_load_data
-;Test the procedure here
-event=load_events_info(label='110511_01')
-st=event.st
-et=event.et
-wav='193'
-aia_load_data,st,et,wav,event=event,subdata=subdata,subindex=subindex,/subroi,/force
-stop
+  
+  ;Run for a single event like this:
+  one=1
+  if one eq 1 then begin
+     label='110125_01'
+     event=load_events_info(label=label)
+     wav='193'
+     aia_load_data,event.st,event.et,wav,event=event,subdata=subdata,subindex=subindex,/subroi,/force
+  endif
+
+  ;Alternatively, run for all the events:
+  all=0
+  if all eq 1 then begin
+     events=load_events_info()
+     wavelengths=['193','211']
+     for ev=0,n_elements(events)-1 do begin
+        event=events[ev]
+        for w=0,n_elements(wavelengths)-1 do begin
+           wav=wavelengths[w]
+           aia_load_data,event.st,event.et,wav,event=event,subdata=subdata,subindex=subindex,/subroi,/force
+        endfor
+     endfor
+  endif
+
 end
 
 
@@ -320,6 +337,7 @@ endif else begin
    
    if keyword_set(nodata) then begin
       read_sdo,files,index,data,/nodata
+      return
    endif else begin   
       read_sdo,files,ind,dat,/uncomp_delete
    endelse

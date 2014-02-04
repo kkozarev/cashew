@@ -1,24 +1,33 @@
 pro test_aia_make_movies
 
   ;You can run this for a single event, like so
-  one=1
+  one=0
   if one eq 1 then begin
-     label='110511_01'
+     label='111020_01'
 ;  label='110125_01'
      event=load_events_info(label=label)
-     movie_type='pfss_shock'
+     wavelengths=['193','211']
+     movie_types=['araw','abase','arun','raw','base','run']
+     movie_types=['teem']
      wavelength='193'
-     aia_make_movies, event, movie_type=movie_type, wav=wavelength, FRAMES_PER_SECOND = frames_per_second,/force
+     for w=0,n_elements(wavelengths)-1 do begin
+        wavelength=wavelengths[w]
+        for mt=0,n_elements(movie_types)-1 do begin
+           movie_type=movie_types[mt]
+           aia_make_movies, event, movie_type=movie_type, wav=wavelength,/force
+        endfor
+     endfor
   endif
   
   ;Alternatively, run it for all/multiple events
-  all=0
+  all=1
   if all eq 1 then begin
      events=load_events_info()
      wavelengths=['193','211']
-     ;movie_types=['raw','base','run']
-     movie_types=['araw','abase','arun']
-    ; movie_types=['araw']
+     wavelengths='193'
+     movie_types=['raw','base','run']
+     ;movie_types=['araw','abase','arun','raw','base','run']
+     movie_types=['teem']
      nevents=n_elements(events)
      for ev=0,nevents-1 do begin
         event=events[ev]
@@ -169,6 +178,10 @@ endif
 ;Create symbolic links in which the files are ordered starting from 1. 
 ;This is necessary because of issues with different versions of ffmpeg
 imgs=file_search(imgsearch)
+if n_elements(imgs) lt 6 then begin
+   print,'Not enough frames to make movie '+moviefname
+   return
+endif
 
 ;Create a temporary folder to order the images properly.
 tmpdir="$HOME/tmpdir_"+strtrim(string(fix(floor(randomn(2)*100000))),2)+'/'

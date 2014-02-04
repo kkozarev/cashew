@@ -1,13 +1,14 @@
 pro test_aia_nrh_map_overlay
-
-  ;Run for a single event like this:
+  
+  ;Run for a single or a few events, like this:
   one=1
   if one eq 1 then begin
-     label='110125_01'
-     event=load_events_info(label=label)
-     aia_nrh_map_overlay,event,/base ;/run,/subroi
+     label=['131119_01','131107_01']
+     events=load_events_info(label=label)
+     for ev=0,n_elements(events)-1 do $
+        aia_nrh_map_overlay,events[ev],/base ;/run,/subroi
   endif
-
+  
   ;Alternatively, run for all the events:
   all=0
   if all eq 1 then begin
@@ -18,7 +19,6 @@ pro test_aia_nrh_map_overlay
      endfor
   endif
 end
-
 
 
 pro aia_nrh_map_overlay,event,datapath=datapath,savepath=savepath,base=base,run=run,subroi=subroi
@@ -53,6 +53,7 @@ pro aia_nrh_map_overlay,event,datapath=datapath,savepath=savepath,base=base,run=
 ;
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 10/2013
+;Update, 01/27/2014, KAK - improved appearances slightly
 
 
   tmp=strsplit(event.st,' ',/extract)
@@ -95,7 +96,7 @@ pro aia_nrh_map_overlay,event,datapath=datapath,savepath=savepath,base=base,run=
      if keyword_set(run) then aia_runmap=aia_basemap
   endif
   
- 
+  
   
   ;MAIN LOOP
   set_plot,'z'
@@ -123,32 +124,37 @@ pro aia_nrh_map_overlay,event,datapath=datapath,savepath=savepath,base=base,run=
      
      ;Plot AIA base difference map
      if keyword_set(base) then begin
-        aia_map.data=aia_map.data-aia_basemap.data
+        plotmap=map_diff(aia_map[0],aia_basemap)
+        ;plotmap=aia_map[0].data-aia_basemap.data
+        stop
         loadct,9,/silent
-        plot_map,aia_map,fov=nrh_map[tsp],/limb,dmin=-250,dmax=100,charsize=2,charthick=2
+        plot_map,plotmap,fov=nrh_map[tsp],/limb,dmin=-250,dmax=100,charsize=2,charthick=2
         file='aia_nrh_overlay_base_'+event.label+'_'+event.date+'_'+strout
      endif else begin
       ;Plot AIA running difference map
         if keyword_set(run) then begin
-           saverunmap=aia_map
-           aia_map.data=aia_map.data-aia_runmap.data
+           saverunmap=aia_map[0]
+           plotmap=aia_map[0].data-aia_runmap.data
            loadct,9,/silent
-           plot_map,aia_map,fov=nrh_map,/limb,dmin=-250,dmax=100
+           plot_map,plotmap,fov=nrh_map[tsp],/limb,dmin=-250,dmax=100
            file='aia_nrh_overlay_run_'+event.label+'_'+event.date+'_'+strout
         endif else begin
            aia_lct,r,g,b,wavelnth='193',/load
-           plot_map,aia_map,fov=nrh_map,/limb,dmin=1,dmax=1000
+           plot_map,aia_map[0],fov=nrh_map[tsp],/limb,dmin=1,dmax=1000
            file='aia_nrh_overlay_raw_'+event.label+'_'+event.date+'_'+strout
         endelse
      endelse
      
      ;Overplot contours of NRH data
      plot_map,nrh_map[tsp],/over,/rotate,thick=2,/smooth,color=0,charsize=2,charthick=2,$
-              levels=[0.15,0.25,0.35,0.45,0.55,0.65]*max(nrh_map[tsp].data)
+              levels=[0.25,0.35,0.45,0.55,0.65,0.75,0.85]*max(nrh_map[tsp].data)
      xyouts,0.30,0.88,'NRH '+nrh_ind[tsp].date_obs+' UT',/normal,color=0,charsize=3,charthick=2
      tvlct,rr,gg,bb,/get
+     if file_exist(savepath+file+'.png') then spawn, 'rm '+savepath+file+'.png'
      write_png,savepath+file+'.png',tvrd(),rr,gg,bb
      if tsp gt 0 and keyword_set(run) then aia_runmap=saverunmap
+     if tsp eq 10 then stop
   endfor
   set_plot,'x'
+  close,/all
 end

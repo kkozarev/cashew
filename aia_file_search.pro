@@ -55,10 +55,13 @@ function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=
 ;                  exposure frames - keyword remove_aec
 ;11/30/2013, KAK - integrated with the event structure, 
 ;
-starttime=sts
-endtime=ets
-wave=wav
-
+  starttime=sts
+  endtime=ets
+  
+;Format the wavelength string properly
+  wave=wav
+  while strlen(wave) lt 4 do wave='0'+wave
+  
   if not keyword_set(path) then path='/Data/SDO/AIA/level1/'
   
   if n_elements(starttime) eq 1 then begin
@@ -95,8 +98,7 @@ wave=wav
   
 ;figure out where to search
   
-;Format the wavelength string properly
-  while strlen(wave) lt 4 do wave='0'+wave
+
   
 ;if the hours are different
   if st[3] ne et[3] then begin
@@ -145,104 +147,116 @@ wave=wav
         endelse
      endfor
   endelse
-
-
-err=-1
+  
+  
+  err=-1
 ;do the searching for the files
-for h=0,n_elements(hmins[0,*])-1 do begin
-   locpath=basepath+'H'+hmins[0,h]+'00/'
-   file=file_search(locpath+'*_'+hmins[0,h]+hmins[1,h]+'*_'+wave+'.fits')
-   if keyword_set(jsoc) then file=file_search(locpath+'*'+strmid(wave,1,3)+'A*'+hmins[0,h]+'_'+hmins[1,h]+'*.fits')
-   
-   if strtrim(file[0],2) eq '' then begin
-      if not var_exist(err) then err=h else err=[err,h]
-      continue
-   endif else begin
-      if not var_exist(files) then files=file else files=[files,file]
-   endelse
-
-endfor
-if n_elements(err) gt 1 then err=err[1:*]
-
-if keyword_set(missing) and var_exist(files) then missing=reform(hmins[*,err])
-
+  for h=0,n_elements(hmins[0,*])-1 do begin
+     locpath=basepath+'H'+hmins[0,h]+'00/'
+     file=file_search(locpath+'*_'+hmins[0,h]+hmins[1,h]+'*_'+wave+'.fits')
+     if keyword_set(jsoc) then file=file_search(locpath+'*'+strmid(wave,1,3)+'A*'+hmins[0,h]+'_'+hmins[1,h]+'*.fits')
+     
+     if strtrim(file[0],2) eq '' then begin
+        if not var_exist(err) then err=h else err=[err,h]
+        continue
+     endif else begin
+        if not var_exist(files) then files=file else files=[files,file]
+     endelse
+     
+  endfor
+  if n_elements(err) gt 1 then err=err[1:*]
+  
+  if keyword_set(missing) and var_exist(files) then missing=reform(hmins[*,err])
+  
 ;Check that the image times conform to the range given, even in the
 ;seconds.
 ;1. extract the times and convert them to seconds for easier
 ;comparison with sts and ets - initial and final times
-if var_exist(files) then begin
-   times=dblarr(n_elements(files))
-   cc=0
-   for ii=0,n_elements(files)-1 do begin
-      if files[ii] ne '' then begin
-         tmp=strsplit(files[ii],'_',/extract)
-         mind=n_elements(tmp)-2
-         time=tmp[mind]
-         times[ii]=anytim(st[0]+'/'+st[1]+'/'+st[2]+' '+strmid(time,0,2)+':'+strmid(time,2,2)+':'+strmid(time,4,2))
-         cc++
-      endif
-   endfor
-   
+  if var_exist(files) then begin
+     times=dblarr(n_elements(files))
+     cc=0
+     for ii=0,n_elements(files)-1 do begin
+        if files[ii] ne '' then begin
+           tmp=strsplit(files[ii],'_',/extract)
+           mind=n_elements(tmp)-2
+           time=tmp[mind]
+           times[ii]=anytim(st[0]+'/'+st[1]+'/'+st[2]+' '+strmid(time,0,2)+':'+strmid(time,2,2)+':'+strmid(time,4,2))
+           cc++
+        endif
+     endfor
+     
 ;compute the final time
-   finind=where(((times-anytim(sts)) ge 0.0) and ((anytim(ets)-times) ge 0.0))
-   
-if finind[0] ne -1 then begin 
-   files=files[finind] 
-endif else begin
-   files=''
-endelse
-
-endif else begin
-   files=''
-   times=0
-endelse
-
-if keyword_set(loud) and files[0] ne '' then begin 
-    print,files
-    print,''
-    print,'Number of files found: '+strtrim(string(n_elements(files)),2)
-    print,''
- endif
-
-if keyword_set(check171) then begin 
-   if ntotfiles ne n_elements(files) then begin
-      print,''
-      print,'There are files missing for band '+wav+'!'
-      print,'Total number of files is '+strtrim(string(n_elements(files)),2)
-      print,'Total number of files for reference band 171 is '+strtrim(string(ntotfiles),2)
-      print,'Consider manually reviewing the data files in '+path
-      return,-1
-   endif
-endif
-
-
-if keyword_set(remove_aec) and files[0] ne '' then begin
-   read_sdo,files,ind,dat,/nodata
-   mask=where(ind.aectype eq 0)
-   if mask[0] ne -1 then begin
-      files=files[mask]
-      nfiles=n_elements(files)
-      ind=0
-      dat=0
-      if keyword_set(loud) then begin
-         print,''
-         print,'Checking for images with Automatic Exposure Control (AEC) - where index.AECTYPE != 0'
-         print,''
-         wait,0.1
-         print,'Updated list of files to load:'
-         print,files
-         print,''
-         print,'Number of files found: '+strtrim(string(nfiles),2)
-         print,''
-         print,'---------------------------------------------------'
-         print,''
-      endif
-   endif
-endif
-
-
-
-if keyword_set(first) then return,files[0] $
-else return,files
-
+     finind=where(((times-anytim(sts)) ge 0.0) and ((anytim(ets)-times) ge 0.0))
+     
+     if finind[0] ne -1 then begin 
+        files=files[finind] 
+     endif else begin
+        files=''
+     endelse
+     
+  endif else begin
+     files=''
+     times=0
+  endelse
+  
+  if keyword_set(loud) and files[0] ne '' then begin 
+     print,files
+     print,''
+     print,'Number of files found: '+strtrim(string(n_elements(files)),2)
+     print,''
+  endif
+  
+  ;Check for missing files within the time period.
+  cad=12
+  missing=aia_check_missing_files(files,cadence=cad)
+  if missing[0] ne '' then begin
+     print,'Missing data files around the following files:'
+     print,missing
+     print,'Consider manually reviewing the missing data. Quitting...'
+     return,-1
+  endif
+  
+  if keyword_set(check171) then begin 
+     if ntotfiles ne n_elements(files) then begin
+        print,''
+        print,'Total number of files for band '+wav+' is '+strtrim(string(n_elements(files)),2)
+        print,'Total number of files for reference band 171 is '+strtrim(string(ntotfiles),2)
+        print,'There is a discrepancy between the number of files between the current and reference bands.'
+        print,'Continuing with the smaller number of files...'
+        print,''
+        ntotfiles=n_elements(files)
+     endif
+  endif
+  
+  
+  if keyword_set(remove_aec) and files[0] ne '' then begin
+     read_sdo,files,ind,dat,/nodata
+     mask=where(ind.aectype eq 0)
+     if mask[0] ne -1 then begin
+        files=files[mask]
+        nfiles=n_elements(files)
+        ind=0
+        dat=0
+        if keyword_set(loud) then begin
+           print,''
+           print,'Checking for images with Automatic Exposure Control (AEC) - where index.AECTYPE != 0'
+           print,''
+           wait,0.1
+           print,'Updated list of files to load:'
+           print,files
+           print,''
+           print,'Number of files found: '+strtrim(string(nfiles),2)
+           print,''
+           print,'---------------------------------------------------'
+           print,''
+        endif
+     endif
+  endif
+  
+  
+  
+  if keyword_set(first) then return,files[0] $
+  else return,files
+  
 end
+

@@ -10,7 +10,7 @@ function get_event_info,filename
              typeII:0,$
              typeIII:0,$
              path:'/Volumes/Backscratch/Users/kkozarev/AIA/events/01/'}
-
+ 
 ;read and parse the file contents
   openr,lun,filename,/get_lun
   line=''
