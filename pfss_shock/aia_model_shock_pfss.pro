@@ -31,7 +31,8 @@ pro test_aia_model_shock_pfss
   
   ;Run the model here for all shock jump cases!
   for cc=0,n_elements(compression)-1 do begin
-     aia_model_shock_pfss,event,shockcomp=compression[cc],vupstream=vshock;,/plot,/png
+     aia_model_shock_pfss,event,shockcomp=compression[cc],vupstream=vshock,/plot,/png
+     stop
   endfor
 
 ;Plot the energy histogram
@@ -69,9 +70,7 @@ pro aia_model_shock_pfss,event,wav=wav,shockcomp=shockcomp,plot=plot,png=png,vup
   
 ;for sloncho-2
   if pcname eq 'sloncho-2' then begin
-;restore,'/Users/kkozarev/AIA/algoTests/yaftawave/normalized_'+eventname+'_subdata.sav'
-                                ;restore,'/Users/kkozarev/AIA/pfss_results_'+date+'_1.1Rs_dens_2.sav'
-     restore,'/Users/kkozarev/AIA/pfss_results_'+date+'_1.1Rs.sav'
+     restore,'/Users/kkozarev/AIA/pfss_results_'+date+'_1.0Rs.sav'
   endif else begin
      
 ;for arien
@@ -80,8 +79,7 @@ pro aia_model_shock_pfss,event,wav=wav,shockcomp=shockcomp,plot=plot,png=png,vup
         datapath=savepath
         pfsspath=event.pfsspath
         
-        
-        pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_1.1Rs_dens_1.sav'
+        pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_1.05Rs_dens_0.5.sav'
         shockfile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed.sav'
         
         print,'Loading AIA File '+datapath+'normalized_'+eventname+'_subdata.sav'
@@ -117,7 +115,6 @@ pro aia_model_shock_pfss,event,wav=wav,shockcomp=shockcomp,plot=plot,png=png,vup
         ;Load the PFSS model results
         print,'Loading PFSS File '+pfssfile
         restore,pfssfile
-        
         
         
      endif else begin
@@ -204,7 +201,7 @@ pro aia_model_shock_pfss,event,wav=wav,shockcomp=shockcomp,plot=plot,png=png,vup
   ;range better. In that scheme, E[i]=E0*((E1/E0)^(i/Nergs))
   emin=mine * MeVinJ
   emax=maxe * MeVinJ
-  
+   
   ;Create a momentum grid
   for i=0,nenrgs-1 do gride[i]=mine*(maxe/mine)^(i/((nenrgs-1)*1.0))
   egrid=gride * MeVinJ ;The energy grid in Joules
@@ -277,7 +274,7 @@ pro aia_model_shock_pfss,event,wav=wav,shockcomp=shockcomp,plot=plot,png=png,vup
            b=subindex[sstep].crlt_obs*!PI/180.0
            pfss_sphtocart,ptr,ptth,ptph,l,b,pfss_px,pfss_pz,pfss_py
            nlines=n_elements(pfss_px[0,*])*1.0D
-           maxnpts=n_elements(pfss_px[*,0])  
+           maxnpts=n_elements(pfss_px[*,0])
            
 ;Convert the pfss coordinates from Rs to pixels
            ;stop
@@ -287,6 +284,19 @@ pro aia_model_shock_pfss,event,wav=wav,shockcomp=shockcomp,plot=plot,png=png,vup
            for ff=0.0D,nlines-1 do begin
               
               npt=nstep[ff]     ;the number of points in this particular line.
+
+              
+
+              ;SAVE THE FIELD LINE INFORMATION TO A STRUCTURE ARRAY
+              if ff eq 0 then begin
+                 pfssLine={npts:0L,px:dblarr(max(nstep)),py:dblarr(max(nstep)),pz:dblarr(max(nstep)),open:0}
+                 pfssLines=replicate(pfssLine,nlines)
+              endif
+              pfssLines[ff]={npts:npt,px:pfss_px[*,ff],py:pfss_py[*,ff],px:pfss_px[*,ff],open:0,linid:ff}
+              
+
+              
+              ;Transform to the current view
               pos = transpose([[reform(pfss_px[0:npt-1,ff])],$
                                [reform(pfss_py[0:npt-1,ff])],$
                                [reform(pfss_pz[0:npt-1,ff])]])
@@ -295,6 +305,9 @@ pro aia_model_shock_pfss,event,wav=wav,shockcomp=shockcomp,plot=plot,png=png,vup
               pos = transform_volume(pos,translate=[xcenter,ycenter,zcenter])
              ; stop
               pfss_cartpos[ff,*,0:npt-1]=pos
+
+
+           
            endfor
            
                                 ;Free some memory
@@ -386,6 +399,7 @@ pro aia_model_shock_pfss,event,wav=wav,shockcomp=shockcomp,plot=plot,png=png,vup
            ;pind[0,*] are the crossing line indices
            ;pind[1,*] are the crossing point indices
            pind=array_indices(reform(pfss_cartpos[*,0,*]),ptind)
+           
            ;Leave only the unique crossing lines.
            srt=sort(pind[0,*])
            pind=pind[*,srt]
@@ -398,7 +412,7 @@ pro aia_model_shock_pfss,event,wav=wav,shockcomp=shockcomp,plot=plot,png=png,vup
            continue
         endelse
         
-        cross_points=fltarr(3,ncrosses)
+        cross_points=fltarr(3,ncrosses)        
         for i=0,ncrosses-1 do cross_points[*,i]=reform(pfss_cartpos[pind[0,i],*,pind[1,i]])
         allcrossPoints[sstep,*,0:ncrosses-1]=cross_points*1.0D
         allcrossLineIndices[sstep,0:ncrosses-1]=reform(pind[0,*])
@@ -420,8 +434,6 @@ pro aia_model_shock_pfss,event,wav=wav,shockcomp=shockcomp,plot=plot,png=png,vup
 ;-==============================================================================
 
        
-
-
 ;+==============================================================================
 ;6. Find the crossing angles. Find the local field direction and the
 ;normal to the shock first, then the angle ThetaBN at every point.
@@ -550,12 +562,14 @@ pro aia_model_shock_pfss,event,wav=wav,shockcomp=shockcomp,plot=plot,png=png,vup
            pt=reform(allcrossPoints[sstep,*,i])   ;the point location
            ;Point radial distance from sun center, in Rs
         rmag=sqrt((pt[0]-xcenter)^2+(pt[1]-ycenter)^2+(pt[2]-zcenter)^2)/sunrad
+
         ;THIS IS THE NEW VERSION, USING PFSS LINEAR INTERPOLATION
         sphpt=cart2sph([pt[0]-xcenter,pt[1]-ycenter,pt[2]-zcenter]/sunrad)
         local_B=bfield_pfss(sphpt,sph_data)
-        
-        ;BELOW IS THE OLD VERSION, USING GOPALSWAMY ET AL., 2011 MODEL
-        ;local_B=bfield(rmag)       ;The local magnetic field, in Tesla
+
+        ;AND THIS IS THE OLD VERSION, USING GOPALSWAMY ET AL., 2011 MODEL
+        ;local_B=bfield(rmag)   ;The local magnetic field, in Tesla
+
            rg=p0/(echarge*local_B) ;The particle's gyroradius, in meters
            thetabn=allcrossAngles[sstep,i] ;degrees
                                 ;Calculate the diffusion coefficients
@@ -601,6 +615,25 @@ pro aia_model_shock_pfss,event,wav=wav,shockcomp=shockcomp,plot=plot,png=png,vup
      endfor  ;END TIMESTEP LOOP
      
 
+     
+;CREATE A STRUCTURE TO HOLD THE RESULTS FOR EASY PROCESSING LATER
+     nmaxcrosses=max(allcrosses)
+     crossPoint={px:0.0D,py:0.0D,pz:0.0D,thbn:0.0D,linid:0L}
+     CrossPoints=replicate(crossPoint,nsteps,nmaxcrosses)
+     
+     for sstep=0,nsteps-1 do begin
+        ncrosses=allcrosses[sstep]
+        for cross=0,ncrosses-1 do begin
+           CrossPoints[sstep,cross].px=allcrosspoints[sstep,0,cross]
+           CrossPoints[sstep,cross].py=allcrosspoints[sstep,1,cross]
+           CrossPoints[sstep,cross].pz=allcrosspoints[sstep,2,cross]
+           CrossPoints[sstep,cross].linid=allcrossLineIndices[sstep,cross]
+           CrossPoints[sstep,cross].thbn=allcrossAngles[sstep,cross]
+        endfor
+     endfor
+
+
+
 ;Save the results to a file
      fname='model_shock_vsh_'+strtrim(string(vshock/1000.0,format='(f7.1)'),2)+'_r_'+$
            strtrim(string(shockjump,format='(f4.2)'),2)+'.sav'
@@ -641,7 +674,7 @@ pro pfss_shock_plot_energy_histogram,event,compression=compression,vshock=vshock
   mine=0.01                     ;minimum energy of protons, MeV
   binsiz=0.1             ;the energy bin size for the histograms, MeV
   
-  nruns=n_elements(compression)
+  nruns=n_elements(compression) 
   dts=fltarr(nruns)
   nparticles=intarr(nruns)
   
@@ -724,7 +757,7 @@ pro pfss_shock_plot_energy_histogram,event,compression=compression,vshock=vshock
            color=col,thick=4,linestyle=2
      ;Label the runs
      xyouts,!P.position[2]-0.5,!P.position[3]-0.1-i*0.04,$
-            '!6V!Dshock!N = '+shockspeed+'!6 km/s; r = '+comp,$
+            '!6V!Dshock!N = '+shockspeed+'!6 km/s; r = '+strtrim(string(compression[i]),2),$
             charsize=2.2,charthick=2,/normal,color=col
   endfor
   loadct,0,/silent
