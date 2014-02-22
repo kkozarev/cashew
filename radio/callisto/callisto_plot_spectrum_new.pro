@@ -1,7 +1,6 @@
-
 ;+====================================================================
 pro test_callisto_plot_spectrum_new
-  
+
 ;Run the program like this to combine four files at different times
 ;and frequency ranges
 ;Order the files like this - rows are time, cols are frequency (from high freq to low)
@@ -10,10 +9,25 @@ files = [['BIR_20111105_101500_02.fit.gz','BIR_20111105_103000_02.fit.gz'],$
 timerange='2011-NOV-05 10:' + ['20:30','36:00']
 freqrange=[40,160]
 station='Birr'
-callisto_plot_spectrum_new,files,timerange=timerange,station=station,freqrange=freqrange
+
 
 stop
 
+
+
+  ;You can run this for a single or few events, like so
+  one=1
+  if one eq 1 then begin
+     label='131107_01'
+     events=load_events_info(label=label)
+     for ev=0,n_elements(events)-1 do $
+        callisto_plot_spectrum_new,files,timerange=timerange,station=station,freqrange=freqrange
+        
+  endif
+
+
+stop
+stop
 
 files = ['ALMATY_20110809_080000_59.fit']
 timerange='2011-AUG-09 08:' + ['02:00','04:30']
