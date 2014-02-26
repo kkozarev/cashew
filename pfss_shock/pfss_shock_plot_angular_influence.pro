@@ -1,14 +1,13 @@
-pro test_pfss_shock_plot_csgs
-;Testing the CSGS model plotting procedure
+pro test_pfss_shock_plot_angular_influence
+;Testing the CSGS angular influence plotting procedure
 event=load_events_info(label='110511_01')
-pfss_shock_plot_csgs,event,png=png
+pfss_shock_plot_angular_influence,event;,png=png
 end
 
 
-pro pfss_shock_plot_csgs,event,png=png
+pro pfss_shock_plot_angular_influence,event,png=png
 ;PURPOSE:
-;Plot the time-dependent Coronal Shock Geometrical Surface model,
-;overlaying AIA images, PFSS model, and CSGS model with crossing points.
+;Plot the time-dependent CSGS model with interacting field lines.
 ;
 ;CATEGORY:
 ;PFSS_Shock
@@ -25,7 +24,7 @@ pro pfss_shock_plot_csgs,event,png=png
 ;transform_volume, sym
 ;
 ;MODIFICATION HISTORY:
-;Written by Kamen Kozarev, 02/21/2014
+;Written by Kamen Kozarev, 02/22/2014
 ;
   resolve_routine,'sym',/either,/compile_full_file
   wav='193'
@@ -40,7 +39,6 @@ pro pfss_shock_plot_csgs,event,png=png
   pfsspath=event.pfsspath
   
   wavefile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed.sav'
-  aiafile=event.savepath+'normalized_'+eventname+'_subdata.sav'
   
   ;Find a file to load with the latest results of applying the CSGS model
   csgsfile=find_latest_file(event.pfsspath+'csgs_results_*') 
@@ -53,23 +51,30 @@ pro pfss_shock_plot_csgs,event,png=png
 ;LOAD THE DATA
   print,''
   print,'Loading data...'
-  ;Load the CSGS model results
-  print ,'Loading CSGS File '+csgsfile
-  restore,csgsfile
-  
-  ;Load the AIA observations
-  print,'Loading AIA File '+aiafile
-  restore,aiafile
-  
+
   ;Load the Annulusplot analysis results
   print, 'Loading shock info file '+wavefile
   restore,wavefile
+
+  ;Load the CSGS model results
+  print ,'Loading CSGS File '+csgsfile
+  restore,csgsfile
 
 ;-==============================================================================
 
 
 ;+==============================================================================
 ;Constants and definitions
+  lon=event.arlon
+  lat=event.arlat
+
+  winsize=1024
+  xcenter=winsize/2.0
+  ycenter=winsize/2.0
+  zcenter=0
+  suncenter=[xcenter,ycenter,zcenter]
+  sunrad=0.2*winsize
+
   sp=rad_data.xfitrange[0]
   ep=rad_data.xfitrange[1]
   time=(rad_data.time[sp:ep]- rad_data.time[sp])*3600.
@@ -79,16 +84,11 @@ pro pfss_shock_plot_csgs,event,png=png
   fit=reform(rad_data.fitparams[0,*].front)
   radiusfitlines=(fit[0]+fit[1]*time+0.5*fit[2]*time^2)/RSUN
   radiusfitlines-=1.
-  radiusfitlines*=RSUN*event.geomcorfactor
-  radius=radiusfitlines/kmpx
+  radius=radiusfitlines*sunrad*event.geomcorfactor
+  ;radiusfitlines*=RSUN*event.geomcorfactor
+  ;radius=radiusfitlines/kmpx
 
-  lon=event.arlon
-  lat=event.arlat
-  winsize=1024
-  xcenter=suncenter[0]
-  ycenter=suncenter[1]
-  zcenter=suncenter[2]
-  sunrad=subindex[0].r_sun+10;For some reason the R_SUN variable is 10 px short...
+
 ;-==============================================================================
 
 
@@ -99,23 +99,41 @@ pro pfss_shock_plot_csgs,event,png=png
      print,'Step #'+string(sstep)
      shockrad=radius[sstep]     ;Get this from the measurements
 
-
-;+==============================================================================
-;PLOT THE AIA IMAGE
-     aia_lct,rr,gg,bb,wavelnth=subindex[sstep].wavelnth,/load     
-     if sstep eq 0 then wdef,0,winsize
-     tv,bytscl(sqrt(subdata[*,*,sp+sstep]),min=1,max=50)
-     
+     if sstep eq 0 then begin
+        sunrot=[-lon,-lat]
+;Rotation angles for the entire plot
+        xrot_gen=(sstep*0.0)/nsteps-sunrot[1]
+        yrot_gen=(sstep*0.0)/nsteps+sunrot[0]
+        zrot_gen=(sstep*0.0)/nsteps
+        genrot=[xrot_gen,yrot_gen,zrot_gen]
+        
+;Rotation angles for the PFSS points
+        xrot_pfss=0             ;+xrot_gen
+        yrot_pfss=0             ;+yrot_gen
+        zrot_pfss=0             ;+zrot_gen
+        pfssrot=[xrot_pfss,yrot_pfss,zrot_pfss]
+        
+;Rotation angles for the shock surface points
+        xrot_shock=-lat+xrot_gen
+        yrot_shock=lon+yrot_gen   
+        zrot_shock=0+zrot_gen
+        csgsrot=[xrot_shock,yrot_shock,zrot_shock]
+        
+;Save the rotation angles
+        rotationAngles={genrot:genrot,pfssrot:pfssrot,csgsrot:csgsrot}   
+     endif
+     wdef,0,winsize
+     loadct,0,/silent
+     !p.background=100
+     !P.color=255
 ;Overplot the limb location
-     circ=aia_circle(xcenter,ycenter,sunrad,/plot)
-;-============================================================================== 
-
-
-
+     circ=aia_circle(xcenter,ycenter,sunrad,/plot,color=0)
+     
 ;+==============================================================================
 ;1. Plot the field lines on disk center.
      if sstep eq 0 then begin
         nlines=n_elements(pfssLines)
+        ;maxnpts=n_elements(pfssLines[0].px)  
         maxnpts=n_elements(pfssLines[0].ptr)  
         
 ;Apply the rotations and translations and plot
@@ -126,37 +144,43 @@ pro pfss_shock_plot_csgs,event,png=png
            ;px=pfssLines[ff].px[0:npt-1]
            ;py=pfssLines[ff].py[0:npt-1]
            ;pz=pfssLines[ff].pz[0:npt-1]
-           ;pos = transpose([[reform(px)],[reform(py)],[reform(pz)]])
-           ;pos = transform_volume(pos,rotation=rotationAngles.pfssrot,$
-           ;                       scale=[sunrad,sunrad,sunrad])
-           ;pos = transform_volume(pos,translate=suncenter)
+           ;pfss_sphtocart,pfssLines[ff].ptr,pfssLines[ff].ptth,pfssLines[ff].ptph,$
+           ;               carrlon,carrlat,px,pz,py
+          
            pfss_sphtocart,pfssLines[ff].ptr,pfssLines[ff].ptth,pfssLines[ff].ptph,$
-                          carrlon-sunrot,carrlat,px,pz,py
+                          carrlon-sunrot[0]*!PI/180.,carrlat-sunrot[1]*!PI/180.,px,pz,py
            pos = transpose([[reform(px[0:npt-1])],[reform(py[0:npt-1])],[reform(pz[0:npt-1])]])
-           ;TRANSFORM THE POINTS APPROPRIATELY
-           pos = transform_volume(pos,scale=[sunrad,sunrad,sunrad])
+           
+           ;The order of the operations is rotate, scale, translate
+           ;pos = transform_volume(pos,scale=[sunrad,sunrad,sunrad])
+           
+           pos = transform_volume(pos,scale=[sunrad,sunrad,sunrad]) ;centre_rotation=suncenter,rotation=pfssrot,
            pos = transform_volume(pos,translate=suncenter)
-           pfss_cartpos[ff,*,0:npt-1]=pos        
+           ;pos = transform_volume(pos,rotation=[0,0,-90],centre_rotation=suncenter)
+           
+           
+           pfss_cartpos[ff,*,0:npt-1]=pos
            ;Plot the field line 
-           plots,pos,color=250,/device,psym=3
+           ;plots,pos,color=250,/device
         endfor
         pos=0
      endif
-
+     ;stop
+     
      for ff=0.0D,nlines-1 do begin
         npt=pfssLines[ff].npts
         ;Plot the field lines
         if pfss_cartpos[ff,2,0] gt 0.0 and pfss_cartpos[ff,2,npt-1] gt 0.0 then $
-           plots,reform(pfss_cartpos[ff,*,0:npt-1]),/device,color=250
+           plots,reform(pfss_cartpos[ff,*,0:npt-1]),/device,color=250,thick=2.
      endfor
-
+     
 ;-==============================================================================
      
 
 
 ;+==============================================================================
 ;3. CALCULATE AND PLOT THE CSGS MODEL
-       
+
 ;Create the shock surface
      MESH_OBJ, $
         4, $
@@ -165,50 +189,56 @@ pro pfss_shock_plot_csgs,event,png=png
         p3=-asin(shockrad/(2*sunrad))
      
 ;apply rotation and translation to the surface
-     Vertex_List = $
-        transform_volume(vertex_list,$
-                         translate=[suncenter[0],suncenter[1],suncenter[2]+sunrad])
+     vertex_List = $
+        transform_volume(vertex_list,translate=[xcenter,ycenter,zcenter+sunrad])
      vert_transmat=!P.T
-     Vertex_List = transform_volume(vertex_list,rotation=rotationAngles.csgsrot,$
+     vertex_List = transform_volume(vertex_list,rotation=csgsrot,$
                                     centre_rotation=suncenter)
      vert_rotmat=!P.T
      loadct,9,/silent
-     plots,sc[0],sc[1],psym=2,color=0,symsize=2,/device
      plots,vertex_list,color=0,thick=0.05,/device
      plots,vertex_list,color=180,thick=0.1,symsize=0.6,psym=sym(1),/device
+
 ;-==============================================================================
+
 
 
 ;+==============================================================================
 ;Plot the field lines that pass through the shock surface
      ncrosses=allcrosses[sstep]
-     cpsx=crossPoints[sstep,0:ncrosses-1].px
-     cpsy=crossPoints[sstep,0:ncrosses-1].py
-     cpsz=crossPoints[sstep,0:ncrosses-1].pz 
-     pind=reform(crossPoints[sstep,0:ncrosses-1].linid)
-     colors=abs(randomn(10L,ncrosses))*255.
+     
+        cpsx=crossPoints[sstep,0:ncrosses-1].px
+        cpsy=crossPoints[sstep,0:ncrosses-1].py
+        cpsz=crossPoints[sstep,0:ncrosses-1].pz 
+        pind=reform(crossPoints[sstep,0:ncrosses-1].linid)
+        
+        if sstep eq 0 then begin
+           colors=abs(randomn(10L,max(allcrosses)))*255.
+           ;colors=findgen(ncrosses)*255./(ncrosses*1.)
+        endif
+     
      loadct,13,/silent
      
      for ff=0,ncrosses-1 do begin
-        lind=pfss[ff]
+        lind=pind[ff]
         npt=pfssLines[lind].npts
         if pfss_cartpos[ff,2,0] gt 0.0 and pfss_cartpos[ff,2,npt-1] gt 0.0 then $
-        plots,reform(pfss_cartpos[lind,*,0:npt-1]),$
-              color=colors[ff],/device,psym=sym(1),symsize=0.5
-     endfor
+           plots,reform(pfss_cartpos[lind,*,0:npt-1]),$
+                 color=colors[ff],/device,psym=sym(1),symsize=1
 ;plot the points of crossing in red.
-     plots,[cpsx,cpsy,cpsz],color=240,psym=sym(1),symsize=1.4,/device
+    ; plots,[cpsx,cpsy,cpsz],color=240,psym=sym(1),symsize=1.4,/device
+     endfor
 ;-==============================================================================
      
-     if keyword_set(png) then begin
-        tvlct,rr,gg,bb,/get
-        image=tvrd(true=1)
-        stp=strtrim(string(sstep),2)
-        if stp lt 100 then stp='0'+stp
-        if stp lt 10 then stp='0'+stp
-        write_png,pfsspath+'aia_pfss_shock_'+event.date+'_'+event.label+'_'+stp+'.png',image,rr,gg,bb
-     endif
-     
-  endfor ;END TIMESTEP LOOP
-     
+     tvlct,rr,gg,bb,/get
+     image=tvrd(true=1)
+     stp=strtrim(string(sstep),2)
+     if stp lt 100 then stp='0'+stp
+     if stp lt 10 then stp='0'+stp
+     write_png,pfsspath+'aia_pfss_shock_angular_influence_'+event.date+'_'+event.label+'_'+stp+'.png',image,rr,gg,bb
+     loadct,0,/silent
+     stop
+  endfor                        ;END TIMESTEP LOOP
+  
+  loadct,0,/silent
 end

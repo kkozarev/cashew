@@ -35,7 +35,6 @@ pro test_pfss_shock_run_csgs
   event=load_events_info(label='110511_01')
   pfss_shock_run_csgs,event;,/plot,/png
 
-
 end
 ;---------------------------------------------------------------------
 
@@ -88,7 +87,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
   pfsspath=event.pfsspath
   
   pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_1.05Rs_dens_0.5.sav'
-  ;pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_1.1Rs_dens_8.sav'
+  ;pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_1.05Rs_dens_4.0.sav'
   aiafile=datapath+'normalized_'+eventname+'_subdata.sav'
   shockfile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed.sav'
   
@@ -183,7 +182,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
         yrot_shock=lon+yrot_gen
         zrot_shock=0+zrot_gen
         csgsrot=[xrot_shock,yrot_shock,zrot_shock]
-
+        
 ;Save the rotation angles
         rotationAngles={genrot:genrot,pfssrot:pfssrot,csgsrot:csgsrot}
         
@@ -192,9 +191,11 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
         if sstep eq 0 then begin
 ;Convert the spherical to x,y,z coordinates.
 ;Switch y and z axes to make the coordinate system right-handed.
-           l=subindex[sstep].crln_obs*!PI/180.0
-           b=subindex[sstep].crlt_obs*!PI/180.0
-           pfss_sphtocart,ptr,ptth,ptph,l,b,pfss_px,pfss_pz,pfss_py
+           carrlon=subindex[sstep].crln_obs*!PI/180.0 ;l
+           carrlat=subindex[sstep].crlt_obs*!PI/180.0  ;b
+           
+           pfss_sphtocart,ptr,ptth,ptph,carrlon,carrlat,pfss_px,pfss_pz,pfss_py
+           
            nlines=n_elements(pfss_px[0,*])*1.0D
            maxnpts=n_elements(pfss_px[*,0])
            
@@ -205,13 +206,13 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
               
               ;SAVE THE FIELD LINE INFORMATION TO A STRUCTURE ARRAY
               if ff eq 0 then begin
-                 pfssLine={npts:0L,px:dblarr(max(nstep)),py:dblarr(max(nstep)),pz:dblarr(max(nstep)),open:0,linid:0L}
+                 pfssLine={npts:0L,ptr:dblarr(max(nstep)),ptth:dblarr(max(nstep)),ptph:dblarr(max(nstep)),open:0,linid:0L}
                  pfssLines=replicate(pfssLine,nlines)
               endif
               pfssLines[ff].npts=npt
-              pfssLines[ff].px=pfss_px[0:npt-1,ff]
-              pfssLines[ff].py=pfss_py[0:npt-1,ff]
-              pfssLines[ff].pz=pfss_px[0:npt-1,ff]
+              pfssLines[ff].ptr=ptr[0:npt-1,ff]
+              pfssLines[ff].ptth=ptth[0:npt-1,ff]
+              pfssLines[ff].ptph=ptph[0:npt-1,ff]
               pfssLines[ff].open=0
               pfssLines[ff].linid=ff
               
@@ -410,13 +411,19 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
         
      endfor  ;END TIMESTEP LOOP
      
-
      
-;CREATE A STRUCTURE TO HOLD THE RESULTS FOR EASY PROCESSING LATER
+     
+;CREATE A STRUCTURE TO HOLD THE CROSS-POINT RESULTS FOR EASY PROCESSING LATER
      nmaxcrosses=max(allcrosses)
      crossPoint={px:0.0D,py:0.0D,pz:0.0D,thbn:0.0D,linid:0L,bmag:0.0D}
      crossPoints=replicate(crossPoint,nsteps,nmaxcrosses)
      
+        ;This array will hold the closest and farthest point coordinates for every interacting
+        ;field line
+           endPointCoords=replicate({ptr:0.0,ptth:0.0,ptph:0.0,linid:0L},nsteps,nmaxcrosses,2)
+           lineSpread=dblarr(nsteps,max(allcrosses),3,2)
+           maxLonExtent=dblarr(nsteps)
+           
      for sstep=0,nsteps-1 do begin
         ncrosses=allcrosses[sstep]
         for cross=0,ncrosses-1 do begin
@@ -426,16 +433,38 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
            crossPoints[sstep,cross].linid=allcrossLineIndices[sstep,cross]
            crossPoints[sstep,cross].thbn=allcrossAngles[sstep,cross]
            crossPoints[sstep,cross].bmag=allcrossBmag[sstep,cross]
-        endfor
+
+           
+;Get the spherical coordinates for the starting and ending point for
+;every interacting field line.
+        linid=allcrossLineIndices[sstep,cross]
+        endPointCoords[sstep,cross,0].ptr=pfssLines[linid].ptr[0]
+        endPointCoords[sstep,cross,0].ptth=pfssLines[linid].ptth[0]
+        endPointCoords[sstep,cross,0].ptph=pfssLines[linid].ptph[0]
+        endPointCoords[sstep,cross,0].linid=pfssLines[linid].linid
+        endPointCoords[sstep,cross,1].ptr=pfssLines[linid].ptr[pfssLines[linid].npts-1]
+        endPointCoords[sstep,cross,1].ptth=pfssLines[linid].ptth[pfssLines[linid].npts-1]
+        endPointCoords[sstep,cross,1].ptph=pfssLines[linid].ptph[pfssLines[linid].npts-1]
+        endPointCoords[sstep,cross,1].linid=pfssLines[linid].linid
+;Get the largest and smallest coordinates for each field line, for
+;each time step.
+        lineSpread[sstep,cross,0,*]=minmax(pfssLines[linid].ptr[0:pfssLines[linid].npts-1])
+        lineSpread[sstep,cross,1,*]=minmax(pfssLines[linid].ptth[0:pfssLines[linid].npts-1])
+        lineSpread[sstep,cross,2,*]=minmax(pfssLines[linid].ptph[0:pfssLines[linid].npts-1])
+     endfor
+     
+     ;Find the largest longitudinal extent for this particular time step.
+        tmp=abs(reform(lineSpread[sstep,0:ncrosses-1,2,*])-lon*!PI/180.)
+        maxLonExtent[sstep]=max(tmp)*180./!PI
      endfor
      
 
 
 ;Save the results to a file
      fname='csgs_results_'+event.date+'_'+event.label+'.sav'
-     save,filename=pfsspath+fname,pfssLines,$
-          allcrosses,dt,subindex,radius,time,rotationAngles,crossPoints,$
+     print,'Saving file '+pfsspath+fname
+     save,filename=pfsspath+fname,pfssLines,endPointCoords,lineSpread,maxLonExtent,$
+          allcrosses,dt,subindex,radius,time,rotationAngles,crossPoints,carrlon,carrlat,$
           vertex_list,vert_rotmat,vert_transmat,suncenter,nsteps,sc,radiusfitlines,ind_arr
-     
 ;-==============================================================================     
 end ; END AIA_MODEL_SHOCK_PFSS

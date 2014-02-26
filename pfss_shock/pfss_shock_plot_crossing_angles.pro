@@ -47,7 +47,7 @@ pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot
 
   savepath=event.pfsspath
   if not keyword_set(infile) then infile=find_latest_file(event.pfsspath+'csgs_results_*')
-  if infile eq '' then begin
+  if infile[0] eq '' then begin
      print,'The file to load is not properly set or does not exist. Quitting.'
      return
   endif
