@@ -2,16 +2,23 @@ pro test_pfss_return_field
 ;Test the procedure pfss_return_field
 
 ;You can run for one event, like this.
-  one=0
+  one=1
   if one eq 1 then begin
-     event=load_events_info(label='110125_01')
+     event=load_events_info(label='110511_01')
      date=event.st
-     pfss_return_field,date,invdens=1,/save,path=event.pfsspath,event=event
+     aia_return_carrington_latlon,event,lat,lon
+     aclon=lon+event.arlon
+     aclat=lat+event.arlat
+     box=[aclon-90.,aclat-90.,aclon+90.,aclat+90.]
+     ;box=[aclon-45.,aclat-45.,aclon+45.,aclat+45.]
+     
+;     pfss_return_field,date,invdens=0.5,/save,path=event.pfsspath,event=event,box=box
+     pfss_return_field,date,invdens=8,/save,path=event.pfsspath,event=event;,box=box
   endif
   
   
 ;Alternatively, run for all events
-  all=1
+  all=0
   if all eq 1 then begin
      events=load_events_info()
      for ev=0,n_elements(events)-1 do begin
@@ -25,7 +32,7 @@ pro test_pfss_return_field
 
 end
 
-pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct=pfss_struct,save=save,path=path
+pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct=pfss_struct,save=save,path=path,box=box
 ;PURPOSE:
 ; Return the PFSS field model
 ;CATEGORY:
@@ -44,13 +51,16 @@ pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct
 ;pfss_to_spherical, 
 ;
 ;MODIFICATION HISTORY:
-;Written by Kamen Kozarev, 2011
+;Written by Kamen Kozarev, 2011 (based on the pfss_example_1.pro file)
+;Modified by Kamen Kozarev, 02/21/2014 - added the box keyword
 ;
+
 
 ;date='2011-01-25'
 ;/Users/kkozarev/AIA/algoTests/yaftawave/normalized_AIA_20110125_05_193_subdata.sav
 ;Set up the common block variables
-;@pfss_data_block
+@pfss_data_block
+
 ;spherical_to_pfss,pfssData
   if n_elements(date) eq 0 then begin
      print,'You need to supply a date string, like "2011-01-25"'
@@ -61,14 +71,17 @@ pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct
   
 ;  starting points to be on a regular grid covering the full disk,
 ;  with a starting radius of r=1.00 Rsun
-  if not keyword_set (rstart) then rstart=1.0001
+  if not keyword_set (rstart) then rstart=1.05
 ;  factor inverse to line density, i.e. lower values = more lines
   if not keyword_set(invdens) then invdens = 4 
-  pfss_field_start_coord,5,invdens,radstart=rstart
+  if keyword_set(box) then $
+     pfss_field_start_coord,5,invdens,radstart=rstart,bbox=box $
+  else $
+     pfss_field_start_coord,5,invdens,radstart=rstart
   
 ;  trace the field lines passing through the starting point arrays
   pfss_trace_field, kind
-@pfss_data_block
+;@pfss_data_block
   ind=where(ptph lt 0.0)
   if ind[0] gt -1 then ptph[ind]+=2*!PI
   ind=where(ptph ge 2*!PI)
@@ -86,6 +99,7 @@ pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct
 ;      longitude in radians.
   pfss_to_spherical,sph_data
   if keyword_set(pfss_struct) then pfss_struct=sph_data
+  
 ;pfss_data is a structure array of type
 ;{spherical_field_data, $
 ;  br:ptr_new(),bth:ptr_new(),bph:ptr_new(),bderivs:ptr_new(),$
@@ -109,18 +123,20 @@ pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct
 ;carrCoords=get_stereo_lonlat(date,'Earth',/degrees,system='Carrington')
 ;print,carrCoords
 
-  
+;Get the open field lines
+pfss_get_chfootprint,openfield,/quiet,/usecurrent;,/close,spacing=spacing
+
 ;Save the structure and Carrington coordinates of SDO to a sav file:
   if keyword_set(save) then begin
      if not keyword_set(event) then begin
         res=strsplit(date,'/ ',/extract)
         dat=strtrim(res[0]+res[1]+res[2],2)
-        fname='pfss_results_'+dat+'_'+strtrim(string(rstart,format='(f3.1)'),2)+'Rs_dens_'+strtrim(string(invdens),2)+'.sav'
+        fname='pfss_results_'+dat+'_'+strtrim(string(rstart,format='(f4.2)'),2)+'Rs_dens_'+strtrim(string(invdens,format='(f3.1)'),2)+'.sav'
      endif else begin
         dat=event.date
-        fname='pfss_results_'+dat+'_'+strtrim(string(rstart,format='(f3.1)'),2)+'Rs_dens_'+strtrim(string(invdens),2)+'.sav'
+        fname='pfss_results_'+dat+'_'+event.label+'_'+strtrim(string(rstart,format='(f4.2)'),2)+'Rs_dens_'+strtrim(string(invdens,format='(f3.1)'),2)+'.sav'
      endelse
      if keyword_set(path) then fname=path+fname
-     save,filename=fname,kind,ptr,ptth,ptph,nstep,br,bph,bth,sph_data
+     save,filename=fname,kind,ptr,ptth,ptph,nstep,br,bph,bth,sph_data,openfield
   endif
 end
