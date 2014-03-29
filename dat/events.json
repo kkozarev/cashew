@@ -366,3 +366,20 @@
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/12/12/SSRT_20131212_031500_59.fit.gz.png",
 	"nrh_lookup": ""
 }
+
+{
+	"label": "130411_01",
+	"coordX": -200,
+	"coordY": 200,
+	"st": "2013/04/11 06:54:00",
+	"et": "2013/04/11 07:20:00",
+	"aiafov": [1024,1024],
+	"flareclass": "M6.5",
+	"typeII": true,
+	"loop": true,
+	"filament": false,
+	"comment": "Sigmoid eruption near disk center, wave.",
+	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/learmonth/images/13/20130411spectrograph.gif",
+	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/04/11/BIR_20130411_070000_01.fit.gz.png",
+	"nrh_lookup": ""
+}
