@@ -52,16 +52,19 @@ for tt=0,ntimes-1 do begin
       avgemiss=avg(10^emiss)
       emarr[rr,tt]=avgemiss
    endfor
-
+   
 ;Do the fitting with mpfit
-   fit_model = 'p[0] * (x)^p[1]'
+   fit_model = 'p[0] + (x)*p[1]'
    em=reform(emarr[*,tt])
+   logem=alog(reform(emarr[*,tt]))
+   lograd=alog(rad)
    a_dist = size(em, /n_elements)
    h_error = replicate(1., a_dist)
-   fit = mpfitexpr(fit_model, rad, em, h_error, [em[0], -1.5], perror=perror, $
-                  bestnorm = bestnorm, /quiet)
-   plot,rad,em,psym=2,/ylog
-   oplot,fit[0]*rad^fit[1]
+   res = mpfitexpr(fit_model, lograd, logem, h_error, [alog(em[0]), -2.], perror=perror, /quiet)
+   fit=exp(res[0])*rad^res[1]
+   beta=res[1]
+   plot,rad,em,psym=2,color=0,symsize=4,ystyle=0,xstyle=0
+   oplot,rad,fit,color=0
    stop
 endfor
 stop
