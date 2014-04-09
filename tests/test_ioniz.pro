@@ -58,7 +58,7 @@ for tt=0,ntimes-1 do begin
    em=reform(emarr[*,tt])
    a_dist = size(em, /n_elements)
    h_error = replicate(1., a_dist)
-   fit = mpfitexpr(fit_model, rad, em, h_error, [em[0], -1.5,], perror=perror, $
+   fit = mpfitexpr(fit_model, rad, em, h_error, [em[0], -1.5], perror=perror, $
                   bestnorm = bestnorm, /quiet)
    stop
 endfor
