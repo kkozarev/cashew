@@ -45,6 +45,7 @@ radregs=[5,2,6,7]
 nregs=n_elements(radregs)
 ntimes=n_elements(times)
 rad=reform(roi_radheight[radregs])
+beta=fltarr(ntimes)
 for tt=0,ntimes-1 do begin
    for rr=0,nregs-1 do begin
       emiss=reform(emdata[radregs[rr],tt,0:npix[rr]-1])
@@ -62,11 +63,11 @@ for tt=0,ntimes-1 do begin
    h_error = replicate(1., a_dist)
    res = mpfitexpr(fit_model, lograd, logem, h_error, [alog(em[0]), -2.], perror=perror, /quiet)
    fit=exp(res[0])*rad^res[1]
-   beta=res[1]
+   beta[tt]=res[1]
    plot,rad,em,psym=2,color=0,symsize=4,ystyle=0,xstyle=0
    oplot,rad,fit,color=0
-   stop
 endfor
+
 stop
 
 end 
