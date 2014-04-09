@@ -41,6 +41,8 @@ pro test_ioniz
 inpath=event.aschdempath
 radregs=['06','03','07','08']
 nregs=n_elements(radregs)
+restore, inpath+'dem_'+date+'_'+label+'_teem_map_subrois.sav'
+stop
 for rr=0,nregs-1 do begin
    restore, inpath+'aschdem_'+date+'_'+label+'_teem_normalized_series_r'+radregs[rr]+'.sav'
    if rr eq 0 then emarr=dblarr(nregs,n_elements(emiss))
