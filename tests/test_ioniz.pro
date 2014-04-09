@@ -39,14 +39,15 @@ pro test_ioniz
 
 ;Load the radial regions DEM results
 inpath=event.aschdempath
-radregs=['06','03','07','08']
-nregs=n_elements(radregs)
+
 restore, inpath+'dem_'+date+'_'+label+'_teem_map_subrois.sav'
-stop
+nregs=n_elements(radregs)
+radregs=fix(radregs)-1
+
 for rr=0,nregs-1 do begin
-   restore, inpath+'aschdem_'+date+'_'+label+'_teem_normalized_series_r'+radregs[rr]+'.sav'
-   if rr eq 0 then emarr=dblarr(nregs,n_elements(emiss))
-   emarr[rr,*]=10^emiss
+   emiss=emdata[radregs[rr],*,0:npix[rr]-1]
+   if rr eq 0 then emarr=dblarr(nregs,n_elements(emdata[0,*,0],max(npix))
+   emarr[rr,*,0:npix[rr]-1]=10^emiss
    stop
 endfor
 
