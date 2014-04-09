@@ -120,7 +120,7 @@ for t=0,ntimes-1 do begin
 endfor
 
 
-save,filename=dempath+'dem_'+date+'_'+label+'_teem_map_subrois.sav',chidata,emdata,sigdata,tedata,times,waves,npix
+save,filename=dempath+'dem_'+date+'_'+label+'_teem_map_subrois.sav',chidata,emdata,sigdata,tedata,times,waves,npix,roi_positions,roi_subindex,roi_radheight
 
 
 
