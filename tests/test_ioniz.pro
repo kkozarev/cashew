@@ -44,13 +44,22 @@ restore, inpath+'dem_'+date+'_'+label+'_teem_map_subrois.sav'
 radregs=[5,2,6,7]
 nregs=n_elements(radregs)
 ntimes=n_elements(times)
-
+rad=reform(roi_radheight[radregs])
 for tt=0,ntimes-1 do begin
    for rr=0,nregs-1 do begin
       emiss=reform(emdata[radregs[rr],tt,0:npix[rr]-1])
-      if rr eq 0 then emarr=dblarr(nregs,max(npix))
-      emarr[rr,0:npix[rr]-1]=10^emiss
+      if rr eq 0 and tt eq 0 then emarr=dblarr(nregs,ntimes)
+      avgemiss=avg(10^emiss)
+      emarr[rr,tt]=avgemiss
    endfor
+
+;Do the fitting with mpfit
+   fit_model = 'p[0] * (x)^[p1].'
+   em=reform(emarr[*,tt])
+   a_dist = size(em, /n_elements)
+   h_error = replicate(1., a_dist)
+   fit = mpfitexpr(fit_model, rad, em, h_error, [em[0], -1.5,], perror=perror, $
+                  bestnorm = bestnorm, /quiet)
    stop
 endfor
 stop
