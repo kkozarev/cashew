@@ -52,6 +52,7 @@ for tt=0,ntimes-1 do begin
    plot,rad,em,psym=2,color=0,symsize=4,ystyle=0,xstyle=0,/ylog
    oplot,rad,fit,color=0
 endfor
+
 ;This is the beta value to use.
 avgbeta=avg(beta[0:19])
 
@@ -63,6 +64,8 @@ falpha=0.72
 
 ;The pre-event density
 n0=sqrt(em/(rad*falpha))
+
+stop
 
 ;===================================
 ;Next, calculate the density jump, X
