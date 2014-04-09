@@ -20,7 +20,7 @@ pro test_ioniz
   !P.charthick=4
   !P.position=[0.15,0.12,0.95,0.9]
   !p.font=1
-  fname='aschdem_'+event.date+'_'+event.label+'_teem_normalized_series_r'
+  ;fname='aschdem_'+event.date+'_'+event.label+'_teem_normalized_series_r'
   
   old=0
   if old eq 1 then begin
@@ -40,10 +40,15 @@ pro test_ioniz
 ;Load the radial regions DEM results
 inpath=event.aschdempath
 radregs=['06','03','07','08']
-for rr=0,n_elements(radregs)-1 do begin
+nregs=n_elements(radregs)
+for rr=0,nregs-1 do begin
    restore, inpath+'aschdem_'+date+'_'+label+'_teem_normalized_series_r'+radregs[rr]+'.sav'
+   if rr eq 0 then emarr=dblarr(nregs,n_elements(emiss))
+   emarr[rr,*]=10^emiss
    stop
 endfor
+
+stop
 
 end 
 
