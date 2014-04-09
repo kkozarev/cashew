@@ -69,7 +69,17 @@ stop
 
 ;===================================
 ;Next, calculate the density jump, X
-shockfile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed.sav'
+;===================================
+
+;Calculate the shock speed
+shockfile=event.annuluspath+'annplot_'+date+'_'+label+'_193_analyzed.sav'
+restore,shockfile
+tm=anytim(times)
+time=tm-tm[0]
+RSUN=subindex[0].rsun_ref/1000. ;Solar radius in km.  
+KMPX=ind_arr[0].IMSCL_MP*ind_arr[0].RSUN_REF/(1000.0*ind_arr[0].RSUN_OBS)
+fit=reform(rad_data.fitparams[0,*].front)
+radiusfitlines=(fit[0]+fit[1]*time+0.5*fit[2]*time^2)/RSUN
 
 ;Calculate dEM/dt
 for rr=0,nregs-1 do begin
@@ -82,6 +92,7 @@ for rr=0,nregs-1 do begin
    
    plot,time,demdt,ytitle='dEM/dt',title='dEM/dt vs. time, R1'
    write_png,'demdt_time.png',tvrd(/true)
+   stop
 endfor
 
 
