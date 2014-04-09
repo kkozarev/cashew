@@ -54,7 +54,7 @@ for tt=0,ntimes-1 do begin
    endfor
 
 ;Do the fitting with mpfit
-   fit_model = 'p[0] * (x)^[p1]'
+   fit_model = 'p[0] * (x)^p[1]'
    em=reform(emarr[*,tt])
    a_dist = size(em, /n_elements)
    h_error = replicate(1., a_dist)
