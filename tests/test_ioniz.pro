@@ -44,13 +44,14 @@ restore, inpath+'dem_'+date+'_'+label+'_teem_map_subrois.sav'
 nregs=n_elements(radregs)
 radregs=fix(radregs)-1
 
-for rr=0,nregs-1 do begin
-   emiss=emdata[radregs[rr],*,0:npix[rr]-1]
-   if rr eq 0 then emarr=dblarr(nregs,n_elements(emdata[0,*,0],max(npix))
-   emarr[rr,*,0:npix[rr]-1]=10^emiss
+for tt=0,n_elements(times)-1 do begin
+   for rr=0,nregs-1 do begin
+      emiss=emdata[radregs[rr],tt,0:npix[rr]-1]
+      if rr eq 0 then emarr=dblarr(nregs,max(npix))
+      emarr[rr,tt,0:npix[rr]-1]=10^emiss
+   endfor
    stop
 endfor
-
 stop
 
 end 
