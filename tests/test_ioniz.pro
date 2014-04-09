@@ -22,21 +22,6 @@ pro test_ioniz
   !p.font=1
   ;fname='aschdem_'+event.date+'_'+event.label+'_teem_normalized_series_r'
   
-  old=0
-  if old eq 1 then begin
-;start with one region
-     restore,event.aschdempath+'50_px/'+fname+'01'+'.sav'
-     EM=10^emiss
-     time=(tm-tm[0])*86400.
-     dEMdt=deriv(time,EM)
-     
-     plot,time,EM,ytitle='EM',title='EM vs. time, R1'
-     write_png,'em_time.png',tvrd(/true)
-   
-     plot,time,demdt,ytitle='dEM/dt',title='dEM/dt vs. time, R1'
-     write_png,'demdt_time.png',tvrd(/true)
-  endif
-
 ;Load the radial regions DEM results
 inpath=event.aschdempath
 
@@ -67,8 +52,36 @@ for tt=0,ntimes-1 do begin
    plot,rad,em,psym=2,color=0,symsize=4,ystyle=0,xstyle=0,/ylog
    oplot,rad,fit,color=0
 endfor
+;This is the beta value to use.
+avgbeta=avg(beta[0:19])
 
-stop
+;Then, calculate alpha
+alpha=0.5*(abs(avgbeta)+1)
+
+;f(alpha)
+falpha=0.72
+
+;The pre-event density
+n0=sqrt(em/(rad*falpha))
+
+;===================================
+;Next, calculate the density jump, X
+shockfile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed.sav'
+
+;Calculate dEM/dt
+for rr=0,nregs-1 do begin
+   EM=emarr[rr,*]
+   time=(tm-tm[0])*86400.
+   dEMdt=deriv(time,EM)
+   
+   plot,time,EM,ytitle='EM',title='EM vs. time, R1'
+   write_png,'em_time.png',tvrd(/true)
+   
+   plot,time,demdt,ytitle='dEM/dt',title='dEM/dt vs. time, R1'
+   write_png,'demdt_time.png',tvrd(/true)
+endfor
+
+
 
 end 
 
