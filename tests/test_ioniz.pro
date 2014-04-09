@@ -41,8 +41,8 @@ pro test_ioniz
 inpath=event.aschdempath
 
 restore, inpath+'dem_'+date+'_'+label+'_teem_map_subrois.sav'
+radregs=[5,2,6,7]
 nregs=n_elements(radregs)
-radregs=fix(radregs)-1
 
 for tt=0,n_elements(times)-1 do begin
    for rr=0,nregs-1 do begin
