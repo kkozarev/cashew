@@ -108,8 +108,11 @@ pro aia_aschdem_analyze,event,trange=trange,savepath=savepath
         tebckg=avg(te[r,0:rng-1])
         tdiff=10^mxt-10^tebckg
         
+             
+        
 ;Plot the original data
         rst=strtrim(string(r+1),2)
+        if rst lt 10 then rst='0'+rst
         fname=inpath+'aschdem_'+evdate+'_'+evlabel+'_teem_normalized_series_r'+rst
         device,file=fname+'.eps',/inches,xsize=8.0,ysize=8.0,$
                /encaps,/color,/helvetica
@@ -148,6 +151,13 @@ pro aia_aschdem_analyze,event,trange=trange,savepath=savepath
         device,/close
         exec='convert -flatten '+fname+'.eps '+fname+'.png ; rm -rf '+fname+'.eps '
         spawn,exec
+
+
+        ;Save the information to a file
+        temp=reform(te[r,*])
+        emiss=reform(em[r,*])
+        save,filename=fname+'.sav',denscompress,mnt,mxt,mine,maxe,embckg,tdiff,tm,tebckg,temp,emiss
+
      endfor
 
 set_plot,'x'     
