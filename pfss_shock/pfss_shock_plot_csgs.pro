@@ -1,7 +1,7 @@
 pro test_pfss_shock_plot_csgs
 ;Testing the CSGS model plotting procedure
 event=load_events_info(label='110511_01')
-pfss_shock_plot_csgs,event,png=png
+pfss_shock_plot_csgs,event,/png
 end
 
 
@@ -81,7 +81,7 @@ pro pfss_shock_plot_csgs,event,png=png
   radiusfitlines-=1.
   radiusfitlines*=RSUN*event.geomcorfactor
   radius=radiusfitlines/kmpx
-
+  
   lon=event.arlon
   lat=event.arlat
   winsize=1024
@@ -89,6 +89,7 @@ pro pfss_shock_plot_csgs,event,png=png
   ycenter=suncenter[1]
   zcenter=suncenter[2]
   sunrad=subindex[0].r_sun+10;For some reason the R_SUN variable is 10 px short...
+  set_plot,'z'
 ;-==============================================================================
 
 
@@ -103,7 +104,9 @@ pro pfss_shock_plot_csgs,event,png=png
 ;+==============================================================================
 ;PLOT THE AIA IMAGE
      aia_lct,rr,gg,bb,wavelnth=subindex[sstep].wavelnth,/load     
-     if sstep eq 0 then wdef,0,winsize
+     ;if sstep eq 0 then wdef,0,winsize
+     if sstep eq 0 then $
+        device,set_resolution=[winsize,winsize],SET_PIXEL_DEPTH=24, DECOMPOSED=0
      tv,bytscl(sqrt(subdata[*,*,sp+sstep]),min=1,max=50)
      
 ;Overplot the limb location
@@ -131,7 +134,7 @@ pro pfss_shock_plot_csgs,event,png=png
            ;                       scale=[sunrad,sunrad,sunrad])
            ;pos = transform_volume(pos,translate=suncenter)
            pfss_sphtocart,pfssLines[ff].ptr,pfssLines[ff].ptth,pfssLines[ff].ptph,$
-                          carrlon-sunrot,carrlat,px,pz,py
+                          carrlon,carrlat,px,pz,py
            pos = transpose([[reform(px[0:npt-1])],[reform(py[0:npt-1])],[reform(pz[0:npt-1])]])
            ;TRANSFORM THE POINTS APPROPRIATELY
            pos = transform_volume(pos,scale=[sunrad,sunrad,sunrad])
@@ -186,15 +189,15 @@ pro pfss_shock_plot_csgs,event,png=png
      cpsy=crossPoints[sstep,0:ncrosses-1].py
      cpsz=crossPoints[sstep,0:ncrosses-1].pz 
      pind=reform(crossPoints[sstep,0:ncrosses-1].linid)
-     colors=abs(randomn(10L,ncrosses))*255.
+     ;colors=abs(randomn(10L,ncrosses))*255.
      loadct,13,/silent
      
      for ff=0,ncrosses-1 do begin
-        lind=pfss[ff]
+        lind=pind[ff]
         npt=pfssLines[lind].npts
         if pfss_cartpos[ff,2,0] gt 0.0 and pfss_cartpos[ff,2,npt-1] gt 0.0 then $
         plots,reform(pfss_cartpos[lind,*,0:npt-1]),$
-              color=colors[ff],/device,psym=sym(1),symsize=0.5
+              color=pfssLines[lind].color,/device,psym=sym(1),symsize=0.5
      endfor
 ;plot the points of crossing in red.
      plots,[cpsx,cpsy,cpsz],color=240,psym=sym(1),symsize=1.4,/device
@@ -208,7 +211,8 @@ pro pfss_shock_plot_csgs,event,png=png
         if stp lt 10 then stp='0'+stp
         write_png,pfsspath+'aia_pfss_shock_'+event.date+'_'+event.label+'_'+stp+'.png',image,rr,gg,bb
      endif
-     
+     stop
   endfor ;END TIMESTEP LOOP
-     
+  set_plot,'x'
+  loadct,0,/silent
 end

@@ -2,7 +2,7 @@ pro test_pfss_shock_plot_crossing_angles
 ;Testing the shock crossing angles plotting procedure
 event=load_events_info(label='110511_01')
 ;
-pfss_shock_plot_crossing_angles,event,/oplot
+pfss_shock_plot_crossing_angles,event;,/oplot
 
 end
 

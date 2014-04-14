@@ -94,7 +94,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
   print,'Loading AIA File '+aiafile
   restore,aiafile
   subdata=0
-
+  
   ;Load the measured shock wave radius.
   ;This was created with measure_wave_sphere.pro
   ;print, 'Loading shock info file '+datapath+eventname+'_shocklocations.sav'
@@ -201,12 +201,14 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
            
 ;Apply the rotations and translations and plot
            pfss_cartpos=fltarr(nlines,3,maxnpts)
+           linecols=fix(abs(randomu(10L,nlines,/uniform))*255.)
            for ff=0.0D,nlines-1 do begin
               npt=nstep[ff]     ;the number of points on this particular line.
               
               ;SAVE THE FIELD LINE INFORMATION TO A STRUCTURE ARRAY
               if ff eq 0 then begin
-                 pfssLine={npts:0L,ptr:dblarr(max(nstep)),ptth:dblarr(max(nstep)),ptph:dblarr(max(nstep)),open:0,linid:0L}
+                 pfssLine={npts:0L,ptr:dblarr(max(nstep)),ptth:dblarr(max(nstep)),ptph:dblarr(max(nstep)),$
+                           open:0,linid:0L,color:0.}
                  pfssLines=replicate(pfssLine,nlines)
               endif
               pfssLines[ff].npts=npt
@@ -215,7 +217,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
               pfssLines[ff].ptph=ptph[0:npt-1,ff]
               pfssLines[ff].open=0
               pfssLines[ff].linid=ff
-              
+              pfssLines[ff].color=linecols[ff]
               
               ;Transform to the current view
               pos = transpose([[reform(pfss_px[0:npt-1,ff])],$
@@ -229,6 +231,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
            endfor
            
            ;Free some memory
+           linecols=0
            pfss_px=0
            pfss_pz=0
            pfss_py=0

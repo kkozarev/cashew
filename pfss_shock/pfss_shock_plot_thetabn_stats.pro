@@ -28,7 +28,8 @@ pro pfss_shock_plot_thetabn_stats,event
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 02/22/2014
 ;
-
+  set_plot,'x'
+  close,/all
   savepath=event.pfsspath
   infile=find_latest_file(event.pfsspath+'csgs_results_*')
   if infile[0] eq '' then begin
@@ -77,15 +78,22 @@ pro pfss_shock_plot_thetabn_stats,event
 
   
 ;+======================================================================
-  cthick=2.8
+  cthick=6
+  chsize=2.2
   dummy = LABEL_DATE(DATE_FORMAT=['%H:%I'])
   xtit='Time of '+event.date
   ytit='# Shock-Interacting Fieldlines'
-  thlet='!4' + String("110B) + '!X'
-  !P.position=[0.16,0.14,0.79,0.92]
-  !P.charthick=2
-  !P.font=-1
-  wdef,0,1000,800
+  ;thlet='!4' + String("150B) + '!X'
+  thlet='!9'+String("161B)+'!X'
+  
+  !P.position=[0.16,0.14,0.94,0.92]
+  !P.charthick=4
+  !P.font=0
+  ;wdef,0,1000,800
+  set_plot,'ps'
+  fname=savepath+'thetabn_stats_time_'+event.date+'_'+event.label
+  device,file=fname+'.eps',/inches,xsize=10.0,ysize=9.0,$
+         /encaps,/color,/helvetica
   loadct,0,/silent
   PLOT, tm, allcrosses, PSYM = 10, $ 
         TITLE = thlet+'!DBN!N Evolution', $
@@ -95,8 +103,8 @@ pro pfss_shock_plot_thetabn_stats,event
         xticklen=-0.01,$
         xrange=xrng,yrange=yrng,xticks=4, $
         xstyle=1,ystyle=1,color=0,background=255,$
-        xthick=3,ythick=3,thick=3,charsize=3,charthick=cthick,/nodata
-  
+        xthick=4,ythick=4,thick=4,charsize=chsize,charthick=chthick,/nodata
+
   loadct,13,/silent
   cols=findgen(nranges)*255./(nranges*1.0)
   rvst=strtrim(string(rangevals,format='(i3)'),2)
@@ -105,15 +113,16 @@ pro pfss_shock_plot_thetabn_stats,event
               baselines=valranges[*,rr,0],/overplot
      if rr eq 0 then sttr=' 0!Uo!N<'+thlet+'!DBN!N<'+rvst[0]+'!Uo!N' $
      else sttr=rvst[rr-1]+'!Uo!N'+'<'+thlet+'!DBN!N<'+rvst[rr]+'!Uo!N'
-     xyouts,!p.position[2]+0.01,!p.position[3]-0.05-0.05*rr,sttr,charsize=3,$
-            charthick=cthick+0.2,color=cols[rr],/norm
+     xyouts,!p.position[0]+0.02,!p.position[3]-0.05-0.05*rr,sttr,charsize=chsize,$
+            charthick=chthick,color=cols[rr],/norm
   endfor
-  
-  tvlct,rr,gg,bb,/get
-  image=tvrd(true=1)
-  fname=savepath+'thetabn_stats_time_'+event.date+'_'+event.label+'.png'
-  write_png,fname,image,rr,gg,bb
-  
+  ;tvlct,rr,gg,bb,/get
+  ;image=tvrd(true=1)
+  device,/close
+  exec='convert -flatten '+fname+'.eps '+fname+'.png ; rm -rf '+fname+'.eps '
+  spawn,exec
+  ;write_png,fname,image,rr,gg,bb
+  set_plot,'x'
 ;-======================================================================
   
 
@@ -121,6 +130,11 @@ pro pfss_shock_plot_thetabn_stats,event
   xtit='Shock Nose Distance, R!Ds!N'
   rad=radiusfitlines/rsun*event.geomcorfactor+1
   xrng=[min(rad),max(rad)]
+  ;wdef,0,1000,800
+  set_plot,'ps'
+  fname=savepath+'thetabn_stats_distance_'+event.date+'_'+event.label
+  device,file=fname+'.eps',/inches,xsize=10.0,ysize=8.0,$
+         /encaps,/color,/helvetica
   loadct,0,/silent
   PLOT, rad, allcrosses, PSYM = 10, $ 
         TITLE = thlet+'!DBN!N Evolution', $
@@ -129,7 +143,7 @@ pro pfss_shock_plot_thetabn_stats,event
         xticklen=-0.01,xtickformat='(f4.2)',$
         xrange=xrng,yrange=yrng,xticks=4, $
         xstyle=1,ystyle=1,color=0,background=255,$
-        xthick=3,ythick=3,thick=3,charsize=3,charthick=cthick,/nodata
+        xthick=3,ythick=3,thick=4,charsize=chsize,charthick=chthick,/nodata
   
   loadct,13,/silent
   cols=findgen(nranges)*255./(nranges*1.0)
@@ -139,15 +153,17 @@ pro pfss_shock_plot_thetabn_stats,event
               baselines=valranges[*,rr,0],/overplot
      if rr eq 0 then sttr=' 0!Uo!N<'+thlet+'!DBN!N<'+rvst[0]+'!Uo!N' $
      else sttr=rvst[rr-1]+'!Uo!N'+'<'+thlet+'!DBN!N<'+rvst[rr]+'!Uo!N'
-     xyouts,!p.position[2]+0.01,!p.position[3]-0.05-0.05*rr,sttr,charsize=3,$
-            charthick=cthick+0.2,color=cols[rr],/norm
+     xyouts,!p.position[0]+0.02,!p.position[3]-0.05-0.05*rr,sttr,charsize=chsize,$
+            charthick=chthick,color=cols[rr],/norm
   endfor
   
-  tvlct,rr,gg,bb,/get
-  image=tvrd(true=1)
-  fname=savepath+'thetabn_stats_distance_'+event.date+'_'+event.label+'.png'
-  write_png,fname,image,rr,gg,bb
+  ;tvlct,rr,gg,bb,/get
+  ;image=tvrd(true=1)
+  device,/close
+  exec='convert -flatten '+fname+'.eps '+fname+'.png ; rm -rf '+fname+'.eps '
+  spawn,exec
+  ;write_png,fname,image,rr,gg,bb
+  set_plot,'x'
 ;-======================================================================
 
-  
 end
