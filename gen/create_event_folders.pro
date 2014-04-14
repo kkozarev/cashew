@@ -1,14 +1,15 @@
 pro test_create_event_folders,web=web
   ;Run for a single event like this:
-  one=0
+  one=1
   if one eq 1 then begin
-     label='110125_01'
+     label='130411_01'
      event=load_events_info(label=label)
-     create_event_folders,event,web=web
+     create_event_folders,event
+     create_event_folders,event,/web
   endif
 
   ;Alternatively, run for all the events:
-  all=1
+  all=0
   if all eq 1 then begin
      events=load_events_info()
      for ev=0,n_elements(events)-1 do begin
