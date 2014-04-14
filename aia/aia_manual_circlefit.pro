@@ -1,4 +1,4 @@
-pro aiamancirclefit,circlepos,p,np=np,error=error,mousebutton=mousebutton,$
+pro aia_manual_circlefit,circlepos,p,np=np,error=error,mousebutton=mousebutton,$
                     special_point=special_point
 ;PURPOSE:
 ;This procedure uses the mpfitellipse procedure to make a circle fit to 

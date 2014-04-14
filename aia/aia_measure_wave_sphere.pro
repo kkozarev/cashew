@@ -138,7 +138,7 @@ pro aia_measure_wave_sphere,event,wav=wav,profrange=profrange
         xyouts,0.94,0.97,ind,charsize=3,charthick=3,color=200
         print,'Select points along the wave front. Please pick the radial direction first!'
         aia_oplot_radial,subindex[0],[subindex[0].arx0,subindex[0].ary0]
-        aiamancirclefit,circlepos,p,special_point=special_point,np=5
+        aia_manual_circlefit,circlepos,p,special_point=special_point,np=5
         ;if mousebutton eq 4 then begin
         ;   print,'The user has aborted at frame '+ind
         ;   print,'No more measurements will be made for this event!'
