@@ -3,8 +3,9 @@ pro test_callisto_plot_spectra
 ;Run the program like this to combine four files at different times
 ;and frequency ranges
 ;timerange='2011-May-11 02:' + ['27:00','36:00']
-timerange='2013-Apr-11 07:' + ['02:00','09:00']
-freqrange=[40,180]
+timerange='2013-Apr-11 07:' + ['02:00','14:00']
+freqrange=[70,180]
+station='SSRT'
 
   ;You can run this for a single or few events, like so
   one=1
@@ -12,7 +13,7 @@ freqrange=[40,180]
      label='130411_01'
      events=load_events_info(label=label)
      for ev=0,n_elements(events)-1 do $
-        callisto_plot_spectra,events[ev],freqrange=freqrange,timerange=timerange
+        callisto_plot_spectra,events[ev],freqrange=freqrange,timerange=timerange,station=station
   endif
 
   ;Alternatively, run for all events, like this
@@ -29,7 +30,7 @@ end
 
 
 ;+===============================================================================
-PRO callisto_plot_spectra,event,timerange=timerange,station=station,freqrange=freqrange,fit=fit,plot=plot
+PRO callisto_plot_spectra,event,timerange=timerange,station=station,freqrange=freqrange,fit=fit,plot=plot,ps=ps
 ;PURPOSE
 ; This procedure loads Callisto data, plotting a spectrum for a given event for the duration of available AIA data.
 ;
@@ -56,10 +57,13 @@ PRO callisto_plot_spectra,event,timerange=timerange,station=station,freqrange=fr
 ;
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 01/29/2014
+  set_plot,'x'
+  close,/all
 
-
+if keyword_set(station) then statn=station else statn=''
 ;Get the proper files to load
-  callisto_file_search,event,files,station=statn
+  callisto_file_search,event,statn,files,station=outstation
+  station=outstation
 
   if files[0] eq '' then begin
      print,''
@@ -78,8 +82,14 @@ PRO callisto_plot_spectra,event,timerange=timerange,station=station,freqrange=fr
      timerange[1]=tmp[2]+'-'+tmp[1]+'-'+tmp[0]+' '+tmp[3]+':'+tmp[4]+':'+tmp[5]
   endif
   
-  set_plot,'x'
-  loadct,8
+  if keyword_set(ps) then begin
+     set_plot,'ps'
+     fname=event.callistopath+'callisto_'+event.date+'_'+event.label+'_'+station+'_spectrum'
+     device,file=fname+'.eps',/inches,xsize=11.0,ysize=9.0,$
+            /encaps,/color,/helvetica
+  endif 
+
+  loadct,8,/silent
   tvlct,rr,gg,bb,/get
   tvlct,reverse(rr),reverse(gg),reverse(bb)
   !P.font=1
@@ -160,16 +170,22 @@ PRO callisto_plot_spectra,event,timerange=timerange,station=station,freqrange=fr
   pzb=zb
   pzb[where(zb lt 0.0)]=0.0
 
-  window,0,xsize=1200,ysize=800  ; for XWIN only!
+  if not keyword_set(ps) then window,0,xsize=1200,ysize=800  ; for XWIN only!
 ;  device, set_resolution=[1200,800], SET_PIXEL_DEPTH=24, DECOMPOSED=0  ;For the Z-buffer
-
   spectro_plot, reverse(pzb,2), x, reverse(y) ,/xs, /ys, $
                 xrange = timerange, thick=2,$
                 yrange = [freqrng[0],freqrng[1]], ytitle = 'Frequency [MHz]', $
                 title='eCallisto ('+station+') radio spectrum, event '+event.label,charsize=3,charthick=4
-  image=tvrd(/true)
-  write_png,event.callistopath+'callisto_'+event.date+'_'+event.label+'_spectrum.png',image
   
+  if keyword_set(ps) then begin
+     device,/close
+     exec='convert -flatten '+fname+'.eps '+fname+'.png ; rm -rf '+fname+'.eps '
+     spawn,exec
+     set_plot,'x'
+  endif else begin
+     image=tvrd(/true)
+     write_png,event.callistopath+'callisto_'+event.date+'_'+event.label+'_'+station+'_spectrum.png',image
+  endelse
   
 ;======================================
 ;Part 2. Find and fit the spectrum maxima
@@ -184,7 +200,7 @@ PRO callisto_plot_spectra,event,timerange=timerange,station=station,freqrange=fr
      nmax=intarr(timrng[1]-timrng[0]+1)
      
      for timind=timrng[0],timrng[1] do begin
-        
+     
 ;arr=smooth(reform(zb[timind,frng[0]:frng[1]]),4,/edge_truncate)
         arr=reform(zb[timind,frng[0]:frng[1]])
         plot,y[frng[0]:frng[1]],arr,xrange=[freqrng[0],freqrng[1]],$

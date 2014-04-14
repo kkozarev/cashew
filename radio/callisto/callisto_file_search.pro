@@ -1,4 +1,4 @@
-pro callisto_file_search,event,files,station=station
+pro callisto_file_search,event,instation,files,station=station
 ;PURPOSE
 ; This procedure searches in the local archive for eCallisto data for
 ; a particular event, and forms a properly formatted string array of files.
@@ -32,7 +32,7 @@ pro callisto_file_search,event,files,station=station
  ;Find out if there is Callisto data for this event, and return the files, in the appropriate form.
   tmp=strsplit(event.st,'/ ',/extract)
   date=tmp[0]+tmp[1]+tmp[2]
-  tmp=file_search(event.callisto_datapath+'*'+date+'*.fit.gz')
+  tmp=file_search(event.callisto_datapath+instation+'*'+date+'*.fit.gz')
   if tmp[0] eq '' then begin
      files=''
      return
