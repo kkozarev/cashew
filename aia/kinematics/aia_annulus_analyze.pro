@@ -7,7 +7,7 @@ pro test_aia_annulus_analyze
      wav='193'
      rrange=[1.11,1.34]
      event=load_events_info(label='110511_01')
-     aia_annulus_analyze,event,wave=wav,rrange=rrange ;,/interactive
+     aia_annulus_analyze,event,wave=wav;,rrange=rrange ;,/interactive
   endif
   
   
@@ -88,7 +88,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   
 ;Pixel coordinates in arcseconds from the center of the sun. How do I convert them to km?
   y_arcsec_array=(res/ind_arr[0].cdelt1*findgen(nrows)+r_in)
-  y_rsun_array=y_arcsec_array/ind_arr[0].rsun_obs*event.geomcorfactor
+  y_rsun_array=y_arcsec_array/ind_arr[0].rsun_obs  ;*event.geomcorfactor
   
 ;The X-angular array (distance along the limb from the pole).
   if keyword_set(interactive) then x_deg_array=findgen(ncols)*ang_step $
@@ -116,7 +116,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
      plot_image, img, xtitle = '!5Theta [degrees from solar north]', $
                  ytitle = '!5Radius [arcsec from Sun center]', $
                  title = 'Annulusplot, AIA/'+wav+' '+date, max = 50, $
-                 origin = [0,0], charthick = 1.2, charsize=4, $
+                 origin = [0,0], charthick = 1.2, charsize=3, $
                  scale = [ang_step, res/ind_arr[0].cdelt1], $
                  pos = [0.1, 0.1, 0.95, 0.95], min = -40
   endif else begin
@@ -125,13 +125,13 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
      plot_image, img, xtitle = '!5Theta [degrees from solar north]', $
                  ytitle = '!5Radius [arcsec from Sun center]', $
                  title = 'Annulusplot, AIA/'+wav+' '+date, max = 50, $
-                 origin = [thrang[0]*180./!PI,r_in], charthick = 1.2, charsize=4,$
+                 origin = [thrang[0]*180./!PI,r_in], charthick = 1.2, charsize=3,$
                  scale = [ang_step, res/ind_arr[0].cdelt1], $
                  pos = [0.1, 0.1, 0.95, 0.95], min = -40, font_name='Hershey 5'
   endelse
   
   
-  htlimits=rad_height_limits(degarray=x_deg_array)
+  htlimits=aia_rad_height_limits(degarray=x_deg_array)
   oplot,x_deg_array,htlimits,color=255,thick=2;,/data
   
   limb=ind_arr[0].rsun_obs ;Limb position in arcsec
@@ -165,16 +165,18 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
      endif else arlat=centerlat
      
      ;Find the radial outward limit/edge for which there's data
-     yradlimit=rad_height_limits(angle=arlat)
+     yradlimit=aia_rad_height_limits(angle=arlat)
      yradlimind=min(where(y_arcsec_array ge yradlimit))
      
      oplot,[arlat,arlat],[ind_arr[0].rsun_obs,yradlimit],thick=2
+
      
+
      ;The index of the AR latitude
      arxcentind=min(where(x_deg_array ge arlat))
      
-     lat_heights=(limb+[0.25,0.55,0.85]*(yradlimit-limb))/ind_arr[0].rsun_obs*event.geomcorfactor
-     print,lat_heights
+     lat_heights=(limb+[0.25,0.55,0.85]*(yradlimit-limb))/ind_arr[0].rsun_obs;*event.geomcorfactor
+     ;print,lat_heights
      nlatmeas=n_elements(lat_heights)
      htind=intarr(nlatmeas)
      goodlats=fltarr(nlatmeas,ncols)-10.
@@ -189,6 +191,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
         ;Overplot the lateral measurements location
         ;oplot,thrang*180./!PI,[y_arcsec_array[htind[ii]],y_arcsec_array[htind[ii]]],thick=2
      endfor
+     
      
     
   endif else begin
@@ -205,6 +208,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
         wait,0.1
      endwhile
      nlatmeas=uinput
+     if nlatmeas gt 5 then nlatmeas=5
      ;Arrays that hold the measurement heights/indices thereof
      lat_heights=dblarr(nlatmeas)
      htind=dblarr(nlatmeas)
@@ -232,6 +236,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
 ;Save the overview plot
   write_png,savepath+'annplot_'+date+'_'+event.label+'_'+wav+'_overview_plot.png',tvrd(/true),ct_rr,ct_gg,ct_bb
   wdel,0
+  
   
   
   if keyword_set(interactive) then begin
@@ -372,7 +377,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
            lat_pos:arlat,$
            data:tmp,bdiff:tmp,rdiff:tmp,$
            scale:[dt/60./60.,res/ind_arr[0].cdelt1/ind_arr[0].rsun_obs],$
-           origin:[0,y_rsun_array[0]],winsize:[800,600],multi:[0,0,0],winind:3,$
+           origin:[0,y_rsun_array[0]],winsize:[1000,800],multi:[0,0,0],winind:3,$
            difforigin:[0,y_rsun_array[htind[0]]],xfitrange:[0,0],yfitrange:[htind[0],yradlimind],$
            plotinfo:{p:!P, x:!X, y:!Y},$
            kinquantity:['R!D0!N','R!D1!N','V!DR,0!N','V!DR,1!N','a'],$
@@ -384,12 +389,15 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
            maxinds:intarr(1,nsteps),$
            frontinds:intarr(1,nsteps),$
            backinds:intarr(1,nsteps),$
-           xtitle:'Hours since start',ytitle:'Rsun from Sun center',$
-           imgtit:'AIA/'+wav+' BDiff Radial Positions !C Start at '+ind_arr[0].date_obs,$
+           xtitle:'Time of '+event.date,ytitle:'R!Dsun!N',$
+           imgtit:'AIA/'+wav+' BDiff Radial Positions',$
            savename:'annplot_'+date+'_'+event.label+'_'+wav+'_radial.png',$
-           time:rad_times $
+           time:rad_times,$
+           date_obs:ind_arr.date_obs $
            }
-
+  
+  
+  
   if keyword_set(rrange) then begin
      rrange*=event.geomcorfactor
      rind=min(where(y_rsun_array gt rrange[0]))
@@ -400,11 +408,13 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   endif
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;
 ;JMAP PLOTTING
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;
   
   
 ;  if not keyword_set(timerange) then begin
@@ -414,27 +424,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
 ;                title=rad_data.imgtit,$
 ;                font_name='Hershey 5',$
 ;                xtitle=rad_data.xtitle,ytitle=rad_data.ytitle
-;     
-;     print,''
-;     print,'Select starting point:'
-;     cursor,x,y,/down,/data
-;     plots,x,y,psym=5,symsize=2,thick=2,color=100
-;     sp=min(where((rad_times-x) gt 0.0))
-;     oplot,[rad_times[sp],rad_times[sp]],[y_rsun_array[htind[0]],y_rsun_array[yradlimind]],color=255
-     
-     
-;     print,'Select ending point:'
-;     cursor,x,y,/down,/data
-;     plots,x,y,psym=5,symsize=2,thick=2,color=200
-;     ep=min(where((rad_times-x) gt 0.0))
-;     oplot,[rad_times[ep],rad_times[ep]],[y_rsun_array[htind[0]],y_rsun_array[yradlimind]],color=255 
-;  endif else begin
-;     sp=min(where((rad_times-timerange[0]) gt 0.0))
-;     ep=min(where((rad_times-timerange[1]) gt 0.0))
-;     oplot,[rad_times[sp],rad_times[sp]],[y_rsun_array[htind[0]],y_rsun_array[yradlimind]],color=255
-;     oplot,[rad_times[ep],rad_times[ep]],[y_rsun_array[htind[0]],y_rsun_array[yradlimind]],color=255 
-;  endelse
-  
+;       
   sp=56
   ep=90
     ;Record the start/end time indices in the data structures
@@ -443,9 +433,9 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   rad_data.xfitrange=[sp,ep]
   
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;
 ;Plot the Radial Data!
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;
 ;Plot the Radial positions
 ;  wdef,rad_data.winind,rad_data.winsize[0],rad_data.winsize[1]
 ;  !p.multi=rad_data.multi
@@ -464,8 +454,8 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   rad_data.plotinfo.x=!X
   rad_data.plotinfo.y=!Y
   write_png,savepath+rad_data.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;
 
 stop
 
@@ -542,82 +532,19 @@ stop
 
 
 
-function rad_height_limits,angle=angle,degarray=degarray
-;Calculate the limits to which the radial heights are physical in the
-;images. This is useful when creating the j-maps
 
-;If the keyword angle is supplied (in degrees from solar north),
-;return the height for that angle.
-;You can optionally supply the degrees array (again in degrees)
-;Returns the height limit in arcsec
-
-;Angle array at 1 arcmin resolution
-  degarr=findgen(360.*60.)/60.*!PI/180.
-  ndeg=n_elements(degarr)
-;Corresponding height array
-  htarr=fltarr(ndeg)
-  
-;Pick some radius of the circle and the size of the square
-  n=1170.                       ;n is half the side of the square, in arcsec
-  r=1370.                       ;r is the radius of the outer circle of good data
-  
-;calculate special degrees
-  degs=fltarr(8)
-  anr=acos(n/r)
-  degs[0]=anr
-  degs[1]=!pi/2.-anr
-  degs[2]=!pi/2.+anr
-  degs[3]=!pi-anr
-  degs[4]=!pi+anr
-  degs[5]=(3./2.)*!pi-anr
-  degs[6]=(3./2.)*!pi+anr
-  degs[7]=(2.)*!pi-anr
-
-;Find their corresponding indices in the angle array
-  dginds=intarr(8)
-  for i=0,7 do dginds[i]=min(where(degarr ge degs[i]))
-  
-;Calculate the heights in the 12 different regions
-  htarr[0:dginds[0]-1]=n/abs(cos(degarr[0:dginds[0]-1])) ; region I
-  htarr[dginds[0]:dginds[1]-1]=r
-  htarr[dginds[1]:dginds[2]-1]=n/abs(sin(degarr[dginds[1]:dginds[2]-1])) ; regions II and III
-  htarr[dginds[2]:dginds[3]-1]=r
-  htarr[dginds[3]:dginds[4]-1]=n/abs(cos(degarr[dginds[3]:dginds[4]-1])) ; regions IV and V
-  htarr[dginds[4]:dginds[5]-1]=r
-  htarr[dginds[5]:dginds[6]-1]=n/abs(sin(degarr[dginds[5]:dginds[6]-1])) ; regions VI and VII
-  htarr[dginds[6]:dginds[7]-1]=r
-  htarr[dginds[7]:ndeg-1]=n/abs(cos(degarr[dginds[7]:ndeg-1])) ; region VIII
-  
-  if keyword_set(angle) then begin
-     ang=angle
-     while ang lt 0. do ang+=360.
-     while ang gt 360. do ang-=360.
-     ang=ang*!pi/180.     
-     angind=min(where(degarr ge ang))
-     tmp=htarr[angind]
-     
-     return, tmp[0]
-  endif
-  
-  if keyword_set(degarray) then begin
-     numinds=n_elements(degarray)
-     beg=min(where(degarr ge degarray[0]*!pi/180.))
-     fin=min(where(degarr ge degarray[numinds-1]*!pi/180.))
-     newhts=congrid(htarr[beg:fin],numinds)
-     return,newhts
-  endif
-  
-  return, htarr
-end
+;-============================================================================
 
 
-
+;+============================================================================
 pro annplot_fit_maxima,event,indata,datastruct,tim,yarr,lateral=lateral
 
   RSUN=6.96e5  ;Solar radius in km.
   nlatmeas=n_elements(datastruct.imgtit)
   time=tim
+  nt=n_elements(time)
   yarray=yarr
+  
 
   ;The info to pass to the position fitting routine for the fitting parameters
   parinfo = replicate({value:0.D, limited:[0,0], limits:[0.D,0.D]}, 3)
@@ -634,7 +561,7 @@ pro annplot_fit_maxima,event,indata,datastruct,tim,yarr,lateral=lateral
   endif else begin
      xmargin=0.03
      ymargin=0.04
-     chars=1.6
+     chars=2
      TIME_FACTOR=3600.
      DIST_FACTOR=RSUN
      parinfo[0].value=1.0*DIST_FACTOR
@@ -650,27 +577,44 @@ pro annplot_fit_maxima,event,indata,datastruct,tim,yarr,lateral=lateral
   parinfo[2].value=10.
   parinfo[2].limited[0]=1
   parinfo[2].limits[0]=-1500.0
-  sp=datastruct.xfitrange[0]
-  ep=datastruct.xfitrange[1]
-                                ;Search for the edges of the wave
-  wave_frontedge=replicate({val:0.0D,ind:0L},ep-sp+1)
-  wave_backedge=wave_frontedge
-  
   
   yrng=datastruct.yfitrange
   !p.multi=datastruct.multi
   device,window_state=win_open
   
-;LOOP OVER LATERAL MEASUREMENTS!
+  
+;LOOP OVER MEASUREMENTS!
   for mind=0,nlatmeas-1 do begin
   data=indata[*,*,mind]
   if keyword_set(lateral) then height=datastruct.lat_heights[mind] else height=1.0
   ht_km=yarr*DIST_FACTOR*height
   if mind eq 0 then wdef,datastruct.winind,datastruct.winsize[0],datastruct.winsize[1]
   
-  plot_image,data[*,yrng[0]:yrng[1]],scale=datastruct.scale,min=-40,max=50,charsize=chars,charthick=1.2,origin=datastruct.difforigin,$
-             title=datastruct.imgtit[mind],font_name='Hershey 5',$
-             xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
+;
+;  plot_image,data[*,yrng[0]:yrng[1]],scale=datastruct.scale,min=-40,max=50,$
+;             charsize=chars,charthick=1.2,origin=datastruct.difforigin,$
+;             title=datastruct.imgtit[mind],font_name='Hershey 5',$
+;             xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
+  
+  ;fix the times
+  tmp=anytim2jd(datastruct.date_obs)
+  timejd=dblarr(nt)
+  for t=0,nt-1 do timejd[t]=tmp[t].int+tmp[t].frac
+  
+  !P.position=[0.18,0.17,0.9,0.9]
+  fitrange=intarr(2)
+  ;
+  aia_plot_jmap_data,timejd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
+                     min=-40,max=50,fitrange=fitrange,$
+                     title=datastruct.imgtit[mind],$
+                     xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
+  
+  datastruct.xfitrange=fitrange
+  sp=datastruct.xfitrange[0]
+  ep=datastruct.xfitrange[1]
+                                ;Search for the edges of the wave
+  wave_frontedge=replicate({val:0.0D,ind:0L},ep-sp+1)
+  wave_backedge=wave_frontedge
   
   ;To restore the plot information and overplot on them, do
   datastruct.plotinfo[mind].p=!P
@@ -678,33 +622,35 @@ pro annplot_fit_maxima,event,indata,datastruct,tim,yarr,lateral=lateral
   datastruct.plotinfo[mind].y=!Y
   
   ;Fit the maxima and overplot them...
-  jmap_find_maxima,data,time,yarray,mymaxima=mymaxima,yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],numplotmax=3
+  jmap_find_maxima,data,time,yarray,mymaxima=mymaxima,$
+                   yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
+                   numplotmax=3
+;  jmap_find_maxima,data[*,yrng[0]:yrng[1]],time,yarray[yrng[0]:yrng[1]],$
+;                   mymaxima=mymaxima,numplotmax=3               
   tmp=reform(mymaxima[0,*].ind)
   datastruct.maxinds[mind,*]=reform(mymaxima[0,*].ind)
-  
- ; oplot,time,reform(yarray[datastruct.maxinds[mind,*]]),psym=1,color=200,thick=4,symsize=2
- ; loadct,8,/silent
- ; oplot,time[sp:ep],yarray[datastruct.maxinds[mind,sp:ep]],psym=1,color=200,thick=4,symsize=2
- ; oplot,[time[sp],time[sp]],[yarray[0],yarray[n_elements(yarray)-1]],color=255
- ; oplot,[time[ep],time[ep]],[yarray[0],yarray[n_elements(yarray)-1]],color=255
- ; loadct,0,/silent
+
 
 ;Filter the maxima positions here for physicality
   ;outliers=1
   maxinds=jmap_filter_maxima(time_sec,ht_km,mymaxima,fitrange=datastruct.xfitrange);,outliers=outliers
   good_ind_pos=where(maxinds ge 0)
   good_max_inds=maxinds[good_ind_pos]
+  device,window_state=win_open
+  oplot,timejd,reform(yarray[datastruct.maxinds[mind,*]]),psym=1,color=200,thick=4,symsize=2
   
-  oplot,time,reform(yarray[datastruct.maxinds[mind,*]]),psym=1,color=200,thick=4,symsize=2
   loadct,8,/silent
   ;oplot,time[sp:ep],yarray[datastruct.maxinds[mind,sp:ep]],psym=1,color=200,thick=4,symsize=2
-  oplot,time[sp+good_ind_pos],yarray[datastruct.maxinds[mind,sp+good_ind_pos]]/event.geomcorfactor,psym=1,color=200,thick=4,symsize=2
-  oplot,[time[sp],time[sp]],[yarray[0],yarray[n_elements(yarray)-1]],color=255
-  oplot,[time[ep],time[ep]],[yarray[0],yarray[n_elements(yarray)-1]],color=255
+  oplot,timejd[sp+good_ind_pos],yarray[datastruct.maxinds[mind,sp+good_ind_pos]],psym=1,color=200,thick=4,symsize=2
+  oplot,[timejd[sp],timejd[sp]],[yarray[0],yarray[n_elements(yarray)-1]],color=255
+  oplot,[timejd[ep],timejd[ep]],[yarray[0],yarray[n_elements(yarray)-1]],color=255
   
+
   for ii=sp,ep do begin
      if maxinds[ii-sp] gt 0.0 then begin
         
+
+
 ;+--------------------------------------------------------------
 ;Find the front edge of the wave
         oldv=1
@@ -773,10 +719,13 @@ pro annplot_fit_maxima,event,indata,datastruct,tim,yarr,lateral=lateral
            datastruct.backinds[mind,ii]=mymaxima[0,ii].ind+tmp
         endif
 ;---------------------------------------------------------------        
-        
-        oplot,[time[ii],time[ii]],$
-              [wave_backedge[ii-sp].val,wave_frontedge[ii-sp].val],$
-              color=200,thick=1
+ 
+;DEBUG    
+;For now, don't overplot the back edge  
+;        oplot,[time[ii],time[ii]],$
+;              [wave_backedge[ii-sp].val,wave_frontedge[ii-sp].val],$
+;              color=200,thick=1
+;END DEBUG
      endif
   endfor
   loadct,0,/silent
@@ -804,7 +753,7 @@ pro annplot_fit_maxima,event,indata,datastruct,tim,yarr,lateral=lateral
 ;  wave_rads=rad_data.fitparams[0,0].front+rad_data.fitparams[0,1].front*wave_times+0.5*(rad_data.fitparams[0,2].front)^2
 ;--------------------------------------------------
   ;oplot,time[sp:ep],wave_fits,thick=3
-  oplot,time[sp+good_ind_pos],wave_fits,thick=3
+  oplot,timejd[sp+good_ind_pos],wave_fits,thick=3
   
   
 ;--------------------------------------------------
@@ -819,7 +768,7 @@ pro annplot_fit_maxima,event,indata,datastruct,tim,yarr,lateral=lateral
   print,''
   print,''
   wave_fits=p1[0] + p2[0] * (time_good)+ 0.5 * p3[0] * (time_good)^2
-  wave_fits=wave_fits/RSUN*180./!PI
+  wave_fits=wave_fits/DIST_FACTOR;RSUN*180./!PI
   datastruct.fitparams[mind,0].max=p1[0]
   datastruct.fitparams[mind,1].max=p2[0]
   datastruct.fitparams[mind,2].max=p3[0]
@@ -828,8 +777,8 @@ pro annplot_fit_maxima,event,indata,datastruct,tim,yarr,lateral=lateral
   datastruct.fitsigma[mind,2].max=s3[0]
 ;--------------------------------------------------
   ;oplot,time[sp:ep],wave_fits,thick=3
-  oplot,time[sp+good_ind_pos],wave_fits,thick=3
-  
+  oplot,timejd[sp+good_ind_pos],wave_fits,thick=3
+  stop
   
   ;--------------------------------------------------
 ;Do second order polynomial fitting for the wave back edges
@@ -852,8 +801,8 @@ pro annplot_fit_maxima,event,indata,datastruct,tim,yarr,lateral=lateral
   datastruct.fitsigma[mind,2].back=s3[0]
 ;--------------------------------------------------
   ;oplot,time[sp:ep],wave_fits,thick=3
-  oplot,time[sp+good_ind_pos],wave_fits,thick=3
-
+  oplot,timejd[sp+good_ind_pos],wave_fits,thick=3
+  
   
   ;Print out the results of the fitting
 ;initial position angle/Radial position
@@ -917,6 +866,8 @@ pro annplot_fit_maxima,event,indata,datastruct,tim,yarr,lateral=lateral
   print,''
   xyouts,!x.window[0]+xmargin,!P.position[3]-5*ymargin,tmpstr,/norm,charsize=1.4,color=255
 endfor
+
+stop
 end
 
 

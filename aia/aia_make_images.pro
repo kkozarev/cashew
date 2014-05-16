@@ -5,10 +5,10 @@ pro test_aia_make_images
   one=1
   if one eq 1 then begin
      wavelengths=['193','211']
-     label=['130411_01']
+     label=['100613_01'] ;'140418_01','140425_01'
      events=load_events_info(label=label)
      for w=0,n_elements(wavelengths)-1 do for ev=0,n_elements(events)-1 do $
-        aia_make_images,events[ev],wavelengths[w],/base,/run;,/raw
+        aia_make_images,events[ev],wavelengths[w],/base,/run,/raw
   endif
   
   ;Alternatively, run it for all events
@@ -183,7 +183,9 @@ pro aia_make_images, event, wave, savepath=savepath,force=force,raw=raw,base=bas
         endif
 
         finsavpath=savepath+imgtype+'/'+wav+'/'
-        if not dir_exist(finsavpath) then spawn,'mkdir '+finsavpath   
+        if not dir_exist(finsavpath) then begin
+           spawn,'mkdir '+finsavpath
+        endif
         infname='normalized_AIA_'+date+'_'+event.label+'_'+wav+'_subdata_'+imgtype+'_'+ind+'.png'
         write_png,finsavpath+infname,image,rr,gg,bb
        ;stop

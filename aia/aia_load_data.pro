@@ -1,13 +1,16 @@
 pro test_aia_load_data
   
-  ;Run for a single event like this:
+  ;Run for one or a few events like this:
   one=1
   if one eq 1 then begin
-     label='130411_01'
-     event=load_events_info(label=label)
-     wav='193'
-     aia_load_data,event.st,event.et,wav,event=event,/nodata
-  ;   aia_load_data,event.st,event.et,wav,event=event,subdata=subdata,subindex=subindex,/subroi,/force
+     labels=['130411_01']
+     for ev=0,n_elements(labels)-1 do begin
+        label=labels[ev]
+        event=load_events_info(label=label)
+        wav='193'
+        ;aia_load_data,event.st,event.et,wav,event=event,/nodata
+        aia_load_data,event.st,event.et,wav,event=event,subdata=subdata,subindex=subindex,/subroi,/force
+     endfor
   endif
 
   ;Alternatively, run for all the events:

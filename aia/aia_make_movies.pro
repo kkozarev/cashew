@@ -3,13 +3,12 @@ pro test_aia_make_movies
   ;You can run this for a single event, like so
   one=1
   if one eq 1 then begin
-     label='111020_01'
-     label='130411_01'
+     label='100613_01'
      event=load_events_info(label=label)
      wavelengths=['193']
      movie_types=['araw','abase','arun','raw','base','run']
      movie_types=['pfss_shock','thetabn','thetabn_cumulative','pfss_spread']
-     movie_types=['run','base']
+     movie_types=['run','base','raw']
      wavelengths=['193','211']
      for w=0,n_elements(wavelengths)-1 do begin
         wavelength=wavelengths[w]
