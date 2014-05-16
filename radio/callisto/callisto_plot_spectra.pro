@@ -3,17 +3,17 @@ pro test_callisto_plot_spectra
 ;Run the program like this to combine four files at different times
 ;and frequency ranges
 ;timerange='2011-May-11 02:' + ['27:00','36:00']
-timerange='2013-Apr-11 07:' + ['02:00','14:00']
-freqrange=[70,180]
+timerange='2010-Jun-13 05:' + ['36:00','49:00']
+freqrange=[50,350]
 station='SSRT'
 
   ;You can run this for a single or few events, like so
   one=1
   if one eq 1 then begin
-     label='130411_01'
+     label='100613_01'
      events=load_events_info(label=label)
      for ev=0,n_elements(events)-1 do $
-        callisto_plot_spectra,events[ev],freqrange=freqrange,timerange=timerange,station=station
+        callisto_plot_spectra,events[ev],freqrange=freqrange,timerange=timerange;,station=station
   endif
 
   ;Alternatively, run for all events, like this
