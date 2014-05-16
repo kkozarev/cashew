@@ -164,9 +164,14 @@ events[ev].yaftawavepath=events[ev].savepath+'yaftawave/'
 events[ev].kinematicspath=events[ev].savepath+'kinematics/'
 events[ev].particlespath=events[ev].savepath+'particles/'
 
+;event filename templates will go here!
+
+
+if not dir_exist(events[ev].savepath) then create_event_folders,events[ev]
 endfor
 
 if keyword_set(printlabels) then print,events.label
+
 ;if keyword_set(label) then begin
 ;   ind=where(events.label eq label)
 ;   single_event=events[ind]   

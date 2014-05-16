@@ -32,7 +32,7 @@ pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=s
   inObj=0
   line=''
   cc=0 ; a counter for the number of events
-
+  
   openr,lun,fname,/get_lun
   while not eof(lun) do begin
      readf, lun, line
@@ -51,6 +51,8 @@ pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=s
      
      ;Do the parsing of the lines using regex:
      tmp=strsplit(line,'"[ /t]*:',/extract,/regex)
+     ;Exclude the empty lines
+     if n_elements(tmp) eq 1 then continue
      tmp[0]=strtrim(strjoin(strsplit(tmp[0],'"',/extract),''),2)
      tmp[1]=strsplit(tmp[1],',$',/extract,/regex)
      tmp[1]=strtrim(strjoin(strsplit(tmp[1],'"',/extract),''),2)
