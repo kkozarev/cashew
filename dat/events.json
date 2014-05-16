@@ -354,8 +354,8 @@
 	"label": "131212_01",
 	"coordX": 750,
 	"coordY": -400,
-	"st": "2013/12/12 03:03",
-	"et": "2013/12/12 03:33",
+	"st": "2013/12/12 03:03:00",
+	"et": "2013/12/12 03:33:00",
 	"aiafov": [1024,1024],
 	"flareclass": "B2.2",
 	"typeII": true,
@@ -366,14 +366,13 @@
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/12/12/SSRT_20131212_031500_59.fit.gz.png",
 	"nrh_lookup": ""
 }
-
 {
 	"label": "130411_01",
 	"coordX": -200,
 	"coordY": 200,
 	"st": "2013/04/11 06:54:00",
 	"et": "2013/04/11 07:20:00",
-	"aiafov": [1024,1024],
+	"aiafov": [2048,2048],
 	"flareclass": "M6.5",
 	"typeII": true,
 	"loop": true,
@@ -381,5 +380,55 @@
 	"comment": "Sigmoid eruption near disk center, wave.",
 	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/learmonth/images/13/20130411spectrograph.gif",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/04/11/BIR_20130411_070000_01.fit.gz.png",
+	"nrh_lookup": ""
+}
+{
+	"label": "140418_01",
+	"coordX": 499,
+	"coordY": -192,
+	"st": "2014/04/18 12:30:00",
+	"et": "2014/04/18 13:10:00",
+	"aiafov": [2048,2048],
+	"flareclass": "M7.3",
+	"typeII": true,
+	"loop": true,
+	"filament": false,
+	"comment": "An eruption from a complicated AR caused a large SEP increase, also a type II.",
+	"ips_lookup": "",
+	"callisto_lookup": "",
+	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=1200&dayofyear=20140418&composite=2"
+}
+{
+	"label": "140425_01",
+	"coordX": 960,
+	"coordY": -268,
+	"st": "2014/04/25 00:15:00",
+	"et": "2014/04/25 00:30:00",
+	"aiafov": [2048,2048],
+	"flareclass": "X1.3",
+	"typeII": true,
+	"loop": true,
+	"filament": false,
+	"comment": "A strong flare from an AR behind the limb, with a wave but no particles at Earth, also a type II.",
+	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/learmonth/images/14/20140425spectrograph.gif",
+	"callisto_lookup": "",
+	"nrh_lookup": ""
+}
+{
+	"label": "100613_01",
+	"coordX": 885,
+	"coordY": -422,
+	"st": "2010/06/13 05:34:00",
+	"et": "2010/06/13 05:49:00",
+	"aiafov": [1024,2048],
+	"flareclass": "M1.0",
+	"typeII": true,
+	"loop": true,
+	"filament": false,
+	"comment": "A nice 'double-bubble' event, with a loop
+	expansion driving a dome shock wave, overlapping with a
+	two-band type II burst",
+	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/culgoora/images/10/20100613spectrograph.gif",
+	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2010/06/13/OOTY_20100613_052959_59.fit.gz.png",
 	"nrh_lookup": ""
 }
