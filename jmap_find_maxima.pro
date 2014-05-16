@@ -50,12 +50,10 @@ pro jmap_find_maxima,zb,x,y,xrange=xrange,yrange=yrange,gaussfit=gaussfit,allgfi
   endif
   
   allgfits=fltarr(100,5,xind[1]-xind[0]+1)
-  tmp={val:0.0D,ind:0L}
+  tmp={val:0.0D,ind:0L,rad:0.0D}
   allmaxima=replicate(tmp,100,xind[1]-xind[0]+1)
   mymaxima=replicate(tmp,100,xind[1]-xind[0]+1)
   nmax=intarr(xind[1]-xind[0]+1)
-  
-  
   
 ;Loop over the X-values (usually time)
   for xx=xind[0],xind[1] do begin
@@ -131,7 +129,7 @@ pro jmap_find_maxima,zb,x,y,xrange=xrange,yrange=yrange,gaussfit=gaussfit,allgfi
         print,''
         return
      endif
-
+     
      nmax[xx-xind[0]]=cc
      maxima=maxima[0:cc-1]
      indmaxima=indmaxima[0:cc-1]
