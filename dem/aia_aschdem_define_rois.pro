@@ -67,6 +67,7 @@ ionizpath=event.ionizationpath
   if not keyword_set(roisize) then ROISIZE=50
   if not keyword_set(waves) then waves=['193','211','335','171','94','131']
   roi_positions=replicate({npix:0,pos:dblarr(2,1.1*ROISIZE*ROISIZE)},NUMROI) ;Hold the positions of all ROI pixels
+
   roiStart_x=fltarr(NUMROI)
   roiEnd_x=roiStart_x
   roiStart_y=roiStart_x
