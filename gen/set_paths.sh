@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# sets up environmentals and paths
+
+#set CORWAV to the directory where analyzed events will be stored
+CORWAV="/Volumes/Backscratch/Users/kkozarev/corwav/"
+#set CORWAV_TRUNK to the directory of the CorWav code (or local copy of the repository)
+CORWAV_TRUNK="${HOME}/svn/corwav/trunk/"
+#set CORWAV_WEB to the the web database page is.
+CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
+
+#Add the global vars to .bashrc
+echo "export CORWAV=\"$CORWAV\"" >> ~/.bashrc
+echo "export CORWAV_TRUNK=\"$CORWAV_TRUNK\"" >> ~/.bashrc
+echo "export CORWAV_WEB=\"$CORWAV_WEB\"" >> ~/.bashrc
+
+#Add the global vars to .cshrc
+echo "setenv CORWAV $CORWAV" >> ~/.cshrc.user
+echo "setenv CORWAV_TRUNK $CORWAV_TRUNK" >> ~/.cshrc.user
+echo "setenv CORWAV_WEB $CORWAV_WEB" >> ~/.cshrc.user
+
+idl_path='!PATH'"=expand_path('+${CORWAV_TRUNK}',/all_dirs)+':'"+'!PATH'
+echo $idl_path >> ~/.idl_startup
+echo "" >> ~/.idl_startup
+#
+#eof
+#
