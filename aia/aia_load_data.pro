@@ -3,7 +3,7 @@ pro test_aia_load_data
   ;Run for one or a few events like this:
   one=1
   if one eq 1 then begin
-     labels=['130411_01']
+     labels=['140418_01']
      for ev=0,n_elements(labels)-1 do begin
         label=labels[ev]
         event=load_events_info(label=label)
@@ -12,7 +12,7 @@ pro test_aia_load_data
         aia_load_data,event.st,event.et,wav,event=event,subdata=subdata,subindex=subindex,/subroi,/force
      endfor
   endif
-
+  
   ;Alternatively, run for all the events:
   all=0
   if all eq 1 then begin
@@ -28,7 +28,7 @@ pro test_aia_load_data
   endif
 
 end
-
+ 
 
 function aia_get_fname,s,st,wv,loud=loud
 ;print,'enter aia_get_fname'
@@ -118,7 +118,7 @@ pro aia_load_data,stt,ett,wav,index,data,savefile=savefile,nodata=nodata,map=map
 ;Constants and definitions
 ;===========================================================
 cfaarc='/Data/SDO/AIA/level1/'
-locarc=getenv('CORWAV')+'AIA_data/'
+locarc=getenv('CORWAV_DATA')+'AIA_data/'
 if keyword_set(archive) then locarc=archive
 ;===========================================================
 loud=1

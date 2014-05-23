@@ -19,7 +19,7 @@ pro test_aia_archive_local_data,force=force
 ;Written by Kamen Kozarev, 09/23/2013   
 ;
   cfaarc='/Data/SDO/AIA/level1/'
-  ;locarc='/Volumes/Backscratch/Users/kkozarev/AIA_data/'
+  locarc=getenv('CORWAV_DATA')+'AIA_data/'
   wave=['171','193','211','335','094','131','304']
   
   events=load_events_info()

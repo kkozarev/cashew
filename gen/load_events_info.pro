@@ -30,6 +30,7 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
 ;- Continuously updated list of events.
 ;----------------------------------------------------------------------------------------
   basepath=GETENV('CORWAV');Usually, it will be /Volumes/Backscratch/Users/kkozarev/corwav/ or similar
+  datapath=GETENV('CORWAV_DATA')
   webbasepath=GETENV('CORWAV_WEB')
   trunk=GETENV('CORWAV_TRUNK')
 
@@ -79,14 +80,14 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
   for ll=0,nevents-1 do if coordX[ll] lt 0. then hemisphere[ll]='E' else hemisphere[ll]='W'
 
 ;DATAPATHS
-aia_datapath=basepath+'AIA_data/'
-nrh_datapath=basepath+'NRH_data/'
-ips_datapath=basepath+'IPS_data/'
-callisto_datapath=basepath+'Callisto_data/'
-rhessi_datapath=basepath+'RHESSI_data/'
-euvi_datapath=basepath+'EUVI_data/'
-swap_datapath=basepath+'SWAP_data/'
-pfss_datapath=basepath+'PFSS_data/'
+aia_datapath=datapath+'AIA_data/'
+nrh_datapath=datapath+'NRH_data/'
+ips_datapath=datapath+'IPS_data/'
+callisto_datapath=datapath+'Callisto_data/'
+rhessi_datapath=datapath+'RHESSI_data/'
+euvi_datapath=datapath+'EUVI_data/'
+swap_datapath=datapath+'SWAP_data/'
+pfss_datapath=datapath+'PFSS_data/'
 
 ;SAVEPATHS
 savepath=basepath+'events/' ;The base savepath

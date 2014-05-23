@@ -29,20 +29,22 @@
 		
 <!-- --------SECTION 1----------- -->
         <section>
-    	<h2 id="sec1">1. What is CorWav?</h2>
+    	<h2 id="sec1"><b>1. What is CorWav?</b></h2>
     	<p>CorWav is a library of Interactive Data Language (IDL) tools for the manipulation and analysis of 
-    	large-scale MHD waves (and related phenomena) in the solar corona ("CorWav" comes from "coronal waves").
+    	large-scale waves (and related phenomena) in the solar corona ("CorWav" comes from "coronal waves").
     	 It has been designed to be used with the <a href="http://www.lmsal.com/solarsoft/" target="_blank">SolarSoft</a> 
     	 IDL package of solar and heliospheric physics tools.
     	 CorWav is freely available, and can be downloaded/forked from <a href="https://github.com/kkozarev/coronalwaves" target="_blank">GitHub</a> (Git 
-    	 help is <a href="https://help.github.com/" target="_blank">here</a>). The main suite of tools was designed to analyze EUV wave observations from the 
+    	 help is <a href="https://help.github.com/" target="_blank">here</a>). The main suite of tools was designed to analyze EUV wave 
+    	 observations from the 
     	 Atmospheric Imaging Assembly (AIA) on the Solar Dynamics Observatory (SDO) mission. 
-    	 However, the code has been written with flexibility and modularity in mind, so it may be easily modified to incorporate new types of data or data-driven models.</p>
+    	 However, the code has been written with flexibility and modularity in mind, so it may be easily 
+    	 modified to incorporate new types of data or data-driven models.</p>
         <a href="#top">Top</a>
         </section>
 <!-- --------SECTION 2----------- -->    
     	<section>
-    	<h2 id="sec2">2. What tools does CorWav include?</h2>
+    	<h2 id="sec2"><b>2. What tools does CorWav include?</b></h2>
     	<p>CorWav includes tools to analyze the radial and lateral kinematics of coronal bright fronts/EUV waves, 
     	as well as their other properties: wave sheath thickness, density and temperature change,
     	their interaction with the coronal magnetic field (shock-to-magnetic-field angles, heliospheric connectivity).
@@ -52,33 +54,40 @@
         </section>
 <!-- --------SECTION 3----------- -->    
     	<section>
-    	<h2 id="sec3">3. Setting up your local copy of CorWav.</h2>
-    	<p>You can download your local copy of CorWav from <a href="https://github.com/kkozarev/coronalwaves" target="_blank">here</a>, or by running the following in your
+    	<h2 id="sec3"><b>3. Setting up your local copy of CorWav.</b></h2>
+    	<p>You can download your local copy of CorWav from <a href="https://github.com/kkozarev/coronalwaves" target="_blank">here</a>, 
+    	or by running the following in your
     	command line terminal (assuming you have git installed):
     	<pre><code>
     	git clone https://github.com/kkozarev/coronalwaves corwav
     	</code></pre>
-    	This will download a local copy of the code into the folder 'corwav'.</p>
+    	This will download a copy of the code into the local folder 'corwav'.</p>
     	<p>After this, there are several steps to take in order to ensure you can access the procedures and run them properly.
-    	First, you need to add some global variables to your linux/unix-like environment (UNIX, Linux, Mac OS only). Luckily,
-    	there's a script that can do that for you. Open corwav/gen/set_paths.sh - you should see several variables like this:
+    	First, you need to add some global variables to your linux/unix-like environment. Luckily,
+    	there's a script that can do that for you. Open the file <b>set_paths.sh</b> in gen/ directory of the code folder - 
+    	you should see several variables like this near the top:
     	<pre><code>
 #set CORWAV to the directory where analyzed events will be stored
 CORWAV="/Volumes/Backscratch/Users/kkozarev/corwav/"
+#set CORWAV_DATA to the directory where the local copy of data will live
+CORWAV_DATA="/Volumes/Itch/Users/kkozarev/corwav/"
 #set CORWAV_TRUNK to the directory of the CorWav code (or local copy of the repository)
 CORWAV_TRUNK="${HOME}/git/corwav/"
 #set CORWAV_WEB to directory where the web database page is.
 CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
 </code></pre>
-		Edit these 
+		Edit these to point to the code location (CORWAV_TRUNK), archived local data (CORWAV_DATA), the directory where analyzed data will live (CORWAV), 
+		and (optionally) the web database directory (CORWAV_WEB). Save and execute the script.</p>
         <a href="#top">Top</a>
         </section>
 <!-- --------SECTION 4----------- -->
         <section>
-    	<h2 id="sec4">4. Creating and loading an event.</h2>
+    	<h2 id="sec4"><b>4. Creating and loading an event.</b></h2>
     	<p>An 'event' is a structure containing the necessary information that CorWav tools use to load and process coronal wave and 
-    	related data, for a given solar eruption event. This information is instrument-independent. CorWav provides a human-readable, easy to use
-    	<a href="http://www.json.org/" target="_blank">JSON</a> format for loading event data into IDL. Here is an example of the input format for a single event:</p>
+    	related data, for a given solar eruption event. This information is instrument-independent. CorWav provides a human-readable, 
+    	easy to use
+    	<a href="http://www.json.org/" target="_blank">JSON</a> format for loading event data into IDL. Here is an example of the 
+    	input format for a single event:</p>
     	<pre><code>
 {
  "label": "110809_01",
@@ -97,15 +106,21 @@ CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
  "nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=0800&dayofyear=20110809&composite=2"
 }
         </code></pre>
-        <p>The JSON format has elements (such as "label"), which have certain values (such as "110809_01"), assigned with the ':' character. The elements are separated by commas.
-        Text values must be surrounded in quotation marks, unlike numbers. The format also accepts an array of values (such as "aiafov": [1024,2048]), or boolean values (such as "filament": true). 
-        Every instance of the structure format is surrounded by curly brackets. White space is unimportant for the JSON format, but it is very important for readable code.</p>
+        <p>The JSON format has elements (such as "label"), which have certain values (such as "110809_01"), assigned with the ':' character. 
+        The elements are separated by commas.
+        Text values must be surrounded in quotation marks, unlike numbers. The format also accepts an array of values 
+        (such as "aiafov": [1024,2048]), 
+        or boolean values (such as "filament": true). 
+        Every instance of the structure format is surrounded by curly brackets. White space is unimportant for the JSON format, but it is very 
+        important for readable code.</p>
         <p>Let's look at the elements in the event structure. The first one,
         <pre><code>
  {"label": "110809_01"}
         </code></pre>
-        is the unique label of the event. Its format is YYMMDD_NN, where YYMMDD is the date, and NN is the consecutive number of this event in the database for that date. 
-        Thus, "110809_01" is the first event of 9 August, 2011 in the event database. The event label is very important, since it is used to uniquely identify an event, along with all its information.</p>
+        is the unique label of the event. Its format is YYMMDD_NN, where YYMMDD is the date, and NN is the consecutive number of this event 
+        in the database for that date. 
+        Thus, "110809_01" is the first event of 9 August, 2011 in the event database. The event label is very important, since it is used to 
+        uniquely identify an event, along with all its information.</p>
 		<pre><code>
 {"coordX": 883,
  "coordY": 269,
@@ -115,8 +130,10 @@ CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
         <p>The next few elements specify the time and space position of the event. 
         The first two, "coordX" and "coordY", give the coordinates, in arcseconds, of the origin of the eruption on the solar disk 
         (these can be obtained most easily from <a href="http://lmsal.com/isolsearch" target="_blank">Heliospheric Event Knowledgebase (HEK)</a>).
-        These coordinates are used to determine the position of the event on AIA images and to automatically cut a subregion around it, together with the "aiafov" element (see below).
-        "st" and "et" give the starting and ending times for the event. They are used to automatically fetch only the necessary data files for analysis.
+        These coordinates are used to determine the position of the event on AIA images and to automatically cut a subregion around it, together 
+        with the "aiafov" element (see below).
+        "st" and "et" give the starting and ending times for the event. They are used to automatically fetch only the necessary data files for 
+        analysis.
         Note the particular datetime format, which is required for CorWav to parse the information properly.</p>
         <pre><code>
 { 
@@ -128,7 +145,8 @@ CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
 }
         </code></pre>
         <p> The "aiafov" element holds the X- and Y-sizes (in pixels) for the field of view to cut out from the 4k-by-4k pixels of the original 
-        AIA data (Using the entire image is rarely necessary). The "flareclass" element holds the X-ray class of the flare (if there isn't one, leave a blank string). 
+        AIA data (Using the entire image is rarely necessary). The "flareclass" element holds the X-ray class of the flare (if there isn't one, 
+        leave a blank string). 
         The best place to search for the class of a flare is <a href="http://www.solarmonitor.org" target="_blank">Solar Monitor</a>, 
         or <a href="http://lmsal.com/isolsearch" target="_blank">HEK</a>. The next three elements take boolean values 'true' or 'false', 
         depending on whether there was metric radio type II emission, expanding loops, or filaments.</p>
@@ -140,11 +158,15 @@ CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
  "nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=0800&dayofyear=20110809&composite=2"
 }
         </code></pre>  
-        <p>The element "comment" holds a free-form comment on the appearance and any interesting features of the particular event, by (ideally) the person who submits it. 
-        The last three elments hold the urls or file names of quicklook plots of metric radio emission during the event, from three different networks of solar radio observatories. 
+        <p>The element "comment" holds a free-form comment on the appearance and any interesting features of the particular event, by (ideally) 
+        the person who submits it. 
+        The last three elments hold the urls or file names of quicklook plots of metric radio emission during the event, from three different 
+        networks of solar radio observatories. 
         If no quicklook plots are available, this field should be left a blank string.</p>
-        <p>All the event entries (individual structures) must be written/added to the file <b>'events.json'</b> in the <b>dat/</b> folder of your local CorWav copy.
-        CorWav knows to search for event information there. You can access the information you entered, and more, for a single event, by using the load_events_info() 
+        <p>All the event entries (individual structures) must be written/added to the file <b>'events.json'</b> in the <b>dat/</b> folder of 
+        your local CorWav copy.
+        CorWav knows to search for event information there. You can access the information you entered, and more, for a single event, by 
+        using the load_events_info() 
         function and specifying the event label:
         <pre><code>
 IDL> event=load_events_info(label='110809_01')
@@ -203,30 +225,74 @@ IDL> help,event,/st
    YAFTAWAVEPATH   STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/yaftawav'...
    KINEMATICSPATH  STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/kinematics/'
 </code></pre>
-As you can see, the structure contains not only the information we supplied through the JSON format, but a lot of additional information as well - 
-such as all the necessary input and output directory paths, correction factors, active region coordinates in degrees, and a geometric correction factor
-(more on that later). You can load all the event information at once, by running load_events_info() with no arguments:
+As you can see, the structure contains not only the information we supplied through the JSON format, but a lot of additional information as 
+well - 
+such as all the necessary input and output directory paths, correction factors, active region coordinates in degrees, and a geometric 
+correction factor
+(more on that later). You can load all the event information at once, by running load_events_info() with no arguments:</p>
         <pre><code>
 IDL> events=load_events_info()
 IDL> help,event
 EVENTS           STRUCT    = -> <Anonymous> Array[27]
         </code></pre>
-Let's go back to event '110809_01'. Once you have its event structure loaded, you can pass it as an argument to many CorWav tools. 
-Next, you will see how to load some AIA data and make movies from it.
+<p>Let's go back to event '110809_01'. Once you have its event structure loaded, you can pass it as an argument to many CorWav tools. 
+Next, you will see how to load some AIA data and make movies from it. 
+Oh, and by the way, calling load_events_info for the first time for an event causes it to create the event's directory tree in the 
+CORWAV directory, so no need to worry about that.</p>
         <a href="#top">Top</a>
         </section>
 <!-- --------SECTION 5----------- -->
         <section>
-    	<h2 id="sec5">5. Loading AIA data. Processing AIA data, making images and movies.</h2>
-    	<p>TEXT HERE</p>
+    	<h2 id="sec5"><b>5. Loading AIA data. Processing AIA data, making images and movies.</b></h2>
+    	<p>To load and preprocess (prep) AIA data, use the aia_load_data procedure. 
+    	It loads the AIA data from the local (or remote archive), preprocesses/calibrates it, and saves it as a datacube in the appropriate 
+    	location in the event's directory.</p>
         <pre><code>
-        IDL CODE HERE.
+event=load_events_info(label='110809_01')
+wav=['193','211'] ;The AIA (best for waves) waveband channels for which to load data.
+;To load all EUV channels, use the following instead:
+;wav=['94','131','171','193','211','335'] 
+for w=0,n_elements(wav)-1 do aia_load_data,event.st,event.et,wav[w],event=event,/subroi,/force
         </code></pre>
+        <p> The '/subroi' keyword tells aia_load_data to also create a dataset with cutouts based on the AR coordinates and cutout size, 
+        specified in the event's JSON description. The '/force' keyword tells the procedure to overwrite whatever data there is
+         already loaded.
+        aia_load_data has many other options, which you can find by opening the file CORWAV_TRUNK/aia/aia_load_data.pro. For example, an 
+        important option is to not include files with much shorter exposure that are often created during flares, 
+        by supplying the /remove_aec keyword. <b>In general, most of the procedures have additional keywords, described in the individual
+        procedure files in the CORWAV_TRUNK folder.</b></p>
+        <p> Once aia_load_data has executed successfully, you can make image files from the data.
+        <pre><code>
+for w=0,n_elements(wav)-1 do aia_make_images,event,wavelength,/raw,/base,/run,/force
+        </code></pre>
+        The '/raw','/base','/run' keywords tell the procedure to make image files from the raw data (with an inverted color table 
+        to highlight the faint waves), base difference images (subtracting the first image from all consequent ones), or running difference
+        images (subtracting the preceding image from the next one). Running the above will create PNG files in 
+        CORWAV/events/110809_01/png/[type]/[wav]/,type being one of raw/base/run.</p>
+        <p>You can also create annulus images. Those are images, created by 'deprojecting' the solar image onto a rectangular canvas, where
+        the X-axis is angular distance from solar north along the limb, and the Y-axis is radial distance from Sun-center.
+        <pre><code>
+for w=0,n_elements(wav)-1 do aia_annulus_create,event,/raw,wav=wav[w],/force
+        </code></pre>
+        Here, again, you have the option to produce base difference or running difference annulus images, with the '/base' and '/run'
+        keywords. Running the above will create PNG files in CORWAV/events/110809_01/annulusplot/[type]/[wav]/, 
+        type being one of araw/abase/arun.</p>
+        <p>Now that we have created some images, we can create time lapse movies from them, like so:
+        <pre><code>
+movie_types=['run','arun']
+;If you want to make all types of movie, use this instead
+;movie_types=['araw','abase','arun','raw','base','run']
+for w=0,n_elements(wav)-1 do $
+	for mt=0,n_elements(movie_types)-1 do $
+		aia_make_movies, event, movie_type=movie_type, wav=wavelength,/force
+        </code></pre>
+        We just made a running difference and annulus running difference movie for this event. They will be stored in 
+        CORWAV/events/110809_01/movies/. The '$' sign in the IDL code above just allows to break the line without IDL breaking.</p>
         <a href="#top">Top</a>
         </section>
 <!-- --------SECTION 6----------- -->
         <section>
-    	<h2 id="sec6">6. Measuring EUV wave kinematics.</h2>
+    	<h2 id="sec6"><b>6. Measuring EUV wave kinematics.</b></h2>
     	<p>TEXT HERE</p>
         <pre><code>
         IDL CODE HERE.
@@ -235,7 +301,7 @@ Next, you will see how to load some AIA data and make movies from it.
        	</section>        
 <!-- --------SECTION 7----------- -->
         <section>
-    	<h2 id="sec7">7. Running the DEM, PFSS+CSGS models.</h2>
+    	<h2 id="sec7"><b>7. Running the DEM, PFSS+CSGS models.</b></h2>
     	<p>TEXT HERE</p>
         <pre><code>
         IDL CODE HERE.
@@ -244,7 +310,7 @@ Next, you will see how to load some AIA data and make movies from it.
         </section>        
 <!-- --------SECTION 8----------- -->
         <section>
-    	<h2 id="sec8">8. Plotting radio and X-ray data.</h2>
+    	<h2 id="sec8"><b>8. Plotting radio and X-ray data.</b></h2>
     	<p>TEXT HERE</p>
         <pre><code>
         IDL CODE HERE.
@@ -253,7 +319,7 @@ Next, you will see how to load some AIA data and make movies from it.
         </section>        
 <!-- --------SECTION 9----------- -->
         <section>
-    	<h2 id="sec9">9. Updating the online database/webpage.</h2>
+    	<h2 id="sec9"><b>9. Updating the online database/webpage.</b></h2>
     	<p>TEXT HERE</p>
         <pre><code>
         IDL CODE HERE.
@@ -262,7 +328,7 @@ Next, you will see how to load some AIA data and make movies from it.
         </section>
 <!-- --------SECTION 10----------- -->
         <section>
-    	<h2 id="sec10">10. Advanced tips and tricks.</h2>
+    	<h2 id="sec10"><b>10. Advanced tips and tricks.</b></h2>
     	<p>TEXT HERE</p>
         <pre><code>
         IDL CODE HERE.
