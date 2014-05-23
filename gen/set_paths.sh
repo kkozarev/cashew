@@ -5,8 +5,12 @@
 CORWAV="/Volumes/Backscratch/Users/kkozarev/corwav/"
 #set CORWAV_TRUNK to the directory of the CorWav code (or local copy of the repository)
 CORWAV_TRUNK="${HOME}/svn/corwav/trunk/"
-#set CORWAV_WEB to the the web database page is.
+#set CORWAV_WEB to the directory where the web database page is.
 CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
+
+
+
+#=======================NO USER INPUT BELOW!===================================
 
 #Add the global vars to .bashrc
 echo "export CORWAV=\"$CORWAV\"" >> ~/.bashrc
