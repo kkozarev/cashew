@@ -59,6 +59,7 @@ pro aia_jmap_find_maxima,data,time,dist,xrange=xrange,yrange=yrange,gaussfit=gau
   allnmax=intarr(xind[1]-xind[0]+1)
 ;------------------------------------------------------------
 
+stop
 
 ;------------------------------------------------------------
 ;Find all local maxima in every column of data
