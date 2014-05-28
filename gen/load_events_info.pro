@@ -92,7 +92,6 @@ pfss_datapath=datapath+'PFSS_data/'
 ;SAVEPATHS
 savepath=basepath+'events/' ;The base savepath
 webpath=webbasepath+'events/'
-;FILENAMES
 
 ;----------------------------------------------------------------------------------------
 
@@ -103,7 +102,7 @@ event={label:'',st:'',et:'',coordX:0,coordY:0,aiafov:intarr(2),hemisphere:'',dat
        euvi_datapath:'',swap_datapath:'',pfss_datapath:'',savepath:'',webpath:'',$
        moviepath:'',radiopath:'',nrhpath:'',ipspath:'',callistopath:'',annuluspath:'',pfsspath:'',$
        swappath:'',ionizationpath:'',aschdempath:'',weberpath:'',particlespath:'',$
-      euvipath:'',dempath:'',pngpath:'',yaftawavepath:'',kinematicspath:''}
+      euvipath:'',dempath:'',pngpath:'',yaftawavepath:'',kinematicspath:'',aia_savename:'',annplot:{savename:'',analyzed_savename:''}}
 events=replicate(event,nevents)
 
 for ev=0,nevents-1 do begin
@@ -134,7 +133,7 @@ events[ev].nrh_lookup=nrh_lookup[ev]
 events[ev].callisto_lookup=callisto_lookup[ev]
 events[ev].ips_lookup=ips_lookup[ev]
 
-;datapaths
+;DATAPATHS
 events[ev].aia_datapath=aia_datapath
 events[ev].nrh_datapath=nrh_datapath
 events[ev].callisto_datapath=callisto_datapath
@@ -144,7 +143,7 @@ events[ev].swap_datapath=swap_datapath
 events[ev].euvi_datapath=euvi_datapath
 events[ev].pfss_datapath=pfss_datapath
 
-;savepaths
+;SAVEPATHS
 events[ev].savepath=savepath+events[ev].label+'/'
 events[ev].webpath=webpath+events[ev].label+'/'
 events[ev].moviepath=events[ev].savepath+'movies/'
@@ -165,8 +164,10 @@ events[ev].yaftawavepath=events[ev].savepath+'yaftawave/'
 events[ev].kinematicspath=events[ev].savepath+'kinematics/'
 events[ev].particlespath=events[ev].savepath+'particles/'
 
-;event filename templates will go here!
-
+;FILENAMES
+events[ev].aia_savename="normalized_AIA_"+events[ev].date+'_'+events[ev].label+'_'
+events[ev].annplot.analyzed_savename="annplot_"+events[ev].date+'_'+events[ev].label+'_'
+events[ev].annplot.savename="aia_deprojected_annulus_"+events[ev].date+'_'+events[ev].label+'_'
 
 if not dir_exist(events[ev].savepath) then create_event_folders,events[ev]
 endfor

@@ -59,7 +59,7 @@
     	or by running the following in your
     	command line terminal (assuming you have git installed):
     	<pre><code>
-    	git clone https://github.com/kkozarev/coronalwaves corwav
+$> git clone https://github.com/kkozarev/coronalwaves corwav
     	</code></pre>
     	This will download a copy of the code into the local folder 'corwav'.</p>
     	<p>After this, there are several steps to take in order to ensure you can access the procedures and run them properly.
@@ -172,7 +172,7 @@ CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
 IDL> event=load_events_info(label='110809_01')
 IDL> help,event
 EVENT           STRUCT    = -> <Anonymous> Array[1]
-        </code></pre>
+        </code></pre> 
         The result is a structure, let's see what's inside.
         <pre><code>
 IDL> help,event,/st
@@ -236,7 +236,7 @@ IDL> help,event
 EVENTS           STRUCT    = -> <Anonymous> Array[27]
         </code></pre>
 <p>Let's go back to event '110809_01'. Once you have its event structure loaded, you can pass it as an argument to many CorWav tools. 
-Next, you will see how to load some AIA data and make movies from it. 
+Next, you will see how to load some AIA data and make movies from it.
 Oh, and by the way, calling load_events_info for the first time for an event causes it to create the event's directory tree in the 
 CORWAV directory, so no need to worry about that.</p>
         <a href="#top">Top</a>
@@ -248,22 +248,30 @@ CORWAV directory, so no need to worry about that.</p>
     	It loads the AIA data from the local (or remote archive), preprocesses/calibrates it, and saves it as a datacube in the appropriate 
     	location in the event's directory.</p>
         <pre><code>
-event=load_events_info(label='110809_01')
-wav=['193','211'] ;The AIA (best for waves) waveband channels for which to load data.
+IDL> event=load_events_info(label='110809_01')
+IDL> wav=['193','211'] ;The AIA (best for waves) waveband channels for which to load data.
 ;To load all EUV channels, use the following instead:
-;wav=['94','131','171','193','211','335'] 
-for w=0,n_elements(wav)-1 do aia_load_data,event.st,event.et,wav[w],event=event,/subroi,/force
+;wav=['94','131','171','193','211','335']
+;For every waveband, execute aia_load_event:
+IDL> for w=0,n_elements(wav)-1 do $
+	 aia_load_event,event,wav[w],$
+		index=index,data=data,$
+		subindex=subindex,subdata=subdata,$
+		map=map,/remove_aec,/subroi,/force
         </code></pre>
-        <p> The '/subroi' keyword tells aia_load_data to also create a dataset with cutouts based on the AR coordinates and cutout size, 
-        specified in the event's JSON description. The '/force' keyword tells the procedure to overwrite whatever data there is
-         already loaded.
+        <p> The procedure 'aia_load_event' is a wrapper for the powerful 'aia_load_data'. It loads, preps, normalizes the files for the given
+        waveband channel, and saves them as a datacube in the event main folder. The '/subroi' keyword tells aia_load_event to also create a datacube
+        of reduced proportions, based on the AR coordinates and cutout size (event.aiafov), specified in the event's JSON description. 
+        The '/force' keyword tells the procedure to overwrite whatever data there is already loaded. The 'index' and 'data' keywords will return
+        the index structure and datacube for the event. For the sub-fov data, 'subindex' and 'subdata' do the same. <b>The data and subdata will be 
+        saved to the event folder regardless of whether these keywords are supplied.</b>
         aia_load_data has many other options, which you can find by opening the file CORWAV_TRUNK/aia/aia_load_data.pro. For example, an 
         important option is to not include files with much shorter exposure that are often created during flares, 
         by supplying the /remove_aec keyword. <b>In general, most of the procedures have additional keywords, described in the individual
         procedure files in the CORWAV_TRUNK folder.</b></p>
-        <p> Once aia_load_data has executed successfully, you can make image files from the data.
+        <p> Once aia_load_data has executed successfully, you can make image files from the data, like this (1024x2048 px) base difference image: <img src="png/aia_baseim.png" alt='AIA base difference image'>
         <pre><code>
-for w=0,n_elements(wav)-1 do aia_make_images,event,wavelength,/raw,/base,/run,/force
+IDL> for w=0,n_elements(wav)-1 do aia_make_images,event,wav[w],/raw,/base,/run,/force
         </code></pre>
         The '/raw','/base','/run' keywords tell the procedure to make image files from the raw data (with an inverted color table 
         to highlight the faint waves), base difference images (subtracting the first image from all consequent ones), or running difference
@@ -272,31 +280,45 @@ for w=0,n_elements(wav)-1 do aia_make_images,event,wavelength,/raw,/base,/run,/f
         <p>You can also create annulus images. Those are images, created by 'deprojecting' the solar image onto a rectangular canvas, where
         the X-axis is angular distance from solar north along the limb, and the Y-axis is radial distance from Sun-center.
         <pre><code>
-for w=0,n_elements(wav)-1 do aia_annulus_create,event,/raw,wav=wav[w],/force
+IDL> for w=0,n_elements(wav)-1 do aia_annulus_create,event,/raw,/base,/run,wav=wav[w],/force
         </code></pre>
-        Here, again, you have the option to produce base difference or running difference annulus images, with the '/base' and '/run'
-        keywords. Running the above will create PNG files in CORWAV/events/110809_01/annulusplot/[type]/[wav]/, 
-        type being one of araw/abase/arun.</p>
+        Running the above will create PNG files in CORWAV/events/110809_01/annulusplot/[type]/[wav]/, 
+        type being one of araw/abase/arun. <br>A base difference annulus image looks like this: <img src="png/aia_annplot_baseim.png" alt='AIA annulus base difference image'></p>
+        
         <p>Now that we have created some images, we can create time lapse movies from them, like so:
         <pre><code>
-movie_types=['run','arun']
+IDL> movie_types=['run','arun']
 ;If you want to make all types of movie, use this instead
 ;movie_types=['araw','abase','arun','raw','base','run']
-for w=0,n_elements(wav)-1 do $
-	for mt=0,n_elements(movie_types)-1 do $
-		aia_make_movies, event, movie_type=movie_type, wav=wavelength,/force
+IDL> for w=0,n_elements(wav)-1 do $
+	    for mt=0,n_elements(movie_types)-1 do $
+		   aia_make_movies, event, movie_type=movie_types[mt], wav=wav[w],/force
         </code></pre>
-        We just made a running difference and annulus running difference movie for this event. They will be stored in 
+        We just made a running difference and annulus running difference .mp4 movies for this event. They will be stored in 
         CORWAV/events/110809_01/movies/. The '$' sign in the IDL code above just allows to break the line without IDL breaking.</p>
         <a href="#top">Top</a>
         </section>
 <!-- --------SECTION 6----------- -->
         <section>
     	<h2 id="sec6"><b>6. Measuring EUV wave kinematics.</b></h2>
-    	<p>TEXT HERE</p>
+    	<p>There are different ways to measure how fast the wave is moving and how much it is accelerating/decelerating as a function of time.
+    	The usual way is to record the pixel values along a single radial line passing through the wave front and through the center of the Sun,
+    	as a function of time. This way, we can measure the evolution of the apparent edge (front) of the wave in the radial direction. The annulus images allow
+    	us to do that, but they also allow us to easily measure the lateral motion of the wave at different heights above the solar limb, 
+    	which can give us information about the local plasma properties, as well as the eruptive feature that drives the wave. We will start
+    	with the radial measurements. The procedure to use is 'aia_annulus_analyze_radial' (interactive):</p>
         <pre><code>
-        IDL CODE HERE.
+IDL> rrange=[1.1,1.37] ;The radial range of the annulus to use (Rs)
+IDL> for w=0,n_elements(wav)-1 do aia_annulus_analyze_radial,event,wave=wav[w],rrange=rrange,/constrain
         </code></pre>
+        <p>The rrange keyword contains the radial range of the annulus image to use, in solar radii. The 'constrain' keyword tells the procedure
+        to constrain the wave front to behave physically, allowing radial speeds between 10 and 1500 km/s. The procedure is interactive, and
+        will produce a plot like this: <img src="png/aia_annplot_radial.png" alt='AIA annulus base difference image' width=500> <br>
+        It will be automatically saved as a .png file in the CORWAV/events/110809_01/annulusplot/ folder, together with all the variables in a
+        .sav file. The black line is a fit to the front of the wave, with the fit parameters written on the plot. The white vertical lines are
+        the start and end times for fitting the wave front - these must be supplied by the user of the procedure (currently). The underlying
+        greyscale plot was made by taking one column of the annulus image (centered on the AR position) at every time step, and stacking it next
+        to the others. This produces a time-height plot, also known as a 'J-map'.</p>
         <a href="#top">Top</a>
        	</section>        
 <!-- --------SECTION 7----------- -->

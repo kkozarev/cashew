@@ -1,6 +1,5 @@
 pro test_aia_load_data
-  
-  ;Run for one or a few events like this:
+;Run for one or a few events like this:
   one=1
   if one eq 1 then begin
      labels=['140418_01']
@@ -70,7 +69,7 @@ end
 
 ;-----------------------------------------------------------------------
 
-pro aia_load_data,stt,ett,wav,index,data,savefile=savefile,nodata=nodata,map=map,$
+pro aia_load_data,stt,ett,wav,index,data,savefile=savefile,nodata=nodata,map=map,submap=submap,$
                   original=original,noprep=noprep,quiet=quiet,local=local,archive=archive,$
                   first=first,remove_aec=remove_aec,event=event,coords=coords,$
                   force=force,subroi=subroi,subdata=subdata,subindex=subindex
@@ -96,6 +95,7 @@ pro aia_load_data,stt,ett,wav,index,data,savefile=savefile,nodata=nodata,map=map
 ;      map - saves a map of the data in the provided variable
 ;      original - do not normalize the data to one second exposure
 ;      noprep - do not run aia_prep to make level 1.5 data
+;      savefile - 
 ;
 ;OUTPUT:
 ;
@@ -113,6 +113,7 @@ pro aia_load_data,stt,ett,wav,index,data,savefile=savefile,nodata=nodata,map=map
 ;Written by Kamen Kozarev, 02/2010
 ;Added a keyword remove_aec to check for automatic exposure control
 ;(AEC) images and remove them from the datacube - KAK 09/30/2013
+;Fixed the savefile keyword - KAK 05/27/2014
 
 ;===========================================================
 ;Constants and definitions
@@ -121,6 +122,7 @@ cfaarc='/Data/SDO/AIA/level1/'
 locarc=getenv('CORWAV_DATA')+'AIA_data/'
 if keyword_set(archive) then locarc=archive
 ;===========================================================
+
 loud=1
 if keyword_set(quiet) then loud=0
 if not keyword_set(coords) then if keyword_set(event) then $
@@ -130,25 +132,50 @@ if not keyword_set(event) then begin
    tmp=strsplit(stt,'/ ',/extract)
    date=tmp[0]+tmp[1]+tmp[2]
 endif else date=event.date
-
+if keyword_set(force) then print,'FORCE!'
 ;First thing to do is check if the data has already been loaded into data cubes.
 
 if keyword_set(event) then path=event.savepath else path='./'
-datfname='normalized_AIA_'+date+'_'+label+'_'+wav+'.sav'
-subfname='normalized_AIA_'+date+'_'+label+'_'+wav+'_subdata.sav'
+if keyword_set(event) then aiafov=event.aiafov else aiafov=[1024,1024]
+if keyword_set(savefile) then begin
+   if savefile eq '' then begin
+      datfname=''
+      subfname=''
+   endif else begin
+      datfname=savefile+'.sav'
+      subfname=savefile+'_subdata.sav'
+   endelse
+endif
+if not keyword_set(event) then begin
+   datfname=path+'normalized_AIA_'+date+'_'+label+'_'+wav+'.sav'
+   subfname=path+'normalized_AIA_'+date+'_'+label+'_'+wav+'_subdata.sav'
+endif else begin
+   datfname=path+event.aia_savename+wav+'.sav'
+   subfname=path+event.aia_savename+wav+'_subdata.sav'
+endelse
+if not keyword_set(savefile) then savefile=''
 
-if not keyword_set(force) and keyword_set(subroi) and file_exist(path+subfname) then begin
-   restore,path+subfname
+if not keyword_set(force) and keyword_set(subroi) and file_exist(subfname) then begin
+   restore,subfname
    if keyword_set(submap) then index2map,subindex,subdata,submap
    return
 endif
 
-if not keyword_set(force) and file_exist(path+datfname) then begin
-   restore,path+datfname
+
+if not keyword_set(force) and file_exist(datfname) then begin
+   restore,datfname
+   if not file_exist(subfname) and keyword_set(subroi) then begin
+      newcoords=aia_autoselect_subroi(index[0],coords,event=event)
+      subdata=aia_inspect_data(index,data,autoregion=newcoords,event=event)
+      subindex=aia_update_subdata_index(index,[newcoords[0],newcoords[1]],aiafov,coords)
+      save,subindex,subdata,filename=subfname
+   endif else begin
+      restore, subfname
+   endelse
+   if keyword_set(submap) then index2map,subindex,subdata,submap
+   return
 endif else begin
-   
-   
-   
+
 ;check if wave is an array or not...
    wave=wav
    nwav=n_elements(wave)
@@ -367,41 +394,40 @@ endif
 ;Normalize the data
 if not keyword_set(original) then for i=0,nfiles-1 do data[*,*,i]/=index[i].exptime
 
-if keyword_set(map) then begin
-   if loud eq 1 then print,"making the map in aia_load_data"
-   index2map,index,data,map
-endif
+if loud eq 1 then print,"making the map in aia_load_data"
+index2map,index,data,map
 
 
 ;Make subroi data array.
 if keyword_set(subroi) then begin
    if keyword_set(event) then fov=event.aiafov else fov=[1024,1024]
-   newcoords=aia_autoselect_subroi(index[0],coords)
-   subdata=aia_inspect_data(index,data,autoregion=newcoords)
+   newcoords=aia_autoselect_subroi(index[0],coords,event=event)
+   subdata=aia_inspect_data(index,data,autoregion=newcoords,event=event)
    subindex=aia_update_subdata_index(index,[newcoords[0],newcoords[1]],fov,coords)
 endif
 
 if keyword_set(submap) then begin
-   if not keyword_set(map) then begin
-      print,''
-      print,'The /map keyword should be selected! Making map for you...'
-      index2map,index,data,map
+;   if not keyword_set(map) then begin
+;      print,''
+;      print,'The /map keyword should be selected! Making map for you...'
+;      index2map,index,data,map
+;      aia_inspect_map,map,submap=submap
+;   endif else begin
       aia_inspect_map,map,submap=submap
-   endif else begin
-      aia_inspect_map,map,submap=submap
-   endelse
+;   endelse
 endif
 
-                                ;optionally, save everything 
-if keyword_set(savefile) then begin
-   if savefile eq '' then savefile='tmp.sav'
-   save,index,data,filename=savefile
+;optionally, save everything
+if savefile ne '' then begin
+   save,index,data,filename=datfname
+   if keyword_set(subroi) then save,subindex,subdata,filename=subfname
 endif
 
-if keyword_set(archive) then begin
-   save,index,data,filename=path+datfname
-   if keyword_set(subroi) then save,subindex,subdata,filename=path+subfname
-endif
+
+;if keyword_set(archive) then begin
+;   save,index,data,filename=path+datfname
+;   if keyword_set(subroi) then save,subindex,subdata,filename=path+subfname
+;endif
 
 
 

@@ -70,7 +70,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
   if not keyword_set(savepath) then savepath=event.savepath+'annulusplot/' ;'./'
   if not keyword_set(datapath) then datapath=savepath ;'./'
 
-  fname='aia_deprojected_annulus_'+date+'_'+event.label+'_'+wav+'.sav'
+  fname=event.annplot.savename+wav+'.sav'
   restore, datapath+fname
   
   nsteps=n_elements(projdata[*,0,0])
@@ -311,7 +311,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
                 lat_heights:lat_heights,$
                 wav:wav,$
                 data:left_lat_data,bdiff:left_lat_data,winind:1,$
-                savename:'annplot_'+date+'_'+event.label+'_'+wav+'_lateral_left.png',$
+                savename:event.annplot.analyzed_savename+wav+'_lateral_left.png',$
                 plotinfo:replicate({p:!P, x:!X, y:!Y},nlatmeas),$
                 kinquantity:['Th!D0!N','Th!D1!N','V!Dth,0!N','V!Dth,1!N','a'],$
                 kinunit:['!Uo!N','!Uo!N',' km/s',' km/s',' km/s!U2!N'],$
@@ -342,7 +342,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
                  wav:wav,$
                  lat_heights:lat_heights,$
                  data:right_lat_data,bdiff:right_lat_data,winind:2,$
-                 savename:'annplot_'+date+'_'+event.label+'_'+wav+'_lateral_right.png',$
+                 savename:event.annplot.analyzed_savename+wav+'_lateral_right.png',$
                  plotinfo:replicate({p:!P, x:!X, y:!Y},nlatmeas),$
                  kinquantity:['Th!D0!N','Th!D1!N','V!Dth,0!N','V!Dth,1!N','a'],$
                  kinunit:['!Uo!N','!Uo!N',' km/s',' km/s',' km/s!U2!N'],$
@@ -391,7 +391,7 @@ pro aia_annulus_analyze,event,datapath=datapath,savepath=savepath,thrange=thrang
            backinds:intarr(1,nsteps),$
            xtitle:'Time of '+event.date,ytitle:'R!Dsun!N',$
            imgtit:'AIA/'+wav+' BDiff Radial Positions',$
-           savename:'annplot_'+date+'_'+event.label+'_'+wav+'_radial.png',$
+           savename:event.annplot.analyzed_savename+wav+'_radial.png',$
            time:rad_times,$
            date_obs:ind_arr.date_obs $
            }
@@ -524,7 +524,7 @@ stop
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     
-  save,filename=savepath+'annplot_'+date+'_'+event.label+'_'+wav+'_analyzed.sav',rad_data,lat_data_left,lat_data_right,ind_arr,nsteps,$
+  save,filename=savepath+event.annplot.analyzed_savename+wav+'_analyzed.sav',rad_data,lat_data_left,lat_data_right,ind_arr,nsteps,$
          ncols,nrows,wav,htind,yradlimind,lat_deg_array,y_arcsec_array,$
          y_rsun_array,rad_times,lat_times
  end

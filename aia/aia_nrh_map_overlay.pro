@@ -116,9 +116,9 @@ pro aia_nrh_map_overlay,event,datapath=datapath,savepath=savepath,base=base,run=
      strout=strin[3]+strin[4]+strin[5]
      
      ;select the AIA data map
-     st=aia_augment_timestring(nrh_ind[tsp-1].date_obs,0) ;just reformat the string time
-     et=aia_augment_timestring(nrh_ind[tsp].date_obs,5)
-     aia_load_event,st,et,'193',aia_ind,aia_dat,/local,/first,/remove_aec,subroi=subroi
+     event.st=aia_augment_timestring(nrh_ind[tsp-1].date_obs,0) ;just reformat the string time
+     event.et=aia_augment_timestring(nrh_ind[tsp].date_obs,5)
+     aia_load_event,event,'193',aia_ind,aia_dat,/local,/first,/remove_aec,subroi=subroi
      index2map,aia_ind,aia_dat,aia_map
      
      

@@ -14,11 +14,15 @@ CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
 
 #=======================NO USER INPUT BELOW!===================================
 
-#Add the global vars to .bashrc
+#Add the global vars to .bashrc and .bash_profile
 echo "export CORWAV=\"$CORWAV\"" >> ~/.bashrc
 echo "export CORWAV_DATA=\"$CORWAV_DATA\"" >> ~/.bashrc
 echo "export CORWAV_TRUNK=\"$CORWAV_TRUNK\"" >> ~/.bashrc
 echo "export CORWAV_WEB=\"$CORWAV_WEB\"" >> ~/.bashrc
+echo "export CORWAV=\"$CORWAV\"" >> ~/.bash_profile
+echo "export CORWAV_DATA=\"$CORWAV_DATA\"" >> ~/.bash_profile
+echo "export CORWAV_TRUNK=\"$CORWAV_TRUNK\"" >> ~/.bash_profile
+echo "export CORWAV_WEB=\"$CORWAV_WEB\"" >> ~/.bash_profile
 
 #Add the global vars to .cshrc
 echo "setenv CORWAV $CORWAV" >> ~/.cshrc.user

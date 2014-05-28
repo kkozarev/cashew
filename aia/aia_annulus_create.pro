@@ -21,16 +21,21 @@ pro test_aia_annulus_create
         for w=0,n_elements(wavelengths)-1 do begin
            wavelength=wavelengths[w]
            ;aia_annulus_create,event,wav=wavelength,/force
-           aia_annulus_create,event,/run,wav=wavelength
-           aia_annulus_create,event,/base,wav=wavelength
-           aia_annulus_create,event,/raw,wav=wavelength
+           aia_annulus_create,event,/raw,/run,/base,wav=wavelength
         endfor
      endfor
   endif
 end
 
 
-pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, centerlat=centerlat, ring_width=ring_width,thrange=thrange,rrange=rrange,datascale=datascale,savename=savename,savepath=savepath,annulus_data=annulus_data,full=full,force=force,remove_aec=remove_aec
+pro aia_annulus_create,event,run=run,base=base,raw=raw,_extra=_extra
+  if keyword_set(raw) then aia_annulus_create_main, event, /raw, _extra=_extra
+  if keyword_set(base) then aia_annulus_create_main, event, /base, _extra=_extra
+  if keyword_set(run) then aia_annulus_create_main, event, /run, _extra=_extra
+end 
+
+
+pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, centerlat=centerlat, ring_width=ring_width,thrange=thrange,rrange=rrange,datascale=datascale,savename=savename,savepath=savepath,annulus_data=annulus_data,full=full,force=force,remove_aec=remove_aec
 ;PURPOSE:
 ; Routine to produce RD polar-deprojected data using an annulus technique applied to SDO
 ; images.
@@ -94,7 +99,7 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, centerlat=c
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;CHECK FOR EXISTING SAVE FILE, ELSE LOAD DATA FROM FITS FILES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  infile='aia_deprojected_annulus_'+date+'_'+event.label+'_'+passband+'.sav'
+  infile=event.annplot.savename+passband+'.sav'
   restored=0
   
   if (file_exist(savepath+infile)) and (not keyword_set(force)) then begin
@@ -119,7 +124,7 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, centerlat=c
      nsteps=size(fls,/n_elements)
 
      read_sdo, fls, ind_arr, /nodata
-      ;aia_load_event,event.st,event.et,wav,ind_arr,data,/remove_aec,/nodata
+      ;aia_load_event,event,wav,index=ind_arr,data=data,/remove_aec,/nodata
      
 ; Width of ring (effectively distance from limb to edge of aperture in arcsec)
      if not keyword_set(ring_width) then ring_width = 400.;(maxrad-ind_arr[0].rsun_obs)
@@ -213,16 +218,16 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, centerlat=c
         dat_0 = dat_0/i_0.exptime
         d_img = dat_0
 
-; Second image     
+; Second image
 ;    Running difference
         if keyword_set(run) then begin
            aia_prep, fls[img_no], -1, i_1, dat_1
            dat_1 = dat_1/i_1.exptime
-; Difference image    
+; Difference image
            d_img = dat_1 - dat_0
         endif
         
-;    Base difference 
+;    Base difference
         if keyword_set(base) then begin
            d_img = dat_0 - dat_init
         endif    
@@ -358,11 +363,11 @@ pro aia_annulus_create, event, wav=wav, run=run, base=base, raw=raw, centerlat=c
   endfor  ;ENDFOR TIMESTEP LOOP
   
   set_plot, 'x'
-
+  
   
   ;SAVE THE DATA!
   if (not keyword_set(run)) and (not keyword_set(base)) then begin
-     if not keyword_set(savename) then savname=savepath+'aia_deprojected_annulus_'+date+'_'+event.label+'_'+passband+'.sav' $
+     if not keyword_set(savename) then savname=savepath+event.annplot.savename+passband+'.sav' $
      else savname=savepath+savename
      
      if file_exist(savname) then begin 

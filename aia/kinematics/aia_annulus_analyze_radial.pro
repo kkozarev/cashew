@@ -79,7 +79,7 @@ pro aia_annulus_analyze_radial,event,datapath=datapath,savepath=savepath,thrange
   if not keyword_set(savepath) then savepath=event.savepath+'annulusplot/' ;'./'
   if not keyword_set(datapath) then datapath=savepath ;'./'
 
-  fname='aia_deprojected_annulus_'+event.date+'_'+event.label+'_'+wav+'.sav'
+  fname=event.annplot.savename+wav+'.sav'
   restore, datapath+fname
   ;Create the time structure
   time=get_time(ind_arr.date_obs)
@@ -158,7 +158,7 @@ pro aia_annulus_analyze_radial,event,datapath=datapath,savepath=savepath,thrange
                                 ;oplot,thrang*180./!PI,[y_arcsec_array[htind[ii]],y_arcsec_array[htind[ii]]],thick=2
   endfor
 ;Save the overview plot
-  write_png,savepath+'annplot_'+date+'_'+event.label+'_'+wav+'_overview_plot.png',tvrd(/true),ct_rr,ct_gg,ct_bb
+  write_png,savepath+event.annplot.analyzed_savename+wav+'_overview_plot.png',tvrd(/true),ct_rr,ct_gg,ct_bb
  ; wdel,0
 ;----------------------------------------------------
 
@@ -231,7 +231,7 @@ pro aia_annulus_analyze_radial,event,datapath=datapath,savepath=savepath,thrange
 ;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;
   
- save,filename=savepath+'annplot_'+date+'_'+event.label+'_'+wav+'_analyzed_radial.sav',rad_data,ind_arr,nsteps,$
+ save,filename=savepath+event.annplot.analyzed_savename+wav+'_analyzed_radial.sav',rad_data,ind_arr,nsteps,$
          ncols,nrows,wav,htind,yradlimind,y_arcsec_array,$
          y_rsun_array,time
 
