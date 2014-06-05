@@ -3,7 +3,7 @@ pro test_aia_define_rois
   one=1
   if one eq 1 then begin
      event=load_events_info(label='110511_01')
-     aia_define_rois,event,numroi=8,/force
+     aia_define_rois,event,/force
   endif
   
   
@@ -13,21 +13,22 @@ pro test_aia_define_rois
      events=load_events_info()
      for ev=0,n_elements(events)-1 do begin
         event=events[ev]
-        aia_define_rois,event,numroi=8
+        aia_define_rois,event
      endfor
   endif
 
 end
 
 
-pro aia_define_rois,event,savepath=savepath,force=force,numroi=numroi,roisize=roisize
+pro aia_define_rois,event,savepath=savepath,force=force
 ;PURPOSE:
 ;
 ;This procedure defines the AIA ROIs for the ionization and DEM
 ;calculations. The difference between this procedure and the older
-;aia_aschdem_define_rois is that this one automatically positions the rectangular
-;regions tangentially to the shock surface, and only saves the pixel
-;positions of each region, not the data itself.
+;aia_aschdem_define_rois is that this one automatically positions 8 rectangular
+;regions tangentially to the shock surface, four along the shock
+;surface for the middle time step, and four along a radial direction.
+;Also, it only saves the pixel positions of each region, not the data itself.
 ;
 ;CATEGORY:
 ; AIA

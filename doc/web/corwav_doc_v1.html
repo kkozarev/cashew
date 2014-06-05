@@ -23,7 +23,7 @@
                 		<a href="#sec7">7. Running the DEM, PFSS+CSGS models.</a><br>
                 		<a href="#sec8">8. Plotting radio and X-ray data.</a><br>
                 		<a href="#sec9">9. Updating the online database/webpage.</a><br>
-                		<a href="#sec10">10. Advanced tips and tricks.</a></p></h3>
+                		<a href="#sec10">10. Other useful procedures.</a></p></h3>
 		</section>
 			<br>
 		
@@ -90,23 +90,23 @@ CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
     	input format for a single event:</p>
     	<pre><code>
 {
- "label": "110809_01",
- "coordX": 883,
- "coordY": 269,
- "st": "2011/08/09 07:55:00",
- "et": "2011/08/09 08:20:00",
- "aiafov": [1024,2048],
- "flareclass": "X6.9",
- "typeII": true,
- "loop": false,
- "filament": true,
- "comment": "Large shock wave inside the limb propagates southward.",
- "ips_lookup": "",
- "callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2011/08/09/ALMATY_20110809_080000_59.fit.gz.png",
- "nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=0800&dayofyear=20110809&composite=2"
+"label": "110511_01",
+"coordX": 785,
+"coordY": 399,
+"st": "2011/05/11 02:10:00",
+"et": "2011/05/11 02:40:00",
+"aiafov": [1024,2048],
+"flareclass": "B8.1",
+"typeII": true,
+"loop": true,
+"filament": true,
+"comment": "Huge shock wave originates inside the limb, with clear lateral expansion.",
+"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/.../20110511spectrograph.gif",
+"callisto_lookup": "",
+"nrh_lookup": ""
 }
         </code></pre>
-        <p>The JSON format has elements (such as "label"), which have certain values (such as "110809_01"), assigned with the ':' character. 
+        <p>The JSON format has elements (such as "label"), which have certain values (such as "110511_01"), assigned with the ':' character. 
         The elements are separated by commas.
         Text values must be surrounded in quotation marks, unlike numbers. The format also accepts an array of values 
         (such as "aiafov": [1024,2048]), 
@@ -115,21 +115,24 @@ CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
         important for readable code.</p>
         <p>Let's look at the elements in the event structure. The first one,
         <pre><code>
- {"label": "110809_01"}
+ {"label": "110511_01"}
         </code></pre>
         is the unique label of the event. Its format is YYMMDD_NN, where YYMMDD is the date, and NN is the consecutive number of this event 
         in the database for that date. 
-        Thus, "110809_01" is the first event of 9 August, 2011 in the event database. The event label is very important, since it is used to 
+        Thus, "110511_01" is the first event of 11 May, 2011 in the event database. The event label is very important, since it is used to 
         uniquely identify an event, along with all its information.</p>
 		<pre><code>
-{"coordX": 883,
- "coordY": 269,
- "st": "2011/08/09 07:55:00",
- "et": "2011/08/09 08:20:00"}
+{
+"coordX": 785,
+"coordY": 399,
+"st": "2011/05/11 02:10:00",
+"et": "2011/05/11 02:40:00"
+}
         </code></pre>
         <p>The next few elements specify the time and space position of the event. 
         The first two, "coordX" and "coordY", give the coordinates, in arcseconds, of the origin of the eruption on the solar disk 
-        (these can be obtained most easily from <a href="http://lmsal.com/isolsearch" target="_blank">Heliospheric Event Knowledgebase (HEK)</a>).
+        (these can be obtained most easily from <a href="http://lmsal.com/isolsearch" target="_blank">Heliospheric Event Knowledgebase (HEK)</a>,
+        although they are not always correct).
         These coordinates are used to determine the position of the event on AIA images and to automatically cut a subregion around it, together 
         with the "aiafov" element (see below).
         "st" and "et" give the starting and ending times for the event. They are used to automatically fetch only the necessary data files for 
@@ -138,13 +141,13 @@ CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
         <pre><code>
 { 
  "aiafov": [1024,2048],
- "flareclass": "X6.9",
+ "flareclass": "B8.1",
  "typeII": true,
- "loop": false,
+ "loop": true,
  "filament": true
 }
         </code></pre>
-        <p> The "aiafov" element holds the X- and Y-sizes (in pixels) for the field of view to cut out from the 4k-by-4k pixels of the original 
+        <p> The "aiafov" element holds the X- and Y-sizes (in pixels) for the field of view to cut out from the 4096-by-4096 pixels of the original 
         AIA data (Using the entire image is rarely necessary). The "flareclass" element holds the X-ray class of the flare (if there isn't one, 
         leave a blank string). 
         The best place to search for the class of a flare is <a href="http://www.solarmonitor.org" target="_blank">Solar Monitor</a>, 
@@ -152,10 +155,10 @@ CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
         depending on whether there was metric radio type II emission, expanding loops, or filaments.</p>
 	    <pre><code>
 { 
- "comment": "Large shock wave inside the limb propagates southward.",
- "ips_lookup": "",
- "callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2011/08/09/ALMATY_20110809_080000_59.fit.gz.png",
- "nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=0800&dayofyear=20110809&composite=2"
+"comment": "Huge shock wave originates inside the limb, with clear lateral expansion.",
+"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/.../20110804spectrograph.gif",
+"callisto_lookup": "",
+"nrh_lookup": ""
 }
         </code></pre>  
         <p>The element "comment" holds a free-form comment on the appearance and any interesting features of the particular event, by (ideally) 
@@ -169,61 +172,63 @@ CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
         using the load_events_info() 
         function and specifying the event label:
         <pre><code>
-IDL> event=load_events_info(label='110809_01')
+IDL> event=load_events_info(label='110511_01')
 IDL> help,event
 EVENT           STRUCT    = -> <Anonymous> Array[1]
         </code></pre> 
         The result is a structure, let's see what's inside.
         <pre><code>
 IDL> help,event,/st
-** Structure <6819808>, 46 tags, length=624, data length=618, refs=1:
-   LABEL           STRING    '110809_01'
-   ST              STRING    '2011/08/09 07:55:00'
-   ET              STRING    '2011/08/09 08:20:00'
-   COORDX          INT            883
-   COORDY          INT            269
+** Structure <4827008>, 48 tags, length=672, data length=666, refs=1:
+   LABEL           STRING    '110511_01'
+   ST              STRING    '2011/05/11 02:10:00'
+   ET              STRING    '2011/05/11 02:40:00'
+   COORDX          INT            785
+   COORDY          INT            399
    AIAFOV          INT       Array[2]
    HEMISPHERE      STRING    'W'
-   DATE            STRING    '20110809'
-   ARLON           FLOAT           78.4978
-   ARLAT           FLOAT           17.8637
-   GEOMCORFACTOR   FLOAT           1.02049
-   FLARECLASS      STRING    'X6.9'
+   DATE            STRING    '20110511'
+   ARLON           FLOAT           64.0852
+   ARLAT           FLOAT           23.4466
+   GEOMCORFACTOR   FLOAT           1.11180
+   FLARECLASS      STRING    'B8.1'
    TYPEII          INT              1
-   LOOP            INT              0
+   LOOP            INT              1
    FILAMENT        INT              1
-   COMMENT         STRING    'Large shock wave inside the limb propagates southward.'
-   AIA_DATAPATH    STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/AIA_data/'
-   NRH_DATAPATH    STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/NRH_data/'
-   RHESSI_DATAPATH STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/RHESSI_data/'
-   IPS_DATAPATH    STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/IPS_data/'
+   COMMENT         STRING    'Huge shock wave originates inside the limb, with clear lateral expansion.'
+   AIA_DATAPATH    STRING    '/Volumes/Itch/Users/kkozarev/corwav/AIA_data/'
+   NRH_DATAPATH    STRING    '/Volumes/Itch/Users/kkozarev/corwav/NRH_data/'
+   RHESSI_DATAPATH STRING    '/Volumes/Itch/Users/kkozarev/corwav/RHESSI_data/'
+   IPS_DATAPATH    STRING    '/Volumes/Itch/Users/kkozarev/corwav/IPS_data/'
    CALLISTO_DATAPATH
-                   STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/Callisto_data/'
-   IPS_LOOKUP      STRING    ''
-   CALLISTO_LOOKUP STRING    'http://soleil.i4ds.ch/solarradio/qkl/2011/08/09/ALMATY_20110809_0800'...
-   NRH_LOOKUP      STRING    'http://secchirh.obspm.fr/survey.php?hour=0800&dayofyear=20110809&com'...
-   EUVI_DATAPATH   STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/EUVI_data/'
-   SWAP_DATAPATH   STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/SWAP_data/'
-   PFSS_DATAPATH   STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/PFSS_data/'
-   SAVEPATH        STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/'
-   WEBPATH         STRING    '/var/www/personal/kkozarev/public_html/events/110809_01/'
-   MOVIEPATH       STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/movies/'
-   RADIOPATH       STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/radio/'
-   NRHPATH         STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/radio/NR'...
-   IPSPATH         STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/radio/IP'...
-   CALLISTOPATH    STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/radio/Ca'...
-   ANNULUSPATH     STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/annulusp'...
-   PFSSPATH        STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/pfss/'
-   SWAPPATH        STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/swap/'
-   IONIZATIONPATH  STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/ionizati'...
-   ASCHDEMPATH     STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/dem/asch'...
-   WEBERPATH       STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/dem/webe'...
-   PARTICLESPATH   STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/particle'...
-   EUVIPATH        STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/euvi/'
-   DEMPATH         STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/dem/'
-   PNGPATH         STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/png/'
-   YAFTAWAVEPATH   STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/yaftawav'...
-   KINEMATICSPATH  STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110809_01/kinematics/'
+                   STRING    '/Volumes/Itch/Users/kkozarev/corwav/Callisto_data/'
+   IPS_LOOKUP      STRING    'http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Downl'...
+   CALLISTO_LOOKUP STRING    ''
+   NRH_LOOKUP      STRING    ''
+   EUVI_DATAPATH   STRING    '/Volumes/Itch/Users/kkozarev/corwav/EUVI_data/'
+   SWAP_DATAPATH   STRING    '/Volumes/Itch/Users/kkozarev/corwav/SWAP_data/'
+   PFSS_DATAPATH   STRING    '/Volumes/Itch/Users/kkozarev/corwav/PFSS_data/'
+   SAVEPATH        STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/'
+   WEBPATH         STRING    '/var/www/personal/kkozarev/public_html/events/110511_01/'
+   MOVIEPATH       STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/movies/'
+   RADIOPATH       STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/radio/'
+   NRHPATH         STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/radio/NRH/'
+   IPSPATH         STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/radio/IPS/'
+   CALLISTOPATH    STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/radio/Callisto/'
+   ANNULUSPATH     STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/annulusplot/'
+   PFSSPATH        STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/pfss/'
+   SWAPPATH        STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/swap/'
+   IONIZATIONPATH  STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/ionization/'
+   ASCHDEMPATH     STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/dem/aschwanden/'
+   WEBERPATH       STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/dem/weber/'
+   PARTICLESPATH   STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/particles/'
+   EUVIPATH        STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/euvi/'
+   DEMPATH         STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/dem/'
+   PNGPATH         STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/png/'
+   YAFTAWAVEPATH   STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/yaftawave/'
+   KINEMATICSPATH  STRING    '/Volumes/Backscratch/Users/kkozarev/corwav/events/110511_01/kinematics/'
+   AIA_SAVENAME    STRING    'normalized_AIA_20110511_110511_01_'
+   ANNPLOT         STRUCT    -> <Anonymous> Array[1]
 </code></pre>
 As you can see, the structure contains not only the information we supplied through the JSON format, but a lot of additional information as 
 well - 
@@ -235,7 +240,7 @@ IDL> events=load_events_info()
 IDL> help,event
 EVENTS           STRUCT    = -> <Anonymous> Array[27]
         </code></pre>
-<p>Let's go back to event '110809_01'. Once you have its event structure loaded, you can pass it as an argument to many CorWav tools. 
+<p>Let's go back to event '110511_01'. Once you have its event structure loaded, you can pass it as an argument to many CorWav tools. 
 Next, you will see how to load some AIA data and make movies from it.
 Oh, and by the way, calling load_events_info for the first time for an event causes it to create the event's directory tree in the 
 CORWAV directory, so no need to worry about that.</p>
@@ -248,7 +253,7 @@ CORWAV directory, so no need to worry about that.</p>
     	It loads the AIA data from the local (or remote archive), preprocesses/calibrates it, and saves it as a datacube in the appropriate 
     	location in the event's directory.</p>
         <pre><code>
-IDL> event=load_events_info(label='110809_01')
+IDL> event=load_events_info(label='110511_01')
 IDL> wav=['193','211'] ;The AIA (best for waves) waveband channels for which to load data.
 ;To load all EUV channels, use the following instead:
 ;wav=['94','131','171','193','211','335']
@@ -276,13 +281,13 @@ IDL> for w=0,n_elements(wav)-1 do aia_make_images,event,wav[w],/raw,/base,/run,/
         The '/raw','/base','/run' keywords tell the procedure to make image files from the raw data (with an inverted color table 
         to highlight the faint waves), base difference images (subtracting the first image from all consequent ones), or running difference
         images (subtracting the preceding image from the next one). Running the above will create PNG files in 
-        CORWAV/events/110809_01/png/[type]/[wav]/,type being one of raw/base/run.</p>
+        CORWAV/events/110511_01/png/[type]/[wav]/,type being one of raw/base/run.</p>
         <p>You can also create annulus images. Those are images, created by 'deprojecting' the solar image onto a rectangular canvas, where
         the X-axis is angular distance from solar north along the limb, and the Y-axis is radial distance from Sun-center.
         <pre><code>
 IDL> for w=0,n_elements(wav)-1 do aia_annulus_create,event,/raw,/base,/run,wav=wav[w],/force
         </code></pre>
-        Running the above will create PNG files in CORWAV/events/110809_01/annulusplot/[type]/[wav]/, 
+        Running the above will create PNG files in CORWAV/events/110511_01/annulusplot/[type]/[wav]/, 
         type being one of araw/abase/arun. <br>A base difference annulus image looks like this: <img src="png/aia_annplot_baseim.png" alt='AIA annulus base difference image'></p>
         
         <p>Now that we have created some images, we can create time lapse movies from them, like so:
@@ -305,8 +310,11 @@ IDL> for w=0,n_elements(wav)-1 do $
     	The usual way is to record the pixel values along a single radial line passing through the wave front and through the center of the Sun,
     	as a function of time. This way, we can measure the evolution of the apparent edge (front) of the wave in the radial direction. The annulus images allow
     	us to do that, but they also allow us to easily measure the lateral motion of the wave at different heights above the solar limb, 
-    	which can give us information about the local plasma properties, as well as the eruptive feature that drives the wave. We will start
-    	with the radial measurements. The procedure to use is 'aia_annulus_analyze_radial' (interactive):</p>
+    	which can give us information about the local plasma properties, as well as the eruptive feature that drives the wave. This is because we can simply 
+    	measure the feature move along a row of pixels in the annulus images, which represent a constant height above the solar surface. The CorWav library allows 
+    	the user to measure the radial and lateral motions along specific directions (black vertical and horizontal lines), shown in this automatically generated plot 
+    	(white line denotes the edge of data):<img src="png/aia_annplot_overview_plot.png" alt='AIA annulus image with image edges and kinematics measurement "slits" width=0.1'>
+    	<p>We will start with the radial measurements. The procedure to use is 'aia_annulus_analyze_radial' (interactive):</p>
         <pre><code>
 IDL> rrange=[1.1,1.37] ;The radial range of the annulus to use (Rs)
 IDL> for w=0,n_elements(wav)-1 do aia_annulus_analyze_radial,event,wave=wav[w],rrange=rrange,/constrain
@@ -314,7 +322,7 @@ IDL> for w=0,n_elements(wav)-1 do aia_annulus_analyze_radial,event,wave=wav[w],r
         <p>The rrange keyword contains the radial range of the annulus image to use, in solar radii. The 'constrain' keyword tells the procedure
         to constrain the wave front to behave physically, allowing radial speeds between 10 and 1500 km/s. The procedure is interactive, and
         will produce a plot like this: <img src="png/aia_annplot_radial.png" alt='AIA annulus base difference image' width=500> <br>
-        It will be automatically saved as a .png file in the CORWAV/events/110809_01/annulusplot/ folder, together with all the variables in a
+        It will be automatically saved as a .png file in the CORWAV/events/110511_01/annulusplot/ folder, together with all the variables in a
         .sav file. The black line is a fit to the front of the wave, with the fit parameters written on the plot. The white vertical lines are
         the start and end times for fitting the wave front - these must be supplied by the user of the procedure (currently). The underlying
         greyscale plot was made by taking one column of the annulus image (centered on the AR position) at every time step, and stacking it next
@@ -324,34 +332,120 @@ IDL> for w=0,n_elements(wav)-1 do aia_annulus_analyze_radial,event,wave=wav[w],r
 <!-- --------SECTION 7----------- -->
         <section>
     	<h2 id="sec7"><b>7. Running the DEM, PFSS+CSGS models.</b></h2>
-    	<p>TEXT HERE</p>
+    	<p>To be able to say more about the likely plasma and magnetic conditions, we need to apply several models, which use as inputs AIA observations
+    	or parameters inferred from these observations. These models are the essence of the analysis, and CorWav provides interfaces to them.</p>
+    	<p><h3>7.1 DEM</h3></p>
+    	<p>The first one is Differential Emission Measure analysis, which allows to use the multi-wavelength observations of AIA
+    	to calculate the amount of emitting material along the observed line of sight - a proxy for the coronal density. Currently, CorWav provides an 
+    	interface to the DEM model of <a href="http://adsabs.harvard.edu/abs/2013SoPh..283....5A" target="_blank">Aschwanden et al., 2013</a>. This model 
+    	fits a single Gaussian profile to the EUV emission as a function of temperature, and provides, for every pixel and time step, a value of the 
+    	Emission Measure (EM) and the temperature of maximum emission (Tmax). This is how the model is run (including the /remove_aec keyword in order to 
+    	remove any artefacts from flare exposure corrections):</p>
         <pre><code>
-        IDL CODE HERE.
+IDL> aia_cfa_teem_run,event,/remove_aec
         </code></pre>
+        <p>This will analyze data for every timestep and the specified field of view, and create a map of EM and Tmax. The individual time maps will be stored in
+        the CORWAV/events/110511_01/dem/aschwanden/ folder, in PNG and SAV files. Here is the result for a single snapshot of the 110511_01 event:</p>
+		<img src="png/aschdem_teem_map.png" alt='AIA EM result image'>
+		<p>Next, the time series of EM and Tmax for particular regions around the EUV wave sheath can be extracted, assuming the wave kinematics measurements 
+		have been performed.</p>
+	    <pre><code>	
+IDL> aia_define_rois,event
+        </code></pre>
+        <p>This procedure automatically positions 8 rectangular regions of interest (ROI) tangentially to the shock surface, four along the shocksurface for the middle time step, 
+        and four along a radial direction outward from the eruption source, like in the following image. The results are saved in the 
+        CORWAV/events/110511_01/ionization/ folder. </p>
+        <img src="png/aia_dem_rois.png" alt='AIA ROIs for DEM analysis'>
+        <p>The user can also choose to extract square ROIs interactively, using the aia_aschdem_define_rois procedure:
+        <pre><code>	
+IDL> aia_aschdem_define_rois,event,numroi=8,roisize=10
+        </code></pre>
+		where numroi is the number of ROIs to select, and roisize gives the square ROI size, in pixels.</p>
+        <p>Once the DEM model has been run, and the ROIs have been selected, we can plot time series of EM and Tmax for them, using the aia_dem_analyze procedure:</p>
+        <pre><code>	
+IDL> trange='2011-05-11T'+['02:15:00','02:31:00']
+IDL> aia_dem_analyze,event,trange=trange
+        </code></pre>
+        <p>Running this will produce individual PNG and SAV files for all selected regions in CORWAV/events/110511_01/dem/aschwanden/ with information on the time
+        evolution of EM and Tmax. Here's a plot for one region for this particular event:</p>
+        <img src="png/aia_dem_result.png" alt='AIA DEM result' width=400>
+        <p><h3>7.2 PFSS+CSGS</h3></p>
+        <p>To obtain information about how efficient the shock wave may be in accelerating particles to high energies, we combine a 3D static model of the coronal magnetic fields
+        with a 3D evolving model of the shock surface. The magnetic field model (<a href="http://adsabs.harvard.edu/abs/2003SoPh..212..165S" target="_blank">Schrijver and De Rosa, 2003</a>) 
+        is known as a Potential Field Source Surface (PFSS) model, and is freely available as part of SolarSoft. It is driven by observations of photospheric line-of-sight magnetic fields
+        over a full solar rotation, and produces extrapolations of that magnetic field in the corona out to ~2.5 solar radii. The CSGS model has been developed specifically for CorWav,
+        and is part of this library. It uses the kinematic measurements for the wave radial edge positions to create a spheroidal surface, which represents the entire surface of the wave.
+        Combining the two models allows the estimation of the time-dependent shock-to-field angle values and magnetic coronal connectivity for the shock event.</p>
+        <p>To apply the PFSS model, we first need to generate an instance of it for the nearest time to the event. This is done with the pfss_return_field procedure:</p>
+        <pre><code>	
+IDL> pfss_return_field,event.st,/save,path=event.pfsspath,event=event
+        </code></pre>
+        <p>The result is a large file, which will automatically be saved in CORWAV/events/110511_01/pfss/ folder. Next, run the pfss_shock_run_csgs procedure. It will create the CSGS model,
+        and combine it with the PFSS model, to produce the positions at which the magnetic field lines cross the shock surface, and the crossing angle values. The results are saved again
+        in the pfss/ folder.</p>
+        <pre><code>	
+IDL> pfss_shock_run_csgs,event
+        </code></pre>
+        <p>The image below illustrates the application of the PFSS+CSGS model. The loopy lines of varying colors represent the modeled coronal magnetic field lines near the time of the event.
+        The black and green meshed surface is the CSGS model for that time step, and the orange points represent the crossing points. This plot was created by running</p>
+        <pre><code>	
+IDL> pfss_shock_plot_csgs,event,/png
+        </code></pre>
+        <img src="png/aia_pfss_csgs_combination.png" alt='AIA PFSS+CSGS Illustration' width=400>
+        <p>To plot the values of the shock-crossing angle (known as ThetaBN) for all time steps, run pfss_shock_plot_crossing_angles. 
+        It will produce one image for every time of the top-down view of the shock surface with the position of the shock crossings up to that time step (if you specify the /oplot keyword), 
+        and angle value color coded. Without the /oplot keyword, the image will only contain the current crossings positions and angle values.</p>
+        <pre><code>	
+IDL> pfss_shock_plot_crossing_angles,event(,/oplot)
+    	</code></pre>
+    	<img src="png/thetabn_crossings.png" alt='AIA ThetaBN shock crossing angle values' width=400><img src="png/thetabn_crossings_oplot.png" alt='AIA ThetaBN shock crossing angle values' width=400>
+    	<p> You can obtain some statistics on the ThetaBN values over time and make a plot of them, by running</p>
+    	<pre><code>	
+IDL> pfss_shock_plot_thetabn_stats,event
+    	</code></pre>
+    	<img src="png/thetabn_stats.png" alt='AIA ThetaBN value statistics' width=400>
+    	<p>Finally, you can plot the coronal connectivity of the shock (all field lines that interact with the shock) for all time steps, using pfss_shock_plot_angular_influence. 
+    	It will produce PFSS images with crossing field lines highlighted, in a face-on view. The images can also be done in a top-down view, if we specify the /topview keyword:</p>
+    	<pre><code>	
+IDL> pfss_shock_plot_angular_influence,event(,/topview)
+    	</code></pre>
+    	<img src="png/pfss_connectivity.png" alt='AIA PFSS+CSGS connectivity' width=400> <img src="png/pfss_connectivity_topview.png" alt='AIA PFSS+CSGS connectivity, top view' width=400>
+		<p>The top view has the advantage that it shows more readily the heliospheric connectivity, as well as the longitudinal range of magnetic field lines, which are nominally connected 
+		to near-Earth space (black arc), for solar wind speeds between 400 and 500 km/s.</p>
+		<p><b>All the plots shown in this section are generated automatically, and may be found in the /dem/aschwanden or /pfss/ folders of the respective event.</b></p>
         <a href="#top">Top</a>
         </section>        
 <!-- --------SECTION 8----------- -->
         <section>
     	<h2 id="sec8"><b>8. Plotting radio and X-ray data.</b></h2>
-    	<p>TEXT HERE</p>
-        <pre><code>
-        IDL CODE HERE.
-        </code></pre>
+    	<p>Under Construction.</p>
         <a href="#top">Top</a>
         </section>        
 <!-- --------SECTION 9----------- -->
         <section>
     	<h2 id="sec9"><b>9. Updating the online database/webpage.</b></h2>
-    	<p>TEXT HERE</p>
+    	<p><b>This section describes the process for the local CfA webpage only!</b></p>
+    	<p>To update the web database page:<br>
+    	    Run the procedure <b>sync_event_webfolders</b> to copy/update all data products to the webpage folders.<br>
+    	    Run the procedure <b>create_coronalshocks_page</b> to create/update the webpage. The filename to update/create is 'coronalwaves.content'.2<br>
+    	    Go to the web page main folder($CORWAV_WEB) and run the sync-ing script - <b>./sync_events</b><br>
+    	    Finally, run <b>svnlog HEAD</b> and add at the top of the text file ‘Approved by [YOURNAME]’. (ESC and then :wq to save and exit)</p>
         <pre><code>
-        IDL CODE HERE.
+IDL> sync_event_webfolders,event
+IDL> webpath=GETENV('CORWAV_WEB')
+IDL> fname='coronalwaves.content'
+IDL> create_coronalshocks_page,webpath
+
+$> cd $CORWAV_WEB
+$CORWAV_WEB$> ./sync_events
+$CORWAV_WEB$> svnlog HEAD
         </code></pre>
         <a href="#top">Top</a>
         </section>
 <!-- --------SECTION 10----------- -->
         <section>
-    	<h2 id="sec10"><b>10. Advanced tips and tricks.</b></h2>
-    	<p>TEXT HERE</p>
+    	<h2 id="sec10"><b>10. Other useful procedures.</b></h2>
+    	<p>Run the procedure <b>batch_archive_local_data</b> to archive/update the event data on Backscratch (or wherever you are storing it).</p>
         <pre><code>
         IDL CODE HERE.
         </code></pre>

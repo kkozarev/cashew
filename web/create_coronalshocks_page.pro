@@ -1,5 +1,5 @@
 pro test_create_coronalshocks_page
-  path='/var/www/personal/kkozarev/www/'
+  path=getenv('CORWAV_WEB')
   fname='coronalwaves.content'
   create_coronalshocks_page,path+fname
   
@@ -153,11 +153,3 @@ pro create_coronalshocks_page, fname
   printf,lun,'</table>'
   close,/all
 end
-
-
-
-;pro write_event_row, event, fname
-;Write the HTML code for the event to the HTML file.
-  
-  
-;end

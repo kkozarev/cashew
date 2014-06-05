@@ -193,7 +193,7 @@ pro pfss_shock_plot_csgs,event,png=png
      for ff=0,ncrosses-1 do begin
         lind=pind[ff]
         npt=pfssLines[lind].npts
-        if pfss_cartpos[ff,2,0] gt 0.0 and pfss_cartpos[ff,2,npt-1] gt 0.0 then $
+;        if pfss_cartpos[ff,2,0] gt 0.0 and pfss_cartpos[ff,2,npt-1] gt 0.0 then $
         plots,reform(pfss_cartpos[lind,*,0:npt-1]),$
               color=pfssLines[lind].color,/device,psym=sym(1),symsize=0.5
      endfor

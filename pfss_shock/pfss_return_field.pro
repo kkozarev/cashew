@@ -73,7 +73,7 @@ pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct
 ;  with a starting radius of r=1.00 Rsun
   if not keyword_set (rstart) then rstart=1.05
 ;  factor inverse to line density, i.e. lower values = more lines
-  if not keyword_set(invdens) then invdens = 4 
+  if not keyword_set(invdens) then invdens = 1 
   if keyword_set(box) then $
      pfss_field_start_coord,5,invdens,radstart=rstart,bbox=box $
   else $
@@ -134,6 +134,7 @@ pfss_get_chfootprint,openfield,/quiet,/usecurrent;,/close,spacing=spacing
         fname='pfss_results_'+dat+'_'+strtrim(string(rstart,format='(f4.2)'),2)+'Rs_dens_'+strtrim(string(invdens,format='(f3.1)'),2)+'.sav'
      endif else begin
         dat=event.date
+        path=event.pfsspath
         fname='pfss_results_'+dat+'_'+event.label+'_'+strtrim(string(rstart,format='(f4.2)'),2)+'Rs_dens_'+strtrim(string(invdens,format='(f3.1)'),2)+'.sav'
      endelse
      if keyword_set(path) then fname=path+fname

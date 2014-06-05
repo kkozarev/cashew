@@ -86,7 +86,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
   datapath=savepath
   pfsspath=event.pfsspath
   
-  pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_1.05Rs_dens_0.5.sav'
+  pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_1.05Rs_dens_1.0.sav'
   ;pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_1.05Rs_dens_4.0.sav'
   aiafile=datapath+'normalized_'+eventname+'_subdata.sav'
   shockfile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed.sav'
