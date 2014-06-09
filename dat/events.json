@@ -425,10 +425,24 @@
 	"typeII": true,
 	"loop": true,
 	"filament": false,
-	"comment": "A nice 'double-bubble' event, with a loop
-	expansion driving a dome shock wave, overlapping with a
-	two-band type II burst",
+	"comment": "A nice 'double-bubble' event, with a loop expansion driving a dome shock wave, overlapping with a two-band type II burst",
 	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/culgoora/images/10/20100613spectrograph.gif",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2010/06/13/OOTY_20100613_052959_59.fit.gz.png",
+	"nrh_lookup": ""
+}
+{
+	"label": "140331_01",
+	"coordX": 880,
+	"coordY": -175,
+	"st": "2014/03/31 07:50:00",
+	"et": "2014/03/31 08:15:00",
+	"aiafov": [1024,1024],
+	"flareclass": "M1.4",
+	"typeII": false,
+	"loop": false,
+	"filament": true,
+	"comment": "A fast filament eruption with no SEPs or type II, but an interesting shock wave formation seen in AIA/131 channel",
+	"ips_lookup": "",
+	"callisto_lookup": "",
 	"nrh_lookup": ""
 }

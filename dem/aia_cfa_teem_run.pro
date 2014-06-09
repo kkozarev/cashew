@@ -85,7 +85,7 @@ pro aia_cfa_teem_run,event,savepath=savepath,fileset=fileset,remove_aec=remove_a
   
 ;Obtain all the necessary filenames
   for w=0,nwave-1 do begin
-     ftmp=aia_file_search(st,et,wave[w],remove_aec=remove_aec,/check171,path=event.aia_datapath)
+     ftmp=aia_file_search(st,et,wave[w],remove_aec=remove_aec,/check171);,path=event.aia_datapath
      
                                 ;Create the filename structure
      if w eq 0 then begin
@@ -93,6 +93,8 @@ pro aia_cfa_teem_run,event,savepath=savepath,fileset=fileset,remove_aec=remove_a
         nfiles=n_elements(ftmp)
         files=replicate(fstr,nfiles)
      endif
+     
+     ftmp=ftmp[0:nfiles-1]
      
      case w of
         0: files.w131=ftmp
