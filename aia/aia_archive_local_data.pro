@@ -1,4 +1,4 @@
-pro test_aia_archive_local_data,force=force
+pro aia_archive_local_data,force=force
 ;PURPOSE:
 ;Copy AIA files from the CfA archive to the local archive in Backscratch
 ;
@@ -20,7 +20,7 @@ pro test_aia_archive_local_data,force=force
 ;
   cfaarc='/Data/SDO/AIA/level1/'
   locarc=getenv('CORWAV_DATA')+'AIA_data/'
-  wave=['171','193','211','335','094','131','304']
+  wave=['171','193','211','335','094','131']
   
   events=load_events_info()
   
@@ -32,15 +32,17 @@ pro test_aia_archive_local_data,force=force
         wav=wave[w]
         print,'EVENT '+event.label+' - Copying '+wav+' channel AIA data between '+event.st+' and '+event.et
         files=aia_file_search(event.st,event.et,wav,loud=loud,missing=cfamissing,path=cfaarc)
+        print,n_elements(files)
         aia_check_dirs,locarc,event.st,event.et ;check whether the local folders exist
-        aia_archive_local_data,files,locarc
+        print,''
+        aia_archive_local_data_main,files,locarc
      endfor
      print,''
   endfor
 end
 
 
-pro aia_archive_local_data,files,locarc,force=force
+pro aia_archive_local_data_main,files,locarc,force=force
 ;Copy the files from the CfA to the local archive one by one, checking their filenames and putting them
 ;in the appropriate folders.
   nf=n_elements(files)
@@ -60,6 +62,7 @@ pro aia_archive_local_data,files,locarc,force=force
 ;check whether the file already was copied and skip unless forcing an overwrite.
      if file_exist(outpath+fname) and not keyword_set(force) then continue 
      cc++
+     print,'Copying file '+outpath+file
      exec='cp '+file+' '+outpath
      spawn,exec  
   endfor

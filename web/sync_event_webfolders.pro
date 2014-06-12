@@ -45,6 +45,7 @@ pro sync_event_webfolders,event,force=force
   
   if size(event,/type) ne 8 then return
   path=event.webpath
+  if not dir_exist(path) then spawn,'mkdir '+path
 
   for f=0,n_elements(folders)-1 do begin
      folder=folders[f]

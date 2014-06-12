@@ -57,13 +57,17 @@ function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=
 ;
   starttime=sts
   endtime=ets
+  default_path='/Data/SDO/AIA/level1/'
   
 ;Format the wavelength string properly
   wave=wav
   while strlen(wave) lt 4 do wave='0'+wave
   
-  if not keyword_set(path) then path='/Data/SDO/AIA/level1/'
+  if not keyword_set(path) then $
+     if keyword_set(event) then path=event.aia_datapath $
+     else path=default_path
   
+
   if n_elements(starttime) eq 1 then begin
      st=strsplit(starttime,' /:,.-T',/extract)
      if n_elements(st) eq 4 then st=[st,'00']
@@ -98,7 +102,6 @@ function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=
   
 ;figure out where to search
   
-
   
 ;if the hours are different
   if st[3] ne et[3] then begin
@@ -153,8 +156,9 @@ function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=
 ;do the searching for the files
   for h=0,n_elements(hmins[0,*])-1 do begin
      locpath=basepath+'H'+hmins[0,h]+'00/'
-     file=file_search(locpath+'*_'+hmins[0,h]+hmins[1,h]+'*_'+wave+'.fits')
-     if keyword_set(jsoc) then file=file_search(locpath+'*'+strmid(wave,1,3)+'A*'+hmins[0,h]+'_'+hmins[1,h]+'*.fits')
+     ;print,'Looking for file '+locpath+'*_'+hmins[0,h]+hmins[1,h]+'*_'+wave+'.fits',h, n_elements(hmins[0,*])-1
+     if keyword_set(jsoc) then file=file_search(locpath+'*'+strmid(wave,1,3)+'A*'+hmins[0,h]+'_'+hmins[1,h]+'*.fits') $
+     else file=file_search(locpath+'*_'+hmins[0,h]+hmins[1,h]+'*_'+wave+'.fits')
      
      if strtrim(file[0],2) eq '' then begin
         if not var_exist(err) then err=h else err=[err,h]
@@ -255,8 +259,13 @@ function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=
      endif
   endif
   
-  
-  
+  ;If nothing in the user's personal archive, search the CfA archive.
+  if files[0] eq '' then begin
+     if keyword_set(path) or keyword_set(event) then begin
+        if path eq default_path then return,''
+        files=aia_file_search(starttime,endtime,wav,path=default_path)
+     endif
+  endif
   if keyword_set(first) then return,files[0] $
   else return,files
   

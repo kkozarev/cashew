@@ -6,13 +6,13 @@ pro test_pfss_return_field
   if one eq 1 then begin
      event=load_events_info(label='110511_01')
      date=event.st
-     aia_return_carrington_latlon,event,lat,lon
+     aia_carrington_latlon,event,lat,lon
      aclon=lon+event.arlon
      aclat=lat+event.arlat
      box=[aclon-90.,aclat-90.,aclon+90.,aclat+90.]
      ;box=[aclon-45.,aclat-45.,aclon+45.,aclat+45.]
      
-;     pfss_return_field,date,invdens=0.5,/save,path=event.pfsspath,event=event,box=box
+     ;pfss_return_field,date,invdens=0.5,/save,path=event.pfsspath,event=event;,box=box
      pfss_return_field,date,invdens=8,/save,path=event.pfsspath,event=event;,box=box
   endif
   
@@ -41,7 +41,9 @@ pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct
 ;INPUTS:
 ;
 ;KEYWORDS:
-; 
+;        BOX - 
+;        SAVE -
+;        
 ;
 ;OUTPUTS:
 ;
@@ -52,7 +54,9 @@ pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct
 ;
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 2011 (based on the pfss_example_1.pro file)
-;Modified by Kamen Kozarev, 02/21/2014 - added the box keyword
+;Modified by Kamen Kozarev, 02/21/2014 - added the box keyword to
+;                                        reduce the extent of the PFSS
+;                                        model coverage
 ;
 
 
@@ -138,6 +142,6 @@ pfss_get_chfootprint,openfield,/quiet,/usecurrent;,/close,spacing=spacing
         fname='pfss_results_'+dat+'_'+event.label+'_'+strtrim(string(rstart,format='(f4.2)'),2)+'Rs_dens_'+strtrim(string(invdens,format='(f3.1)'),2)+'.sav'
      endelse
      if keyword_set(path) then fname=path+fname
-     save,filename=fname,kind,ptr,ptth,ptph,nstep,br,bph,bth,sph_data,openfield
+     save,sph_data,openfield,nstep,filename=fname,kind,/comm,/variables,/compress
   endif
 end
