@@ -128,7 +128,7 @@ pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct
 ;print,carrCoords
 
 ;Get the open field lines
-pfss_get_chfootprint,openfield,/quiet,/usecurrent;,/close,spacing=spacing
+pfss_get_chfootprint,openfield,/quiet,/usecurrent,spacing=invdens;,/close
 
 ;Save the structure and Carrington coordinates of SDO to a sav file:
   if keyword_set(save) then begin

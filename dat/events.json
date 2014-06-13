@@ -92,7 +92,7 @@
 	"comment": "Large shock wave inside the limb propagates southward.",
 	"ips_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2011/08/09/ALMATY_20110809_080000_59.fit.gz.png",
-	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=0800&dayofyear=20110809&composite=2"
+	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=0800&dayofyear=20110809&survey_type=2"
 }
 {
 	"label": "111020_01",
@@ -124,7 +124,7 @@
 	"comment": "Faint, far inside the limb, possibly a loop in front of filament.",
 	"ips_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2011/11/09/BIR_20111109_130000_02.fit.gz.png",
-	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=1300&dayofyear=20111109&composite=2"
+	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=1300&dayofyear=20111109&survey_type=2"
 }
 {
 	"label": "120424_01",
@@ -252,7 +252,7 @@
 	"comment": "A nice event on the eastern limb with serious NRH emission and type II bursts.",
 	"ips_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/05/17/BIR_20130517_083946_02.fit.gz.png",
-	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=0800&dayofyear=20130517&composite=2"
+	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=0800&dayofyear=20130517&survey_type=2"
 }
 {
 	"label": "131106_01",
@@ -268,7 +268,7 @@
 	"comment": "Eastern event with interesting type III and type II bursts.",
 	"ips_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/11/06/BIR_20131106_134500_03.fit.gz.png",
-	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=day&dayofyear=20131106&composite=2"
+	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=day&dayofyear=20131106&survey_type=2"
 }
 {
 	"label": "131029_01",
@@ -316,7 +316,7 @@
 	"comment": "Event started behind eastern limb, accompanying a big CME and a nice wave along the eastern limb. There is a distinct	type II starting after the wave shows up.",
 	"ips_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/11/07/BIR_20131107_101500_02.fit.gz.png",
-	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=1000&dayofyear=20131107&composite=2"
+	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=1000&dayofyear=20131107&survey_type=2"
 }
 {
 	"label": "131119_01",
@@ -332,7 +332,7 @@
 	"comment": "A nice event on the southwest limb, very fast, with strong type II/III bursts.",
 	"ips_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/11/19/BIR_20131119_101500_02.fit.gz.png",
-	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=1000&dayofyear=20131119&composite=2"
+	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=1000&dayofyear=20131119&survey_type=2"
 }
 {
 	"label": "131207_01",
@@ -396,7 +396,7 @@
 	"comment": "An eruption from a complicated AR caused a large SEP increase, also a type II.",
 	"ips_lookup": "",
 	"callisto_lookup": "",
-	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=1200&dayofyear=20140418&composite=2"
+	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=1200&dayofyear=20140418&survey_type=2"
 }
 {
 	"label": "140425_01",
