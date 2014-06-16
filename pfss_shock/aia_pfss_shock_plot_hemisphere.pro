@@ -1,6 +1,8 @@
 pro test_aia_pfss_shock_plot_hemisphere
 ;;TEST CASE
-restore,'/Volumes/Backscratch/Users/kkozarev/AIA/events/05/normalized_AIA_20110125_05_193_subdata.sav'
+basepath=GETENV('CORWAV')
+
+restore,basepath+'/events/05/normalized_AIA_20110125_05_193_subdata.sav'
 index=subindex
 wdef,0,1024
 tvscl,subdata[*,*,0]

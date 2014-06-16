@@ -1,6 +1,7 @@
 pro aia_archive_local_data,force=force
 ;PURPOSE:
-;Copy AIA files from the CfA archive to the local archive in Backscratch
+;Copy AIA files from the CfA archive to the user's personal
+;data archive (set in the $CORWAV_DATA global variable)
 ;
 ;CATEGORY:
 ;AIA/General

@@ -2,11 +2,11 @@
 # sets up environmentals and paths
 
 #set CORWAV to the directory where analyzed events will be stored
-CORWAV="/Volumes/Backscratch/Users/kkozarev/corwav/"
+CORWAV="/data/george/corwav/"
 #set CORWAV_DATA to the directory where the local copy of data will live
-CORWAV_DATA="/Volumes/Itch/Users/kkozarev/corwav/"
+CORWAV_DATA="/data/george/corwav/"
 #set CORWAV_TRUNK to the directory of the CorWav code (or local copy of the repository)
-CORWAV_TRUNK="${HOME}/svn/corwav/trunk/"
+CORWAV_TRUNK="${HOME}/git/corwav/"
 #set CORWAV_WEB to the directory where the web database page is.
 CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
 
