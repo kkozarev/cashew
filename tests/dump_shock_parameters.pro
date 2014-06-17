@@ -77,7 +77,7 @@ close,/all
 ;Write the file with information ordered by field line index
   savname=savepath+'line_shock_info.txt'
   openw,lun,savname,/get_lun
-  printf,lun,'#This file contains information about shock crossing magnetic field lines.'
+  printf,lun,'#Shock crossing magnetic field lines for event '+event.label
   printf,lun,'#These are results from running the PFSS-CSGS models on AIA data.'
   printf,lun,'# LineId    Time[s]   Vshock[km/s]   ThetaBN[deg]   n1/n2    |B|[G]'
   for mm=0,n_elements(tmp2)-1 do begin
