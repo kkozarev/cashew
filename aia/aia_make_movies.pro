@@ -210,7 +210,12 @@ endif
 tmpdir="$HOME/tmpdir_"+strtrim(string(fix(floor(randomn(2)*100000))),2)+'/'
 res=file_test(tmpdir,/directory)
 if res then spawn,'rm '+tmpdir+'*' $
-else spawn,'mkdir '+tmpdir+'&> /dev/null'
+
+;For some reason /dev/anull does not work on Alex's computer,
+;commenting out for now and removing
+
+;else spawn,'mkdir '+tmpdir+'&> /dev/anull'
+else spawn,'mkdir '+tmpdir
 
 for ii=0,n_elements(imgs)-1 do begin
    img_strind=strtrim(string(ii+1),2)

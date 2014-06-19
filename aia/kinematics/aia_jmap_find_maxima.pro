@@ -59,7 +59,7 @@ pro aia_jmap_find_maxima,data,time,dist,xrange=xrange,yrange=yrange,gaussfit=gau
   allnmax=intarr(xind[1]-xind[0]+1)
 ;------------------------------------------------------------
 
-stop
+;stop
 
 ;------------------------------------------------------------
 ;Find all local maxima in every column of data
@@ -125,7 +125,14 @@ function get_local_maxima, column,dist,yind=yind,gaussfit=gaussfit
 ;Optionally, do a gaussian fit to all maxima to find the max position           
         if keyword_set(gaussfit) then begin
 ;6-term fit
-           res=gaussfit(locy,locarr,aa,nterms=6)
+
+; For some strange reason I am receiving a compile time error when I
+; include the nterms=6 argument to gaussfit. Looking at documenation
+; it looks like it defaults to nterms=6 anyways so I'm removing
+; this for nowt
+
+;           res=gaussfit(locy,locarr,aa,nterms=6)
+           res=gaussfit(locy,locarr,aa)
 ;Follow up with a Levenberg-Marquardt fitting algorigthm
            res=lmfit(locy,locarr,aa,/double,function_name='gaussianfit',sigma=sigma)
            if cc eq 0 then print,aa[1],dist[lmaxind]
