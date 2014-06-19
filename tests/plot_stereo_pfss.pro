@@ -272,11 +272,9 @@ if keyword_set(stb) then begin
    plot_map,pfssmap_sta,/over,/rotate,cthick=2
    loadct,0,/silent
    tmp=strsplit(bmaps_fnames[0],'_',/extract)
-   fname=event.label+'_'+event.date+'_'+tmp[1]+'_'+wav+'_STA_PFSS_overlay_partial.png'
-   write_png,event.euvipath+fname,tvrd(/true),rr,gg,bb
-   tmp=strsplit(bmaps_fnames[0],'_',/extract)
    fname=event.label+'_'+event.date+'_'+tmp[1]+'_'+wav+'_STB_PFSS_overlay_full.png'
    write_png,event.euvipath+fname,tvrd(/true),rr,gg,bb
+
    
 ;Make the submaps
    xr=[-400,1600]
