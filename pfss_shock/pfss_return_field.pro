@@ -4,7 +4,7 @@ pro test_pfss_return_field
 ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
-     event=load_events_info(label='110511_01')
+     event=load_events_info(label='130517_01')
      date=event.st
      aia_carrington_latlon,event,lat,lon
      aclon=lon+event.arlon
@@ -12,8 +12,8 @@ pro test_pfss_return_field
      box=[aclon-90.,aclat-90.,aclon+90.,aclat+90.]
      ;box=[aclon-45.,aclat-45.,aclon+45.,aclat+45.]
      
-     ;pfss_return_field,date,invdens=0.5,/save,path=event.pfsspath,event=event;,box=box
-     pfss_return_field,date,invdens=8,/save,path=event.pfsspath,event=event;,box=box
+     pfss_return_field,date,invdens=0.5,/save,event=event;,box=box
+     ;pfss_return_field,date,invdens=8,/save,path=event.pfsspath,event=event;,box=box
   endif
   
   
@@ -72,17 +72,21 @@ pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct
   endif
 ;Restore B-field model
   pfss_restore,pfss_time2file(date,/ssw_cat,/url)
-  
+
+;Set the save path
+if not keyword_set(path) then path=event.pfsspath  
 ;  starting points to be on a regular grid covering the full disk,
 ;  with a starting radius of r=1.00 Rsun
   if not keyword_set (rstart) then rstart=1.05
 ;  factor inverse to line density, i.e. lower values = more lines
-  if not keyword_set(invdens) then invdens = 1 
+  if not keyword_set(invdens) then invdens = 4 
   if keyword_set(box) then $
      pfss_field_start_coord,5,invdens,radstart=rstart,bbox=box $
   else $
      pfss_field_start_coord,5,invdens,radstart=rstart
   
+;stop
+
 ;  trace the field lines passing through the starting point arrays
   pfss_trace_field, kind
 ;@pfss_data_block
@@ -137,11 +141,9 @@ pfss_get_chfootprint,openfield,/quiet,/usecurrent,spacing=invdens;,/close
         dat=strtrim(res[0]+res[1]+res[2],2)
         fname='pfss_results_'+dat+'_'+strtrim(string(rstart,format='(f4.2)'),2)+'Rs_dens_'+strtrim(string(invdens,format='(f3.1)'),2)+'.sav'
      endif else begin
-        dat=event.date
-        path=event.pfsspath
+        dat=event.date        
         fname='pfss_results_'+dat+'_'+event.label+'_'+strtrim(string(rstart,format='(f4.2)'),2)+'Rs_dens_'+strtrim(string(invdens,format='(f3.1)'),2)+'.sav'
      endelse
-     if keyword_set(path) then fname=path+fname
-     save,sph_data,openfield,nstep,filename=fname,kind,/comm,/variables,/compress
+     save,sph_data,openfield,nstep,filename=path+fname,kind,/comm,/variables,/compress
   endif
 end
