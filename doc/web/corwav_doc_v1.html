@@ -249,9 +249,11 @@ CORWAV directory, so no need to worry about that.</p>
 <!-- --------SECTION 5----------- -->
         <section>
     	<h2 id="sec5"><b>5. Loading AIA data. Processing AIA data, making images and movies.</b></h2>
-    	<p>To load and preprocess (prep) AIA data, use the aia_load_data procedure. 
+    	<p>To load and preprocess (prep) AIA data, use the
+        aia_load_data procedure.
     	It loads the AIA data from the local (or remote archive), preprocesses/calibrates it, and saves it as a datacube in the appropriate 
-    	location in the event's directory.</p>
+    	location in the event's directory.</p><p><b>NB! You only need to do
+        this once per event per wavelength.</b></p>
         <pre><code>
 IDL> event=load_events_info(label='110511_01')
 IDL> wav=['193','211'] ;The AIA (best for waves) waveband channels for which to load data.

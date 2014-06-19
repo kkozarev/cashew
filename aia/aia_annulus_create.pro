@@ -120,7 +120,7 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
      endif
 
   endif else begin
-     fls=aia_file_search(event.st,event.et,passband,missing=locmissing,remove_aec=remove_aec)
+     fls=aia_file_search(event.st,event.et,passband,missing=locmissing,remove_aec=remove_aec,event=event)
      nsteps=size(fls,/n_elements)
      
      read_sdo, fls, ind_arr, /nodata
