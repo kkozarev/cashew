@@ -83,6 +83,7 @@ pro pfss_shock_plot_angular_influence,event,topview=topview
   sp=rad_data.xfitrange[0]
   ep=rad_data.xfitrange[1]
   time=(rad_data.time[sp:ep]- rad_data.time[sp])*3600.
+  plot_times=ind_arr[sp:ep].date_obs
   nsteps=n_elements(time)
   RSUN=subindex[0].rsun_ref/1000. ;Solar radius in km.  
   KMPX=ind_arr[0].IMSCL_MP*ind_arr[0].RSUN_REF/(1000.0*ind_arr[0].RSUN_OBS)
@@ -133,8 +134,7 @@ pro pfss_shock_plot_angular_influence,event,topview=topview
      
      
      loadct,0,/silent
- 
-     
+
      device,set_resolution=[winsize,winsize],SET_PIXEL_DEPTH=24, DECOMPOSED=0
      !p.background=100
      !P.color=255
@@ -142,10 +142,12 @@ pro pfss_shock_plot_angular_influence,event,topview=topview
      erase
      ;wdef,0,winsize
 
-
+     
      ;Plot the limb location
      circ=aia_circle(xcenter,ycenter,sunrad,/plot,color=0)
-
+     ;Print the time of this step.
+     xyouts,0.64*winsize,0.975*winsize,plot_times[sstep],/device,charsize=2,charthick=2.4
+     
 ;+==============================================================================
 ;1. Plot the field lines on disk center.
      if sstep eq 0 then begin
@@ -185,18 +187,18 @@ pro pfss_shock_plot_angular_influence,event,topview=topview
      endif
      ;stop
      
-     ii=0L
-     for ff=0L,nlines-1 do begin
+     ;ii=0L
+     ;Find the cadence, at which to plot lines
+     plotcad=nlines/(maxnumlines)
+     for ff=0L,nlines-1,plotcad do begin
         npt=pfssLines[ff].npts
         ;Plot the field lines
-        if ff eq ii*nlines/(maxnumlines*1.) then begin
                                 ;if pfss_cartpos[ff,2,0] gt 0.0 and
                                 ;pfss_cartpos[ff,2,npt-1] gt 0.0 then
                                 ;$
 ;if not keyword_set(topview) then
            plots,reform(pfss_cartpos[ff,*,0:npt-1]),/device,color=250,thick=2.
-           ii++
-        endif
+           ;ii++
      endfor
 
      
@@ -296,8 +298,6 @@ pro pfss_shock_plot_angular_influence,event,topview=topview
      if keyword_set(topview) then fname='aia_pfss_shock_angular_influence_'+$
                                         event.date+'_'+event.label+'_topview_'+stp+'.png'
      write_png,pfsspath+fname,image,rr,gg,bb
-     
-     stop
   endfor                        ;END TIMESTEP LOOP
   set_plot,'x'
   loadct,0,/silent

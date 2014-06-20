@@ -58,7 +58,6 @@ function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=
   starttime=sts
   endtime=ets
   default_path='/Data/SDO/AIA/level1/'
-  ;default_path='/data/george/corwav/AIA_data/'
   
 ;Format the wavelength string properly
   wave=wav
