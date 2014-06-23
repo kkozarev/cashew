@@ -1,9 +1,9 @@
-pro test_dump_shock_parameters
+pro test_pfss_dump_shock_parameters
   event=load_events_info(label='110511_01')
   dump_shock_parameters,event
 end
 
-pro dump_shock_parameters,event
+pro pfss_dump_shock_parameters,event
 ;This is a quick and dirty program (for now) to extract shock information for specific field lines 
 ;Need Vshock, ThetaBN, density jump,time,line index
 close,/all

@@ -93,7 +93,6 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
   
   print,'Loading AIA File '+aiafile
   restore,aiafile
-  subdata=0
   
   ;Load the measured shock wave radius.
   ;This was created with measure_wave_sphere.pro
@@ -101,7 +100,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
   ;restore,datapath+eventname+'_shocklocations.sav'
   print, 'Loading shock info file '+shockfile
   restore,shockfile
-
+  
   ;Load the PFSS model results
   print,'Loading PFSS File '+pfssfile
   restore,pfssfile
@@ -114,9 +113,9 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
   loadct,8,/silent
   sp=rad_data.xfitrange[0]
   ep=rad_data.xfitrange[1]
-  time=(rad_data.time[sp:ep]-rad_data.time[sp])*3600.
+  time=(rad_data.time[sp:ep]-rad_data.time[sp])
   nsteps=n_elements(time)                                
-  RSUN=subindex[0].rsun_ref/1000. ;Solar radius in km.  
+  RSUN=ind_arr[0].rsun_ref/1000. ;Solar radius in km.  
   KMPX=ind_arr[0].IMSCL_MP*ind_arr[0].RSUN_REF/(1000.0*ind_arr[0].RSUN_OBS)
   fit=reform(rad_data.fitparams[0,*].front)
   radiusfitlines=(fit[0]+fit[1]*time+0.5*fit[2]*time^2)/RSUN
@@ -162,7 +161,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
 ;THIS IS THE STEPS LOOP!
      for sstep=0,nsteps-1 do begin             
         print,'Step #'+string(sstep)
-        stop
+        
         shockrad=radius[sstep] ;Get this from the measurements
         
 ;Rotation angles for the entire plot
