@@ -8,7 +8,7 @@ CORWAV_DATA="/data/george/corwav/"
 #set CORWAV_TRUNK to the directory of the CorWav code (or local copy of the repository)
 CORWAV_TRUNK="${HOME}/git/corwav/"
 #set CORWAV_WEB to the directory where the web database page is.
-CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
+CORWAV_WEB="/Volumes/Scratch/Users/kendrick/web/"
 
 
 

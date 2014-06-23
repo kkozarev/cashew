@@ -1,6 +1,6 @@
 pro test_sync_event_webfolders
   ;Run for a single event like this:
- one=1
+ one=0
  if one eq 1 then begin
   label='130411_01'
   event=load_events_info(label=label)
@@ -9,7 +9,7 @@ pro test_sync_event_webfolders
 
  
   ;Alternatively, run for all the events:
- all=0
+ all=1
  if all eq 1 then begin
   events=load_events_info()
   for ev=0,n_elements(events)-1 do begin
@@ -44,7 +44,12 @@ pro sync_event_webfolders,event,force=force
   
   
   if size(event,/type) ne 8 then return
+  
+  events_path=getenv('CORWAV_WEB')+'events/'
+  if not dir_exist(events_path) then spawn, 'mkdir '+events_path
+  
   path=event.webpath
+  
   if not dir_exist(path) then spawn,'mkdir '+path
 
   for f=0,n_elements(folders)-1 do begin

@@ -86,14 +86,16 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
   datapath=savepath
   pfsspath=event.pfsspath
   
-  pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_1.05Rs_dens_1.0.sav'
+  ;pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_1.05Rs_dens_1.0.sav'
+  pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_1.0Rs_dens_1.0.sav'
   ;pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_1.05Rs_dens_4.0.sav'
   aiafile=datapath+'normalized_'+eventname+'_subdata.sav'
   shockfile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed.sav'
   
   print,'Loading AIA File '+aiafile
   restore,aiafile
-  subdata=0
+
+;  subdata=0
   
   ;Load the measured shock wave radius.
   ;This was created with measure_wave_sphere.pro
@@ -162,7 +164,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
 ;THIS IS THE STEPS LOOP!
      for sstep=0,nsteps-1 do begin             
         print,'Step #'+string(sstep)
-        stop
+        ;stop
         shockrad=radius[sstep] ;Get this from the measurements
         
 ;Rotation angles for the entire plot

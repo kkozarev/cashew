@@ -64,7 +64,7 @@ pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct
 ;/Users/kkozarev/AIA/algoTests/yaftawave/normalized_AIA_20110125_05_193_subdata.sav
 ;Set up the common block variables
 @pfss_data_block
-stop
+;stop
 ;spherical_to_pfss,pfssData
   if n_elements(date) eq 0 then begin
      print,'You need to supply a date string, like "2011-01-25"'
