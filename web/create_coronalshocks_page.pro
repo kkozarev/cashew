@@ -1,5 +1,5 @@
 pro test_create_coronalshocks_page
-  path=getenv('CORWAV_WEB')
+  path=getenv('CORWAV_WEB')+'events/'
   fname='coronalwaves.content'
   create_coronalshocks_page,path+fname
   
@@ -49,7 +49,7 @@ pro create_coronalshocks_page, fname
   printf,lun,'<th rowspan=2>Start (UT)</th>'
   printf,lun,'<th rowspan=2>End (UT)</th>'
   printf,lun,'<th rowspan=2>Flare Class</th>'
-  printf,lun,'<th rowspan=2>X (&quot;) <font color="red">E</font>/<font color="blue">W</font></th>'
+  printf,lun,'<th rowspan=2>X (&quot;) <font color="red">East</font>/<font color="blue">West</font></th>'
   printf,lun,'<th rowspan=2>Y (&quot;)</th>'
   printf,lun,'<th rowspan=2>Filament Erupt</th>'
   printf,lun,'<th rowspan=2>Loop Erupt</th>'

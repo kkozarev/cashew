@@ -162,7 +162,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
 ;THIS IS THE STEPS LOOP!
      for sstep=0,nsteps-1 do begin             
         print,'Step #'+string(sstep)
-
+        stop
         shockrad=radius[sstep] ;Get this from the measurements
         
 ;Rotation angles for the entire plot
