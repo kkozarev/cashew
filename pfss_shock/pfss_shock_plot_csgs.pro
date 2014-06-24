@@ -106,7 +106,8 @@ pro pfss_shock_plot_csgs,event,png=png
      aia_lct,rr,gg,bb,wavelnth=subindex[sstep].wavelnth,/load     
      ;if sstep eq 0 then wdef,0,winsize
      if sstep eq 0 then $
-        device,set_resolution=[winsize,winsize],SET_PIXEL_DEPTH=24, DECOMPOSED=0
+        ;device,set_resolution=[winsize,winsize],SET_PIXEL_DEPTH=24, DECOMPOSED=0
+        device,set_resolution=[event.aiafov[0],event.aiafov[1]],SET_PIXEL_DEPTH=24,DECOMPOSED=0
      tv,bytscl(sqrt(subdata[*,*,sp+sstep]),min=1,max=50)
      
 ;Overplot the limb location
@@ -209,7 +210,7 @@ pro pfss_shock_plot_csgs,event,png=png
         if stp lt 10 then stp='0'+stp
         write_png,pfsspath+'aia_pfss_shock_'+event.date+'_'+event.label+'_'+stp+'.png',image,rr,gg,bb
      endif
-     stop
+     ;stop
   endfor ;END TIMESTEP LOOP
   set_plot,'x'
   loadct,0,/silent
