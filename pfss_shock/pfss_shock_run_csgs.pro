@@ -152,7 +152,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
   allcrossPoints=fltarr(nsteps,3,1000000)
   allcrossAngles=fltarr(nsteps,1000000)
   allcrossBmag=fltarr(nsteps,1000000)
-  allcrossLineIndices=intarr(nsteps,1000000)
+  allcrossLineIndices=fltarr(nsteps,1000000)
   allcrosses=fltarr(nsteps)
 ;--------------------------------------------------------------
   
@@ -163,11 +163,6 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
 ;THIS IS THE STEPS LOOP!
      for sstep=0,nsteps-1 do begin             
         print,'Step #'+string(sstep)
-<<<<<<< HEAD
-        ;stop
-=======
-        
->>>>>>> upstream/master
         shockrad=radius[sstep] ;Get this from the measurements
         
 ;Rotation angles for the entire plot
