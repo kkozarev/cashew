@@ -65,10 +65,14 @@ for f=0, n_elements(folders)-1 do begin
          tangentialFiles193=file_search(path+folder+'/*_193_tangential*')
 
          print, "-------------------------------------------------------------"
-         print, "The following 193A files have been located:"
-         print, strcompress(n_elements(overviewFiles193))," overview .png files"
-         print, strcompress(n_elements(radialFiles193))," radial .png files"
-         print, strcompress(n_elements(tangentialFiles193))," tangential .png files"
+         if files193[0] ne '' then begin
+            print, "The following 193A files have been located:"
+            print, strcompress(n_elements(overviewFiles193))," overview .png files"
+            print, strcompress(n_elements(radialFiles193))," radial .png files"
+            print, strcompress(n_elements(tangentialFiles193))," tangential .png files"
+         endif else begin
+            print, "No 193A files found."
+         endelse 
          print, "-------------------------------------------------------------"
 
          files211=file_search(path+folder+'/*_211*')
@@ -76,10 +80,14 @@ for f=0, n_elements(folders)-1 do begin
          radialFiles211=file_search(path+folder+'/*_211_radial*')
          tangentialFiles211=file_search(path+folder+'/*_211_tangential*')
 
-         print, "The following 211A files have been located:"
-         print, strcompress(n_elements(overviewFiles211))," overview .png files"
-         print, strcompress(n_elements(radialFiles211))," radial .png files"
-         print, strcompress(n_elements(tangentialFiles211))," tangential .png files"
+         if files211[0] ne '' then begin
+            print, "The following 211A files have been located:"
+            print, strcompress(n_elements(overviewFiles211))," overview .png files"
+            print, strcompress(n_elements(radialFiles211))," radial .png files"
+            print, strcompress(n_elements(tangentialFiles211))," tangential .png files"
+         endif else begin
+            print, "No 211A files found."
+         endelse 
          
       endif else begin
          print, "No kinematics files found"
@@ -163,16 +171,17 @@ for f=0, n_elements(folders)-1 do begin
 
       if nFiles  ne 0 then begin
          for i=0, n_elements(subfolders.radio)-1 do begin
-            subfolderFilesRadio=n_elements(file_search(path+folder+'/'+subfolders.radio[i], '*'))
-            test=file_search(path+folder+'/'+subfolders.radio[i],'*')
-            if subfolderFilesRadio ne 0 then begin
+            subfolderFilesRadio=file_search(path+folder+'/'+subfolders.radio[i], '*')
+            if subfolderFilesRadio ne '' then begin
                print, "In the " + subfolders.radio[i] + " directory"
-               print, strcompress(subfolderFilesRadio)," files exist"
-            endif
+               print, strcompress(n_elements(subfolderFilesRadio))," files exist"
+            endif else begin
+               print, "No files found in "+subfolders.radio[i]
+            endelse
          endfor
          
       endif else begin
-         print, "No annulusplot files found"
+         print, "No radio files found"
          
       endelse 
       
@@ -180,6 +189,82 @@ for f=0, n_elements(folders)-1 do begin
       
    endif
    
+   if folder eq 'pfss' then begin
+      print, "================================================================"
+
+      print, "In the PFSS subfolder:"
+
+      if nFiles ne 0 then begin
+         
+         files=file_search(path+folder+'/*.png')
+         numFiles=n_elements(files)
+
+         numStr = string(numFiles)
+         print, strcompress(numStr)+" .png files have been located"
+
+         print, "-------------------------------------------------------------"
+         print, "The following save files have been located"
+         
+         saveFiles=file_search(path+folder+'/*.sav')
+         print, saveFiles
+
+         print, "-------------------------------------------------------------"
+         shockFiles=file_search(path+folder+'/*_pfss_shock_2*')
+         
+         if shockFiles[0] ne '' then begin
+            print, strcompress(n_elements(shockFiles))," PFSS shock files exist"
+         endif else begin
+            print, "No PFSS shock files exist"
+         endelse 
+
+         angularShockFiles=file_search(path+folder+'/*_pfss_shock_angular*')
+         
+         if angularShockFiles[0] ne '' then begin
+            print, strcompress(n_elements(angularShockFiles))," angular influence PFSS shock files exist"
+         endif else begin
+            print, "No angular influence PFSS shock files exist"
+         endelse 
+
+         topShockFiles=file_search(path+folder+'/*_topview_*')
+         
+         if topShockFiles[0] ne '' then begin
+            print, strcompress(n_elements(topShockFiles))," topview angular influence PFSS shock files exist"
+         endif else begin
+            print, "No topview angular influence PFSS shock files exist"
+         endelse
+
+         thetaFiles=file_search(path+folder+'/thetabn_2*')
+         thetaOplotFiles=file_search(path+folder+'/*_oplot.png')
+         
+         if thetaFiles[0] ne '' then begin
+            print, strcompress(n_elements(shockFiles))," thetabn files exist"
+
+         endif else begin
+            print, "No thetabn files exist"
+         endelse 
+
+         if thetaOplotFiles[0] ne '' then begin
+            print, strcompress(n_elements(thetaOplotFiles)), " oplot thetabn files exist"
+         endif else begin
+             print, "No oplot thetabn files exist"
+          endelse
+
+         thetaStats=file_search(path+folder+'/thetabn_stats*')
+         if thetaStats[0] ne '' then begin
+            print, strcompress(n_elements(thetaStats)), " thetabn stats files exist"
+         endif else begin
+            print, "No thetabn stats files found"
+         endelse
+
+      endif else begin
+         print, "No PFSS files found"
+         
+      endelse 
+      
+      print, "================================================================"
+      
+   endif
+
    
 endfor
 
