@@ -57,9 +57,10 @@ pro sync_event_webfolders,event,force=force
      if not dir_exist(path+folder) then spawn,'mkdir '+path+folder
      
      if folder eq 'kinematics' then begin
-        files = file_search(path+folder+'/*.png')
-        if files[0] eq '' or keyword_set(force) then $
+        files = file_search(path+folder, '*.png')
+        if files[0] eq '' or keyword_set(force) then begin
            spawn,'cp '+event.kinematicspath+'*.png '+path+folder
+        endif
      endif
      
      if folder eq 'pfss' then begin

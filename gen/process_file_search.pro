@@ -1,4 +1,4 @@
-pro process_file_search, event
+pro process_file_search, event, All=all
 ;PURPOSE
 ;This procedure will search processed data directories for a given
 ;event and produce output describing which data products exist for
