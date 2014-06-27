@@ -47,6 +47,22 @@
 	"nrh_lookup": ""
 }
 {
+	"label": "110308_01",
+	"coordX": -859,
+	"coordY": -309,
+	"st": "2011/03/08 03:35:00",
+	"et": "2011/03/08 03:55:00",
+	"aiafov": [1024,2048],
+	"flareclass": "M1.5",
+	"typeII": true,
+	"loop": true,
+	"filament": false,
+	"comment": "Large filament eruption in the lower left third of the sun, type II radio burst detected",
+	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/culgoora/images/11/20110308spectrograph.gif",
+	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2011/03/08/OOTY_20110308_034500_59.fit.gz.png",
+	"nrh_lookup": ""
+}
+{
 	"label": "110511_01",
 	"coordX": 785,
 	"coordY": 399,
