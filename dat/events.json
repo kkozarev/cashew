@@ -47,6 +47,22 @@
 	"nrh_lookup": ""
 }
 {
+	"label": "110224_01",
+	"coordX": -939,
+	"coordY": 239,
+	"st": "2011/02/24 07:23:00",
+	"et": "2011/02/24 08:22:00",
+	"aiafov": [1024,1024],
+	"flareclass": "M3.5",
+	"typeII": true,
+	"loop": true,
+	"filament": true,
+	"comment": "Decent sized loop eruption followed by a large and long duration filament release.",
+	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/culgoora/images/11/20110224spectrograph.gif",
+	"callisto_lookup": "",
+	"nrh_lookup": ""
+}
+{
 	"label": "110308_01",
 	"coordX": -859,
 	"coordY": -309,
