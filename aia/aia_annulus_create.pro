@@ -1,17 +1,18 @@
 pro test_aia_annulus_create
 
 ;You can run for one event, like this.
-  one=0
+  one=1
   if one eq 1 then begin
      event=load_events_info(label='110511_01')
      ;aia_annulus_create,event,/force
-     aia_annulus_create,event,/force
-     ;aia_annulus_create,event,/plot,rrange=rrange
+     ;aia_annulus_create,event,/force
+     rrange=[1.0,1.3]
+     aia_annulus_create,event,/base,/force
   endif
   
   
 ;Alternatively, run for all events
-  all=1
+  all=0
   if all eq 1 then begin
      events=load_events_info()
      wavelengths=['193','211']
@@ -76,7 +77,7 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
      else arlat=90.0-event.arlat
   endif else arlat=centerlat
   
-  maxrad=1330. ;maximum radial distance 
+  maxrad=1350. ;maximum radial distance 
   img_size = [1200., 800.]
   ang_step = 0.2                ; Angle step size (degree)
   res = 0.5                     ; Height step size (arcsec)
@@ -107,6 +108,13 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
      restored=1 ;Flag to know that we've restored a datacube file
      nsteps=n_elements(subprojdata[*,0,0])
      
+    ;Convert the radial range to arcsecs.
+     if keyword_set(rrange) then begin
+        rrang=(rrange-1)*ind_arr.rsun_obs
+     endif else begin
+        rrang=[0.0,ring_width]
+     endelse
+     
      ; Define x and y zero points for plotting     
      x_pos = thrang[0]*180./!PI
      y_pos = r_in-1.
@@ -118,7 +126,7 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
         endfor
         dat_init=reform(dat_init/(1.0*lwr_img))
      endif
-
+     
   endif else begin
      fls=aia_file_search(event.st,event.et,passband,missing=locmissing,remove_aec=remove_aec,event=event)
      nsteps=size(fls,/n_elements)
@@ -139,7 +147,8 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
 ; Define inner and outer radius
      r_in = ind_arr[0].rsun_obs+rrang[0] ; Inner radius
      r_out = ind_arr[0].rsun_obs + rrang[1] ; Outer radius
-     
+     if r_out gt maxrad then r_out=maxrad
+
      ; Define x and y zero points for plotting
      x_pos = thrang[0]*180./!PI
      y_pos = r_in-1.
@@ -191,6 +200,7 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
         dat_init=dat_init/(1.0*lwr_img)
      endif
   endelse
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
