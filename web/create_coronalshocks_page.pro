@@ -7,7 +7,7 @@ end
 
 
 
-pro create_coronalshocks_page, fname
+pro create_coronalshocks_page, fname, Exclude=exclude
   close,/all
 ;Load all the events info
   events=load_events_info()
@@ -74,6 +74,15 @@ pro create_coronalshocks_page, fname
 ;Write the second part, containing the data for each event
   for ev=0,n_elements(events)-1 do begin
      event=events[ev]
+     skip=0
+     if n_elements(exclude) ne 0 then begin
+        for i=0, n_elements(exclude)-1 do begin
+           if event.label eq exclude[i] then begin
+              skip=1
+           endif
+        endfor
+        if skip eq 1 then continue
+     endif
      tmp=strsplit(event.st,' ',/extract)
      dt=tmp[0]
      st=strmid(tmp[1],0,5)

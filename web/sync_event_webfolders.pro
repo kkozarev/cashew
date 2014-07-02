@@ -1,6 +1,6 @@
 pro test_sync_event_webfolders
   ;Run for a single event like this:
- one=1
+ one=0
  if one eq 1 then begin
   label='130411_01'
   event=load_events_info(label=label)
@@ -9,7 +9,7 @@ pro test_sync_event_webfolders
 
  
   ;Alternatively, run for all the events:
- all=0
+ all=1
  if all eq 1 then begin
   events=load_events_info()
   for ev=0,n_elements(events)-1 do begin
@@ -44,7 +44,12 @@ pro sync_event_webfolders,event,force=force
   
   
   if size(event,/type) ne 8 then return
+  
+  events_path=getenv('CORWAV_WEB')+'events/'
+  if not dir_exist(events_path) then spawn, 'mkdir '+events_path
+  
   path=event.webpath
+  
   if not dir_exist(path) then spawn,'mkdir '+path
 
   for f=0,n_elements(folders)-1 do begin
@@ -52,29 +57,36 @@ pro sync_event_webfolders,event,force=force
      if not dir_exist(path+folder) then spawn,'mkdir '+path+folder
      
      if folder eq 'kinematics' then begin
-        if file_search(path+folder+'*.png') eq '' or keyword_set(force) then $
+        files = file_search(path+folder, '*.png')
+        if files[0] eq '' or keyword_set(force) then begin
            spawn,'cp '+event.kinematicspath+'*.png '+path+folder
+        endif
      endif
      
      if folder eq 'pfss' then begin
-        if file_search(path+folder+'*.png') eq '' or keyword_set(force) then $
+        files = file_search(path+folder+'/*.png')
+        if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.pfsspath+'*.png '+path+folder
      endif
      
      if folder eq 'swap' then begin
-        if file_search(path+folder+'*.png') eq '' or keyword_set(force) then $
+        files = file_search(path+folder+'/*.png')
+        if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.swappath+'*.png '+path+folder
      endif
      
      if folder eq 'swap' then begin
-        if file_search(path+folder+'*.png') eq '' or keyword_set(force) then $
+        files = file_search(path+folder+'/*.png')
+        if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.euvipath+'*.png '+path+folder
      endif
      
      if folder eq 'particles' then begin
-        if file_search(path+folder+'*.png') eq '' or keyword_set(force) then $
+        files = file_search(path+folder+'/*.png')
+        if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.particlespath+'*.png '+path+folder
      endif
+
      
      ;sync the radio subfolders
      if folder eq 'radio' then begin
@@ -82,34 +94,44 @@ pro sync_event_webfolders,event,force=force
            if not dir_exist(path+folder+'/'+subfolders.radio[i]) then $
               spawn,'mkdir '+path+folder+'/'+subfolders.radio[i]
 
-        if file_search(path+folder+'/'+subfolders.radio[0]+'*.png') eq '' or keyword_set(force) then $
+        files = file_search(path+folder+'/'+subfolders.radio[0]+'/*.png')
+        if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.nrhpath+'*.png '+path+folder+'/'+subfolders.radio[0]
-        if file_search(path+folder+'/'+subfolders.radio[1]+'*.png') eq '' or keyword_set(force) then $
+        files = file_search(path+folder+'/'+subfolders.radio[1]+'/*.png')
+        if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.ipspath+'*.png '+path+folder+'/'+subfolders.radio[1]
-        if file_search(path+folder+'/'+subfolders.radio[2]+'*.png') eq '' or keyword_set(force) then $
+        files = file_search(path+folder+'/'+subfolders.radio[2]+'/*.png')
+        if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.callistopath+'*.png '+path+folder+'/'+subfolders.radio[2]
         
      endif
      
      ;sync the annulusplot subfolders
      if folder eq 'annulusplot' then begin
-        if file_search(path+folder+'*.png') eq '' or keyword_set(force) then $
+        files = file_search(path+folder+'/*.png')
+        if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.annuluspath+'*.png '+path+folder
      endif
      
      ;sync the movies subfolders
      if folder eq 'movies' then begin
-        if file_search(path+folder+'arun*193*.mp4') eq '' or keyword_set(force) then $
+        files = file_search(path+folder+'/arun*193*.mp4')
+        if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.moviepath+'arun*193*.mp4 '+path+folder
-        if file_search(path+folder+'araw*193*.mp4') eq '' or keyword_set(force) then $
+        files=file_search(path+folder+'/araw*193*.mp4')
+        if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.moviepath+'araw*193*.mp4 '+path+folder
-        if file_search(path+folder+'run*193*.mp4') eq '' or keyword_set(force) then $
+        files=file_search(path+folder+'/run*193*.mp4')
+        if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.moviepath+'run*193*.mp4 '+path+folder
-        if file_search(path+folder+'raw*193*.mp4') eq '' or keyword_set(force) then $
+        files=file_search(path+folder+'/raw*193*.mp4')
+        if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.moviepath+'raw*193*.mp4 '+path+folder
-        if file_search(path+folder+'aschdem*.mp4') eq '' or keyword_set(force) then $
+        files=file_search(path+folder+'/aschdem*.mp4')
+        if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.moviepath+'aschdem*.mp4 '+path+folder
-        if file_search(path+folder+'pfss_shock*.mp4') eq '' or keyword_set(force) then $
+        files=file_search(path+folder+'/pfss_shock*.mp4')
+        if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.moviepath+'pfss_shock*.mp4 '+path+folder
      endif
      
@@ -118,10 +140,12 @@ pro sync_event_webfolders,event,force=force
         for i=0,n_elements(subfolders.dem)-1 do $
            if not dir_exist(path+folder+'/'+subfolders.dem[i]) then $
               spawn,'mkdir '+path+folder+'/'+subfolders.dem[i]
-        if file_search(path+folder+'/'+subfolders.dem[0]+'aschdem*series*.png') eq '' or keyword_set(force) then $
+        files = file_search(path+folder+'/'+subfolders.dem[0]+'/aschdem*series*.png')
+        if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.aschdempath+'aschdem*series*.png '+path+folder+'/'+subfolders.dem[0]
-        if file_search(path+folder+'/'+subfolders.dem[1]+'aschdem*series*.png') eq '' or keyword_set(force) then $
-        spawn,'cp '+event.weberpath+'aschdem*series*.png '+path+folder+'/'+subfolders.dem[1]
+        files = file_search(path+folder+'/'+subfolders.dem[1]+'/aschdem*series*.png')
+        if files[0] eq '' or keyword_set(force) then $
+           spawn,'cp '+event.weberpath+'aschdem*series*.png '+path+folder+'/'+subfolders.dem[1]
      endif
   endfor
 
