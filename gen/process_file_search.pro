@@ -293,6 +293,7 @@ for f=0, n_elements(folders)-1 do begin
       if topFiles[0] ne '' then begin
          
          pfssFiles=1
+
          files=file_search(path+folder+'/*.png')
          numFiles=n_elements(files)
 

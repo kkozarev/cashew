@@ -1,4 +1,4 @@
-pro test_plot_srs_kak
+pro test_rstn_plot_spectrum
 ;fname='./LM110511.SRS'
 event=load_events_info(label='110511_01')
 frange=[30,120]
@@ -7,11 +7,11 @@ plot_srs_kak,event,frange=frange,trange=['2011/05/11 02:25:00','2011/05/11 02:43
 end
 
 
-pro plot_srs_kak,event,repair=repair,full=full,frange=frange,trange=trange,datarange=datarange
+pro rstn_plot_spectrum,event,repair=repair,full=full,frange=frange,trange=trange,datarange=datarange
 ;
 ;--------------------------------------------------------------------------------;+
 ; NAME:
-;     plot_srs    
+;     rstn_plot_spectrum    
 ; PURPOSE:
 ;     Routine to plot daily RSTN/SRS spectrogram
 ; WRITTEN BY
