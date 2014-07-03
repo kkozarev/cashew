@@ -1,9 +1,10 @@
 pro test_rstn_plot_spectrum
 ;fname='./LM110511.SRS'
-event=load_events_info(label='110511_01')
+event=load_events_info(label='130517_01')
 frange=[30,120]
 datarange=[30,150]
-plot_srs_kak,event,frange=frange,trange=['2011/05/11 02:25:00','2011/05/11 02:43:00'],datarange=datarange,/repair
+;rstn_plot_spectrum,event,frange=frange,trange=['2011/05/11 02:25:00','2011/05/11 02:43:00'],datarange=datarange,/repair
+rstn_plot_spectrum,event,/full
 end
 
 
@@ -35,8 +36,13 @@ pro rstn_plot_spectrum,event,repair=repair,full=full,frange=frange,trange=trange
 openFile$:
 ;Search for RSTN data for this event
 path=event.ips_datapath
-files=file_basename(file_search(path+'*'+strmid(event.date,2,6)+'.SRS'))
-inputFileName=files[0]
+files=file_basename(file_search(path+'*'+strmid(event.date,2,6)+'.srs',/fold_case))
+
+if files[0] eq '' then begin
+   print,'No files found. Quitting...'
+   return
+endif
+inputFileName=path+files[0]
 If strLen(inputFileName) EQ 0 Then goTo, endJob$
 Print,' SRS File: ',inputFileName
 tmp=strmid(file_basename(inputFileName),0,2)
@@ -71,7 +77,7 @@ if strLen(iStationID) NE 4 OR                              $
   (iStationID NE 'KHMN' AND                                $
    iStationID NE 'APLM' AND                                $
    iStationID NE 'PHFF' AND                                $
-   iStationID NE 'K7OL' AND                                $
+   iStationID NE 'K70L' AND                                $
    iStationID NE 'LISS') Then Begin
    Print,' **** Station ID error ****'
    goTo, endjob$
@@ -147,7 +153,8 @@ for i = 1,nTimeElements-1 do Begin                         ;Look for datagaps GT
     print,''
     print,'TimeStep: ',i-1,' =',contiguousTime[i-1],'    TimeStep: ',i,' =',contiguousTime[i] 
    ; read,prompt='*****File is non-contiguous. Repair? (Y/N): ',iAnswer
-    if keyword_set(repair) then iAnswer='Y' else iAnswer='N'
+   ; if keyword_set(repair) then iAnswer='Y' else iAnswer='N'
+    iAnswer='Y'
     if strLen(iAnswer) EQ 0 Then goTo,endJob$
     iAnswer = strMid(iAnswer,0,1)
     if iAnswer EQ 'N' OR  iAnswer EQ 'n' Then goTo,continueJob$
@@ -343,7 +350,7 @@ fcolorbar, Divisions=4, $
            CHARSIZE=2, format='(i)',$
            Position=[0.89,0.10,0.91,0.90],$
            min=drange[0],max=drange[1]
-stop
+
 ;b1 = IMAGE(spectralArray,x,y,                              $
 ;  rgb_Table=39,                                            $
 ;  Position=[0.05,0.10,0.85,0.90],                          $

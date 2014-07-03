@@ -4,7 +4,6 @@ event=load_events_info(label='110511_01')
 aia_cfa_teem_plot_em_ratios,event
 
 end
- 
 
 
 pro aia_cfa_teem_plot_em_ratios,event
@@ -101,6 +100,7 @@ loadct,0,/silent
 !y.range=[0,ny]
 !x.style=1
 !y.style=1
+!p.background=255
 plot,[0,0],[0,0],xticks=1,yticks=1,xminor=1,yminor=1
 ct=13
 rmin= 0.8;min(inmap/(basemap*1.0))
@@ -122,8 +122,8 @@ tv,bytscl(inmap/(basemap*1.0),min=rmin,max=rmax),0,0
 ;xyouts,0.85,0.96,dateobs,charsize=1.2,color=255,charthick=1,/norm
 loadct,ct,/silent
 fcolorbar, MIN=rmin,MAX=rmax,Divisions=8, $
-           Color=255,VERTICAL=1,RIGHT=1, TITLE='EM BASE RATIO  '+dateobs,$
-           CHARSIZE=2,format='(f3.1)',Position=[0.92, 0.03, 0.94, 0.97]
+           Color=0,VERTICAL=1,RIGHT=1, TITLE='EM BASE RATIO  '+dateobs,$
+           CHARSIZE=2,charthick=2,format='(f4.2)',Position=[0.92, 0.03, 0.94, 0.97]
 
 ;PNG file
 image_tv=tvrd(true=1)

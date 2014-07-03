@@ -100,7 +100,7 @@
 ;       1/12/99: Fixed a problem caused by RSI fixing a bug in IDL 5.2. Sigh... DWF.
 ;-
 
-PRO FCOLORBAR, BOTTOM=bottom, CHARSIZE=charsize, COLOR=color, DIVISIONS=divisions, $
+PRO FCOLORBAR, BOTTOM=bottom, CHARSIZE=charsize, CHARTHICK=charthick,COLOR=color, DIVISIONS=divisions, $
    FORMAT=format, POSITION=position, MAX=max, MIN=min, NCOLORS=ncolors, $
    PSCOLOR=pscolor, TITLE=title, VERTICAL=vertical, TOP=top, RIGHT=right
 
@@ -151,6 +151,7 @@ IF N_ELEMENTS(ncolors) EQ 0 THEN BEGIN
 ENDIF
 IF N_ELEMENTS(bottom) EQ 0 THEN bottom = 0B
 IF N_ELEMENTS(charsize) EQ 0 THEN charsize = 1.0
+IF N_ELEMENTS(charthick) EQ 0 THEN charthick = 1.0
 IF N_ELEMENTS(format) EQ 0 THEN format = '(F8.2)'
 IF N_ELEMENTS(color) EQ 0 THEN color = ncolors - 1 + bottom
 IF N_ELEMENTS(min) EQ 0 THEN min = 0.0
@@ -210,24 +211,24 @@ IF KEYWORD_SET(vertical) THEN BEGIN
    IF KEYWORD_SET(right) THEN BEGIN
 
       PLOT, [min,max], [min,max], /NODATA, XTICKS=1, $
-         YTICKS=divisions, XSTYLE=1, YSTYLE=9, $
-         POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
-         YTICKFORMAT='(A1)', XTICKFORMAT='(A1)', YTICKLEN=0.1 , $
-         YRANGE=[min, max], YTITLE=title
+            YTICKS=divisions, XSTYLE=1, YSTYLE=9, $
+            POSITION=position, COLOR=color, CHARSIZE=charsize, charthick=charthick, /NOERASE, $
+            YTICKFORMAT='(A1)', XTICKFORMAT='(A1)', YTICKLEN=0.1 , $
+            YRANGE=[min, max], YTITLE=title
 
       AXIS, YAXIS=1, YRANGE=[min, max], YTICKFORMAT=format, YTICKS=divisions, $
-         YTICKLEN=0.1, YSTYLE=1, COLOR=color, CHARSIZE=charsize
+         YTICKLEN=0.1, YSTYLE=1, COLOR=color, CHARSIZE=charsize,charthick=charthick
 
    ENDIF ELSE BEGIN
 
       PLOT, [min,max], [min,max], /NODATA, XTICKS=1, $
          YTICKS=divisions, XSTYLE=1, YSTYLE=9, $
-         POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
+         POSITION=position, COLOR=color, CHARSIZE=charsize,charthick=charthick, /NOERASE, $
          YTICKFORMAT=format, XTICKFORMAT='(A1)', YTICKLEN=0.1 , $
          YRANGE=[min, max]
 
       AXIS, YAXIS=1, YRANGE=[min, max], YTICKFORMAT='(A1)', YTICKS=divisions, $
-         YTICKLEN=0.1, YTITLE=title, YSTYLE=1, COLOR=color, CHARSIZE=charsize
+         YTICKLEN=0.1, YTITLE=title, YSTYLE=1, COLOR=color,charthick=charthick, CHARSIZE=charsize
 
    ENDELSE
 
@@ -237,18 +238,18 @@ ENDIF ELSE BEGIN
 
       PLOT, [min,max], [min,max], /NODATA, XTICKS=divisions, $
          YTICKS=1, XSTYLE=9, YSTYLE=1, $
-         POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
+         POSITION=position, COLOR=color,charthick=charthick, CHARSIZE=charsize, /NOERASE, $
          YTICKFORMAT='(A1)', XTICKFORMAT='(A1)', XTICKLEN=0.1, $
          XRANGE=[min, max], XTITLE=title
 
-      AXIS, XTICKS=divisions, XSTYLE=1, COLOR=color, CHARSIZE=charsize, $
+      AXIS, XTICKS=divisions, XSTYLE=1, COLOR=color,charthick=charthick, CHARSIZE=charsize, $
          XTICKFORMAT=format, XTICKLEN=0.1, XRANGE=[min, max], XAXIS=1
 
    ENDIF ELSE BEGIN
 
       PLOT, [min,max], [min,max], /NODATA, XTICKS=divisions, $
          YTICKS=1, XSTYLE=1, YSTYLE=1, $
-         POSITION=position, COLOR=color, CHARSIZE=charsize, /NOERASE, $
+         POSITION=position, COLOR=color, CHARSIZE=charsize,charthick=charthick, /NOERASE, $
          YTICKFORMAT='(A1)', XTICKFORMAT=format, XTICKLEN=0.1, $
          XRANGE=[min, max], TITLE=title
 

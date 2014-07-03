@@ -41,7 +41,7 @@ pro create_coronalshocks_page, fname, Exclude=exclude
   printf,lun,"<col width=65>"
   
   printf,lun,"<tr height=25>"
-  printf,lun,'<th align="center" colspan=19 height=25 width=920>OFF-LIMB CORONAL BRIGHT FRONTS DATABASE</th>'
+  printf,lun,'<th align="center" colspan=19 height=25 width=920>OFF-LIMB CORONAL BRIGHT FRONTS DATABASE (CURRENTLY '+strtrim(string(nev),2)+' EVENTS)</th>'
   printf,lun,"</tr>"
   
   printf,lun,'<tr height=1>'
@@ -49,7 +49,7 @@ pro create_coronalshocks_page, fname, Exclude=exclude
   printf,lun,'<th rowspan=2>Start (UT)</th>'
   printf,lun,'<th rowspan=2>End (UT)</th>'
   printf,lun,'<th rowspan=2>Flare Class</th>'
-  printf,lun,'<th rowspan=2>X (&quot;) <font color="red">East</font>/<font color="blue">West</font></th>'
+  printf,lun,'<th rowspan=2>X (&quot;) <font color="red">East</font>/ <font color="blue">West</font></th>'
   printf,lun,'<th rowspan=2>Y (&quot;)</th>'
   printf,lun,'<th rowspan=2>Filament Erupt</th>'
   printf,lun,'<th rowspan=2>Loop Erupt</th>'

@@ -51,8 +51,8 @@
 	"coordX": -939,
 	"coordY": 239,
 	"st": "2011/02/24 07:23:00",
-	"et": "2011/02/24 08:22:00",
-	"aiafov": [1024,1024],
+	"et": "2011/02/24 07:45:00",
+	"aiafov": [1024,2048],
 	"flareclass": "M3.5",
 	"typeII": true,
 	"loop": true,
@@ -67,7 +67,7 @@
 	"coordX": -859,
 	"coordY": -309,
 	"st": "2011/03/08 03:35:00",
-	"et": "2011/03/08 03:55:00",
+	"et": "2011/03/08 03:50:00",
 	"aiafov": [1024,2048],
 	"flareclass": "M1.5",
 	"typeII": true,
@@ -475,6 +475,22 @@
 	"filament": true,
 	"comment": "A fast filament eruption with no SEPs or type II, but an interesting shock wave formation seen in AIA/131 channel",
 	"ips_lookup": "",
+	"callisto_lookup": "",
+	"nrh_lookup": ""
+}
+{
+	"label": "110607_01",
+	"coordX": 611,
+	"coordY": -355,
+	"st": "2011/06/07 06:20:00",
+	"et": "2011/06/07 06:40:00",
+	"aiafov": [1024,2048],
+	"flareclass": "M2.5",
+	"typeII": true,
+	"loop": false,
+	"filament": true,
+	"comment": "The most epic explosion/CME/wave seen by AIA!",
+	"ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/learmonth/images/11/20110607spectrograph.gif",
 	"callisto_lookup": "",
 	"nrh_lookup": ""
 }

@@ -290,7 +290,16 @@ IDL> for w=0,n_elements(wav)-1 do aia_make_images,event,wav[w],/raw,/base,/run,/
 IDL> for w=0,n_elements(wav)-1 do aia_annulus_create,event,/raw,/base,/run,wav=wav[w],/force
         </code></pre>
         Running the above will create PNG files in CORWAV/events/110511_01/annulusplot/[type]/[wav]/, 
-        type being one of araw/abase/arun. <br>A base difference annulus image looks like this: <img src="png/aia_annplot_baseim.png" alt='AIA annulus base difference image'></p>
+        type being one of araw/abase/arun. You can also just make
+        images by running
+        <pre><code>
+IDL> for w=0,n_elements(wav)-1 do aia_annulus_plot,event,/raw,/base,/run,wav=wav[w]
+        </code></pre>
+This procedure has other functionality, such as specifying the
+        latitudinal and altitudinal ranges for the plots, as well as
+        overplotting the lines along which radial and latitudinal
+        measurements will be taken, for context.
+<br>A base difference annulus image looks like this: <img src="png/aia_annplot_baseim.png" alt='AIA annulus base difference image'></p>
         
         <p>Now that we have created some images, we can create time lapse movies from them, like so:
         <pre><code>
@@ -352,9 +361,9 @@ IDL> aia_cfa_teem_run,event,/remove_aec
 		<p>Next, the time series of EM and Tmax for particular regions around the EUV wave sheath can be extracted, assuming the wave kinematics measurements 
 		have been performed.</p>
 	    <pre><code>	
-IDL> aia_define_rois,event
+IDL> aia_define_rois,event  
         </code></pre>
-        <p>This procedure automatically positions 8 rectangular regions of interest (ROI) tangentially to the shock surface, four along the shocksurface for the middle time step, 
+        <p>This procedure automatically positions 8 rectangular regions of interest (ROI) tangentially to the shock surface, four along the shock surface for the middle time step, 
         and four along a radial direction outward from the eruption source, like in the following image. The results are saved in the 
         CORWAV/events/110511_01/ionization/ folder. </p>
         <img src="png/aia_dem_rois.png" alt='AIA ROIs for DEM analysis'>
@@ -370,7 +379,12 @@ IDL> aia_dem_analyze,event,trange=trange
         </code></pre>
         <p>Running this will produce individual PNG and SAV files for all selected regions in CORWAV/events/110511_01/dem/aschwanden/ with information on the time
         evolution of EM and Tmax. Here's a plot for one region for this particular event:</p>
-        <img src="png/aia_dem_result.png" alt='AIA DEM result' width=400>
+        <img src="png/aia_dem_result.png" alt='AIA EM result' width=400>
+<p>In addition, the user may create plots of the base emission measure base ratios (ratio of each EM image to the pre-event image) like the one below by running:</p>
+        <pre><code>	
+IDL> aia_cfa_teem_plot_em_ratios,event
+        </code></pre>
+<img src="png/aia_dem_em_ratios.png" alt='AIA EM base ratios' width=400>
         <p><h3>7.2 PFSS+CSGS</h3></p>
         <p>To obtain information about how efficient the shock wave may be in accelerating particles to high energies, we combine a 3D static model of the coronal magnetic fields
         with a 3D evolving model of the shock surface. The magnetic field model (<a href="http://adsabs.harvard.edu/abs/2003SoPh..212..165S" target="_blank">Schrijver and De Rosa, 2003</a>) 
@@ -409,7 +423,7 @@ IDL> pfss_shock_plot_thetabn_stats,event
     	<p>Finally, you can plot the coronal connectivity of the shock (all field lines that interact with the shock) for all time steps, using pfss_shock_plot_angular_influence. 
     	It will produce PFSS images with crossing field lines highlighted, in a face-on view. The images can also be done in a top-down view, if we specify the /topview keyword:</p>
     	<pre><code>	
-IDL> pfss_shock_plot_angular_influence,event(,/topview)
+IDL> pfss_shock_plot_angular_influence,event[,/topview]
     	</code></pre>
     	<img src="png/pfss_connectivity.png" alt='AIA PFSS+CSGS connectivity' width=400> <img src="png/pfss_connectivity_topview.png" alt='AIA PFSS+CSGS connectivity, top view' width=400>
 		<p>The top view has the advantage that it shows more readily the heliospheric connectivity, as well as the longitudinal range of magnetic field lines, which are nominally connected 
@@ -420,8 +434,17 @@ IDL> pfss_shock_plot_angular_influence,event(,/topview)
 <!-- --------SECTION 8----------- -->
         <section>
     	<h2 id="sec8"><b>8. Plotting radio and X-ray data.</b></h2>
-    	<p>Under Construction.</p>
-        <a href="#top">Top</a>
+    	<p>CorWav has procedures for plotting radio data from the eCallisto and RSTN catalogs, as well as from Nancay Radio Heliograph, and X-ray imaging data from RHESSI. The radio output files will be stored in the 'radio/' folder of the event(s).</p>
+        <p>To plot eCallisto data, you first need to download the fits files from <a href="http://soleil.i4ds.ch/solarradio/callistoQuicklooks/" target="_blank">the eCallisto website</a> for the dates you are interested in. Then save the data in the appropriate 'Callisto_data' folder, and you can plot them by running
+<pre><code>
+IDL> callisto_plot_spectra,event[,timerange=timerange,freqrange=freqrange]
+</code></pre></p>
+<p> To plot data from the Radio Solar Telescope Network (RSTN), first <a href="http://www.ngdc.noaa.gov/stp/space-weather/solar-data/solar-features/solar-radio/rstn-spectral/" target="_blank">download daily .srs files</a> from one of the five functioning stations (Learmonth, Palehua, San Vito, and Sagamore Hill). After that, you can run
+<pre><code>
+IDL> rstn_plot_spectrum,event[,full=full,frange=frange,trange=trange,datarange=datarange]
+</code></pre>
+The keywords of this procedure allow to plot the full data file, or choose time and frequency ranges, as well as a scaling of the plotted values. The default time range is set to be the same as the event's.</p>
+<a href="#top">Top</a>
         </section>        
 <!-- --------SECTION 9----------- -->
         <section>
@@ -429,9 +452,10 @@ IDL> pfss_shock_plot_angular_influence,event(,/topview)
     	<p><b>This section describes the process for the local CfA webpage only!</b></p>
     	<p>To update the web database page:<br>
     	    Run the procedure <b>sync_event_webfolders</b> to copy/update all data products to the webpage folders.<br>
-    	    Run the procedure <b>create_coronalshocks_page</b> to create/update the webpage. The filename to update/create is 'coronalwaves.content'.2<br>
+    	    Run the procedure <b>create_coronalshocks_page</b> to create/update the webpage. The filename to update/create is 'coronalwaves.content'.<br>
     	    Go to the web page main folder($CORWAV_WEB) and run the sync-ing script - <b>./sync_events</b><br>
-    	    Finally, run <b>svnlog HEAD</b> and add at the top of the text file ‘Approved by [YOURNAME]’. (ESC and then :wq to save and exit)</p>
+            Alternatively, instead of running the first two procedures, you can simply run the update_webpage procedure.
+    	    <!--Finally, run <b>svnlog HEAD</b> and add at the top of the text file ‘Approved by [YOURNAME]’. (ESC and then :wq to save and exit)--></p>
         <pre><code>
 IDL> sync_event_webfolders,event
 IDL> webpath=GETENV('CORWAV_WEB')
@@ -440,7 +464,6 @@ IDL> create_coronalshocks_page,webpath+fname
 
 $> cd $CORWAV_WEB
 $CORWAV_WEB$> ./sync_events
-$CORWAV_WEB$> svnlog HEAD
         </code></pre>
         <a href="#top">Top</a>
         </section>
