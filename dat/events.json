@@ -478,3 +478,19 @@
 	"callisto_lookup": "",
 	"nrh_lookup": ""
 }
+{
+	"label": "120424_01",
+	"coordX": -926,
+	"coordY": 207,
+	"st": "2012/04/24 07:35:00",
+	"et": "2012/04/24 07:55:00",
+	"aiafov": [1024,2048],
+	"flareclass": "C3.7",
+	"typeII": true,
+	"loop": false,
+	"filament": true,
+	"comment": "Reasonably sized filament driven eruption with clear type II signature in Callisto data",
+	"ips_lookup": "",
+	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2012/04/24/BIR_20120424_074500_01.fit.gz.png",
+	"nrh_lookup": ""
+}
