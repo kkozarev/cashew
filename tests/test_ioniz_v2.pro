@@ -4,7 +4,7 @@ pro test_ioniz_v2
 ;path='/home/kkozarev/Desktop/IONIZATION_RAYMOND/'
 ;restore,path+'ionization_times.idl'
   wdef,0,800
-  event=load_events_info(label='110511_01')
+  event=load_events_info(label='test')
   label=event.label
   date=event.date
   regs=['01','02','03','04','05','06','07','08']

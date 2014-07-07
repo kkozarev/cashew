@@ -6,7 +6,7 @@ pro test_aia_annulus_analyze
   if one eq 1 then begin
      wav='193'
      rrange=[1.11,1.34]
-     event=load_events_info(label='110511_01')
+     event=load_events_info(label='test')
      aia_annulus_analyze,event,wave=wav;,rrange=rrange ;,/interactive
   endif
   

@@ -7,7 +7,7 @@ pro test_aia_annulus_plot
   if one eq 1 then begin
      wav='193'
      rmax=1.45
-     event=load_events_info(label='110511_01')
+     event=load_events_info(label='test')
      aia_annulus_plot,event,wav=wav,/base,/run,/raw
   endif
     
@@ -134,14 +134,15 @@ pro aia_annulus_plot_main,event,datapath=datapath,savepath=savepath,thrange=thra
 ; MAIN TIME STEP LOOP!
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-  for step=0,nsteps-1 do begin
+lwr_img=0
+  for step=lwr_img,nsteps-1 do begin
      
      strind=strtrim(string(step),2)
      if strind lt 100 then strind='0'+strind
      if strind lt 10 then strind='0'+strind
      
 ; Setup Z-buffer for plotting
-        if step eq 0 then begin
+        if step eq lwr_img then begin
            set_plot, 'z'
            Device, Set_Resolution=[img_size[0], img_size[1]], set_pixel_depth=24, decomposed = 0
            ;!p.multi = 0
@@ -191,8 +192,11 @@ pro aia_annulus_plot_main,event,datapath=datapath,savepath=savepath,thrange=thra
            else: int_range = [min(plotimg), max(plotimg)]
         endcase
      endif else begin
-        int_range = [0,30]
+        ;int_range = [1,35]
+        int_range=[0.5,4.0]
      endelse
+     ;Plot the log of the image...
+     if keyword_set(raw) then plotimg=alog10(plotimg);plotimg=sqrt(plotimg)
      
      ; Define image title      
      if keyword_set(run) then begin
@@ -213,7 +217,7 @@ pro aia_annulus_plot_main,event,datapath=datapath,savepath=savepath,thrange=thra
                  title = img_tit, max = int_range[1], $
                  origin = [thrang[0]*180./!PI,r_in], charthick = chthick, charsize=chsize,$
                  scale = [ang_step, res/ind_arr[0].cdelt1], $
-                 pos = [0.12, 0.12, 0.96, 0.93], min = int_range[0]
+                 pos = [0.13, 0.14, 0.96, 0.92], min = int_range[0]
      
       htlimits=aia_rad_height_limits(degarray=x_deg_array)
       oplot,x_deg_array,htlimits,color=255,thick=2 ;,/data 
@@ -275,7 +279,6 @@ endif
                    prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_'+strind+'.png', $
                    TVRD(/true),r,g,b     
         
-
 endfor
   set_plot, 'x'
 ;----------------------------------------------------

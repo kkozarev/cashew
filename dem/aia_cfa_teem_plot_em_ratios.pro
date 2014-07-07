@@ -1,6 +1,6 @@
 pro test_aia_cfa_teem_plot_em_ratios
 ;Test procedure for aia_cfa_teem_plot_em_ratios
-event=load_events_info(label='110511_01')
+event=load_events_info(label='test')
 aia_cfa_teem_plot_em_ratios,event
 
 end
@@ -12,7 +12,7 @@ pro aia_cfa_teem_plot_em_ratios,event
   path=event.aschdempath
   fileset=file_basename(file_search(path+'aschdem_'+event.date+'_'+event.label+'*teem_map.sav'))
   nfiles=n_elements(fileset)
-  for ff=40, 45 do begin
+  for ff=0,nfiles-1 do begin
      res=strsplit(fileset[ff],'_',/extract)
      dateobs=res[4]
      infname=path+fileset[ff] ;'aschdem_'+event.date+'_'+event.label+'_'+dateobs+'_teem_map.sav'

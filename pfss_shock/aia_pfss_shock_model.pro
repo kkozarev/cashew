@@ -1,7 +1,7 @@
 pro test_aia_coronal_shock_model
 ;Test the shock modeling procedure
   
-  event=load_events_info(label='110511_01')
+  event=load_events_info(label='test')
   ;pfssfile=savepath+'pfss_results_20110511_110511_01_1.1Rs_dens_1.sav'
   aia_coronal_shock_model,event;,pfssfile=pfssfile
 end

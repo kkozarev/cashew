@@ -1,5 +1,5 @@
 pro test_pfss_dump_shock_parameters
-  event=load_events_info(label='110511_01')
+  event=load_events_info(label='test')
   dump_shock_parameters,event
 end
 

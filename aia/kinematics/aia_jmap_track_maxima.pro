@@ -2,7 +2,7 @@ pro test_aia_jmap_track_maxima
 ;Load the time height data and any additional information
 
 wave=['193']
-event=load_events_info(label='110511_01')
+event=load_events_info(label='test')
 path=event.savepath
 
 

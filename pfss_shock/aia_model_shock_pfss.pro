@@ -27,7 +27,7 @@ pro test_aia_model_shock_pfss
   compression=[1.13,2,4]     ;shock compression ratios.
   ;compression=4.00
   vshock=400.
-  event=load_events_info(label='110511_01')
+  event=load_events_info(label='test')
   
   ;Run the model here for all shock jump cases!
   for cc=0,n_elements(compression)-1 do begin

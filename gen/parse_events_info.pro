@@ -1,12 +1,12 @@
 pro test_parse_events_info
-
-parse_events_info,'dat/events.json'
+trunk=GETENV('CORWAV_TRUNK')
+parse_events_info,trunk+'dat/events.json'
 
 end
 
 
 
-pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=sts, ets=ets, typeII=typeII, loop=loop, filament=filament, comment=comment, flareclass=flareclass, aiafov=aiafov, nrh_lookup=nrh_lookup, callisto_lookup=callisto_lookup, ips_lookup=ips_lookup
+pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=sts, ets=ets, typeII=typeII, loop=loop, filament=filament, comment=comment, flareclass=flareclass, aiafov=aiafov, nrh_lookup=nrh_lookup, callisto_lookup=callisto_lookup, ips_lookup=ips_lookup,web=web
 ;PURPOSE:
 ;
 ;This procedure will parse the json object containing wave event information
@@ -56,7 +56,7 @@ pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=s
      tmp[0]=strtrim(strjoin(strsplit(tmp[0],'"',/extract),''),2)
      tmp[1]=strsplit(tmp[1],',$',/extract,/regex)
      tmp[1]=strtrim(strjoin(strsplit(tmp[1],'"',/extract),''),2)
-
+     
      if inObj eq 1 then begin
         case tmp[0] of
            'label': if cc eq 0 then labels=tmp[1] else labels=[labels,tmp[1]]
@@ -70,6 +70,7 @@ pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=s
            'loop': if cc eq 0 then loop=tmp[1] else loop=[loop,tmp[1]]
            'filament': if cc eq 0 then filament=tmp[1] else filament=[filament,tmp[1]]
            'comment': if cc eq 0 then comment=tmp[1] else comment=[comment,tmp[1]]
+           'web': if cc eq 0 then web=tmp[1] else web=[web,tmp[1]]
            'ips_lookup': if cc eq 0 then ips_lookup=tmp[1] else ips_lookup=[ips_lookup,tmp[1]]
            'callisto_lookup': if cc eq 0 then callisto_lookup=tmp[1] else callisto_lookup=[callisto_lookup,tmp[1]]
            'nrh_lookup': if cc eq 0 then nrh_lookup=tmp[1] else nrh_lookup=[nrh_lookup,tmp[1]]
@@ -83,6 +84,7 @@ pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=s
   coordY=fix(coordY)
   aiafov=fix(aiafov)
   
+  ;FIX THE BOOLEAN ELEMENTS
   ind=where(typeII eq 'true')
   if ind[0] ne -1 then typeII[ind]=1
   ind=where(typeII eq 'false')
@@ -98,7 +100,13 @@ pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=s
   ind=where(filament eq 'false')
   if ind[0] ne -1 then filament[ind]=0
   filament=fix(filament)
-  
+  ind=where(web eq 'true')
+  if ind[0] ne -1 then web[ind]=1
+  ind=where(web eq 'false')
+  if ind[0] ne -1 then web[ind]=0
+  web=fix(web)
+
+
 ;Finally, printous for test purposes.
 ;DEBUG
 ;  print,'|'+labels+'|'

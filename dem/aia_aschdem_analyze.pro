@@ -3,8 +3,8 @@ pro test_aia_dem_analyze
 ;The actual events and AIA channels which to measure...
   ;begstep=[25,30,10,30,20,5,35,1] ;these are the initial steps for which to run the algorithm
   ;endstep=[100,100,100,85,90,100,110,110] ;these are the final steps for which to run the algorithm
-  trange='2011-05-11T'+['02:15:00','02:31:00']
-  event=load_events_info(label='110511_01')
+  trange='2011-05-11T'+['02:32:00','02:34:00']
+  event=load_events_info(label='test')
   aia_dem_analyze,event,trange=trange
 end
 

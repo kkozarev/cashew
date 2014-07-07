@@ -18,7 +18,7 @@ pro test_aia_measure_ionization_times
 ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
-     event=load_events_info(label='110511_01')
+     event=load_events_info(label='test')
      for r=0,nratios-1 do begin
         iontimes=aia_measure_ionization_times(event,ratio=ratios[r])
         if r eq 0 then ionizTimes=fltarr(nratios,n_elements(iontimes))

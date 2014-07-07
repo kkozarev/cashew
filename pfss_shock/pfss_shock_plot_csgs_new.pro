@@ -1,6 +1,6 @@
 pro test_pfss_shock_plot_csgs
 ;Testing the CSGS model plotting procedure
-event=load_events_info(label='110511_01')
+event=load_events_info(label='test')
 pfss_shock_plot_csgs,event,/png
 end
 

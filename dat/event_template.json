@@ -11,6 +11,7 @@
 	"loop": false,
 	"filament": false,
 	"comment": "",
+	"web": false,
 	"ips_lookup": "",
 	"callisto_lookup": "",
 	"nrh_lookup": ""

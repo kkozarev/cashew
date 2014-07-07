@@ -2,7 +2,7 @@ pro test_aia_aschdem_save_subrois
  ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
-     event=load_events_info(label='110511_01')
+     event=load_events_info(label='test')
      aia_aschdem_save_subrois,event
   endif
   

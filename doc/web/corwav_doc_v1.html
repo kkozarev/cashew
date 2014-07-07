@@ -101,6 +101,7 @@ CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
 "loop": true,
 "filament": true,
 "comment": "Huge shock wave originates inside the limb, with clear lateral expansion.",
+"web": false,
 "ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/.../20110511spectrograph.gif",
 "callisto_lookup": "",
 "nrh_lookup": ""
@@ -156,13 +157,14 @@ CORWAV_WEB="/var/www/personal/kkozarev/public_html/"
 	    <pre><code>
 { 
 "comment": "Huge shock wave originates inside the limb, with clear lateral expansion.",
+"web": false,
 "ips_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/.../20110804spectrograph.gif",
 "callisto_lookup": "",
 "nrh_lookup": ""
 }
         </code></pre>  
         <p>The element "comment" holds a free-form comment on the appearance and any interesting features of the particular event, by (ideally) 
-        the person who submits it. 
+        the person who submits it. The "web" element is a tag specifying whether the event is ready to post on a website.
         The last three elments hold the urls or file names of quicklook plots of metric radio emission during the event, from three different 
         networks of solar radio observatories. 
         If no quicklook plots are available, this field should be left a blank string.</p>
