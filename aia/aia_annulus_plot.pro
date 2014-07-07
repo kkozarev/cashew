@@ -7,7 +7,7 @@ pro test_aia_annulus_plot
   if one eq 1 then begin
      wav='193'
      rmax=1.45
-     event=load_events_info(label='test')
+     event=load_events_info(label='110511_01')
      aia_annulus_plot,event,wav=wav,/base,/run,/raw
   endif
     
@@ -128,13 +128,13 @@ pro aia_annulus_plot_main,event,datapath=datapath,savepath=savepath,thrange=thra
   endif
 
 
-  ;wdef,0,
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; MAIN TIME STEP LOOP!
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 lwr_img=0
+
   for step=lwr_img,nsteps-1 do begin
      
      strind=strtrim(string(step),2)
@@ -195,8 +195,8 @@ lwr_img=0
         ;int_range = [1,35]
         int_range=[0.5,4.0]
      endelse
-     ;Plot the log of the image...
-     if keyword_set(raw) then plotimg=alog10(plotimg);plotimg=sqrt(plotimg)
+     ;Plot the sqrt of the image...
+     if keyword_set(raw) then plotimg=alog10(plotimg);plotimg=sqrt(plotimg);
      
      ; Define image title      
      if keyword_set(run) then begin
