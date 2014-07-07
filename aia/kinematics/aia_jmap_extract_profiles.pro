@@ -1,6 +1,6 @@
 pro test_aia_jmap_extract_profiles
   wave=['193']
-  event=load_events_info(label='110511_01')
+  event=load_events_info(label='test')
   aia_jmap_extract_profiles, event, WAV = wave
 end
 

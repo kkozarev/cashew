@@ -1,9 +1,7 @@
 pro test_aia_file_search
   
-  st='2013/01/15 01:01:07'
-  et='2013/01/15 01:03:10'
   wave='193'
-  event=load_events_info(label='110511_01')
+  event=load_events_info(label='110607_01')
   files=aia_file_search(event.st, event.et, wave,missing=missing,/check171,event=event)
   print,files
   

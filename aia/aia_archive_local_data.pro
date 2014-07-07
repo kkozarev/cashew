@@ -1,4 +1,4 @@
-pro aia_archive_local_data,force=force
+pro aia_archive_local_data,event=event,force=force
 ;PURPOSE:
 ;Copy AIA files from the CfA archive to the user's personal
 ;data archive (set in the $CORWAV_DATA global variable)
@@ -23,7 +23,7 @@ pro aia_archive_local_data,force=force
   locarc=getenv('CORWAV_DATA')+'AIA_data/'
   wave=['171','193','211','335','094','131']
   
-  events=load_events_info()
+  if keyword_set(event) then events=event else events=load_events_info()
   
   for ev=0,n_elements(events)-1 do begin
      event=events[ev]

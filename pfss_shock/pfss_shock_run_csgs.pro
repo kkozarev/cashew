@@ -32,7 +32,7 @@ pro test_pfss_shock_run_csgs
 ; A small procedure to run several instances of the coronal shock
 ; model.
   
-  event=load_events_info(label='110511_01')
+  event=load_events_info(label='test')
   pfss_shock_run_csgs,event;,/plot,/png
 
 end

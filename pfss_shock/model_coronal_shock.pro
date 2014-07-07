@@ -2,7 +2,7 @@ pro test_model_coronal_shock
 ;Test the shock modeling procedure
 
   path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
-  ev='110511_01'
+  ev='test'
   shockfile=path+ev+'/AIA_20110511_110511_01_193_shocklocations.sav'
   restore,shockfile
   

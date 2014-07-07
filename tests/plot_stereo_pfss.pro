@@ -1,6 +1,6 @@
 pro test_plot_stereo_pfss
   ;Test run the STEREO/PFSS overplotting routine
-  event=load_events_info(label='110511_01')
+  event=load_events_info(label='test')
   plot_stereo_pfss,event;,/saved
 end
 

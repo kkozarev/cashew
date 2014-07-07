@@ -35,7 +35,7 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
   trunk=GETENV('CORWAV_TRUNK')
 
 ;DEBUG
-  parse_events_info,trunk+'dat/events.json', labels=labels, coordX=coordX, coordY=coordY, sts=sts, ets=ets, typeII=typeII, loop=loop, filament=filament, comment=comment, flareclass=flareclass, aiafov=aiafov, nrh_lookup=nrh_lookup, callisto_lookup=callisto_lookup, ips_lookup=ips_lookup
+  parse_events_info,trunk+'dat/events.json', labels=labels, coordX=coordX, coordY=coordY, sts=sts, ets=ets, typeII=typeII, loop=loop, filament=filament, comment=comment, flareclass=flareclass, aiafov=aiafov, nrh_lookup=nrh_lookup, callisto_lookup=callisto_lookup, ips_lookup=ips_lookup,web=web
 ;DEBUG
   if keyword_set(label) then begin
      nerr=0
@@ -65,6 +65,7 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
      ets=ets[lind]
      typeII=typeII[lind]
      loop=loop[lind]
+     web=web[lind]
      filament=filament[lind]
      comment=comment[lind]
      flareclass=flareclass[lind]
@@ -96,7 +97,7 @@ webpath=webbasepath+'events/'
 ;----------------------------------------------------------------------------------------
 
 event={label:'',st:'',et:'',coordX:0,coordY:0,aiafov:intarr(2),hemisphere:'',date:'',$
-       arlon:0.,arlat:0.,geomcorfactor:0.,flareclass:'',typeII:0,loop:0,filament:0,comment:'',$
+       arlon:0.,arlat:0.,geomcorfactor:0.,flareclass:'',typeII:0,loop:0,filament:0,comment:'',web:0,$
        aia_datapath:'',nrh_datapath:'',rhessi_datapath:'',ips_datapath:'',callisto_datapath:'',$
        ips_lookup:'',callisto_lookup:'',nrh_lookup:'',$
        euvi_datapath:'',swap_datapath:'',pfss_datapath:'',savepath:'',webpath:'',$
@@ -125,6 +126,7 @@ events[ev].et=ets[ev]
 events[ev].typeII=typeII[ev]
 events[ev].loop=loop[ev]
 events[ev].filament=filament[ev]
+events[ev].web=web[ev]
 ;Field of view, in pixels
 events[ev].aiafov=aiafov[*,ev]
 events[ev].comment=comment[ev]

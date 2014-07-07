@@ -3,7 +3,7 @@ pro test_tan_boxes
 ;(time-dependent) shock surface
 ;Written by KAK, March 28, 2014
   path='/home/kkozarev/Desktop/IONIZATION_RAYMOND/'
-  event=load_events_info(label='110511_01')
+  event=load_events_info(label='test')
   wav='193'
   evnum=event.label
   label=event.label

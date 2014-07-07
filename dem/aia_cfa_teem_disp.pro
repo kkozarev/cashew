@@ -78,13 +78,13 @@ t1str	=string(te1,'(f3.1)')
 t2str	=string(te2,'(f3.1)')
 t3str	='6.0' &q3=(6.0-te1)/(te2-te1)
 t4str	='6.5' &q4=(6.5-te1)/(te2-te1)
-xyouts,1.95*nx,0.01*ny,t1str,size=2,color=255
-xyouts,1.95*nx,0.97*ny,t2str,size=2,color=0
-xyouts,1.95*nx,  q3*ny,t3str,size=2,color=255
-xyouts,1.95*nx,  q4*ny,t4str,size=2,color=255
-xyouts,1.05*nx,0.95*ny,'log(T!Dmax!N)',size=3,color=255
-xyouts,0.05*nx,0.95*ny,'log(EM!Dmax!N)',size=3,color=255
-xyouts,0.01*nx,0.01*ny,dateobs,size=2,color=255
+xyouts,1.95*nx,0.01*ny,t1str,size=2,color=255,charthick=2
+xyouts,1.95*nx,0.97*ny,t2str,size=2,color=0,charthick=2
+xyouts,1.95*nx,  q3*ny,t3str,size=2,color=255,charthick=2
+xyouts,1.95*nx,  q4*ny,t4str,size=2,color=255,charthick=2
+xyouts,1.05*nx,0.95*ny,'log(T!Dmax!N)',size=3,color=255,charthick=2
+xyouts,0.05*nx,0.95*ny,'log(EM!Dmax!N)',size=3,color=255,charthick=2
+xyouts,0.01*nx,0.01*ny,dateobs,size=2,color=255,charthick=2
 
 ;PNG file
 image_tv=tvrd(true=1)

@@ -1,6 +1,6 @@
 pro test_pfss_shock_plot_angular_influence
 ;Testing the CSGS angular influence plotting procedure
-event=load_events_info(label='110511_01')
+event=load_events_info(label='test')
 pfss_shock_plot_angular_influence,event,/topview
 ;pfss_shock_plot_angular_influence,event
 end

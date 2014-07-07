@@ -4,7 +4,7 @@ pro test_aia_cfa_teem_run
  ;You can run for one or several events, like this.
   one=1
   if one eq 1 then begin
-     events=load_events_info(label=['131106_01'])
+     events=load_events_info(label=['test'])
 ;    To do (1): '131107_01','131029_01','131119_01','131207_01'
 ;    To do (2): '110804_01','110809_01','110211_02','110128_01','110125_01','120728_01','121007_01'
 ;    Currently being calculated (remove when done): '131105_01', '130517_01', '130501_01'

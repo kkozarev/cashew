@@ -1,4 +1,4 @@
-pro update_webpage, Exclude=exclude 
+pro update_webpage, Exclude=exclude,webfilename=webfilename
 ;PURPOSE:
 ;This procedure will sync event folders and update the webpage
 ;
@@ -18,7 +18,6 @@ pro update_webpage, Exclude=exclude
 ;
 ;MODIFICATION HISTORY:
 ;Written by Alex Kendrick, 06/2014
-
 ;First update the proper webfolders
 
 events=load_events_info()
@@ -27,7 +26,7 @@ path=getenv('CORWAV_WEB')+'events/'
 if n_elements(exclude) eq 0 then begin
    for ev=0, n_elements(events)-1 do begin
       event=events[ev]
-      sync_event_webfolders, event
+      sync_event_webfolders, event,/force
    endfor
 endif else begin
 ;Exlude elements listed in the exclude array
@@ -50,10 +49,14 @@ endelse
 
    
 ;Now create the website
-fname='coronalwaves.content'
-print, "The exclude list is:"
-print, exclude
-create_coronalshocks_page,path+fname,exclude=exclude
+fname=path+'coronalwaves.content'
+if keyword_set(webfilename) then fname=webfilename
+if keyword_set(exclude) then begin
+   print, "The exclude list is:"
+   print, exclude
+endif
+
+create_coronalshocks_page,fname,exclude=exclude
 
 
 end

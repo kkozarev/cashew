@@ -4,7 +4,7 @@ pro test_aia_measure_wave_sphere
   profrange=[11,31]
   wavelength=['193','211']
   wav=wavelength[0]
-  event=load_events_info(label='110511_01')
+  event=load_events_info(label='test')
 aia_measure_wave_sphere,event,wav=wav
 end
 

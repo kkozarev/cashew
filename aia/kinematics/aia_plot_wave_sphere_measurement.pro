@@ -5,7 +5,7 @@ pro test_aia_plot_wave_sphere_measurement
 ;You can run for one event, like this.
   one=0
   if one eq 1 then begin
-     event=load_events_info(label='110511_01')
+     event=load_events_info(label='test')
      aia_plot_wave_sphere_measurement,event
   endif
   

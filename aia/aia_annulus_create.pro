@@ -3,7 +3,7 @@ pro test_aia_annulus_create
 ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
-     event=load_events_info(label='110511_01')
+     event=load_events_info(label='test')
      ;aia_annulus_create,event,/force
      ;aia_annulus_create,event,/force
      rrange=[1.0,1.3]
