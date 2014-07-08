@@ -7,7 +7,7 @@ pro test_aia_annulus_create
      ;aia_annulus_create,event,/force
      ;aia_annulus_create,event,/force
      rrange=[1.0,1.3]
-     aia_annulus_create,event,/base,/force
+     aia_annulus_create,event,/force
   endif
   
   
@@ -30,9 +30,11 @@ end
 
 
 pro aia_annulus_create,event,run=run,base=base,raw=raw,_extra=_extra
-  if keyword_set(raw) then aia_annulus_create_main, event, /raw, _extra=_extra
-  if keyword_set(base) then aia_annulus_create_main, event, /base, _extra=_extra
-  if keyword_set(run) then aia_annulus_create_main, event, /run, _extra=_extra
+  if keyword_set(raw) then aia_annulus_create_main, event, /raw, /remove_aec, _extra=_extra
+  if keyword_set(base) then aia_annulus_create_main, event, /base, /remove_aec, _extra=_extra
+  if keyword_set(run) then aia_annulus_create_main, event, /run, /remove_aec, _extra=_extra
+  if not keyword_set(run) and (not keyword_set(base)) and (not keyword_set(raw)) then $
+     aia_annulus_create_main, event, /remove_aec, _extra=_extra
 end 
 
 
@@ -364,7 +366,7 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
               postfix='raw'
            endelse
         endelse
-        if not dir_exist(savepath+folder+passband+'/') then spawn,'mkdir '+savepath+folder+passband+'/'
+        if not dir_exist(savepath+folder+passband+'/') then spawn,'mkdir -m 775 '+savepath+folder+passband+'/'
         
         write_png, savepath + folder + passband +'/' + $
                    prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_'+img_strind+'.png', $
