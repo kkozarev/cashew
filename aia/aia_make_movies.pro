@@ -211,11 +211,8 @@ tmpdir="$HOME/tmpdir_"+strtrim(string(fix(floor(randomn(2)*100000))),2)+'/'
 res=file_test(tmpdir,/directory)
 if res then spawn,'rm '+tmpdir+'*' $
 
-;For some reason /dev/anull does not work on Alex's computer,
-;commenting out for now and removing
-
-;else spawn,'mkdir '+tmpdir+'&> /dev/anull'
-else spawn,'mkdir '+tmpdir
+;else spawn,'mkdir -m 775 '+tmpdir+'&> /dev/anull'
+else spawn,'mkdir -m 775 '+tmpdir
 
 for ii=0,n_elements(imgs)-1 do begin
    img_strind=strtrim(string(ii+1),2)
@@ -252,7 +249,7 @@ end                             ; EOF
 
 ; Sample Link Setup Input
 ; # Create a temporary directory to house the symbolic links
-; mkdir tmp
+; mkdir -m 775 tmp
 ; # counter for incrementing the symbolic links
 ; @ argnum = 0
 ; # initialize the for-loop for png image files

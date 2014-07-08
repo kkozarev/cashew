@@ -1,6 +1,6 @@
 pro test_aia_cfa_teem_plot_em_ratios
 ;Test procedure for aia_cfa_teem_plot_em_ratios
-event=load_events_info(label='test')
+event=load_events_info(label='110511_01')
 aia_cfa_teem_plot_em_ratios,event
 
 end
@@ -123,7 +123,7 @@ tv,bytscl(inmap/(basemap*1.0),min=rmin,max=rmax),0,0
 loadct,ct,/silent
 fcolorbar, MIN=rmin,MAX=rmax,Divisions=8, $
            Color=0,VERTICAL=1,RIGHT=1, TITLE='EM BASE RATIO  '+dateobs,$
-           CHARSIZE=2,charthick=2,format='(f4.2)',Position=[0.92, 0.03, 0.94, 0.97]
+           CHARSIZE=2,charthick=2,format='(f4.2)',Position=[0.915, 0.03, 0.94, 0.97]
 
 ;PNG file
 image_tv=tvrd(true=1)

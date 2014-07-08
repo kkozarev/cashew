@@ -47,36 +47,36 @@ pro create_event_folders,event,web=web
   if size(event,/type) ne 8 then return
   path=event.savepath
   if keyword_set(web) then path=event.webpath
-  if not dir_exist(path) then spawn,'mkdir '+path
+  if not dir_exist(path) then spawn,'mkdir -m 775 '+path
 
 
   for f=0,n_elements(folders)-1 do begin
      folder=folders[f]
-     if not dir_exist(path+folder) then spawn,'mkdir '+path+folder
+     if not dir_exist(path+folder) then spawn,'mkdir -m 775 '+path+folder
      
      ;make the radio subfolders
      if folder eq 'radio' then $
         for i=0,n_elements(subfolders.radio)-1 do $
            if not dir_exist(path+folder+'/'+subfolders.radio[i]) then $
-              spawn,'mkdir '+path+folder+'/'+subfolders.radio[i]
+              spawn,'mkdir -m 775 '+path+folder+'/'+subfolders.radio[i]
      
      ;make the radio subfolders
      if folder eq 'annulusplot' then $
         for i=0,n_elements(subfolders.annulusplot)-1 do $
            if not dir_exist(path+folder+'/'+subfolders.annulusplot[i]) then $
-              spawn,'mkdir '+path+folder+'/'+subfolders.annulusplot[i]
+              spawn,'mkdir -m 775 '+path+folder+'/'+subfolders.annulusplot[i]
      
      ;make the png subfolders
      if folder eq 'png' then $
         for i=0,n_elements(subfolders.png)-1 do $
            if not dir_exist(path+folder+'/'+subfolders.png[i]) then $
-              spawn,'mkdir '+path+folder+'/'+subfolders.png[i]
+              spawn,'mkdir -m 775 '+path+folder+'/'+subfolders.png[i]
      
      ;make the dem subfolders
      if folder eq 'dem' then $
         for i=0,n_elements(subfolders.dem)-1 do $
            if not dir_exist(path+folders[f]+'/'+subfolders.dem[i]) then $
-              spawn,'mkdir '+path+folders[f]+'/'+subfolders.dem[i]
+              spawn,'mkdir -m 775 '+path+folders[f]+'/'+subfolders.dem[i]
   endfor
 
 print,''

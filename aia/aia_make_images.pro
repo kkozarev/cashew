@@ -184,7 +184,7 @@ pro aia_make_images, event, wave, savepath=savepath,force=force,raw=raw,base=bas
 
         finsavpath=savepath+imgtype+'/'+wav+'/'
         if not dir_exist(finsavpath) then begin
-           spawn,'mkdir '+finsavpath
+           spawn,'mkdir -m 775 '+finsavpath
         endif
         infname='normalized_AIA_'+date+'_'+event.label+'_'+wav+'_subdata_'+imgtype+'_'+ind+'.png'
         write_png,finsavpath+infname,image,rr,gg,bb

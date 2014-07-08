@@ -46,15 +46,15 @@ pro sync_event_webfolders,event,force=force
   if size(event,/type) ne 8 then return
   
   events_path=getenv('CORWAV_WEB')+'events/'
-  if not dir_exist(events_path) then spawn, 'mkdir '+events_path
+  if not dir_exist(events_path) then spawn, 'mkdir -m 775 '+events_path
   
   path=event.webpath
   
-  if not dir_exist(path) then spawn,'mkdir '+path
+  if not dir_exist(path) then spawn,'mkdir -m 775 '+path
 
   for f=0,n_elements(folders)-1 do begin
      folder=folders[f]
-     if not dir_exist(path+folder) then spawn,'mkdir '+path+folder
+     if not dir_exist(path+folder) then spawn,'mkdir -m 775 '+path+folder
      
      if folder eq 'kinematics' then begin
         files = file_search(path+folder, '*.png')
@@ -92,7 +92,7 @@ pro sync_event_webfolders,event,force=force
      if folder eq 'radio' then begin
         for i=0,n_elements(subfolders.radio)-1 do $
            if not dir_exist(path+folder+'/'+subfolders.radio[i]) then $
-              spawn,'mkdir '+path+folder+'/'+subfolders.radio[i]
+              spawn,'mkdir -m 775 '+path+folder+'/'+subfolders.radio[i]
 
         files = file_search(path+folder+'/'+subfolders.radio[0]+'/*.png')
         if files[0] eq '' or keyword_set(force) then $
@@ -139,7 +139,7 @@ pro sync_event_webfolders,event,force=force
      if folder eq 'dem' then begin
         for i=0,n_elements(subfolders.dem)-1 do $
            if not dir_exist(path+folder+'/'+subfolders.dem[i]) then $
-              spawn,'mkdir '+path+folder+'/'+subfolders.dem[i]
+              spawn,'mkdir -m 775 '+path+folder+'/'+subfolders.dem[i]
         files = file_search(path+folder+'/'+subfolders.dem[0]+'/aschdem*series*.png')
         if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.aschdempath+'aschdem*series*.png '+path+folder+'/'+subfolders.dem[0]
