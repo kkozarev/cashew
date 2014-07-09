@@ -1,4 +1,5 @@
-pro update_webpage, All=all, webfilename=webfilename
+pro update_webpage, All=all, webfilename=webfilename,_extra=_extra
+
 ;PURPOSE:
 ;This procedure will sync event folders and update the webpage
 ;
@@ -47,5 +48,8 @@ endif else begin
 endelse
 
 
+;Finally, sync the data files into the actual website location. 
+;This is CfA specific.
+spawn,getenv('CORWAV_WEB')+'../sync_events'
 
 end
