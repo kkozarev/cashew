@@ -1,4 +1,4 @@
-pro update_webpage, Exclude=exclude,webfilename=webfilename
+pro update_webpage, exclude=exclude,webfilename=webfilename,_extra=_extra
 ;PURPOSE:
 ;This procedure will sync event folders and update the webpage
 ;
@@ -58,5 +58,8 @@ endif
 
 create_coronalshocks_page,fname,exclude=exclude
 
+;Finally, sync the data files into the actual website location. 
+;This is CfA specific.
+spawn,getenv('CORWAV_WEB')+'../sync_events'
 
 end
