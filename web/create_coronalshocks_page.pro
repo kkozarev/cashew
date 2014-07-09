@@ -7,12 +7,13 @@ end
 
 
 
-pro create_coronalshocks_page, fname, Exclude=exclude
+pro create_coronalshocks_page, fname, All=all
   close,/all
-;Load all the events info
+  ;Load all the events info
   events=load_events_info()
-  nev=n_elements(events)
-  
+
+  nev = n_elements(where(events[*].web eq 1))
+     
 ;Order the events by time
   tmpind=reverse(sort(anytim(events.st,/sec)))
   events=events[tmpind]
@@ -75,14 +76,11 @@ pro create_coronalshocks_page, fname, Exclude=exclude
   for ev=0,n_elements(events)-1 do begin
      event=events[ev]
      skip=0
-     if n_elements(exclude) ne 0 then begin
-        for i=0, n_elements(exclude)-1 do begin
-           if event.label eq exclude[i] then begin
-              skip=1
-           endif
-        endfor
-        if skip eq 1 then continue
-     endif
+     ;Check to see if the web flag is set, if false skip event
+     if (~keyword_set(all)) then begin
+        if event.web eq 0 then skip=1
+     endif 
+     if skip eq 1 then continue
      tmp=strsplit(event.st,' ',/extract)
      dt=tmp[0]
      st=strmid(tmp[1],0,5)
@@ -101,7 +99,7 @@ pro create_coronalshocks_page, fname, Exclude=exclude
         printf,lun,'<td>No</td>'
      if event.loop eq 1 then printf,lun,'<td>Yes</td>' else $
         printf,lun,'<td>No</td>'
-
+     
 ;This will be replaced by self-generated Callisto plots soon.
 ;     if event.callisto_lookup eq '' then printf,lun,'<td>&nbsp;</td>' else $
 ;        printf,lun,'<td><a href='+event.callisto_lookup+' target="_blank">eCallisto</a></td>'
@@ -109,54 +107,56 @@ pro create_coronalshocks_page, fname, Exclude=exclude
      if file_exist(event.webpath+'radio/Callisto/callisto_'+event.date+'_'+event.label+'_spectrum.png') then $
         printf,lun,'<td><a href="'+pngname+'" target="_blank">eCallisto</a></td>' else $
            printf,lun,'<td>&nbsp;</td>'
-
+     
      if event.nrh_lookup eq '' then printf,lun,'<td>&nbsp;</td>' else $
         printf,lun,'<td><a href='+event.nrh_lookup+' target="_blank">NRH</a></td>'
      if event.ips_lookup eq '' then printf,lun,'<td>&nbsp;</td>' else $
         printf,lun,'<td><a href='+event.ips_lookup+' target="_blank">IPS</a></td>'
- 
-     ;The Raw movie
+     
+                                ;The Raw movie
      movname='events/'+event.label+'/movies/raw_193_'+event.label+'.mp4'
      if file_exist(event.webpath+'movies/raw_193_'+event.label+'.mp4') then $
         printf,lun,'<td><a href="'+movname+'" target="_blank">RAW</a></td>' else $
            printf,lun,'<td>&nbsp;</td>'
-     ;The Running difference movie
+                                ;The Running difference movie
      movname='events/'+event.label+'/movies/run_193_'+event.label+'.mp4'
      if file_exist(event.webpath+'movies/run_193_'+event.label+'.mp4') then $
         printf,lun,'<td><a href="'+movname+'" target="_blank">RDIFF</a></td>' else $
            printf,lun,'<td>&nbsp;</td>'
-     ;The Annulusplot Raw movie
+                                ;The Annulusplot Raw movie
      movname='events/'+event.label+'/movies/araw_193_'+event.label+'.mp4'
      if file_exist(event.webpath+'movies/araw_193_'+event.label+'.mp4') then $
         printf,lun,'<td><a href="'+movname+'" target="_blank">ARAW</a></td>' else $
            printf,lun,'<td>&nbsp;</td>'
-     ;The Annulusplot Running difference movie
+                                ;The Annulusplot Running difference movie
      movname='events/'+event.label+'/movies/arun_193_'+event.label+'.mp4'
      if file_exist(event.webpath+'movies/arun_193_'+event.label+'.mp4') then $
         printf,lun,'<td><a href="'+movname+'" target="_blank">ARDIFF</a></td>' else $
            printf,lun,'<td>&nbsp;</td>'
      
-     ;The deprojected kinematics radial figure
+                                ;The deprojected kinematics radial figure
      pngname='events/'+event.label+'/annulusplot/annplot_'+event.date+'_'+event.label+'_193_radial.png'
      if file_exist(event.webpath+'annulusplot/annplot_'+event.date+'_'+event.label+'_193_radial.png') then $
         printf,lun,'<td><a href="'+pngname+'" target="_blank">PNG</a></td>' else $
            printf,lun,'<td>&nbsp;</td>'
-     ;The deprojected kinematics tangential figure
+                                ;The deprojected kinematics tangential figure
      printf,lun,'<td>&nbsp;</td>'
      
-     ;The Aschwanden DEM movie
+                                ;The Aschwanden DEM movie
      movname='events/'+event.label+'/movies/aschdem_'+event.date+'_'+event.label+'.mp4'
      if file_exist(event.webpath+'movies/aschdem_'+event.date+'_'+event.label+'.mp4') then $
         printf,lun,'<td><a href="'+movname+'" target="_blank">DEM</a></td>' else $
            printf,lun,'<td>&nbsp;</td>'
      
-     ;The PFSS/Shock movie
+                                ;The PFSS/Shock movie
      movname='events/'+event.label+'/movies/aia_pfss_shock_'+event.date+'_'+event.label+'.mp4'
      if file_exist(event.webpath+'movies/aia_pfss_shock_'+event.date+'_'+event.label+'.mp4') then $
         printf,lun,'<td><a href="'+movname+'" target="_blank">PSHOCK</a></td>' else $
            printf,lun,'<td>&nbsp;</td>'
      
      printf,lun,'</tr>'
+     
+     
   endfor
   printf,lun,'</font>'
   printf,lun,'</table>'
