@@ -129,7 +129,7 @@ function get_local_maxima, column,dist,yind=yind,gaussfit=gaussfit
 ; For some strange reason I am receiving a compile time error when I
 ; include the nterms=6 argument to gaussfit. Looking at documenation
 ; it looks like it defaults to nterms=6 anyways so I'm removing
-; this for nowt
+; this for now
 
 ;           res=gaussfit(locy,locarr,aa,nterms=6)
            res=gaussfit(locy,locarr,aa)
