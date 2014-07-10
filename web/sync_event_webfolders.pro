@@ -127,9 +127,9 @@ pro sync_event_webfolders,event,force=force
         files=file_search(path+folder+'/raw*193*.mp4')
         if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.moviepath+'raw*193*.mp4 '+path+folder
-        files=file_search(path+folder+'/aschdem*.mp4')
+        files=file_search(path+folder+'/aschdem*_teem_map.mp4')
         if files[0] eq '' or keyword_set(force) then $
-           spawn,'cp '+event.moviepath+'aschdem*.mp4 '+path+folder
+           spawn,'cp '+event.moviepath+'aschdem*_teem_map.mp4 '+path+folder
         files=file_search(path+folder+'/pfss_shock*.mp4')
         if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.moviepath+'pfss_shock*.mp4 '+path+folder

@@ -75,12 +75,10 @@ pro create_coronalshocks_page, fname, All=all
 ;Write the second part, containing the data for each event
   for ev=0,n_elements(events)-1 do begin
      event=events[ev]
-     skip=0
+
      ;Check to see if the web flag is set, if false skip event
-     if (~keyword_set(all)) then begin
-        if event.web eq 0 then skip=1
-     endif 
-     if skip eq 1 then continue
+     if not keyword_set(all) then if event.web eq 0 then continue
+     ;Otherwise, continue
      tmp=strsplit(event.st,' ',/extract)
      dt=tmp[0]
      st=strmid(tmp[1],0,5)
@@ -143,8 +141,8 @@ pro create_coronalshocks_page, fname, All=all
      printf,lun,'<td>&nbsp;</td>'
      
                                 ;The Aschwanden DEM movie
-     movname='events/'+event.label+'/movies/aschdem_'+event.date+'_'+event.label+'.mp4'
-     if file_exist(event.webpath+'movies/aschdem_'+event.date+'_'+event.label+'.mp4') then $
+     movname='events/'+event.label+'/movies/aschdem_'+event.date+'_'+event.label+'_teem_map.mp4'
+     if file_exist(event.webpath+'movies/aschdem_'+event.date+'_'+event.label+'_teem_map.mp4') then $
         printf,lun,'<td><a href="'+movname+'" target="_blank">DEM</a></td>' else $
            printf,lun,'<td>&nbsp;</td>'
      
