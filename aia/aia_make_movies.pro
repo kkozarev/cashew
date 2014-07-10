@@ -62,13 +62,17 @@ pro aia_make_movies, event, wav=wav, FRAMES_PER_SECOND = frames_per_second, PATH
 ;            'araw', 'abase', 'arun' - raw or base/running difference from
 ;                                the deprojected data
 ;            'teem' - The Aschwanden DEM maps.
+;            'em_baseratio' - Plot a base ratio of the Aschwanden
+;                             model EM.
 ;            'pfss_shock' - the PFSS/Shock model images
 ;            'thetabn' - the plots of ThetaBN angle as a
 ;                         function of the shock surface position
 ;            'thetabn_cumulative' - the plots of cumulative ThetaBN angle as a
 ;                         function of the shock surface position
 ;            'pfss_spread' - the plots of PFSS interacting field lines
-;                            showing the angular spread of shock influence
+;                            showing the angular spread of shock
+;                            influence
+
 ;
 ;            Default is 'raw'
 ;	WAV: wavelength of the AIA channel, 
@@ -88,7 +92,8 @@ pro aia_make_movies, event, wav=wav, FRAMES_PER_SECOND = frames_per_second, PATH
 ;Written by Michael Hammer - 07/2013
 ;Kamen Kozarev, 11/20/2013 - Integrated into the framework, added
 ;                            event structure
-;
+;Kamen Kzoarev, 07/09/2014 - Added EM base ratio movie making.
+
 
 ; Determine Frames Per Second
 if not keyword_set(FRAMES_PER_SECOND) then fps = '10' else fps=frames_per_second
@@ -142,9 +147,18 @@ if movie_type eq 'teem' then begin
    ;The png image files
    imgfnames = savepath + pngfname + '_%06d_teem_map.png'
    imgsearch = savepath + pngfname + '_*_teem_map.png'
-   moviefname = movie_path + pngfname + '.mp4'
+   moviefname = movie_path + pngfname + '_teem_map.mp4'
 endif
 
+if movie_type eq 'em_baseratio' then begin
+   savepath=event.aschdempath
+   movie_path=event.moviepath
+   pngfname='aschdem_'+date+'_'+label
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%06d_teem_em_ratios.png'
+   imgsearch = savepath + pngfname + '_*_teem_em_ratios.png'
+   moviefname = movie_path + pngfname + '_teem_em_ratios.mp4'
+endif
 
 if movie_type eq 'pfss_shock' then begin
    savepath=event.pfsspath

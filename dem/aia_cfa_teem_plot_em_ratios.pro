@@ -1,6 +1,6 @@
 pro test_aia_cfa_teem_plot_em_ratios
 ;Test procedure for aia_cfa_teem_plot_em_ratios
-event=load_events_info(label='110511_01')
+event=load_events_info(label='140331_01')
 aia_cfa_teem_plot_em_ratios,event
 
 end
@@ -19,7 +19,6 @@ pro aia_cfa_teem_plot_em_ratios,event
      outfname=path+'aschdem_'+event.date+'_'+event.label+'_'+dateobs+'_teem_em_ratios.png'
      basefname=path+fileset[0]
      aia_cfa_teem_plot_em_ratios_main,infname,outfname,basefname,te_range,dateobs
-     
   endfor
 
 end
@@ -71,7 +70,6 @@ nx	=dim(1)
 ny	=dim(2)
 inmap=10^em_map
 
-
 ;rebin small images
 ;nx	=nx_
 ;ny	=ny_
@@ -90,7 +88,7 @@ inmap=10^em_map
 
 ;display
 ;window,0,xsize=nx,ysize=ny
-device, set_resolution=[nx*1.15,ny], SET_PIXEL_DEPTH=24, DECOMPOSED=0
+device, set_resolution=[nx*1.2,ny], SET_PIXEL_DEPTH=24, DECOMPOSED=0
 
 !p.font=0
 tvlct,rr,gg,bb,/get
@@ -123,12 +121,12 @@ tv,bytscl(inmap/(basemap*1.0),min=rmin,max=rmax),0,0
 loadct,ct,/silent
 fcolorbar, MIN=rmin,MAX=rmax,Divisions=8, $
            Color=0,VERTICAL=1,RIGHT=1, TITLE='EM BASE RATIO  '+dateobs,$
-           CHARSIZE=2,charthick=2,format='(f4.2)',Position=[0.915, 0.03, 0.94, 0.97]
+           CHARSIZE=2,charthick=2,format='(f4.2)',Position=[0.905, 0.03, 0.94, 0.97]
 
 ;PNG file
 image_tv=tvrd(true=1)
 write_png,outfname,image_tv,rr,gg,bb
-print,'file written : ',outfname+'.png'
+print,'file written : ',outfname
 
 loadct,0,/silent
 set_plot,'x'
