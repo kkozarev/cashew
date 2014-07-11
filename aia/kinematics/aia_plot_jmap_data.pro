@@ -46,6 +46,11 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
   AXIS, XAXIS=1,XRANGE=xrange, /SAVE, color=0,xthick=3,xticks=6,xtickformat='(A1)',xstyle=1
  
   if keyword_set(fitrange) then begin
+     
+     find_start_end, times, rad, data, xrange=xrange,yrange=yrange,ct=ct,min=min,max=max,fitrange=fitrange,_extra=extra
+     
+     stop
+
      print,''
      print,'Select starting point:'
      cursor,x,y,/down,/data
