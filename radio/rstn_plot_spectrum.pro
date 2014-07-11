@@ -1,10 +1,10 @@
 pro test_rstn_plot_spectrum
 ;fname='./LM110511.SRS'
-event=load_events_info(label='130517_01')
+event=load_events_info(label='131212_01')
 frange=[30,120]
 datarange=[30,150]
 ;rstn_plot_spectrum,event,frange=frange,trange=['2011/05/11 02:25:00','2011/05/11 02:43:00'],datarange=datarange,/repair
-rstn_plot_spectrum,event,/full
+rstn_plot_spectrum,event,datarange=datarange;,/full
 end
 
 
@@ -45,9 +45,10 @@ endif
 inputFileName=path+files[0]
 If strLen(inputFileName) EQ 0 Then goTo, endJob$
 Print,' SRS File: ',inputFileName
-tmp=strmid(file_basename(inputFileName),0,2)
+tmp=strupcase(strmid(file_basename(inputFileName),0,2))
 case tmp of
    'PA': iStationID='PHFF'
+   'KP': iStationID='PHFF'
    'LM': iStationID='APLM'
    'HO': iStationID='KHMN'
    'K7': iStationID='K70L'
@@ -327,6 +328,7 @@ loadct,39,/silent
 !p.position=[0.01,0.12,0.9,0.90]
 !p.background=255
 !p.color=0
+tvlct,rr,gg,bb,/get
 drange=[0,255]
 if keyword_set(datarange) then begin
    drange[0]=datarange[0]
@@ -350,6 +352,10 @@ fcolorbar, Divisions=4, $
            CHARSIZE=2, format='(i)',$
            Position=[0.89,0.10,0.91,0.90],$
            min=drange[0],max=drange[1]
+
+fname=event.ipspath+'rstn_spectrum_'+event.date+'_'+event.label+'.png'
+write_png,fname,tvrd(/true),rr,gg,bb
+
 
 ;b1 = IMAGE(spectralArray,x,y,                              $
 ;  rgb_Table=39,                                            $

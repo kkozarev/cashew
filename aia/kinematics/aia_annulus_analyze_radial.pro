@@ -283,7 +283,6 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
   ht_km=yarr*DIST_FACTOR*height
   if mind eq 0 then wdef,datastruct.winind,datastruct.winsize[0],datastruct.winsize[1]
 
-  
   !P.position=[0.18,0.17,0.9,0.9]
   fitrange=intarr(2)
   aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
