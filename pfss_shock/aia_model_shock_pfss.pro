@@ -79,7 +79,7 @@ pro aia_model_shock_pfss,event,wav=wav,shockcomp=shockcomp,plot=plot,png=png,vup
         datapath=savepath
         pfsspath=event.pfsspath
         
-        pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_1.05Rs_dens_0.5.sav'
+        pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav'
         shockfile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed.sav'
         
         print,'Loading AIA File '+datapath+'normalized_'+eventname+'_subdata.sav'
@@ -118,9 +118,6 @@ pro aia_model_shock_pfss,event,wav=wav,shockcomp=shockcomp,plot=plot,png=png,vup
         
         
      endif else begin
-        ;restore,'/Users/kkozarev/AIA/pfss_results_'+date+'_1.0Rs_dens_1.sav'
-        ;restore,'/Users/kkozarev/AIA/pfss_results_'+date+'_1.1Rs_dens_2.sav'
-        ;restore,'/Users/kkozarev/AIA/pfss_results_'+date+'_1.1Rs.sav'
      endelse
   endelse
 ;--------------------------------------------------------------

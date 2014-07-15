@@ -4,16 +4,17 @@ pro test_pfss_return_field
 ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
-     event=load_events_info(label='130517_01')
+     event=load_events_info(label='110511_01')
      date=event.st
      aia_carrington_latlon,event,lat,lon
      aclon=lon+event.arlon
      aclat=lat+event.arlat
-     box=[aclon-90.,aclat-90.,aclon+90.,aclat+90.]
+     ;box=[aclon-90.,aclat-90.,aclon+90.,aclat+90.]
      ;box=[aclon-45.,aclat-45.,aclon+45.,aclat+45.]
-     
-     pfss_return_field,date,invdens=0.5,/save,event=event;,box=box
-     ;pfss_return_field,date,invdens=8,/save,path=event.pfsspath,event=event;,box=box
+     ;pfss_return_field,event,invdens=0.5,/save;,box=box
+                                ;pfss_return_field,date,invdens=0.5,/save,event=event;,box=box
+                                ;pfss_return_field,date,invdens=8,/save,path=event.pfsspath,event=event;,box=box
+     pfss_return_field,event,/save
   endif
   
   
@@ -28,11 +29,21 @@ pro test_pfss_return_field
      endfor
   endif
 
-
-
 end
 
-pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct=pfss_struct,save=save,path=path,box=box
+
+pro pfss_return_field,event,lores=lores,hires=hires,_extra=_extra
+  date=event.st
+  all=0
+  if (not keyword_set(hires)) and (not keyword_set(lores)) then all=1
+  if (keyword_set(lores)) or (all eq 1) then pfss_return_field_main,date,event=event,/lores,_extra=_extra
+  if (keyword_set(hires)) or (all eq 1) then pfss_return_field_main,date,event=event,/hires,_extra=_extra
+end
+
+
+
+pro pfss_return_field_main,date,event=event,rstart=rstart,invdens=invdens,pfss_struct=pfss_struct,$
+                           save=save,path=path,box=box,lores=lores,hires=hires,_extra=_extra
 ;PURPOSE:
 ; Return the PFSS field model
 ;CATEGORY:
@@ -59,12 +70,9 @@ pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct
 ;                                        model coverage
 ;
 
-
-;date='2011-01-25'
-;/Users/kkozarev/AIA/algoTests/yaftawave/normalized_AIA_20110125_05_193_subdata.sav
 ;Set up the common block variables
 @pfss_data_block
-;stop
+
 ;spherical_to_pfss,pfssData
   if n_elements(date) eq 0 then begin
      print,'You need to supply a date string, like "2011-01-25"'
@@ -74,18 +82,25 @@ pro pfss_return_field,date,event=event,rstart=rstart,invdens=invdens,pfss_struct
   pfss_restore,pfss_time2file(date,/ssw_cat,/url)
 
 ;Set the save path
-if not keyword_set(path) then path=event.pfsspath  
+if not keyword_set(path) then begin
+   if keyword_set(event) then path=event.pfsspath else path='./'
+endif
 ;  starting points to be on a regular grid covering the full disk,
-;  with a starting radius of r=1.00 Rsun
+;  with a starting radius of r=1.05 Rsun
   if not keyword_set (rstart) then rstart=1.05
 ;  factor inverse to line density, i.e. lower values = more lines
-  if not keyword_set(invdens) then invdens = 4 
+  if not keyword_set(invdens) then begin 
+     invdens = 8
+     if keyword_set(hires) then invdens=0.5
+     if keyword_set(lores) then invdens=4
+  endif
+  
+  
   if keyword_set(box) then $
      pfss_field_start_coord,5,invdens,radstart=rstart,bbox=box $
   else $
      pfss_field_start_coord,5,invdens,radstart=rstart
-  
-;stop
+ 
 
 ;  trace the field lines passing through the starting point arrays
   pfss_trace_field, kind
@@ -135,6 +150,9 @@ if not keyword_set(path) then path=event.pfsspath
 pfss_get_chfootprint,openfield,/quiet,/usecurrent,spacing=invdens;,/close
 
 ;Save the structure and Carrington coordinates of SDO to a sav file:
+stringres='lores'
+if keyword_set(hires) then stringres='hires'
+
   if keyword_set(save) then begin
      if not keyword_set(event) then begin
         res=strsplit(date,'/ ',/extract)
@@ -142,8 +160,10 @@ pfss_get_chfootprint,openfield,/quiet,/usecurrent,spacing=invdens;,/close
         fname='pfss_results_'+dat+'_'+strtrim(string(rstart,format='(f4.2)'),2)+'Rs_dens_'+strtrim(string(invdens,format='(f3.1)'),2)+'.sav'
      endif else begin
         dat=event.date        
-        fname='pfss_results_'+dat+'_'+event.label+'_'+strtrim(string(rstart,format='(f4.2)'),2)+'Rs_dens_'+strtrim(string(invdens,format='(f3.1)'),2)+'.sav'
+        ;fname='pfss_results_'+dat+'_'+event.label+'_'+strtrim(string(rstart,format='(f4.2)'),2)+'Rs_dens_'+strtrim(string(invdens,format='(f3.1)'),2)+'.sav'
+        fname='pfss_results_'+dat+'_'+event.label+'_'+stringres+'.sav'
      endelse
+     
      save,sph_data,openfield,nstep,filename=path+fname,kind,/comm,/variables,/compress
   endif
 end

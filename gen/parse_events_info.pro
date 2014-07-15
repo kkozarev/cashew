@@ -6,7 +6,7 @@ end
 
 
 
-pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=sts, ets=ets, typeII=typeII, loop=loop, filament=filament, comment=comment, flareclass=flareclass, aiafov=aiafov, nrh_lookup=nrh_lookup, callisto_lookup=callisto_lookup, ips_lookup=ips_lookup,web=web
+pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=sts, ets=ets, typeII=typeII, loop=loop, filament=filament, comment=comment, flareclass=flareclass, aiafov=aiafov, nrh_lookup=nrh_lookup, callisto_lookup=callisto_lookup, rstn_lookup=rstn_lookup,web=web
 ;PURPOSE:
 ;
 ;This procedure will parse the json object containing wave event information
@@ -71,7 +71,7 @@ pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=s
            'filament': if cc eq 0 then filament=tmp[1] else filament=[filament,tmp[1]]
            'comment': if cc eq 0 then comment=tmp[1] else comment=[comment,tmp[1]]
            'web': if cc eq 0 then web=tmp[1] else web=[web,tmp[1]]
-           'ips_lookup': if cc eq 0 then ips_lookup=tmp[1] else ips_lookup=[ips_lookup,tmp[1]]
+           'rstn_lookup': if cc eq 0 then rstn_lookup=tmp[1] else rstn_lookup=[rstn_lookup,tmp[1]]
            'callisto_lookup': if cc eq 0 then callisto_lookup=tmp[1] else callisto_lookup=[callisto_lookup,tmp[1]]
            'nrh_lookup': if cc eq 0 then nrh_lookup=tmp[1] else nrh_lookup=[nrh_lookup,tmp[1]]
            else:
@@ -120,7 +120,7 @@ pro parse_events_info, fname, labels=labels, coordX=coordX, coordY=coordY, sts=s
 ;  print,loop
 ;  print,filament
 ;  print,'|'+comment+'|'
-;  print,'|'+ips_lookup+'|'
+;  print,'|'+rstn_lookup+'|'
 ;  print,'|'+callisto_lookup+'|'
 ;  print,'|'+nrh_lookup+'|'
 ;DEBUG

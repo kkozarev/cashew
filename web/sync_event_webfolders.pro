@@ -40,7 +40,7 @@ pro sync_event_webfolders,event,force=force
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 01/2014
   folders=['radio','annulusplot','kinematics','pfss','swap','ionization','particles','png','movies','dem','yaftawave','euvi']
-  subfolders={radio:['NRH','IPS','Callisto'],annulusplot:['araw','abase','arun'],png:['raw','base','run'],dem:['aschwanden','weber']}
+  subfolders={radio:['NRH','RSTN','Callisto'],annulusplot:['araw','abase','arun'],png:['raw','base','run'],dem:['aschwanden','weber']}
   
   
   if size(event,/type) ne 8 then return
@@ -99,7 +99,7 @@ pro sync_event_webfolders,event,force=force
            spawn,'cp '+event.nrhpath+'*.png '+path+folder+'/'+subfolders.radio[0]
         files = file_search(path+folder+'/'+subfolders.radio[1]+'/*.png')
         if files[0] eq '' or keyword_set(force) then $
-           spawn,'cp '+event.ipspath+'*.png '+path+folder+'/'+subfolders.radio[1]
+           spawn,'cp '+event.rstnpath+'*.png '+path+folder+'/'+subfolders.radio[1]
         files = file_search(path+folder+'/'+subfolders.radio[2]+'/*.png')
         if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.callistopath+'*.png '+path+folder+'/'+subfolders.radio[2]

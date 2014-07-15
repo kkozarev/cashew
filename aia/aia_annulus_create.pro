@@ -38,7 +38,7 @@ pro aia_annulus_create,event,run=run,base=base,raw=raw,_extra=_extra
 end 
 
 
-pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, centerlat=centerlat, ring_width=ring_width,thrange=thrange,rrange=rrange,datascale=datascale,savename=savename,savepath=savepath,annulus_data=annulus_data,full=full,force=force,remove_aec=remove_aec
+pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, centerlat=centerlat, ring_width=ring_width,thrange=thrange,rrange=rrange,datascale=datascale,savename=savename,savepath=savepath,annulus_data=annulus_data,full=full,force=force,remove_aec=remove_aec,plot=plot
 ;PURPOSE:
 ; Routine to produce RD polar-deprojected data using an annulus technique applied to SDO
 ; images.
@@ -287,7 +287,7 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;START PLOTTING
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-     if keyword_set(run) or keyword_set(base) or keyword_set(raw) then begin
+     if keyword_set(plot) then begin
     
 ; Define image title      
      if keyword_set(run) then begin
@@ -313,29 +313,33 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
            else: int_range = [min(plotimg), max(plotimg)]
         endcase
      endif else begin
-        int_range = [0,30]
+        ;int_range = [0,30]
+        int_range=[0.5,4.0]
      endelse
    
+;Plot the sqrt of the image...
+     if keyword_set(raw) then plotimg=alog10(plotimg) ;plotimg=sqrt(plotimg);
+
 ; Setup Z-buffer for plotting
         if img_no eq lwr_img then begin
            set_plot, 'z'
            Device, Set_Resolution=[img_size[0], img_size[1]], set_pixel_depth=24, decomposed = 0
            ;!p.multi = 0
            !P.font=0
-           chsize=1.4
-           chthick=1.2
-           
+           chsize=2.2
+           chthick=1.8   
            loadct,0,/silent
            tvlct, r, g, b, /get
            tvlct,reverse(r),reverse(g),reverse(b)
            col=0
            bckg=255
-           
            if keyword_set(run) or keyword_set(base) then begin
               loadct,0,/silent
               tvlct, r, g, b, /get
               col=255
+              !P.color=0
               bckg=0
+              !P.background=255
            endif
         endif
         

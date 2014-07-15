@@ -42,7 +42,7 @@ pro create_coronalshocks_page, fname, All=all
   printf,lun,"<col width=65>"
   
   printf,lun,"<tr height=25>"
-  printf,lun,'<th align="center" colspan=19 height=25 width=920>OFF-LIMB CORONAL BRIGHT FRONTS DATABASE (CURRENTLY '+strtrim(string(nev),2)+' EVENTS)</th>'
+  printf,lun,'<th align="center" colspan=19 height=25 width=920>OFF-LIMB CORONAL BRIGHT FRONTS DATABASE (CURRENTLY '+strtrim(string(nev),2)+' EVENTS)      LAST UPDATED ON '+SYSTIME(/UTC)+'</th>'
   printf,lun,"</tr>"
   
   printf,lun,'<tr height=1>'
@@ -65,7 +65,7 @@ pro create_coronalshocks_page, fname, All=all
  printf,lun,'<tr height=40 align="center">'
  printf,lun,'<th height=40><a href="http://www.e-callisto.org" target="_blank">eCallisto</a></th>'
  printf,lun,'<th><a href="http://secchirh.obspm.fr/" target="_blank">Nancay</a></th>'
- printf,lun,'<th width=45><a href="http://www.ips.gov.au/World_Data_Centre/1/9" target="_blank">IPS</a></th>'
+ printf,lun,'<th width=45><a href="http://www.ngdc.noaa.gov/stp/space-weather/solar-data/solar-features/solar-radio/rstn-spectral/" target="_blank">RSTN</a></th>'
  printf,lun,'<th colspan=2 width=80>AIA/193</th>'
  printf,lun,'<th colspan=2 width=80>AIA/193</th>'
  printf,lun,'<th width=45>Radial</th>'
@@ -108,8 +108,11 @@ pro create_coronalshocks_page, fname, All=all
      
      if event.nrh_lookup eq '' then printf,lun,'<td>&nbsp;</td>' else $
         printf,lun,'<td><a href='+event.nrh_lookup+' target="_blank">NRH</a></td>'
-     if event.ips_lookup eq '' then printf,lun,'<td>&nbsp;</td>' else $
-        printf,lun,'<td><a href='+event.ips_lookup+' target="_blank">IPS</a></td>'
+
+     pngname='events/'+event.label+'/radio/RSTN/rstn_spectrum_'+event.date+'_'+event.label+'.png'
+     if file_exist(event.webpath+'radio/RSTN/rstn_spectrum_'+event.date+'_'+event.label+'.png') then $
+        printf,lun,'<td><a href="'+pngname+'" target="_blank">RSTN</a></td>' else $
+           printf,lun,'<td>&nbsp;</td>'
      
                                 ;The Raw movie
      movname='events/'+event.label+'/movies/raw_193_'+event.label+'.mp4'
@@ -158,5 +161,6 @@ pro create_coronalshocks_page, fname, All=all
   endfor
   printf,lun,'</font>'
   printf,lun,'</table>'
+  ;printf,lun,
   close,/all
 end

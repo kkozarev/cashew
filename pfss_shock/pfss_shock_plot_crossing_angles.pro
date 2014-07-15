@@ -6,7 +6,7 @@ pfss_shock_plot_crossing_angles,event;,/oplot
 
 end
 
-pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot
+pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,lores=lores
 ;PURPOSE:
 ;Plot the crossing points on the polar projection of the shock
 ;surface with their color signifying the crossing angle.
@@ -47,10 +47,13 @@ pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot
 
   savepath=event.pfsspath
   if not keyword_set(infile) then infile=find_latest_file(event.pfsspath+'csgs_results_*')
+  if keyword_set(hires) then infile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'hires.sav')
+  if keyword_set(hires) then infile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'lores.sav')  
   if infile[0] eq '' then begin
      print,'The file to load is not properly set or does not exist. Quitting.'
      return
   endif
+
   print,''
   print,'Loading file '+infile
   print,''

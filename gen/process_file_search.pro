@@ -23,7 +23,7 @@ pro process_file_search, event, All=all
 ;Written by Alex Kendrick, 06/2014
 
   folders=['radio','annulusplot','kinematics','pfss','swap','ionization','particles','png','movies','dem','yaftawave','euvi']
-  subfolders={radio:['NRH','IPS','Callisto'],annulusplot:['araw','abase','arun'],png:['raw','base','run'],dem:['aschwanden','weber']}
+  subfolders={radio:['NRH','RSTN','Callisto'],annulusplot:['araw','abase','arun'],png:['raw','base','run'],dem:['aschwanden','weber']}
   
   
   if size(event,/type) ne 8 then return
@@ -261,13 +261,13 @@ for f=0, n_elements(folders)-1 do begin
                if keyword_set(all) then print, strcompress(n_elements(subfolderFilesRadio))," files exist"
 
                if subfolders.radio[i] eq 'NRH' then radioNRH = 1
-               if subfolders.radio[i] eq 'IPS' then radioIPS = 1
+               if subfolders.radio[i] eq 'RSTN' then radioRSTN = 1
                if subfolders.radio[i] eq 'Callisto' then radioCallisto = 1
             endif else begin
                if keyword_set(all) then print, "No files found in "+subfolders.radio[i]
 
                if subfolders.radio[i] eq 'NRH' then radioNRH = 0
-               if subfolders.radio[i] eq 'IPS' then radioIPS = 0
+               if subfolders.radio[i] eq 'RSTN' then radioRSTN = 0
                if subfolders.radio[i] eq 'Callisto' then radioCallisto = 0
             endelse
          endfor
@@ -589,8 +589,8 @@ if radioFiles eq 1 then begin
    if radioNRH eq 1 then value='Yes' else value='No'
    print, string(9b)+"NRH Radio Files"+str2+value
    
-   if radioIPS eq 1 then value='Yes' else value='No'
-   print, string(9b)+"IPS Radio Files"+str2+value
+   if radioRSTN eq 1 then value='Yes' else value='No'
+   print, string(9b)+"RSTN Radio Files"+str2+value
    
    if radioCallisto eq 1 then value='Yes' else value='No'
    print, string(9b)+"Callisto Radio Files"+str2+value

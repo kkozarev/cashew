@@ -4,7 +4,7 @@ pro test_jmap_pfss_shock_model
   path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
   ev='37'
   outpath=path+ev+'/'
-  pfssfile=path+ev+'/pfss_results_20110511_1.1Rs_dens_1.sav'
+  pfssfile=path+ev+'/pfss_results_20110511_hires.sav'
   shockfile='/home/kkozarev/svn/corwav/trunk/e37_051111_193_jmap_measurements.sav'
   jmap_pfss_shock_model,shockfile,pfssfile,outpath=outpath
 end
@@ -96,11 +96,8 @@ pro jmap_pfss_shock_model,shockfile,pfssfile,vupstream=vupstream,shockcomp=shock
 ;        datapath='/Volumes/PLUME/AIA_data/studies/2011events/e05/'
         ;restore,datapath+'normalized_AIA_20110125_05_193_subdata.sav'
 ;        shockfile=datapath+'AIA_20110125_05_193_shocklocations.sav'
-;        pfssfile=datapath+'pfss_results_20110125_1.0Rs.sav'
 ;     endif else begin
-        ;restore,'/Users/kkozarev/AIA/pfss_results_20110125_1.0Rs_dens_1.sav'
-        ;restore,'/Users/kkozarev/AIA/pfss_results_20110125_1.1Rs_dens_2.sav'
-;        restore,'/Users/kkozarev/AIA/pfss_results_20110125_1.1Rs.sav'
+
 ;     endelse
 ;  endelse
 ;endif else begin

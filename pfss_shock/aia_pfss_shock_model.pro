@@ -2,7 +2,6 @@ pro test_aia_coronal_shock_model
 ;Test the shock modeling procedure
   
   event=load_events_info(label='test')
-  ;pfssfile=savepath+'pfss_results_20110511_110511_01_1.1Rs_dens_1.sav'
   aia_coronal_shock_model,event;,pfssfile=pfssfile
 end
 
@@ -40,7 +39,7 @@ date=event.date
 label=event.label
 savepath=event.savepath
 shockfile=savepath+'AIA_'+date+'_'+label+'_'+wav+'sphere_shocklocations.sav'
-if not keyword_set(pfssfile) then pfssfile=event.pfsspath+'pfss_results_'+date+'_'+label+'_1.1Rs_dens_1.sav'
+if not keyword_set(pfssfile) then pfssfile=event.pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav'
 
 ;+==================================================================================
 ;LOAD DATA
