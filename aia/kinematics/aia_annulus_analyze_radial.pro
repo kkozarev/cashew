@@ -194,7 +194,7 @@ pro aia_annulus_analyze_radial,event,datapath=datapath,savepath=savepath,thrange
            backinds:intarr(1,nsteps),$
            xtitle:'Time of '+event.date,ytitle:'R!Dsun!N',$
            imgtit:'AIA/'+wav+' BDiff Radial Positions',$
-           savename:'annplot_'+date+'_'+event.label+'_'+wav+'_radial.png',$
+           savename:'annplot_'+date+'_'+event.label+'_'+wav+'_radial_auto.png',$
            time:time.relsec,$
            date_obs:ind_arr.date_obs $
            } 
@@ -275,21 +275,28 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
   !p.multi=datastruct.multi
   device,window_state=win_open
   
-  
 ;LOOP OVER MEASUREMENTS!
-  for mind=0,nmeas-1 do begin
+  for mind=0,nmeas-1 do begin 
   data=indata[*,*,mind]
   height=1.0
   ht_km=yarr*DIST_FACTOR*height
   if mind eq 0 then wdef,datastruct.winind,datastruct.winsize[0],datastruct.winsize[1]
 
+  ;Find start and end positions
+  find_start_end, data, time, yrng, startInd=startInd, endInd=endInd
+
+  ;Exit if a good start position is not found
+  if startInd eq -1 then return
+
+  print, startInd
+  print, endInd
   
   !P.position=[0.18,0.17,0.9,0.9]
   fitrange=intarr(2)
   aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
                      min=-40,max=50,fitrange=fitrange,$
                      title=datastruct.imgtit[mind],$
-                     xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
+                     xtitle=datastruct.xtitle,ytitle=datastruct.ytitle,startInd=startInd,endInd=endInd
   
   datastruct.xfitrange=fitrange
   sp=datastruct.xfitrange[0]
@@ -403,10 +410,10 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
               color=200,thick=2
 ;END DEBUG
 
-  endfor
+     endfor 
   loadct,0,/silent
   
-  
+ 
 ;--------------------------------------------------
 ;Do second order polynomial fitting for the wave fronts edges
   print,''

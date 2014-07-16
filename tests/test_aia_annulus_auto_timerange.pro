@@ -296,7 +296,7 @@ stop
   !P.position=[0.18,0.17,0.9,0.9]
   fitrange=intarr(2)
   aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
-                     min=-40,max=50,fitrange=fitrange,$
+                     min=-40,max=50,fitrange=fitrange,yrange=yrng,$
                      title=datastruct.imgtit[mind],$
                      xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
   

@@ -1,89 +1,108 @@
-pro find_start_end, times, rad, data, xrange=xrange,yrange=yrange,ct=ct,min=min,max=max,fitrange=fitrange,_extra=extra
-  
-  intensityData = dblarr(n_elements(times), n_elements(rad))
-  
-  for t=0, n_elements(times)-1 do begin
-     for r=0, n_elements(rad)-1 do begin
-        currentPixel = data[t, r]
-        skip = 0
-        ; Take surrounding pixels and create an intensity score
-        
-        if t eq 0 then begin
-           if r eq 0 then begin
-              upDiff = abs(data[t,r]-data[t,r+1])
-              rightDiff = abs(data[t,r]-data[t+1,r])
-              meanDiff = max([upDiff, rightDiff])
-              intensityData[t,r] = meanDiff
-           endif else if r eq n_elements(rad)-1 then begin
-              downDiff = abs(data[t,r]-data[t,r-1])
-              rightDiff = abs(data[t,r]-data[t+1,r])
-              meanDiff = max([downDiff, rightDiff])
-              intensityData[t,r] = meanDiff
-           endif else begin
-              print, t
-              print, r
+pro find_start_end, data, time, yrng, startInd=startInd, endInd=endInd, quit=quit
 
-              downDiff = abs(data[t,r]-data[t,r-1])
-              rightDiff = abs(data[t,r]-data[t+1,r])
-              upDiff = abs(data[t,r]-data[t,r+1])
-              meanDiff = max([downDiff, rightDiff, upDiff])
-              intensityData[t,r] = meanDiff
-           endelse
-        endif else if r eq 0 then begin
-           if t eq n_elements(times)-1 then begin
-              leftDiff = abs(data[t,r]-data[t-1,r])
-              upDiff = abs(data[t,r]-data[t,r+1])
-              meanDiff = max([leftDiff, upDiff])
-              intensityData[t,r] = meanDiff
-           endif else begin
-              leftDiff = abs(data[t,r]-data[t-1,r])
-              rightDiff = abs(data[t,r]-data[t+1,r])
-              upDiff = abs(data[t,r]-data[t,r+1])
-              meanDiff = max([leftDiff, upDiff, rightDiff])
-              intensityData[t,r] = meanDiff
-           endelse
-        endif else if t eq n_elements(times)-1 then begin
-           if r eq n_elements(rad)-1 then begin
-              leftDiff = abs(data[t,r]-data[t-1,r])
-              downDiff = abs(data[t,r]-data[t,r-1])
-              meanDiff = max([leftDiff, downDiff])
-              intensityData[t,r] = meanDiff
-           endif else begin
-              downDiff = abs(data[t,r]-data[t,r-1])
-              leftDiff = abs(data[t,r]-data[t-1,r])
-              upDiff = abs(data[t,r]-data[t,r+1])
-              meanDiff = max([downDiff, leftDiff, upDiff])
-              intensityData[t,r] = meanDiff
-           endelse
-        endif else if r eq n_elements(rad)-1 then begin
-           leftDiff = abs(data[t,r]-data[t-1,r])
-           rightDiff = abs(data[t,r]-data[t+1,r])
-           downDiff = abs(data[t,r]-data[t,r-1])
-           meanDiff = max([leftDiff, downDiff, rightDiff])
-           intensityData[t,r] = meanDiff
-        endif else begin
-           leftDiff = abs(data[t,r]-data[t-1,r])
-           rightDiff = abs(data[t,r]-data[t+1,r])
-           downDiff = abs(data[t,r]-data[t,r+1])
-           upDiff = abs(data[t,r]-data[t,r+1])
-           meanDiff = max([leftDiff, downDiff, rightDiff, upDiff])
-           intensityData[t,r] = meanDiff
-        endelse
-        
-        if data[t,r] gt 0 && meanDiff lt 20 then begin
-           intensityData[t,r] = data[t,r]
-           print, "time is:"
-           print, times[t]
-           print, "Diff is:"
-           print, meanDiff
-        endif
+;PURPOSE
+;Procedure to automatically find start end times of the EUV front
+;Takes data, sums up pixel intensities at each time step, determines
+;start and end times from how the sum of intensities change
+;
+;INPUTS
+;     DATA - annulus data from aia_annulus_analyze_radial.pro
+;     TIME - array of times to corresponding annulus data
+;     YRNG - radial distance ranges from
+;            aia_annulus_analyze_radial.pro
+;
+;OUTPUTS
+;     STARTIND - index of front start position
+;     ENDIND - index of front end position
 
-     endfor
+  nt = n_elements(time)
+  
+  ; Go through and sum up the intensities for each time step
+  totalPixVals=dblarr(nt)
+  for tt=0,nt-1 do begin
+     dat=data[tt,yrng[0]:yrng[1]]
+     ind=where(dat gt 0.0)
+     if ind[0] gt -1 then tmp=total(dat[ind]) else tmp=0
+     totalPixVals[tt]=tmp
+  endfor
+     
+     
+  cgplot, totalPixVals, /window
+  
+  prevVal = totalPixVals[0]
+  maxDuration = 0
+     ;; for tt=0, nt-1 do begin
+     ;;    if totalPixVals[tt] gt prevVal then begin
+     ;;       prevVal = totalPixVals[tt]
+     ;;       maxDuration++
+     ;;       print, maxDuration
+     ;;    endif else begin
+     ;;       prevVal = totalPixVals[tt]
+     ;;       maxDuration = 0
+     ;;    endelse
+
+     ;;    if maxDuration gt 6 then begin
+     ;;       backgroundEnd = tt - 5
+     ;;       break
+     ;;    endif
+     ;; endfor
+
+; Better plan -> running average of data
+  currentMean = totalPixVals[0]
+  for tt=0, nt-1 do begin
+     currentMean = mean(totalPixVals[0:tt])
+;        print, currentMean
+ ;       print, totalPixVals[tt]
+     if totalPixVals[tt] gt currentMean then begin
+        maxDuration++
+        print, maxDuration
+     endif else begin
+        maxDuration = 0 
+     endelse
+     if maxDuration gt 8 then begin
+        backgroundEnd = tt
+        break
+     endif
   endfor
 
+  slope = dblarr(nt)
+  julianTime = time.jd
+  
+  for tt=backgroundEnd-8, backgroundEnd+15 do begin
+     slope[tt] = (totalPixVals[tt] - totalPixVals[tt-1])
+  endfor
+  
+  quit = 0
+  startInd = min(where(slope gt 250))
+  if startInd eq -1 then begin
+     print, "Could not find valid starting point, exiting..."
+     quit = 1
+     return
+  endif
 
-  intensityData = intensityData*100
-  cgimage, intensityData
-  stop
+  startTime = time[startInd]
+
+  backgroundLevel = mean(totalPixVals[0:startInd])
+  
+  threshold = 0.10
+  startLevel = backgroundLevel + threshold*backgroundLevel
+  print, startLevel
+  print, backgroundEnd
+  
+  for tt=startInd, nt-1 do begin
+     print, totalPixVals[tt]
+     if totalPixVals[tt] lt startLevel then begin
+        endTime = time[tt]
+           endInd = tt
+           break
+        endif
+  endfor
+
+  print, "Start Index: ", startInd
+  print, "End Index: ", endInd
+     
+;     print, "Start Time: ", startTime
+;     print, "End Time: ", endTime
+  
+
 end
-         
