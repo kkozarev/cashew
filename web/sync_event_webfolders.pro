@@ -19,7 +19,7 @@ pro test_sync_event_webfolders
  endif
 end
 
-pro sync_event_webfolders,event,force=force
+pro sync_event_webfolders,event,force=force, local=local
 ;PURPOSE:
 ;This procedure will sync the event webfolders and subfolders
 ;
@@ -45,10 +45,17 @@ pro sync_event_webfolders,event,force=force
   
   if size(event,/type) ne 8 then return
   
-  events_path=getenv('CORWAV_WEB')+'events/'
+  if keyword_set(local) then begin
+     events_path='/Volumes/Scratch/Users/kendrick/web/events/'+event.label+'/'
+     path=events_path
+  endif else begin
+     events_path=getenv('CORWAV_WEB')+'events/'
+     path=event.webpath
+  endelse 
+
   if not dir_exist(events_path) then spawn, 'mkdir -m 775 '+events_path
   
-  path=event.webpath
+
   
   if not dir_exist(path) then spawn,'mkdir -m 775 '+path
 
