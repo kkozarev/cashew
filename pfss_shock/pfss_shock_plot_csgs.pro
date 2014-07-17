@@ -1,11 +1,11 @@
 pro test_pfss_shock_plot_csgs
 ;Testing the CSGS model plotting procedure
-event=load_events_info(label='test')
+event=load_events_info(label='110511_01')
 pfss_shock_plot_csgs,event,/png
 end
 
 
-pro pfss_shock_plot_csgs,event,png=png
+pro pfss_shock_plot_csgs,event,png=png,hires=hires,lores=lores
 ;PURPOSE:
 ;Plot the time-dependent Coronal Shock Geometrical Surface model,
 ;overlaying AIA images, PFSS model, and CSGS model with crossing points.
@@ -43,9 +43,15 @@ pro pfss_shock_plot_csgs,event,png=png
   aiafile=event.savepath+'normalized_'+eventname+'_subdata.sav'
   
   ;Find a file to load with the latest results of applying the CSGS model
-  csgsfile=find_latest_file(event.pfsspath+'csgs_results_*') 
-  if csgsfile eq '' then begin
-     print,'The CSGS file is not properly set or does not exist. Quitting.'
+  csgsfile=find_latest_file(event.pfsspath+'csgs_results_*')
+  if keyword_set(hires) then infile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'hires.sav')
+  if keyword_set(hires) then infile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'lores.sav')
+  if infile[0] eq '' then begin
+     print,'The file to load is not properly set or does not exist. Quitting.'
+     return
+  endif  
+if csgsfile eq '' then begin
+   print,'The CSGS file is not properly set or does not exist. Quitting.'
      return
   endif
 
@@ -121,10 +127,10 @@ pro pfss_shock_plot_csgs,event,png=png
      if sstep eq 0 then begin
         nlines=n_elements(pfssLines)
         maxnpts=n_elements(pfssLines[0].ptr)  
-        
+        stride=(1.*nlines)/1000. ;assume that we want to see about 1000. field lines, for now.
 ;Apply the rotations and translations and plot
         pfss_cartpos=fltarr(nlines,3,maxnpts)
-        for ff=0.0D,nlines-1 do begin
+        for ff=0.0D,nlines-1,stride do begin
            ;the number of points in this particular line.
            npt=pfssLines[ff].npts      
            ;px=pfssLines[ff].px[0:npt-1]
@@ -147,7 +153,7 @@ pro pfss_shock_plot_csgs,event,png=png
         pos=0
      endif
 
-     for ff=0.0D,nlines-1 do begin
+     for ff=0.0D,nlines-1,stride do begin
         npt=pfssLines[ff].npts
         ;Plot the field lines
         if pfss_cartpos[ff,2,0] gt 0.0 and pfss_cartpos[ff,2,npt-1] gt 0.0 then $

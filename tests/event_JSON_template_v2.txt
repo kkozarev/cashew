@@ -41,7 +41,7 @@
 	       		"savepath": "",
 		    },
 		    {
-			"type": "IPS",
+			"type": "RSTN",
 	       		"fov": "",
 	       		"datapath": "",
 	       		"savepath": "",

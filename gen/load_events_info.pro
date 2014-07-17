@@ -35,7 +35,7 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
   trunk=GETENV('CORWAV_TRUNK')
 
 ;DEBUG
-  parse_events_info,trunk+'dat/events.json', labels=labels, coordX=coordX, coordY=coordY, sts=sts, ets=ets, typeII=typeII, loop=loop, filament=filament, comment=comment, flareclass=flareclass, aiafov=aiafov, nrh_lookup=nrh_lookup, callisto_lookup=callisto_lookup, ips_lookup=ips_lookup,web=web
+  parse_events_info,trunk+'dat/events.json', labels=labels, coordX=coordX, coordY=coordY, sts=sts, ets=ets, typeII=typeII, loop=loop, filament=filament, comment=comment, flareclass=flareclass, aiafov=aiafov, nrh_lookup=nrh_lookup, callisto_lookup=callisto_lookup, rstn_lookup=rstn_lookup,web=web
 ;DEBUG
   if keyword_set(label) then begin
      nerr=0
@@ -72,7 +72,7 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
      aiafov=aiafov[*,lind]
      nrh_lookup=nrh_lookup[lind]
      callisto_lookup=callisto_lookup[lind]
-     ips_lookup=ips_lookup[lind]
+     rstn_lookup=rstn_lookup[lind]
   endif
   
   nevents=n_elements(labels)
@@ -83,7 +83,7 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet
 ;DATAPATHS
 aia_datapath=datapath+'AIA_data/'
 nrh_datapath=datapath+'NRH_data/'
-ips_datapath=datapath+'IPS_data/'
+rstn_datapath=datapath+'RSTN_data/'
 callisto_datapath=datapath+'Callisto_data/'
 rhessi_datapath=datapath+'RHESSI_data/'
 euvi_datapath=datapath+'EUVI_data/'
@@ -98,10 +98,10 @@ webpath=webbasepath+'events/'
 
 event={label:'',st:'',et:'',coordX:0,coordY:0,aiafov:intarr(2),hemisphere:'',date:'',$
        arlon:0.,arlat:0.,geomcorfactor:0.,flareclass:'',typeII:0,loop:0,filament:0,comment:'',web:0,$
-       aia_datapath:'',nrh_datapath:'',rhessi_datapath:'',ips_datapath:'',callisto_datapath:'',$
-       ips_lookup:'',callisto_lookup:'',nrh_lookup:'',$
+       aia_datapath:'',nrh_datapath:'',rhessi_datapath:'',rstn_datapath:'',callisto_datapath:'',$
+       rstn_lookup:'',callisto_lookup:'',nrh_lookup:'',$
        euvi_datapath:'',swap_datapath:'',pfss_datapath:'',savepath:'',webpath:'',$
-       moviepath:'',radiopath:'',nrhpath:'',ipspath:'',callistopath:'',annuluspath:'',pfsspath:'',$
+       moviepath:'',radiopath:'',nrhpath:'',rstnpath:'',callistopath:'',annuluspath:'',pfsspath:'',$
        swappath:'',ionizationpath:'',aschdempath:'',weberpath:'',particlespath:'',$
       euvipath:'',dempath:'',pngpath:'',yaftawavepath:'',kinematicspath:'',aia_savename:'',annplot:{savename:'',analyzed_savename:''}}
 events=replicate(event,nevents)
@@ -133,14 +133,14 @@ events[ev].comment=comment[ev]
 events[ev].flareclass=flareclass[ev]
 events[ev].nrh_lookup=nrh_lookup[ev]
 events[ev].callisto_lookup=callisto_lookup[ev]
-events[ev].ips_lookup=ips_lookup[ev]
+events[ev].rstn_lookup=rstn_lookup[ev]
 
 ;DATAPATHS
 events[ev].aia_datapath=aia_datapath
 events[ev].nrh_datapath=nrh_datapath
 events[ev].callisto_datapath=callisto_datapath
 events[ev].rhessi_datapath=rhessi_datapath
-events[ev].ips_datapath=ips_datapath
+events[ev].rstn_datapath=rstn_datapath
 events[ev].swap_datapath=swap_datapath
 events[ev].euvi_datapath=euvi_datapath
 events[ev].pfss_datapath=pfss_datapath
@@ -151,7 +151,7 @@ events[ev].webpath=webpath+events[ev].label+'/'
 events[ev].moviepath=events[ev].savepath+'movies/'
 events[ev].radiopath=events[ev].savepath+'radio/'
 events[ev].nrhpath=events[ev].radiopath+'NRH/'
-events[ev].ipspath=events[ev].radiopath+'IPS/'
+events[ev].rstnpath=events[ev].radiopath+'RSTN/'
 events[ev].callistopath=events[ev].radiopath+'Callisto/'
 events[ev].annuluspath=events[ev].savepath+'annulusplot/'
 events[ev].pfsspath=events[ev].savepath+'pfss/'

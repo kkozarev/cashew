@@ -1,4 +1,4 @@
-pro pfss_test_shock_geometry,png=png,steps=steps
+pro pfss_test_shock_geometry,event=event,png=png,steps=steps
 ;PURPOSE:
 ;This procedure tests visually the geometrical overlap of the pfss
 ;results to the spherical shell model. It does so by plotting the two
@@ -26,6 +26,7 @@ pro pfss_test_shock_geometry,png=png,steps=steps
   print,''
   print,'Loading data...'
   
+if not keyword_set(event) then begin
 ;Figure out the name of the local machine.
   pcname=hostname()
 
@@ -38,13 +39,17 @@ pro pfss_test_shock_geometry,png=png,steps=steps
 ;for arien
      if pcname eq 'arien' then begin
         datapath='/Volumes/Backscratch/Users/kkozarev/AIA/events/05/'
-                                ;restore,datapath+'normalized_AIA_20110125_05_193_subdata.sav'
+;restore,datapath+'normalized_AIA_20110125_05_193_subdata.sav'
         restore,datapath+'pfss_results_20110125_1.1Rs.sav'
      endif else begin
         restore,'/Users/kkozarev/AIA/pfss_results_20110125_1.1Rs.sav'
      endelse
   endelse
-
+endif else begin
+path=event.pfsspath
+dat=event.date        
+        fname='pfss_results_'+dat+'_'+event.label+'_hires.sav'
+endelse
 ;--------------------------------------------------------------
 
 

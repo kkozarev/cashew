@@ -41,7 +41,7 @@ end
 
 
 ;+--------------------------------------------------------------------
-pro pfss_shock_run_csgs,event,plot=plot,png=png
+pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
 ;This procedure runs the pfss/shock model for estimating shock
 ;orientation to magnetic fields, and 
 ;PURPOSE:
@@ -87,26 +87,43 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png
   pfsspath=event.pfsspath
   
 
-  pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_1.0Rs_dens_1.0.sav'
-  ;pfssfile=pfsspath+'pfss_results_'+date+'_'+label+'_1.05Rs_dens_4.0.sav'
-  aiafile=datapath+'normalized_'+eventname+'_subdata.sav'
-  shockfile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed.sav'
+  pfssfile=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav')
+  if keyword_set(lores) then pfssfile=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_lores.sav')
+  if keyword_set(hires) pfssfile=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav')
+  
+  aiafile=file_search(datapath+'normalized_'+eventname+'_subdata.sav')
+  shockfile=file_search(event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed.sav')
   
   print,'Loading AIA File '+aiafile
-  restore,aiafile
-
+  if aiafile[0] ne '' then begin
+     restore,aiafile[0]
+  endif else begin
+     print,'No AIA data present. Quitting...'
+     return
+  endelse
   
   ;Load the measured shock wave radius.
   ;This was created with measure_wave_sphere.pro
   ;print, 'Loading shock info file '+datapath+eventname+'_shocklocations.sav'
   ;restore,datapath+eventname+'_shocklocations.sav'
   print, 'Loading shock info file '+shockfile
-  restore,shockfile
+  if shockfile[0] ne '' then begin
+     restore,shockfile[0]
+  endif else begin
+     print,'No Shock data present. Quitting...'
+     return
+  endelse
   
   ;Load the PFSS model results
   print,'Loading PFSS File '+pfssfile
-  restore,pfssfile
+  if pfssfile[0] ne '' then begin
+     restore,pfssfile[0]
+  endif else begin
+     print,'No PFSS data present. Quitting...'
+     return
+  endelse
 ;--------------------------------------------------------------
+
 
 
 

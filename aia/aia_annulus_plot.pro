@@ -32,16 +32,6 @@ end
 
 
 ;+============================================================================
-pro aia_annulus_plot,event,run=run,base=base,raw=raw,_extra=_extra
-  if not keyword_set(run) and not keyword_set(base) then raw=1
-  if keyword_set(raw) then aia_annulus_plot_main, event, /raw, _extra=_extra
-  if keyword_set(base) then aia_annulus_plot_main, event, /base, _extra=_extra
-  if keyword_set(run) then aia_annulus_plot_main, event, /run, _extra=_extra
-end 
-;-============================================================================
-
-
-;+============================================================================
 pro aia_annulus_plot_main,event,datapath=datapath,savepath=savepath,thrange=thrange,$
                           wav=wav,rmax=rmax,raw=raw,base=base,run=run,lines=lines
 ;PURPOSE:
@@ -148,8 +138,7 @@ lwr_img=0
            ;!p.multi = 0
            !P.font=0
            chsize=2.2
-           chthick=1.8
-           
+           chthick=1.8          
            if keyword_set(run) or keyword_set(base) then begin
               loadct,0,/silent
               tvlct, r, g, b, /get
@@ -283,5 +272,16 @@ endfor
   set_plot, 'x'
 ;----------------------------------------------------
      
-  end
+end
+;-============================================================================
+
   
+
+;+============================================================================
+pro aia_annulus_plot,event,run=run,base=base,raw=raw,_extra=_extra
+  if not keyword_set(run) and not keyword_set(base) then raw=1
+  if keyword_set(raw) then aia_annulus_plot_main, event, /raw, _extra=_extra
+  if keyword_set(base) then aia_annulus_plot_main, event, /base, _extra=_extra
+  if keyword_set(run) then aia_annulus_plot_main, event, /run, _extra=_extra
+end 
+;-============================================================================

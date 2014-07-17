@@ -40,7 +40,7 @@ pro create_event_folders,event,web=web
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 01/2012
   folders=['radio','annulusplot','kinematics','pfss','swap','ionization','particles','png','movies','dem','yaftawave','euvi']
-  subfolders={radio:['NRH','IPS','Callisto'],annulusplot:['araw','abase','arun'],png:['raw','base','run'],dem:['aschwanden','weber']}
+  subfolders={radio:['NRH','RSTN','Callisto'],annulusplot:['araw','abase','arun'],png:['raw','base','run'],dem:['aschwanden','weber']}
   
 
  ; if keyword_set(label) then event=load_events_info(label)

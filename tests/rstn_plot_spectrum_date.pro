@@ -1,26 +1,13 @@
-pro test_rstn_plot_spectrum
+pro test_rstn_plot_spectrum_date
+date='20110606'
+datapath='/data/george/corwav/RSTN_data/'
 
-one=0
-if one eq 1 then begin
-;fname='./LM110511.SRS'
-   event=load_events_info(label='110607_01')
-   frange=[30,150]
-   datarange=[40,120]
-;rstn_plot_spectrum,event,frange=frange,trange=['2011/05/11 02:25:00','2011/05/11 02:43:00'],datarange=datarange,/repair
-   rstn_plot_spectrum,event     ;,datarange=datarange;,/full
-endif
-
-
-all=1
-if all eq 1 then begin
-   events=load_events_info()
-   for ev=0,n_elements(events)-1 do rstn_plot_spectrum,events[ev]
-endif
-
+dlpath=datapath;+'radio/'
+rstn_plot_spectrum_date,date,dlpath=dlpath
 end
 
 
-pro rstn_plot_spectrum,event,repair=repair,full=full,frange=frange,trange=trange,datarange=datarange
+pro rstn_plot_spectrum_date,date,repair=repair,full=full,frange=frange,trange=trange,datarange=datarange,dlpath=dlpath
 ;
 ;--------------------------------------------------------------------------------;+
 ; NAME:
@@ -36,7 +23,7 @@ pro rstn_plot_spectrum,event,repair=repair,full=full,frange=frange,trange=trange
 ;
 ;HISTORY
 ;     06 Jan 2014 - Derived from code kindly provided by Samuel D. Tun (SDT)
-;     04 Jun 2014 - Rewrite for older versions of IDL, integrate into CorWav (KAK)
+;     04 Jun 2014 - Rewrite for the older versions of IDL (KAK)
 ;KNOW ISSUES - Work-off list
 ;  - X-axis labels are sometimes clobbered; see lm120708.srs (06 Jan 2014)
 ;  - Filling gap assumes 3-s sample time - not always true; see ho010505.srs (06 Jan 2014)    
@@ -47,8 +34,9 @@ pro rstn_plot_spectrum,event,repair=repair,full=full,frange=frange,trange=trange
 ;
 openFile$:
 ;Search for RSTN data for this event
-path=event.rstn_datapath
-files=file_basename(file_search(path+'*'+strmid(event.date,2,6)+'.srs',/fold_case))
+path='./'
+if keyword_set(dlpath) then path=dlpath
+files=file_basename(file_search(path+'*'+strmid(date,2,6)+'.srs',/fold_case))
 
 if files[0] eq '' then begin
    print,'No files found. Quitting...'
@@ -141,28 +129,39 @@ stringTime+=':'+tmp
 ;Find the indices of the starting and ending times consistent with the
 ;event times
 sectimes=anytim(stringTime)
-startTime=event.st
-if keyword_set(full) then startTime=stringTime[0]
+startTime=stringTime[0]
+startTimeError=0
 if keyword_set(trange) then startTime=trange[0]
 StartTimeIndex=min(where(anytim(startTime)-sectimes le 0.0))
 if StartTimeIndex eq -1 then begin
    print,'Event starting time outside data range. Reverting to data starting time...'
+   startTimeError=1
    StartTimeIndex=0
 endif
-endTime=aia_augment_timestring(event.et,600) ;Add ten minutes beyond the CBF event end to the plot
-if keyword_set(full) then endTime=stringTime[nTimeElements-1]
+
+endTime=stringTime[nTimeElements-1]
+endTimeError=0
 if keyword_set(trange) then endTime=trange[1]
 EndTimeIndex=max(where(anytim(endTime)-sectimes ge 0.0))
 if EndTimeIndex eq -1 then begin
    print,'Event ending time outside data range. Reverting to data ending time...'
+   endTimeError=1
    EndTimeIndex=nTimeElements-1
 endif
 
+if startTimeError eq 1 and endTimeError eq 1 then begin
+   print,''
+   print,'Time-range error.'
+   print,'User-supplied time range: '+startTime + ' - ' + endTime
+   print,'Data time range: '+ stringTime[0] + ' - ' + stringTime[nTimeElements-1]
+   print,''
+   return
+endif
+   
 stringTime=stringTime[StartTimeIndex:EndTimeIndex]
 
-
 for i = StartTimeIndex+1,EndTimeIndex do Begin                         ;Look for datagaps GT 15 seconds
-   if contiguousTime[i] GT contiguousTime[i-1]+15 then Begin
+  if contiguousTime[i] GT contiguousTime[i-1]+15 then Begin
     iAnswer = ''
     print,''
     print,'TimeStep: ',i-1,' =',contiguousTime[i-1],'    TimeStep: ',i,' =',contiguousTime[i] 
@@ -366,8 +365,31 @@ fcolorbar, Divisions=4, $
            Position=[0.89,0.10,0.91,0.90],$
            min=drange[0],max=drange[1]
 
-fname=event.rstnpath+'rstn_spectrum_'+event.date+'_'+event.label+'.png'
+fname=path+'rstn_spectrum_'+date+'.png'
 write_png,fname,tvrd(/true),rr,gg,bb
+
+
+;b1 = IMAGE(spectralArray,x,y,                              $
+;  rgb_Table=39,                                            $
+;  Position=[0.05,0.10,0.85,0.90],                          $
+;  axis_style=2,                                            $
+;  title = plotTitle,font_Size=10,                          $
+;  xTickName=xTickChr,xMinor=0,xTickFont_Size=8,            $
+;  yTickName=yTickChr,yMinor=0,yTickFont_Size=8,            $
+;  xtitle='Universal Time (UT)',                            $
+;  ytitle='Frequency (MHz)')
+;b1.aspect_Ratio = r
+;
+;c = COLORBAR(TARGET=b1, ORIENTATION=1,                     $
+;   POSITION=[0.90,0.10,0.93,0.90],                         $
+;   TITLE='Digital Value')
+;; Change some properties
+;c.TEXTPOS = 0
+;c.TICKDIR = 1
+;c.BORDER_ON = 1
+;c.COLOR = 'Black'
+;c.FONT_STYLE = 'Normal'
+;c.FONT_SIZE = 8
 
 endJob$:
 
