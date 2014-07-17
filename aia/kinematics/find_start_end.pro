@@ -41,7 +41,10 @@ pro find_start_end, data, time, startInd=startInd, endInd=endInd, mymaxima=mymax
   cgPlot, gfit3, /overPlot, color='red', /window
   cgPlot, gfit4, /overPlot, color='cyan', /window
 
-  if keyword_set(mymaxima) then stop
+  if keyword_set(mymaxima) then begin
+     for i=startInd, endInd do begin
+        topDiff = wave_frontedge[i-sp].rad
+        
 
 
   prevVal = totalPixVals[0]
