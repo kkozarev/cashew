@@ -1,4 +1,4 @@
-pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,max=max,fitrange=fitrange,_extra=extra,startInd=startInd,endInd=endInd
+pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,max=max,fitrange=fitrange,_extra=extra,startInd=startInd,endInd=endInd, auto=auto
 !P.position=[0.15,0.15,0.94,0.9]
 ;This procedure will plot the jmap-extracted profiles with x- and y-axes
   if keyword_set(ct) then loadct,ct,/silent
@@ -32,6 +32,7 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
         ymin=rad[r]
         ymax=rad[r+1]
         color=255.0*(data[t,r]-min)/(max-min) ; Scale Colors
+        ;color=data[t,r]
         if color lt 0 then color = 0
         if color gt 255 then color = 255
         polyfill,[xmin,xmax,xmax,xmin],[ymin,ymin,ymax,ymax],color=color,/data
@@ -47,8 +48,8 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
  
   if keyword_set(fitrange) then begin
      
-     
-     ;find_start_end, times, rad, data, xrange=xrange,yrange=yrange,ct=ct,min=min,max=max,fitrange=fitrange,_extra=extra
+
+
      ;; yrng=yrange
 
      ;; totalPixVals=dblarr(nt)
@@ -62,13 +63,22 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
      ;; stop
      
      
+     loadct, 0, /silent
+   
+     if ~(keyword_set(auto)) then begin
+        print,''
+        print,'Select starting point:'
+        cursor,x,y,/down,/data
+        ;plots,x,y,psym=5,symsize=2,thick=2,color=100
+        sp=min(where((times-x) gt 0.0))
+        oplot,[times[sp],times[sp]],yrange,color=255
 
-     ;; print,''
-     ;; print,'Select starting point:'
-     ;; cursor,x,y,/down,/data
-     ;; ;plots,x,y,psym=5,symsize=2,thick=2,color=100
-     ;; sp=min(where((times-x) gt 0.0))
-     ;; oplot,[times[sp],times[sp]],yrange,color=255
+        print,'Select ending point:'
+        cursor,x,y,/down,/data
+        ;plots,x,y,psym=5,symsize=2,thick=2,color=200
+        ep=min(where((times-x) gt 0.0))
+        oplot,[times[ep],times[ep]],yrange,color=255
+     endif 
      
      if keyword_set(startInd) then begin
         loadct, 1, /silent
@@ -76,14 +86,7 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
         oplot,[times[startInd],times[startInd]],yrange,thick=3,color=100
         sp = startInd
      endif
-     
-     ;; loadct, 0, /silent
-     ;; print,'Select ending point:'
-     ;; cursor,x,y,/down,/data
-     ;; ;plots,x,y,psym=5,symsize=2,thick=2,color=200
-     ;; ep=min(where((times-x) gt 0.0))
-     ;; oplot,[times[ep],times[ep]],yrange,color=255
-     
+   
      if keyword_set(endInd) then begin
         loadct, 1, /silent
         print, "Plotting automatically detected start position"
@@ -92,8 +95,6 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
      endif
 
      loadct, 0, /silent
-
-
 
      fitrange=[sp,ep]
   endif

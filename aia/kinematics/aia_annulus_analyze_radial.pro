@@ -33,7 +33,7 @@ end
 
 
 ;+============================================================================
-pro aia_annulus_analyze_radial,event,datapath=datapath,savepath=savepath,thrange=thrange,wave=wave,rrange=rrange,constrain=constrain
+pro aia_annulus_analyze_radial,event,datapath=datapath,savepath=savepath,thrange=thrange,wave=wave,rrange=rrange,constrain=constrain, gradient=gradient, auto=auto
 ;PURPOSE:
 ;Procedure to analyze the speeds of radial expansion of a
 ;wave and/or a filament.
@@ -222,7 +222,7 @@ pro aia_annulus_analyze_radial,event,datapath=datapath,savepath=savepath,thrange
   rad_data.bdiff=tmp
   
   ;All the rest of the work is done here.
-  annulus_fit_maxima_radial,event,rad_data.bdiff,rad_data,time,y_rsun_array,constrain=constrain
+  annulus_fit_maxima_radial,event,rad_data.bdiff,rad_data,time,y_rsun_array,constrain=constrain, auto=auto, gradient=gradient
   
   rad_data.plotinfo.p=!P
   rad_data.plotinfo.x=!X
@@ -243,7 +243,7 @@ end
 
 
 ;+============================================================================
-pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,constrain=constrain
+pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,constrain=constrain, auto=auto, gradient=gradient
 
   RSUN=6.96e5  ;Solar radius in km.
   nmeas=n_elements(datastruct.imgtit)
@@ -277,43 +277,68 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
   
 ;LOOP OVER MEASUREMENTS!
   for mind=0,nmeas-1 do begin 
-  data=indata[*,*,mind]
+     data=indata[*,*,mind]
   height=1.0
   ht_km=yarr*DIST_FACTOR*height
   if mind eq 0 then wdef,datastruct.winind,datastruct.winsize[0],datastruct.winsize[1]
 
-  ;Find start and end positions
-  find_start_end, data, time, yrng, startInd=startInd, endInd=endInd
-
-  ;Exit if a good start position is not found
-  if startInd eq -1 then return
-
-  print, startInd
-  print, endInd
-  
   !P.position=[0.18,0.17,0.9,0.9]
   fitrange=intarr(2)
-  aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
+
+  ;Find start and end positions
+  if keyword_set(auto) then begin
+     if keyword_set(gradient) then begin
+        make_gradient_map, time.jd, yarray, data, yrng, intensityData=intensityData
+        data = intensityData
+     endif
+
+     aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
+                          yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
+                          numplotmax=3
+
+     find_start_end, data[*, yrng[0]:yrng[1]], time, startInd=startInd, endInd=endInd
+  
+     ;Exit if a good start position is not found
+     if startInd eq -1 then return
+     if endInd eq -1 then return
+     
+     print, startInd
+     print, endInd
+
+      aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]], data[*, yrng[0]:yrng[1]],$
                      min=-40,max=50,fitrange=fitrange,$
                      title=datastruct.imgtit[mind],$
-                     xtitle=datastruct.xtitle,ytitle=datastruct.ytitle,startInd=startInd,endInd=endInd
+                     xtitle=datastruct.xtitle,ytitle=datastruct.ytitle,startInd=startInd,endInd=endInd, /auto
+
+     
+        
+  endif else begin
+     
+         ;; aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
+         ;;                min=-40,max=50,fitrange=fitrange,$
+         ;;                title=datastruct.imgtit[mind],$
+         ;;                xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
+ 
+     
+    
+                                ;Fit the maxima and overplot them...
+     aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
+                          yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
+                          numplotmax=3  
+  endelse
   
-  datastruct.xfitrange=fitrange
-  sp=datastruct.xfitrange[0]
-  ep=datastruct.xfitrange[1]
+   datastruct.xfitrange=fitrange
+   sp=datastruct.xfitrange[0]
+   ep=datastruct.xfitrange[1]
                                 ;Search for the edges of the wave
-  wave_frontedge=replicate({rad:0.0D,ind:0L},ep-sp+1)
-  wave_backedge=wave_frontedge
+   wave_frontedge=replicate({rad:0.0D,ind:0L},ep-sp+1)
+   wave_backedge=wave_frontedge
+     
+                                ;To restore the plot information and overplot on them, do
+   datastruct.plotinfo[mind].p=!P
+   datastruct.plotinfo[mind].x=!X
+   datastruct.plotinfo[mind].y=!Y
   
-  ;To restore the plot information and overplot on them, do
-  datastruct.plotinfo[mind].p=!P
-  datastruct.plotinfo[mind].x=!X
-  datastruct.plotinfo[mind].y=!Y
-  
-  ;Fit the maxima and overplot them...
-  aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
-                   yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
-                   numplotmax=3
   tmp=reform(mymaxima[0,*].ind)
   datastruct.maxinds[mind,*]=reform(mymaxima[0,*].ind)
   
@@ -413,7 +438,26 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
      endfor 
   loadct,0,/silent
   
- 
+  find_start_end, data[*, yrng[0]:yrng[1]], time, startInd=startInd, endInd=endInd, myMaxima=mymaxima, wave_frontedge=wave_frontedge
+
+
+
+stop
+
+
+    aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
+                        min=-40,max=50,fitrange=fitrange,$
+                        title=datastruct.imgtit[mind],$
+                        xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
+
+
+
+
+
+
+
+
+
 ;--------------------------------------------------
 ;Do second order polynomial fitting for the wave fronts edges
   print,''

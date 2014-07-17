@@ -1,4 +1,4 @@
-pro find_start_end, data, time, yrng, startInd=startInd, endInd=endInd, quit=quit
+pro find_start_end, data, time, startInd=startInd, endInd=endInd, mymaxima=mymaxima, wave_frontedge=wave_frontedge
 
 ;PURPOSE
 ;Procedure to automatically find start end times of the EUV front
@@ -8,47 +8,48 @@ pro find_start_end, data, time, yrng, startInd=startInd, endInd=endInd, quit=qui
 ;INPUTS
 ;     DATA - annulus data from aia_annulus_analyze_radial.pro
 ;     TIME - array of times to corresponding annulus data
-;     YRNG - radial distance ranges from
-;            aia_annulus_analyze_radial.pro
 ;
 ;OUTPUTS
 ;     STARTIND - index of front start position
 ;     ENDIND - index of front end position
 
   nt = n_elements(time)
-  
+
+  dat=data
+
+  ind=where(dat lt 0.0)
+  if ind[0] gt -1 then dat[ind] = 0.0
+
   ; Go through and sum up the intensities for each time step
   totalPixVals=dblarr(nt)
+
   for tt=0,nt-1 do begin
-     dat=data[tt,yrng[0]:yrng[1]]
-     ind=where(dat gt 0.0)
-     if ind[0] gt -1 then tmp=total(dat[ind]) else tmp=0
+     tmp=total(dat[tt,*])
      totalPixVals[tt]=tmp
   endfor
      
-     
   cgplot, totalPixVals, /window
-  
+
+  x = lindgen(n_elements(totalPixVals))
+  gfit1 = gaussfit(x, totalPixVals, coeff, nterms=3)
+  gfit2 = gaussfit(x, totalPixVals, coeff, nterms=4)
+  gfit3 = gaussfit(x, totalPixVals, coeff, nterms=5)
+  gfit4 = gaussfit(x, totalPixVals, coeff, nterms=6)
+
+  cgPlot, gfit1, /overPlot, color='blue', /window
+  cgPlot, gfit2, /overPlot, color='green', /window
+  cgPlot, gfit3, /overPlot, color='red', /window
+  cgPlot, gfit4, /overPlot, color='cyan', /window
+
+  if keyword_set(mymaxima) then stop
+
+
   prevVal = totalPixVals[0]
   maxDuration = 0
-     ;; for tt=0, nt-1 do begin
-     ;;    if totalPixVals[tt] gt prevVal then begin
-     ;;       prevVal = totalPixVals[tt]
-     ;;       maxDuration++
-     ;;       print, maxDuration
-     ;;    endif else begin
-     ;;       prevVal = totalPixVals[tt]
-     ;;       maxDuration = 0
-     ;;    endelse
-
-     ;;    if maxDuration gt 6 then begin
-     ;;       backgroundEnd = tt - 5
-     ;;       break
-     ;;    endif
-     ;; endfor
 
 ; Better plan -> running average of data
   currentMean = totalPixVals[0]
+  backgroundEnd = -1
   for tt=0, nt-1 do begin
      currentMean = mean(totalPixVals[0:tt])
 ;        print, currentMean
@@ -67,8 +68,17 @@ pro find_start_end, data, time, yrng, startInd=startInd, endInd=endInd, quit=qui
 
   slope = dblarr(nt)
   julianTime = time.jd
+
+  if backgroundEnd eq -1 then begin
+     startInd = -1
+     endInd = -1
+     return
+  end
+
+  endWindow = backgroundEnd+15
+  if backgroundEnd+15 gt n_elements(totalPixVals)-1 then endWindow = n_elements(totalPixVals)-1
   
-  for tt=backgroundEnd-8, backgroundEnd+15 do begin
+  for tt=backgroundEnd-8, endWindow do begin
      slope[tt] = (totalPixVals[tt] - totalPixVals[tt-1])
   endfor
   
@@ -76,7 +86,6 @@ pro find_start_end, data, time, yrng, startInd=startInd, endInd=endInd, quit=qui
   startInd = min(where(slope gt 250))
   if startInd eq -1 then begin
      print, "Could not find valid starting point, exiting..."
-     quit = 1
      return
   endif
 
@@ -88,21 +97,27 @@ pro find_start_end, data, time, yrng, startInd=startInd, endInd=endInd, quit=qui
   startLevel = backgroundLevel + threshold*backgroundLevel
   print, startLevel
   print, backgroundEnd
+
+  endInd = -1
   
   for tt=startInd, nt-1 do begin
      print, totalPixVals[tt]
      if totalPixVals[tt] lt startLevel then begin
         endTime = time[tt]
-           endInd = tt
-           break
-        endif
+        endInd = tt
+        break
+     endif
   endfor
+
+  if endInd eq -1 then begin
+     print, "Could not find valid ending point, exiting..."
+     return
+  endif
 
   print, "Start Index: ", startInd
   print, "End Index: ", endInd
      
 ;     print, "Start Time: ", startTime
-;     print, "End Time: ", endTime
+;     print, "End Time: ", endTim
   
-
 end
