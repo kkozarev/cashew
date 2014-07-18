@@ -305,22 +305,26 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
      print, startInd
      print, endInd
 
-      aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]], data[*, yrng[0]:yrng[1]],$
-                     min=-40,max=50,fitrange=fitrange,$
-                     title=datastruct.imgtit[mind],$
-                     xtitle=datastruct.xtitle,ytitle=datastruct.ytitle,startInd=startInd,endInd=endInd, /auto
+     ; Save the start and end locations
+     fitrange=[startInd, endInd]
 
+     ;; aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]], data[*, yrng[0]:yrng[1]],$
+     ;;                    min=-40,max=50,fitrange=fitrange,$
+     ;;                    title=datastruct.imgtit[mind],$
+     ;;                    xtitle=datastruct.xtitle,ytitle=datastruct.ytitle,startInd=startInd,endInd=endInd, /auto
      
-        
+     
+     
   endif else begin
+
+     ; Call plot_jmap_data to find the start and end locations
+     aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
+                    min=-40,max=50,fitrange=fitrange,$
+                    title=datastruct.imgtit[mind],$
+                    xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
      
-         ;; aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
-         ;;                min=-40,max=50,fitrange=fitrange,$
-         ;;                title=datastruct.imgtit[mind],$
-         ;;                xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
- 
      
-    
+     
                                 ;Fit the maxima and overplot them...
      aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
                           yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
@@ -438,11 +442,7 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
      endfor 
   loadct,0,/silent
   
-  find_start_end, data[*, yrng[0]:yrng[1]], time, startInd=startInd, endInd=endInd, myMaxima=mymaxima, wave_frontedge=wave_frontedge
-
-
-
-stop
+  find_start_end, data[*, yrng[0]:yrng[1]], time, yarray[yrng[0]:yrng[1]], startInd=startInd, endInd=endInd, myMaxima=mymaxima, wave_frontedge=wave_frontedge
 
 
     aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
