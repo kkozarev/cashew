@@ -278,92 +278,94 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
 ;LOOP OVER MEASUREMENTS!
   for mind=0,nmeas-1 do begin 
      data=indata[*,*,mind]
-  height=1.0
-  ht_km=yarr*DIST_FACTOR*height
-  if mind eq 0 then wdef,datastruct.winind,datastruct.winsize[0],datastruct.winsize[1]
+     height=1.0
+     ht_km=yarr*DIST_FACTOR*height
+     if mind eq 0 then wdef,datastruct.winind,datastruct.winsize[0],datastruct.winsize[1]
 
-  !P.position=[0.18,0.17,0.9,0.9]
-  fitrange=intarr(2)
+     !P.position=[0.18,0.17,0.9,0.9]
+     fitrange=intarr(2)
 
-  ;Find start and end positions
-  if keyword_set(auto) then begin
-     if keyword_set(gradient) then begin
-        make_gradient_map, time.jd, yarray, data, yrng, intensityData=intensityData
-        data = intensityData
-     endif
+     maxRadIndex = min(where(data[0,*] eq 0.0))
 
-     aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
-                          yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
-                          numplotmax=3
 
-     find_start_end, data[*, yrng[0]:yrng[1]], time, startInd=startInd, endInd=endInd
-  
-     ;Exit if a good start position is not found
-     if startInd eq -1 then return
-     if endInd eq -1 then return
-     
-     print, startInd
-     print, endInd
+                                ;Find start and end positions
+     if keyword_set(auto) then begin
+        if keyword_set(gradient) then begin
+           make_gradient_map, time.jd, yarray, data, yrng, intensityData=intensityData
+           data = intensityData
+        endif
+        
+        aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
+                             yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
+                             numplotmax=3
+        
+        find_start_end, data[*, yrng[0]:yrng[1]], time, yarray, startInd=startInd, endInd=endInd
+        
+                                ;Exit if a good start position is not found
+        if startInd eq -1 then return
+        if endInd eq -1 then return
+        
+        print, startInd
+        print, endInd
+        
+        ;; aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]], data[*, yrng[0]:yrng[1]],$
+        ;;                    min=-40,max=50,fitrange=fitrange,$
+        ;;                    title=datastruct.imgtit[mind],$
+        ;;                    xtitle=datastruct.xtitle,ytitle=datastruct.ytitle,startInd=startInd,endInd=endInd, /auto
+        
+        fitrange=[startInd, endInd]
+        
+     endif else begin
+        
+        aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
+                       min=-40,max=50,fitrange=fitrange,$
+                       title=datastruct.imgtit[mind],$
+                       xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
+        
 
-     ; Save the start and end locations
-     fitrange=[startInd, endInd]
-
-     ;; aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]], data[*, yrng[0]:yrng[1]],$
-     ;;                    min=-40,max=50,fitrange=fitrange,$
-     ;;                    title=datastruct.imgtit[mind],$
-     ;;                    xtitle=datastruct.xtitle,ytitle=datastruct.ytitle,startInd=startInd,endInd=endInd, /auto
-     
-     
-     
-  endif else begin
-
-     ; Call plot_jmap_data to find the start and end locations
-     aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
-                    min=-40,max=50,fitrange=fitrange,$
-                    title=datastruct.imgtit[mind],$
-                    xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
-     
-     
-     
                                 ;Fit the maxima and overplot them...
-     aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
-                          yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
-                          numplotmax=3  
-  endelse
-  
-   datastruct.xfitrange=fitrange
-   sp=datastruct.xfitrange[0]
-   ep=datastruct.xfitrange[1]
+        aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
+                             yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
+                             numplotmax=3  
+     endelse
+
+     
+     datastruct.xfitrange=fitrange
+     sp=datastruct.xfitrange[0]
+     ep=datastruct.xfitrange[1]
                                 ;Search for the edges of the wave
-   wave_frontedge=replicate({rad:0.0D,ind:0L},ep-sp+1)
-   wave_backedge=wave_frontedge
+     wave_frontedge=replicate({rad:0.0D,ind:0L},ep-sp+1)
+     wave_backedge=wave_frontedge
      
                                 ;To restore the plot information and overplot on them, do
-   datastruct.plotinfo[mind].p=!P
-   datastruct.plotinfo[mind].x=!X
-   datastruct.plotinfo[mind].y=!Y
-  
-  tmp=reform(mymaxima[0,*].ind)
-  datastruct.maxinds[mind,*]=reform(mymaxima[0,*].ind)
-  
+     datastruct.plotinfo[mind].p=!P
+     datastruct.plotinfo[mind].x=!X
+     datastruct.plotinfo[mind].y=!Y
+     
+     tmp=reform(mymaxima[0,*].ind)
+     datastruct.maxinds[mind,*]=reform(mymaxima[0,*].ind)
+
+;     mymaxima[0,startInd].rad = 1.11
+;     allmaxima[0,startInd].rad = 1.11
+
 ;Filter the maxima positions here for physicality
-  if keyword_set(constrain) then begin
-     maxinds=jmap_filter_maxima_radial(time.relsec,ht_km,allmaxima,fitrange=datastruct.xfitrange) ;,outliers=outliers
-     mymaxima=maxinds
-  endif
- 
-  device,window_state=win_open
-  oplot,time.jd,reform(yarray[datastruct.maxinds[mind,*]]),psym=1,color=200,thick=4,symsize=2
-  loadct,8,/silent
-  oplot,time[sp:ep].jd,reform(mymaxima[mind,sp:ep].rad),psym=1,color=200,thick=4,symsize=2
-  
+     if keyword_set(constrain) then begin
+        maxinds=jmap_filter_maxima_radial(time.relsec,ht_km,allmaxima,fitrange=datastruct.xfitrange) ;,outliers=outliers
+        mymaxima=maxinds
+     endif
+     
+     device,window_state=win_open
+     oplot,time.jd,reform(yarray[datastruct.maxinds[mind,*]]),psym=1,color=200,thick=4,symsize=2
+     loadct,8,/silent
+     oplot,time[sp:ep].jd,reform(mymaxima[mind,sp:ep].rad),psym=1,color=200,thick=4,symsize=2
+     
 ;  loadct,8,/silent
-  ;oplot,time[sp:ep],yarray[datastruct.mymaxima[mind,sp:ep]],psym=1,color=200,thick=4,symsize=2
+                                ;oplot,time[sp:ep],yarray[datastruct.mymaxima[mind,sp:ep]],psym=1,color=200,thick=4,symsize=2
 ;  oplot,time[sp+good_ind_pos].jd,yarray[datastruct.mymaxima[mind,sp+good_ind_pos]],psym=1,color=200,thick=4,symsize=2
-  ;oplot,[time[sp].jd,time[sp].jd],[yarray[0],yarray[n_elements(yarray)-1]],color=255
-  ;oplot,[time[ep].jd,time[ep].jd],[yarray[0],yarray[n_elements(yarray)-1]],color=255
-  
-  for ii=sp,ep do begin
+                                ;oplot,[time[sp].jd,time[sp].jd],[yarray[0],yarray[n_elements(yarray)-1]],color=255
+                                ;oplot,[time[ep].jd,time[ep].jd],[yarray[0],yarray[n_elements(yarray)-1]],color=255
+     
+     for ii=sp,ep do begin
         
 ;+--------------------------------------------------------------
 ;Find the front edge of the wave
@@ -433,27 +435,37 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
         endif
 ;---------------------------------------------------------------        
  
-;DEBUG    
-;For now, don't overplot the back edge  
-        oplot,[time[ii].jd,time[ii].jd],[mymaxima[mind,ii].rad,wave_frontedge[ii-sp].rad],$
-              color=200,thick=2
-;END DEBUG
 
      endfor 
   loadct,0,/silent
-  
-  find_start_end, data[*, yrng[0]:yrng[1]], time, yarray[yrng[0]:yrng[1]], startInd=startInd, endInd=endInd, myMaxima=mymaxima, wave_frontedge=wave_frontedge
 
+  if keyword_set(auto) then begin
+     find_start_end, data[*, yrng[0]:yrng[1]], time, yarray, startInd=startInd, endInd=endInd,$
+                     myMaxima=mymaxima, wave_frontedge=wave_frontedge, maxRadIndex=maxRadIndex
 
-    aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
+     aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
                         min=-40,max=50,fitrange=fitrange,$
                         title=datastruct.imgtit[mind],$
-                        xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
+                        xtitle=datastruct.xtitle,ytitle=datastruct.ytitle, /auto, startInd=startInd, endInd=endInd
 
+  endif
+  
+  datastruct.xfitrange=fitrange
+  sp=datastruct.xfitrange[0]
+  ep=datastruct.xfitrange[1]
 
-
-
-
+  device,window_state=win_open
+  oplot,time.jd,reform(yarray[datastruct.maxinds[mind,*]]),psym=1,color=200,thick=4,symsize=2
+  loadct,8,/silent
+  oplot,time[sp:ep].jd,reform(mymaxima[mind,sp:ep].rad),psym=1,color=200,thick=4,symsize=2
+  
+  for ii=sp,ep do begin
+;DEBUG    
+;For now, don't overplot the back edge  
+     oplot,[time[ii].jd,time[ii].jd],[mymaxima[mind,ii].rad,wave_frontedge[ii-sp].rad],$
+           color=200,thick=2
+;END DEBUG
+  endfor
 
 
 

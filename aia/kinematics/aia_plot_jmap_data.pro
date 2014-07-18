@@ -97,6 +97,7 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
      loadct, 0, /silent
 
      fitrange=[sp,ep]
+
   endif
 ;endif else begin
 ;     sp=min(where((rad_times-timerange[0]) gt 0.0))

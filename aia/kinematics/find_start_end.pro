@@ -31,6 +31,7 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
   cgplot, totalPixVals, /window
 
 
+
   ; Plot a variety of Gaussian fits to
   ; see if this would be useful for
   ; start/end detection
@@ -51,7 +52,7 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
   if keyword_set(mymaxima) then begin
      ;; print, maxRadIndex
      ;; print, rad[maxRadIndex]
-     
+
      topDiff = fltarr(n_elements(wave_frontedge))
      for i=0, n_elements(wave_frontedge)-1 do begin
         topDiff[i] = abs(wave_frontedge[i].rad - rad[maxRadIndex])
@@ -59,12 +60,9 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
 
      minIndArr = where(topDiff eq min(topDiff))
      minInd = minIndArr[0]
-     endInd = minInd + startInd
+     endInd = minInd + startInd + 1
      return
   endif
-
-        
-
 
   prevVal = totalPixVals[0]
   maxDuration = 0
