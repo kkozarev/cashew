@@ -1,5 +1,11 @@
 pro generate_kinematics_plots
 
+;PURPOSE
+;Procedure to run kinematics processing on all of the events
+;listed in events.json. Control where the script starts processing
+;by changing the starting location of ev in the for loop
+
+
 rrange=[1.1,1.37]
 wav=['193','211']
 
