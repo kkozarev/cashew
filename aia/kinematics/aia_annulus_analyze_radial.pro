@@ -277,6 +277,8 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
   
 ;LOOP OVER MEASUREMENTS!
   for mind=0,nmeas-1 do begin 
+
+
      data=indata[*,*,mind]
      height=1.0
      ht_km=yarr*DIST_FACTOR*height
@@ -305,8 +307,8 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
         if startInd eq -1 then return
         if endInd eq -1 then return
         
-        print, startInd
-        print, endInd
+        print, "Initial start index: ", startInd
+        print, "Initial end index: ", endInd
         
         ;; aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]], data[*, yrng[0]:yrng[1]],$
         ;;                    min=-40,max=50,fitrange=fitrange,$
@@ -344,9 +346,6 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
      
      tmp=reform(mymaxima[0,*].ind)
      datastruct.maxinds[mind,*]=reform(mymaxima[0,*].ind)
-
-;     mymaxima[0,startInd].rad = 1.11
-;     allmaxima[0,startInd].rad = 1.11
 
 ;Filter the maxima positions here for physicality
      if keyword_set(constrain) then begin
@@ -437,16 +436,28 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
  
 
      endfor 
-  loadct,0,/silent
+     loadct,0,/silent
+     
+     mymaxima[0,startInd].rad = 1.11
+     allmaxima[0,startInd].rad = 1.11
 
   if keyword_set(auto) then begin
+     ; Correct start and end positions with maxima data
      find_start_end, data[*, yrng[0]:yrng[1]], time, yarray, startInd=startInd, endInd=endInd,$
-                     myMaxima=mymaxima, wave_frontedge=wave_frontedge, maxRadIndex=maxRadIndex
+                     myMaxima=mymaxima, wave_frontedge=wave_frontedge, maxRadIndex=maxRadIndex,$
+                     startCorr=startCorr, endCorr=endCorr
 
+     print, "Corrected start index: ", startInd
+     print, "Corrected end index: ", endInd
+
+     ; Correct the positioning of the wave front edge
+     wave_frontedge = wave_frontedge[startCorr:endCorr]
+
+     ; Plot new corrected region of interest 
      aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
                         min=-40,max=50,fitrange=fitrange,$
                         title=datastruct.imgtit[mind],$
-                        xtitle=datastruct.xtitle,ytitle=datastruct.ytitle, /auto, startInd=startInd, endInd=endInd
+                        xtitle=datastruct.xtitle,ytitle=datastruct.ytitle, /auto, startInd=startInd, endInd=endInd  
 
   endif
   
@@ -462,12 +473,11 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
   for ii=sp,ep do begin
 ;DEBUG    
 ;For now, don't overplot the back edge  
+     
      oplot,[time[ii].jd,time[ii].jd],[mymaxima[mind,ii].rad,wave_frontedge[ii-sp].rad],$
            color=200,thick=2
 ;END DEBUG
   endfor
-
-
 
 
 ;--------------------------------------------------

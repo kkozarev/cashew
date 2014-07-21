@@ -560,3 +560,21 @@
 	"callisto_lookup": "",
 	"nrh_lookup": ""
 }
+
+{
+	"label": "140708_01",
+	"coordX": -810,
+	"coordY": 161,
+	"st": "2014/07/08 16:08:00",
+	"et": "2014/07/08 16:28:00",
+	"aiafov": [1024,2048],
+	"flareclass": "M6.5",
+	"typeII": true,
+	"loop": false,
+	"filament": true,
+	"comment": "Fast moving filament driven eruption with clear type II burst"
+	"web": true,
+	"rstn_lookup": "",
+	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2014/07/08/ESSEN_20140708_161503_58.fit.gz.png",
+	"nrh_lookup": ""
+}
