@@ -1,0 +1,20 @@
+pro generate_kinematics_plots
+
+rrange=[1.1,1.37]
+wav=['193','211']
+
+events=load_events_info()
+for ev=22, n_elements(events)-1 do begin
+   print, "CURRENT ITERATION", ev
+
+   event=events[ev]
+   print, "Current event is: ", event.label
+   if event.label eq 'test' then continue
+   
+   for w=0, n_elements(wav)-1 do begin
+      print, "Current wavelength is: ", wav[w]
+      aia_annulus_analyze_radial, event, wave=wav[w], rrange=rrange, /constrain, /auto
+   endfor
+endfor
+
+end
