@@ -438,8 +438,8 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
      endfor 
      loadct,0,/silent
      
-     mymaxima[0,startInd].rad = 1.11
-     allmaxima[0,startInd].rad = 1.11
+;     mymaxima[0,startInd].rad = 1.11
+;    allmaxima[0,startInd].rad = 1.11
 
   if keyword_set(auto) then begin
      ; Correct start and end positions with maxima data
