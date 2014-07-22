@@ -33,7 +33,7 @@ end
 
 
 ;+============================================================================
-pro aia_annulus_analyze_radial,event,datapath=datapath,savepath=savepath,thrange=thrange,wave=wave,rrange=rrange,constrain=constrain
+pro aia_annulus_analyze_radial,event,datapath=datapath,savepath=savepath,thrange=thrange,wave=wave,rrange=rrange,constrain=constrain, gradient=gradient, auto=auto
 ;PURPOSE:
 ;Procedure to analyze the speeds of radial expansion of a
 ;wave and/or a filament.
@@ -194,7 +194,7 @@ pro aia_annulus_analyze_radial,event,datapath=datapath,savepath=savepath,thrange
            backinds:intarr(1,nsteps),$
            xtitle:'Time of '+event.date,ytitle:'R!Dsun!N',$
            imgtit:'AIA/'+wav+' BDiff Radial Positions',$
-           savename:'annplot_'+date+'_'+event.label+'_'+wav+'_radial.png',$
+           savename:'annplot_'+date+'_'+event.label+'_'+wav+'_radial_auto.png',$
            time:time.relsec,$
            date_obs:ind_arr.date_obs $
            } 
@@ -222,7 +222,7 @@ pro aia_annulus_analyze_radial,event,datapath=datapath,savepath=savepath,thrange
   rad_data.bdiff=tmp
   
   ;All the rest of the work is done here.
-  annulus_fit_maxima_radial,event,rad_data.bdiff,rad_data,time,y_rsun_array,constrain=constrain
+  annulus_fit_maxima_radial,event,rad_data.bdiff,rad_data,time,y_rsun_array,constrain=constrain, auto=auto, gradient=gradient
   
   rad_data.plotinfo.p=!P
   rad_data.plotinfo.x=!X
@@ -243,7 +243,7 @@ end
 
 
 ;+============================================================================
-pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,constrain=constrain
+pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,constrain=constrain, auto=auto, gradient=gradient
 
   RSUN=6.96e5  ;Solar radius in km.
   nmeas=n_elements(datastruct.imgtit)
@@ -275,58 +275,96 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
   !p.multi=datastruct.multi
   device,window_state=win_open
   
-  
 ;LOOP OVER MEASUREMENTS!
-  for mind=0,nmeas-1 do begin
-  data=indata[*,*,mind]
-  height=1.0
-  ht_km=yarr*DIST_FACTOR*height
-  if mind eq 0 then wdef,datastruct.winind,datastruct.winsize[0],datastruct.winsize[1]
+  for mind=0,nmeas-1 do begin 
 
-  !P.position=[0.18,0.17,0.9,0.9]
-  fitrange=intarr(2)
-  aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
-                     min=-40,max=50,fitrange=fitrange,$
-                     title=datastruct.imgtit[mind],$
-                     xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
-  
-  datastruct.xfitrange=fitrange
-  sp=datastruct.xfitrange[0]
-  ep=datastruct.xfitrange[1]
+
+     data=indata[*,*,mind]
+     height=1.0
+     ht_km=yarr*DIST_FACTOR*height
+     if mind eq 0 then wdef,datastruct.winind,datastruct.winsize[0],datastruct.winsize[1]
+
+     !P.position=[0.18,0.17,0.9,0.9]
+     fitrange=intarr(2)
+
+     maxRadIndex = min(where(data[0,*] eq 0.0))
+
+
+                                ;Find start and end positions
+     if keyword_set(auto) then begin
+        if keyword_set(gradient) then begin
+           make_gradient_map, time.jd, yarray, data, yrng, intensityData=intensityData
+           data = intensityData
+        endif
+        
+        aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
+                             yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
+                             numplotmax=3
+        
+        find_start_end, data[*, yrng[0]:yrng[1]], time, yarray, startInd=startInd, endInd=endInd
+        
+                                ;Exit if a good start position is not found
+        if startInd eq -1 then return
+        if endInd eq -1 then return
+        
+        print, "Initial start index: ", startInd
+        print, "Initial end index: ", endInd
+        
+        ;; aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]], data[*, yrng[0]:yrng[1]],$
+        ;;                    min=-40,max=50,fitrange=fitrange,$
+        ;;                    title=datastruct.imgtit[mind],$
+        ;;                    xtitle=datastruct.xtitle,ytitle=datastruct.ytitle,startInd=startInd,endInd=endInd, /auto
+        
+        fitrange=[startInd, endInd]
+        
+     endif else begin
+        
+        aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
+                       min=-40,max=50,fitrange=fitrange,$
+                       title=datastruct.imgtit[mind],$
+                       xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
+        
+
+                                ;Fit the maxima and overplot them...
+        aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
+                             yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
+                             numplotmax=3  
+     endelse
+
+     
+     datastruct.xfitrange=fitrange
+     sp=datastruct.xfitrange[0]
+     ep=datastruct.xfitrange[1]
                                 ;Search for the edges of the wave
-  wave_frontedge=replicate({rad:0.0D,ind:0L},ep-sp+1)
-  wave_backedge=wave_frontedge
-  
-  ;To restore the plot information and overplot on them, do
-  datastruct.plotinfo[mind].p=!P
-  datastruct.plotinfo[mind].x=!X
-  datastruct.plotinfo[mind].y=!Y
-  
-  ;Fit the maxima and overplot them...
-  aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
-                   yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
-                   numplotmax=3
-  tmp=reform(mymaxima[0,*].ind)
-  datastruct.maxinds[mind,*]=reform(mymaxima[0,*].ind)
-  
+     wave_frontedge=replicate({rad:0.0D,ind:0L},ep-sp+1)
+     wave_backedge=wave_frontedge
+     
+                                ;To restore the plot information and overplot on them, do
+     datastruct.plotinfo[mind].p=!P
+     datastruct.plotinfo[mind].x=!X
+     datastruct.plotinfo[mind].y=!Y
+     
+     tmp=reform(mymaxima[0,*].ind)
+     datastruct.maxinds[mind,*]=reform(mymaxima[0,*].ind)
+
 ;Filter the maxima positions here for physicality
-  if keyword_set(constrain) then begin
-     maxinds=jmap_filter_maxima_radial(time.relsec,ht_km,allmaxima,fitrange=datastruct.xfitrange) ;,outliers=outliers
-     mymaxima=maxinds
-  endif
- 
-  device,window_state=win_open
-  oplot,time.jd,reform(yarray[datastruct.maxinds[mind,*]]),psym=1,color=200,thick=4,symsize=2
-  loadct,8,/silent
-  oplot,time[sp:ep].jd,reform(mymaxima[mind,sp:ep].rad),psym=1,color=200,thick=4,symsize=2
-  
+     if keyword_set(constrain) then begin
+        maxinds=jmap_filter_maxima_radial(time.relsec,ht_km,allmaxima,fitrange=datastruct.xfitrange) ;,outliers=outliers
+        mymaxima=maxinds
+     endif
+     
+     device,window_state=win_open
+     oplot,time.jd,reform(yarray[datastruct.maxinds[mind,*]]),psym=1,color=200,thick=4,symsize=2
+     loadct,8,/silent
+     oplot,time[sp:ep].jd,reform(mymaxima[mind,sp:ep].rad),psym=1,color=200,thick=4,symsize=2
+     
 ;  loadct,8,/silent
-  ;oplot,time[sp:ep],yarray[datastruct.mymaxima[mind,sp:ep]],psym=1,color=200,thick=4,symsize=2
+                                ;oplot,time[sp:ep],yarray[datastruct.mymaxima[mind,sp:ep]],psym=1,color=200,thick=4,symsize=2
 ;  oplot,time[sp+good_ind_pos].jd,yarray[datastruct.mymaxima[mind,sp+good_ind_pos]],psym=1,color=200,thick=4,symsize=2
-  ;oplot,[time[sp].jd,time[sp].jd],[yarray[0],yarray[n_elements(yarray)-1]],color=255
-  ;oplot,[time[ep].jd,time[ep].jd],[yarray[0],yarray[n_elements(yarray)-1]],color=255
-  
-  for ii=sp,ep do begin
+                                ;oplot,[time[sp].jd,time[sp].jd],[yarray[0],yarray[n_elements(yarray)-1]],color=255
+                                ;oplot,[time[ep].jd,time[ep].jd],[yarray[0],yarray[n_elements(yarray)-1]],color=255
+     
+     for ii=sp,ep do begin
         
 ;+--------------------------------------------------------------
 ;Find the front edge of the wave
@@ -362,6 +400,55 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
            wave_frontedge[ii-sp].ind=mymaxima[mind,ii].ind+tmp
            datastruct.frontinds[mind,ii]=mymaxima[mind,ii].ind+tmp
         endif
+
+
+;;         min=-40
+;;         max=50
+;;         data=data[*, yrng[0]:yrng[1]]
+;;         yarray=yarray[yrng[0]:yrng[1]]
+        
+;;         loadct, 0
+
+;;         cgPlot, yarray, data[0,*]
+;;         for i=0, n_elements(data[*,0])-1 do begin
+;;            newtime = time.jd
+;;            caldat, newtime[i], m, d, y, h, m, s 
+;;            print, h, ":", m
+           
+;;            col = data[i,*]
+
+;;            color=255.0*(col-min)/(max-min) ; Scale Colors
+
+;; ;           color=reverse(color)           
+;;  ;          yarray = reverse(yarray)
+
+;;            cgPlot, yarray, color
+
+;;           ; Plot a variety of Gaussian fits to
+;;           ; see if this would be useful for
+;;           ; start/end detection
+           
+
+
+;;            gfit1 = gaussfit(yarray, color, coeff, nterms=3)
+;;            gfit2 = gaussfit(yarray, color, coeff, nterms=4)
+;;            gfit3 = gaussfit(yarray, color, coeff, nterms=5)
+;;            gfit4 = gaussfit(yarray, color, coeff, nterms=6)
+
+;;            cgPlot, yarray, gfit1, /overPlot, color='blue'
+;;            cgPlot, yarray, gfit2, /overPlot, color='green'
+;;            cgPlot, yarray, gfit3, /overPlot, color='red'
+;;            cgPlot, yarray, gfit4, /overPlot, color='cyan'
+
+
+
+
+;;            test = get_kbrd(1)
+              
+;;         endfor
+
+;;         stop
+           
 ;---------------------------------------------------------------
         
         
@@ -379,7 +466,7 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
            wave_backedge[ii-sp].ind=mymaxima[mind,ii].ind-tmp
            datastruct.backinds[mind,ii]=mymaxima[mind,ii].ind-tmp
         endif
-        
+
         newv=0
         if newv gt 0 then begin    
 ;NEW VERSION, SEARCHING UP FROM BACKGROUND
@@ -396,16 +483,54 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
         endif
 ;---------------------------------------------------------------        
  
+
+     endfor 
+     loadct,0,/silent
+     
+;     mymaxima[0,startInd].rad = 1.11
+;    allmaxima[0,startInd].rad = 1.11
+
+  if keyword_set(auto) then begin
+     ; Correct start and end positions with maxima data
+     find_start_end, data[*, yrng[0]:yrng[1]], time, yarray, startInd=startInd, endInd=endInd,$
+                     myMaxima=mymaxima, wave_frontedge=wave_frontedge, maxRadIndex=maxRadIndex,$
+                     startCorr=startCorr, endCorr=endCorr
+
+     print, "Corrected start index: ", startInd
+     print, "Corrected end index: ", endInd
+
+     ; Correct the positioning of the wave front edge
+     wave_frontedge = wave_frontedge[startCorr:endCorr]
+
+     ; Plot new corrected region of interest 
+     aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
+                        min=-40,max=50,fitrange=fitrange,$
+                        title=datastruct.imgtit[mind],$
+                        xtitle=datastruct.xtitle,ytitle=datastruct.ytitle, /auto, startInd=startInd, endInd=endInd  
+
+  endif
+  
+  datastruct.xfitrange=fitrange
+  sp=datastruct.xfitrange[0]
+  ep=datastruct.xfitrange[1]
+
+  device,window_state=win_open
+  oplot,time.jd,reform(yarray[datastruct.maxinds[mind,*]]),psym=1,color=200,thick=4,symsize=2
+  loadct,8,/silent
+  oplot,time[sp:ep].jd,reform(mymaxima[mind,sp:ep].rad),psym=1,color=200,thick=4,symsize=2
+  
+  for ii=sp,ep do begin
 ;DEBUG    
 ;For now, don't overplot the back edge  
-        oplot,[time[ii].jd,time[ii].jd],[mymaxima[mind,ii].rad,wave_frontedge[ii-sp].rad],$
-              color=200,thick=2
+     
+     oplot,[time[ii].jd,time[ii].jd],[mymaxima[mind,ii].rad,wave_frontedge[ii-sp].rad],$
+           color=200,thick=2
 ;END DEBUG
-
   endfor
-  loadct,0,/silent
-  
-  
+
+loadct, 0, /silent
+
+
 ;--------------------------------------------------
 ;Do second order polynomial fitting for the wave fronts edges
   print,''

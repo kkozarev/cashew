@@ -140,8 +140,13 @@ pro create_coronalshocks_page, fname, All=all
      if file_exist(event.webpath+'annulusplot/annplot_'+event.date+'_'+event.label+'_193_radial.png') then $
         printf,lun,'<td><a href="'+pngname+'" target="_blank">PNG</a></td>' else $
            printf,lun,'<td>&nbsp;</td>'
-                                ;The deprojected kinematics tangential figure
-     printf,lun,'<td>&nbsp;</td>'
+                                ;The deprojected kinematics tangential
+                                ;figure
+     ; Currently plotting the auto generated kinematics plots
+     pngname='events/'+event.label+'/annulusplot/annplot_'+event.date+'_'+event.label+'_193_radial_auto.png'
+     if file_exist(event.webpath+'annulusplot/annplot_'+event.date+'_'+event.label+'_193_radial_auto.png') then $
+        printf,lun,'<td><a href="'+pngname+'" target="_blank">PNG</a></td>' else $
+           printf,lun,'<td>&nbsp;</td>'
      
                                 ;The Aschwanden DEM movie
      movname='events/'+event.label+'/movies/aschdem_'+event.date+'_'+event.label+'_teem_map.mp4'
