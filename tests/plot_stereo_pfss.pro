@@ -165,7 +165,7 @@ endif
 ;===-------------------------------------------===
   if keyword_set(sta) then begin
      if not keyword_set(saved) then begin
-        pfssfile=event.pfsspath+'pfss_results_'+event.date+'_'+event.label+'_1.05Rs_dens_8.0.sav'
+        pfssfile=event.pfsspath+'pfss_results_'+event.date+'_'+event.label+'_lores.sav'
         restore,pfssfile
 ;CREATE/LOAD MODEL FOR STEREO-A
         lcent=amaps_latlon[0].crln ;128.50276
@@ -232,7 +232,7 @@ endif
 if keyword_set(stb) then begin
    if not keyword_set(saved) then begin
 ;===-------------------------------------------===
-      pfssfile=event.pfsspath+'pfss_results_'+event.date+'_'+event.label+'_1.05Rs_dens_8.0.sav'
+      pfssfile=event.pfsspath+'pfss_results_'+event.date+'_'+event.label+'_lores.sav'
       restore,pfssfile
 ;CREATE/LOAD MODEL FOR STEREO-B
       lcent=bmaps_latlon[0].crln ;128.50276

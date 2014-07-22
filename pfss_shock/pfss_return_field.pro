@@ -100,11 +100,10 @@ endif
      pfss_field_start_coord,5,invdens,radstart=rstart,bbox=box $
   else $
      pfss_field_start_coord,5,invdens,radstart=rstart
- 
+
 
 ;  trace the field lines passing through the starting point arrays
   pfss_trace_field, kind
-;@pfss_data_block
   ind=where(ptph lt 0.0)
   if ind[0] gt -1 then ptph[ind]+=2*!PI
   ind=where(ptph ge 2*!PI)

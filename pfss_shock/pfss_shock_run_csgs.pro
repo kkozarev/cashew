@@ -32,7 +32,7 @@ pro test_pfss_shock_run_csgs
 ; A small procedure to run several instances of the coronal shock
 ; model.
   
-  event=load_events_info(label='test')
+  event=load_events_info(label='110511_01')
   pfss_shock_run_csgs,event;,/plot,/png
 
 end
@@ -89,7 +89,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
 
   pfssfile=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav')
   if keyword_set(lores) then pfssfile=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_lores.sav')
-  if keyword_set(hires) pfssfile=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav')
+  if keyword_set(hires) then pfssfile=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav')
   
   aiafile=file_search(datapath+'normalized_'+eventname+'_subdata.sav')
   shockfile=file_search(event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed.sav')
@@ -232,7 +232,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
               pfssLines[ff].ptr=ptr[0:npt-1,ff]
               pfssLines[ff].ptth=ptth[0:npt-1,ff]
               pfssLines[ff].ptph=ptph[0:npt-1,ff]
-              pfssLines[ff].open=0
+              if kind[ff] eq 2 then pfssLines[ff].open=1 else pfssLines[ff].open=0
               pfssLines[ff].linid=ff
               pfssLines[ff].color=linecols[ff]
               
@@ -481,7 +481,9 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
 
 
 ;Save the results to a file
-     fname='csgs_results_'+event.date+'_'+event.label+'.sav'
+     resstr='_hires'
+     if keyword_set(lores) then resstr='_lores'
+     fname='csgs_results_'+event.date+'_'+event.label+resstr+'.sav'
      print,'Saving file '+pfsspath+fname
      save,filename=pfsspath+fname,pfssLines,endPointCoords,lineSpread,maxLonExtent,$
           allcrosses,dt,subindex,radius,time,rotationAngles,crossPoints,carrlon,carrlat,$
