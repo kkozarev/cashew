@@ -400,6 +400,55 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
            wave_frontedge[ii-sp].ind=mymaxima[mind,ii].ind+tmp
            datastruct.frontinds[mind,ii]=mymaxima[mind,ii].ind+tmp
         endif
+
+
+;;         min=-40
+;;         max=50
+;;         data=data[*, yrng[0]:yrng[1]]
+;;         yarray=yarray[yrng[0]:yrng[1]]
+        
+;;         loadct, 0
+
+;;         cgPlot, yarray, data[0,*]
+;;         for i=0, n_elements(data[*,0])-1 do begin
+;;            newtime = time.jd
+;;            caldat, newtime[i], m, d, y, h, m, s 
+;;            print, h, ":", m
+           
+;;            col = data[i,*]
+
+;;            color=255.0*(col-min)/(max-min) ; Scale Colors
+
+;; ;           color=reverse(color)           
+;;  ;          yarray = reverse(yarray)
+
+;;            cgPlot, yarray, color
+
+;;           ; Plot a variety of Gaussian fits to
+;;           ; see if this would be useful for
+;;           ; start/end detection
+           
+
+
+;;            gfit1 = gaussfit(yarray, color, coeff, nterms=3)
+;;            gfit2 = gaussfit(yarray, color, coeff, nterms=4)
+;;            gfit3 = gaussfit(yarray, color, coeff, nterms=5)
+;;            gfit4 = gaussfit(yarray, color, coeff, nterms=6)
+
+;;            cgPlot, yarray, gfit1, /overPlot, color='blue'
+;;            cgPlot, yarray, gfit2, /overPlot, color='green'
+;;            cgPlot, yarray, gfit3, /overPlot, color='red'
+;;            cgPlot, yarray, gfit4, /overPlot, color='cyan'
+
+
+
+
+;;            test = get_kbrd(1)
+              
+;;         endfor
+
+;;         stop
+           
 ;---------------------------------------------------------------
         
         
@@ -417,7 +466,7 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
            wave_backedge[ii-sp].ind=mymaxima[mind,ii].ind-tmp
            datastruct.backinds[mind,ii]=mymaxima[mind,ii].ind-tmp
         endif
-        
+
         newv=0
         if newv gt 0 then begin    
 ;NEW VERSION, SEARCHING UP FROM BACKGROUND
@@ -478,6 +527,8 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
            color=200,thick=2
 ;END DEBUG
   endfor
+
+loadct, 0, /silent
 
 
 ;--------------------------------------------------
