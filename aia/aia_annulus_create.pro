@@ -3,7 +3,7 @@ pro test_aia_annulus_create
 ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
-     event=load_events_info(label='test')
+     event=load_events_info(label='140108_01')
      ;aia_annulus_create,event,/force
      ;aia_annulus_create,event,/force
      rrange=[1.0,1.3]
@@ -29,7 +29,7 @@ pro test_aia_annulus_create
 end
 
 
-pro aia_annulus_create,event,run=run,base=base,raw=raw,_extra=_extra
+pro aia_annulus_create,event,run=run,base=base,raw=raw,remove_aec=remove_aec,_extra=_extra;
   if keyword_set(raw) then aia_annulus_create_main, event, /raw, /remove_aec, _extra=_extra
   if keyword_set(base) then aia_annulus_create_main, event, /base, /remove_aec, _extra=_extra
   if keyword_set(run) then aia_annulus_create_main, event, /run, /remove_aec, _extra=_extra
@@ -70,7 +70,9 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
 ;   2013/07/30, Kamen Kozarev - Reworked for the CfA infrastructure
 ;   2013/09/30, Kamen Kozarev - Added savename, savepath keywords
 ;   2013/11/13, Kamen Kozarev - Integrated the event structure
-  
+
+
+
   date=event.date
   if not keyword_set(wav) then passband = '193' else passband = wav
   if not keyword_set(savepath) then savepath=event.savepath+'annulusplot/'
@@ -130,7 +132,7 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
      endif
      
   endif else begin
-     fls=aia_file_search(event.st,event.et,passband,missing=locmissing,remove_aec=remove_aec,event=event)
+        fls=aia_file_search(event.st,event.et,passband,missing=locmissing,remove_aec=remove_aec,event=event)
      nsteps=size(fls,/n_elements)
      
      read_sdo, fls, ind_arr, /nodata

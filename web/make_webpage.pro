@@ -1,4 +1,4 @@
-pro make_webpage, All=all, webfilename=webfilename,_extra=_extra, local=local
+pro make_webpage, All=all, webfilename=webfilename,_extra=_extra, local=local, noexit=noexit
 
 ;PURPOSE:
 ;This procedure will sync event folders and update the webpage
@@ -75,7 +75,7 @@ endelse
 
 if ~(keyword_set(local)) then begin
    spawn,getenv('CORWAV_WEB')+'../sync_events'
-   exit
+   if ~(keyword_set(noexit)) then exit
 endif
 
 end

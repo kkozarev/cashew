@@ -85,7 +85,7 @@ function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=
   if keyword_set(check171) then begin
      tmpst=aia_augment_timestring(sts,-6)
      tmpet=aia_augment_timestring(ets,6)
-     tim171=aia_file_search(tmpst,tmpet,'171',path=path)
+     tim171=aia_file_search(tmpst,tmpet,'171',path=path,remove_aec=remove_aec)
      if tim171[0] ne '' then begin
         tmp=strsplit(tim171[0],'_',/extract)
         mind=n_elements(tmp)-2
@@ -220,7 +220,7 @@ function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=
      endif
   endif
 
-  if keyword_set(check171) then begin 
+  if keyword_set(check171) then begin
      if ntotfiles ne n_elements(files) then begin
         print,''
         print,'Total number of files for band '+wav+' is '+strtrim(string(n_elements(files)),2)
@@ -261,7 +261,7 @@ function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=
   if files[0] eq '' then begin
      if keyword_set(path) or keyword_set(event) then begin
         if path eq default_path then return,''
-        files=aia_file_search(starttime,endtime,wav,path=default_path)
+        files=aia_file_search(starttime,endtime,wav,path=default_path,remove_aec=remove_aec)
      endif
   endif
   if keyword_set(first) then return,files[0] $

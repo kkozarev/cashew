@@ -51,63 +51,6 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
   ;; cgPlot, gfit3, /overPlot, color='red', /window
   ;; cgPlot, gfit4, /overPlot, color='cyan', /window
 
-; Peform a secondary scan and bring up the end index depending
-; on where the distance from the current frontedge to the 
-; edge of valid radian data
-  if keyword_set(mymaxima) then begin
-     ;; print, maxRadIndex
-     ;; print, rad[maxRadIndex]
-
-     ; Compute the difference between the last point of valid data
-     ; in topDiff, and the difference between the current maxima
-     ; and the wave front edge, frontDiff
-     topDiff = fltarr(n_elements(wave_frontedge))
-     frontDiff = fltarr(n_elements(wave_frontedge))
-     for i=0, n_elements(wave_frontedge)-1 do begin
-        topDiff[i] = abs(wave_frontedge[i].rad - rad[maxRadIndex])
-        frontDiff[i] = abs(wave_frontedge[i].rad - mymaxima[0,i+startInd].rad)
-        if debug eq 1 then begin
-           print, "Current index: ", i
-           print, "top diff: ", topDiff[i]
-           print, "front diff: ", frontDiff[i]
-        endif
-     endfor
-     
-     ; Update the endIndex to cutoff once we reach
-     ; the last location of valid data
-     minEndArr = where(topDiff eq min(topDiff))
-     if minEndArr[0] ne -1 then begin
-        minEnd = minEndArr[0]
-        endInd = minEnd + startInd + 1
-        endCorr = minEnd+1
-        if endCorr eq n_elements(wave_frontedge) then begin
-           endInd = minEnd+startInd
-           endCorr = minEnd
-        endif
-     endif 
-
-     ; Make sure the initial wave position has actually
-     ; detected the front, and update the startIndex
-     minStartInd = min(where(frontDiff gt 0.0075))
-     if minStartInd[0] ne -1 then begin
-        startCorr = minStartInd- 1 
-        if startCorr ne -1 then begin
-           startInd = minStartInd + startInd - 1
-        endif else begin
-           startCorr = 0
-        endelse
-     endif 
-
-     if debug eq 1 then begin
-        print, "End Index is: ", endInd
-        print, "End correction is: ", endCorr
-        print, "Start Index is: ", startInd
-        print, "Start correction is: ", startCorr
-     endif
-
-     return
-  endif
-
   prevVal = totalPixVals[0]
   maxDuration = 0
 
@@ -199,6 +142,9 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
   endif
 
   print, "Start Index: ", startInd
+  print, "Start Time: ", time[startInd]
   print, "End Index: ", endInd
+  print, "End Time: ", time[endInd]
+  
        
 end
