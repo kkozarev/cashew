@@ -1,8 +1,8 @@
 pro test_pfss_shock_plot_crossing_angles
 ;Testing the shock crossing angles plotting procedure
 event=load_events_info(label='110511_01')
-;
-pfss_shock_plot_crossing_angles,event,/oplot
+
+pfss_shock_plot_crossing_angles,event,/lores,/oplot
 
 end
 
@@ -74,6 +74,10 @@ pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,
   ycenter=suncenter[1]
   if not keyword_set(datapath) then datapath=savepath
   
+;Get the field line info from the PFSS model results
+  if keyword_set(hires) then $
+     pfss_get_field_line_info,event,pfssLines,/hires $
+  else pfss_get_field_line_info,event,pfssLines,/lores
 ;DEBUG
 ;This simulates open field lines to help the plotting
 ;  nlins=n_elements(pfsslines)
@@ -113,7 +117,6 @@ pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,
   device,set_resolution=[1000,800],SET_PIXEL_DEPTH=24,DECOMPOSED=0
   ;!P.background=0
   chsize=2
-
   for sstep=0,nsteps-1 do begin
      shockrad=radiusfitlines[sstep]/kmpx
      shscale=maxshockrad/shockrad
@@ -134,21 +137,23 @@ pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,
      th=reform(crossPoints[sstep,0:ncrosses-1].thbn)
      
      ;Plot Axes and the shock mesh
-     if keyword_set(oplot) and sstep gt 0 then set_plot,'z'
      loadct,0,/silent
-     PLOT, flx/maxshockrad, fly/maxshockrad, PSYM = 3, $ 
-           TITLE = thlet+'!DBN!N at B-Shock Crossings', $
-           XTITLE = 'X', $
-           YTITLE = 'Y', $
-           xrange=xrng,yrange=yrng,$
-           xstyle=1,ystyle=1,color=0,background=255,$
-           xthick=3,ythick=3,thick=3,charsize=chsize,/nodata
-     PLOTS,vertex_list[0,*]/maxshockrad,vertex_list[1,*]/maxshockrad,psym=3,color=0 ,/data
-     if keyword_set(oplot) and sstep gt 0 then begin 
-;        set_plot,'x'
+     
+        PLOT, flx/maxshockrad, fly/maxshockrad, PSYM = 3, $ 
+              TITLE = thlet+'!DBN!N at B-Shock Crossings', $
+              XTITLE = 'X', $
+              YTITLE = 'Y', $
+              xrange=xrng,yrange=yrng,$
+              xstyle=1,ystyle=1,color=0,background=255,$
+              xthick=3,ythick=3,thick=3,charsize=chsize,/nodata
+        ;if keyword_set(oplot) and sstep gt 0 then goto,next
+        PLOTS,vertex_list[0,*]/maxshockrad,vertex_list[1,*]/maxshockrad,psym=3,color=0 ,/data
+     
+     if keyword_set(oplot) and sstep gt 0 then begin
         xyouts,0.171,0.885,strtime[sstep-1],charsize=chsize,charthick=2,/norm,color=255
      endif
      xyouts,0.171,0.885,strtime[sstep],charsize=chsize,charthick=2,/norm,color=0
+     
      ;Contour data on regular grid
      loadct,13,/silent
      

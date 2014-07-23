@@ -33,7 +33,7 @@ pro test_pfss_shock_run_csgs
 ; model.
   
   event=load_events_info(label='110511_01')
-  pfss_shock_run_csgs,event,/lores;,/plot;,/png
+  pfss_shock_run_csgs,event,/lores;,/plot,/png
 
 end
 ;---------------------------------------------------------------------
@@ -92,8 +92,15 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   if keyword_set(hires) then pfssfile=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav')
   
   aiafile=file_search(datapath+'normalized_'+eventname+'_subdata.sav')
-  shockfile=file_search(event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed_radial.sav')
+  shockfile=file_search(event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed.sav')
   
+  print,'Loading AIA File '+aiafile
+  if aiafile[0] ne '' then begin
+     restore,aiafile[0]
+  endif else begin
+     print,'No AIA data present. Quitting...'
+     return
+  endelse
   
   ;Load the measured shock wave radius.
   ;This was created with measure_wave_sphere.pro
@@ -105,17 +112,8 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   endif else begin
      print,'No Shock data present. Quitting...'
      return
-  endelse  
-  
-  print,'Loading AIA File '+aiafile
-  if aiafile[0] ne '' then begin
-     restore,aiafile[0]
-     if not keyword_set(png) and not keyword_set(plot) then subdata=0
-  endif else begin
-     print,'No AIA data present. Quitting...'
-     return
   endelse
-
+  
   ;Load the PFSS model results
 ;  print,'Loading PFSS File '+pfssfile
 ;  if pfssfile[0] ne '' then begin
@@ -142,7 +140,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   radiusfitlines-=1.
   radiusfitlines*=RSUN*event.geomcorfactor
   radius=radiusfitlines/kmpx
-  
+    
   lon=event.arlon
   lat=event.arlat
   
@@ -156,7 +154,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   minshockrad=radius[0]/kmpx
   maxshockrad=radius[nsteps-1]/kmpx
   subindex=ind_arr[sp:ep]
-  
+
   rsun_m=subindex[0].rsun_ref ;Solar radius in m.
   minAU=1.49598e11 ;m in AU
   mpix=rsun_m/sunrad ;conversion between pixels and m.
@@ -167,20 +165,14 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   dt= time[1]-time[0]           ;The cadence (maxshockrad-minshockrad)*mpix/(nsteps*1.0)/vshock ;timestep in seconds
   
 ;Variables for the crossing points information
-  nmaxcrosses=2.0e5
- ; allcrossPoints=fltarr(nsteps,3,nmaxcrosses)
-  allcrossAngles=fltarr(nsteps,nmaxcrosses)
- ; allcrossBmag=fltarr(nsteps,nmaxcrosses)
- ; allcrossLineIndices=fltarr(nsteps,nmaxcrosses)
+  allcrossPoints=fltarr(nsteps,3,100000)
+  allcrossAngles=fltarr(nsteps,100000)
+  allcrossBmag=fltarr(nsteps,100000)
+  allcrossLineIndices=fltarr(nsteps,100000)
   allcrosses=fltarr(nsteps)
-  
-;A structure array that will hold the information about the field-shock crossings
-  crossPoint={px:0.0D,py:0.0D,pz:0.0D,thbn:0.0D,linid:0L,bmag:0.0D}
-  crossPoints=replicate(crossPoint,nsteps,nmaxcrosses)
-           
 ;--------------------------------------------------------------
   
- 
+  
 
 ;--------------------------------------------------------------
 
@@ -219,21 +211,21 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
            carrlat=subindex[sstep].crlt_obs*!PI/180.0  ;b
            
            ;Get all the necessary information from the PFSS model
-           stop
+           
            if keyword_set(hires) then $
               pfss_get_field_line_info,event,pfssLines,pfssfile=pfssfile,sph_data=sph_data,/hires $
            else pfss_get_field_line_info,event,pfssLines,pfssfile=pfssfile,sph_data=sph_data,/lores
            
            nlines=n_elements(pfssLines)
-          ;   pfss_sphtocart,ptr,ptth,ptph,carrlon,carrlat,pfss_px,pfss_pz,pfss_py
+        ;   pfss_sphtocart,ptr,ptth,ptph,carrlon,carrlat,pfss_px,pfss_pz,pfss_py
            
-          ;  nlines=n_elements(pfss_px[0,*])*1.0D
-           
+;           nlines=n_elements(pfss_px[0,*])*1.0D
+
           ; maxnpts=n_elements(pfss_px[*,0])
            
 ;Apply the rotations and translations and plot
           ; pfss_cartpos=fltarr(nlines,3,maxnpts)
-           
+
            for ff=0.0D,nlines-1 do begin
               npt=pfssLines[ff].npts     ;the number of points on this particular line.
               
@@ -244,6 +236,23 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
                  pfss_cartpos=fltarr(nlines,3,maxnpts)
               endif
               ;SAVE THE FIELD LINE INFORMATION TO A STRUCTURE ARRAY
+;              if ff eq 0 then begin
+;                 pfssLine={npts:0L,ptr:dblarr(max(nstep)),ptth:dblarr(max(nstep)),ptph:dblarr(max(nstep)),$
+;                           open:0,linid:0L,color:0.}
+;                 pfssLines=replicate(pfssLine,nlines)
+;              endif
+;              pfssLines[ff].npts=npt
+;              pfssLines[ff].ptr=ptr[0:npt-1,ff]
+;              pfssLines[ff].ptth=ptth[0:npt-1,ff]
+;              pfssLines[ff].ptph=ptph[0:npt-1,ff]
+;              if kind[ff] eq 2 then pfssLines[ff].open=1 else pfssLines[ff].open=0
+;              pfssLines[ff].linid=ff
+;              pfssLines[ff].color=linecols[ff]
+              ;Transform to the current view
+;              pos = transpose([[reform(pfss_px[0:npt-1,ff])],$
+;                               [reform(pfss_py[0:npt-1,ff])],$
+;                               [reform(pfss_pz[0:npt-1,ff])]])
+
               pos = transpose([[reform(pfss_px[0:npt-1])],$
                                [reform(pfss_py[0:npt-1])],$
                                [reform(pfss_pz[0:npt-1])]])
@@ -251,7 +260,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
                                      scale=[sunrad,sunrad,sunrad])
               pos = transform_volume(pos,translate=[xcenter,ycenter,zcenter])
               pfss_cartpos[ff,*,0:npt-1]=pos
-              if ff mod 100 eq 0 then print,'PFSS section, line #'+strtrim(string(fix(ff)),2)+'/'+strtrim(string(fix(nlines)),2)
+  
            endfor
            
            ;Free some memory
@@ -263,14 +272,14 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
            
         endif
 ;-==============================================================================
-  
+        
         
 ;PLOT THE AIA IMAGE!
            if keyword_set(plot) or keyword_set(png) then begin
               aia_lct,rr,gg,bb,wavelnth=subindex[sstep].wavelnth,/load
               
               if sstep eq 0 then begin
-                 wdef,0,event.aiafov[0],event.aiafov[1]
+                 wdef,0,1024
                                 ;tvlct,rrr,ggg,bbb,/get
               endif
               tv,bytscl(sqrt(subdata[*,*,sp+sstep]),min=1,max=50)
@@ -281,7 +290,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
               
 ;PLOT THE PFSS INFORMATION
               for ff = 0.0D,nlines-1,4 do begin
-                 npt = pfssLines[ff].npts ;the number of points in this particular line.
+                 npt = nstep[ff] ;the number of points in this particular line.
                  pos = reform(pfss_cartpos[ff,*,0:npt-1])
                  plots,pos,color=250,/device,psym=3 ;,psym=sym(1),symsize=0.25
               endfor
@@ -324,7 +333,6 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
 ;-==============================================================================
 
         
-
 ;+==============================================================================
 ;4. Determine the points where the field lines cross the shock
 ;surface of thickness shockthick
@@ -352,32 +360,24 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
         
         cross_points=fltarr(3,ncrosses)
         cross_bmag=fltarr(ncrosses)
-        for cross=0,ncrosses-1 do begin
-           cross_points[*,cross]=reform(pfss_cartpos[pind[0,cross],*,pind[1,cross]])
-           crossPoints[sstep,cross].px=cross_points[0,cross]
-           crossPoints[sstep,cross].py=cross_points[1,cross]
-           crossPoints[sstep,cross].pz=cross_points[2,cross]
-           sphpt=cart2sph([cross_points[0,cross]-xcenter,cross_points[1,cross]-ycenter,cross_points[2,cross]-zcenter]/sunrad)
-           cross_bmag[cross]=bfield_pfss(sphpt,sph_data)
-           crossPoints[sstep,cross].bmag=cross_bmag[cross]
-           crossPoints[sstep,cross].linid=reform(pind[0,cross])
-           ;if ff mod 100 eq 0 then print,'CSGS section, cross #'+strtrim(string(cross),2)
+        for i=0,ncrosses-1 do begin
+           cross_points[*,i]=reform(pfss_cartpos[pind[0,i],*,pind[1,i]])
+           sphpt=cart2sph([cross_points[0,i]-xcenter,cross_points[1,i]-ycenter,cross_points[2,i]-zcenter]/sunrad)
+           cross_bmag[i]=bfield_pfss(sphpt,sph_data)
         endfor
         
-;        allcrossPoints[sstep,*,0:ncrosses-1]=cross_points*1.0D
-;        allcrossBmag[sstep,0:ncrosses-1]=cross_bmag*1.0D
-;        allcrossLineIndices[sstep,0:ncrosses-1]=reform(pind[0,*])
+        allcrossPoints[sstep,*,0:ncrosses-1]=cross_points*1.0D
+        allcrossBmag[sstep,0:ncrosses-1]=cross_bmag*1.0D
+        allcrossLineIndices[sstep,0:ncrosses-1]=reform(pind[0,*])
         allcrosses[sstep]=ncrosses
-
 ;Plot the field lines that pass through the shock surface
         if keyword_set(plot) or keyword_set(png) then begin
            colors=abs(randomn(10L,ncrosses))*255.
            loadct,13,/silent
            for ff=0,ncrosses-1 do begin
-              npt=pfssLines[pind[0,ff]].npts
+              npt=nstep[pind[0,ff]]
               plots,reform(pfss_cartpos[pind[0,ff],*,0:npt-1]),$
                     color=colors[ff],/device,psym=sym(1),symsize=0.3
-              
            endfor
 ;plot the points of crossing in red.
            plots,cross_points,color=240,psym=sym(1),symsize=1.4,/device
@@ -429,11 +429,9 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
         if ind[0] gt -1 then thetabn[ind]=!PI-thetabn[ind]
         th=thetabn*180.0/!PI
         allcrossAngles[sstep,0:ncrosses-1]=th
-        crossPoints[sstep,0:ncrosses-1].thbn=allcrossAngles[sstep,0:ncrosses-1]
 ;-==============================================================================
         
-            
-  
+        
         ;Save the PFSS/CSGS/AIA image
         if keyword_set(png) then begin
            tvlct,rr,gg,bb,/get
@@ -444,35 +442,34 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
            write_png,pfsspath+'aia_pfss_shock_'+event.date+'_'+event.label+'_'+stp+'.png',image,rr,gg,bb
         endif
         
-     endfor;--------------- END TIMESTEP LOOP! ---------------
-     nmaxcrosses=max(allcrosses)
-     crossPoints=crossPoints[*,0:nmaxcrosses]
-
+     endfor  ;END TIMESTEP LOOP
+     
+     
      
 ;CREATE A STRUCTURE TO HOLD THE CROSS-POINT RESULTS FOR EASY PROCESSING LATER
-;     nmaxcrosses=max(allcrosses)
-;     crossPoint={px:0.0D,py:0.0D,pz:0.0D,thbn:0.0D,linid:0L,bmag:0.0D}
-;     crossPoints=replicate(crossPoint,nsteps,nmaxcrosses)
+     nmaxcrosses=max(allcrosses)
+     crossPoint={px:0.0D,py:0.0D,pz:0.0D,thbn:0.0D,linid:0L,bmag:0.0D}
+     crossPoints=replicate(crossPoint,nsteps,nmaxcrosses)
      
         ;This array will hold the closest and farthest point coordinates for every interacting
         ;field line
           ; endPointCoords=replicate({ptr:0.0,ptth:0.0,ptph:0.0,linid:0L},nsteps,nmaxcrosses,2)
-         ;  lineSpread=dblarr(nsteps,max(allcrosses),3,2)
-         ;  maxLonExtent=dblarr(nsteps)
+           lineSpread=dblarr(nsteps,max(allcrosses),3,2)
+           maxLonExtent=dblarr(nsteps)
            
-;     for sstep=0,nsteps-1 do begin
-;        ncrosses=allcrosses[sstep]
-;        for cross=0,ncrosses-1 do begin
-;           crossPoints[sstep,cross].px=allcrosspoints[sstep,0,cross]
-;           crossPoints[sstep,cross].py=allcrosspoints[sstep,1,cross]
-;           crossPoints[sstep,cross].pz=allcrosspoints[sstep,2,cross]
-;           crossPoints[sstep,cross].linid=allcrossLineIndices[sstep,cross]
-;           crossPoints[sstep,cross].thbn=allcrossAngles[sstep,cross]
-;           crossPoints[sstep,cross].bmag=allcrossBmag[sstep,cross]          
+     for sstep=0,nsteps-1 do begin
+        ncrosses=allcrosses[sstep]
+        for cross=0,ncrosses-1 do begin
+           crossPoints[sstep,cross].px=allcrosspoints[sstep,0,cross]
+           crossPoints[sstep,cross].py=allcrosspoints[sstep,1,cross]
+           crossPoints[sstep,cross].pz=allcrosspoints[sstep,2,cross]
+           crossPoints[sstep,cross].linid=allcrossLineIndices[sstep,cross]
+           crossPoints[sstep,cross].thbn=allcrossAngles[sstep,cross]
+           crossPoints[sstep,cross].bmag=allcrossBmag[sstep,cross]          
            
 ;Get the spherical coordinates for the starting and ending point for
 ;every interacting field line.
-;           linid=allcrossLineIndices[sstep,cross]
+        linid=allcrossLineIndices[sstep,cross]
 ;        endPointCoords[sstep,cross,0].ptr=pfssLines[linid].ptr[0]
 ;        endPointCoords[sstep,cross,0].ptth=pfssLines[linid].ptth[0]
 ;        endPointCoords[sstep,cross,0].ptph=pfssLines[linid].ptph[0]
@@ -481,37 +478,24 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
 ;        endPointCoords[sstep,cross,1].ptth=pfssLines[linid].ptth[pfssLines[linid].npts-1]
 ;        endPointCoords[sstep,cross,1].ptph=pfssLines[linid].ptph[pfssLines[linid].npts-1]
 ;        endPointCoords[sstep,cross,1].linid=pfssLines[linid].linid
-;        endfor
-;      endfor
-
-
-;This array will hold the closest and farthest point coordinates for every interacting
-;field line
-  ;lineSpread=dblarr(nsteps,nmaxcrosses,3,2)
-  ;maxLonExtent=dblarr(nsteps)
-;for sstep=0,nsteps-1 do begin
-;   ncrosses=allcrosses[sstep]
-;   for cross=0,ncrosses-1 do begin
 ;Get the largest and smallest coordinates for each field line, for
 ;each time step.
-;      linid=crossPoints[sstep,cross].linid
-;      lineSpread[sstep,cross,0,*]=minmax(pfssLines[linid].ptr[0:pfssLines[linid].npts-1])
-;      lineSpread[sstep,cross,1,*]=minmax(pfssLines[linid].ptth[0:pfssLines[linid].npts-1])
-;      lineSpread[sstep,cross,2,*]=minmax(pfssLines[linid].ptph[0:pfssLines[linid].npts-1])
-;   endfor  
-;Find the largest longitudinal extent for this particular time step.
-;   tmp=abs(reform(lineSpread[sstep,0:ncrosses-1,2,*])-lon*!PI/180.)
-;   maxLonExtent[sstep]=max(tmp)*180./!PI
-;endfor
-
-stop
-
+        lineSpread[sstep,cross,0,*]=minmax(pfssLines[linid].ptr[0:pfssLines[linid].npts-1])
+        lineSpread[sstep,cross,1,*]=minmax(pfssLines[linid].ptth[0:pfssLines[linid].npts-1])
+        lineSpread[sstep,cross,2,*]=minmax(pfssLines[linid].ptph[0:pfssLines[linid].npts-1])
+     endfor
+     
+     ;Find the largest longitudinal extent for this particular time step.
+        tmp=abs(reform(lineSpread[sstep,0:ncrosses-1,2,*])-lon*!PI/180.)
+        maxLonExtent[sstep]=max(tmp)*180./!PI
+     endfor
+     
 ;Save the results to a file
      resstr='_hires'
      if keyword_set(lores) then resstr='_lores'
      fname='csgs_results_'+event.date+'_'+event.label+resstr+'.sav'
      print,'Saving file '+pfsspath+fname
-     save,filename=pfsspath+fname,$
+     save,filename=pfsspath+fname,maxLonExtent,$
           allcrosses,dt,radius,time,rotationAngles,crossPoints,carrlon,carrlat,$
           suncenter,nsteps,sc,radiusfitlines,ind_arr,subindex,$
           vertex_list,vert_rotmat,vert_transmat

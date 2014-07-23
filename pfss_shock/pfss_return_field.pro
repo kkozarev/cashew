@@ -14,7 +14,7 @@ pro test_pfss_return_field
      ;pfss_return_field,event,invdens=0.5,/save;,box=box
                                 ;pfss_return_field,date,invdens=0.5,/save,event=event;,box=box
                                 ;pfss_return_field,date,invdens=8,/save,path=event.pfsspath,event=event;,box=box
-     pfss_return_field,event,/save
+     pfss_return_field,event,/hires,/save
   endif
   
   
@@ -146,7 +146,7 @@ endif
 ;print,carrCoords
 
 ;Get the open field lines
-pfss_get_chfootprint,openfield,/quiet,/usecurrent,spacing=invdens;,/close
+;pfss_get_chfootprint,openfield,/quiet,/usecurrent,spacing=invdens;,/close
 
 ;Save the structure and Carrington coordinates of SDO to a sav file:
 stringres='lores'
@@ -163,6 +163,6 @@ if keyword_set(hires) then stringres='hires'
         fname='pfss_results_'+dat+'_'+event.label+'_'+stringres+'.sav'
      endelse
      
-     save,sph_data,openfield,nstep,filename=path+fname,kind,/comm,/variables,/compress
+     save,filename=path+fname,kind,sph_data,nstep,ptph,ptr,ptth,rix,fname,nlat,nlon,/comm
   endif
 end

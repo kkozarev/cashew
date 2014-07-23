@@ -5,7 +5,7 @@ event=load_events_info(label='110511_01')
 pfss_shock_plot_thetabn_stats,event
 end
 
-pro pfss_shock_plot_thetabn_stats,event
+pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires
 ;PURPOSE:
 ; This procedure will plot a time series of different ranges of
 ; thetaBN for various shock-field angle points.
@@ -32,6 +32,8 @@ pro pfss_shock_plot_thetabn_stats,event
   close,/all
   savepath=event.pfsspath
   infile=find_latest_file(event.pfsspath+'csgs_results_*')
+  infile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_lores.sav')
+  if keyword_set(hires) then infile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_hires.sav')
   if infile[0] eq '' then begin
      print,'The file to load is not properly set or does not exist. Quitting.'
      return
@@ -41,13 +43,19 @@ pro pfss_shock_plot_thetabn_stats,event
   print,''
   restore,infile
   
+  
+;Get the field line info from the PFSS model results
+  if keyword_set(hires) then $
+     pfss_get_field_line_info,event,pfssLines,/hires $
+  else pfss_get_field_line_info,event,pfssLines,/lores
+  
 ;DEBUG
 ;  nlins=n_elements(pfsslines)
 ;  tmpind=indgen(fix(nlins/10))*10
 ;  pfsslines[tmpind].open=1
 ;DEBUG
-  
 
+  
   ;Get the times right
   strtime=subindex[*].date_obs
   tm=anytim2jd(strtime)
@@ -73,9 +81,9 @@ pro pfss_shock_plot_thetabn_stats,event
      ;First take care of the first range
      res=where(crossPoints[tt,*].thbn gt 0.0 and crossPoints[tt,*].thbn le rangevals[0])
      if res[0] eq -1 then valarr[tt,0]=0 else valarr[tt,0]=n_elements(res)
-     valranges[tt,0,0]=10
+     valranges[tt,0,0]=0
      valranges[tt,0,1]=valarr[tt,0]
-
+     
      ;Find the number of open and closed field lines for every angle range
      if res[0] gt -1 then begin
         tmpind=crosspoints[tt,res].linid
@@ -101,6 +109,101 @@ pro pfss_shock_plot_thetabn_stats,event
      endif
      endfor
   endfor
+  
+ 
+
+;+======================================================================
+  cthick=6
+  chsize=2.2
+  dummy = LABEL_DATE(DATE_FORMAT=['%H:%I'])
+  xtit='Time of '+event.date
+  ytit='# Shock-Interacting Fieldlines'
+  ;thlet='!4' + String("150B) + '!X'
+  thlet='!9'+String("161B)+'!X'
+  
+  !P.position=[0.16,0.14,0.94,0.92]
+  !P.charthick=4
+  !P.font=0
+  ;wdef,0,1000,800
+  set_plot,'ps'
+  fname=savepath+'thetabn_stats_'+event.date+'_'+event.label+'_time'
+  device,file=fname+'.eps',/inches,xsize=10.0,ysize=8.0,$
+         /encaps,/color,/helvetica
+  loadct,0,/silent
+  PLOT, tm, allcrosses, PSYM = 10, $ 
+        TITLE = thlet+'!DBN!N Evolution', $
+        XTITLE =xtit, $
+        YTITLE = ytit, $
+        XTICKUNITS = ['Time'],XTICKFORMAT='LABEL_DATE',$
+        xticklen=-0.01,$
+        xrange=xrng,yrange=yrng,xticks=4, $
+        xstyle=1,ystyle=1,color=0,background=255,$
+        xthick=4,ythick=4,thick=4,charsize=chsize,charthick=chthick,/nodata
+
+  loadct,13,/silent
+  cols=findgen(nranges)*255./(nranges*1.0)
+  rvst=strtrim(string(rangevals,format='(i3)'),2)
+  for rr=0,nranges-1 do begin
+     bar_plot,valranges[*,rr,1],background=255,colors=fltarr(ntimes)+cols[rr],$
+              baselines=valranges[*,rr,0],/overplot
+     if rr eq 0 then sttr=' 0!Uo!N<'+thlet+'!DBN!N<'+rvst[0]+'!Uo!N' $
+     else sttr=rvst[rr-1]+'!Uo!N'+'<'+thlet+'!DBN!N<'+rvst[rr]+'!Uo!N'
+     xyouts,!p.position[0]+0.02,!p.position[3]-0.05-0.05*rr,sttr,charsize=chsize,$
+            charthick=chthick,color=cols[rr],/norm
+  endfor
+  
+  ;tvlct,rr,gg,bb,/get
+  ;image=tvrd(true=1)
+  device,/close
+  exec='convert -flatten '+fname+'.eps '+fname+'.png ; rm -rf '+fname+'.eps '
+  spawn,exec
+  ;write_png,fname,image,rr,gg,bb
+  set_plot,'x'
+;-======================================================================
+ 
+stop 
+
+;+======================================================================
+  xtit='Shock Nose Distance, R!Ds!N'
+  rad=radiusfitlines/rsun*event.geomcorfactor+1
+  xrng=[min(rad),max(rad)]
+  ;wdef,0,1000,800
+  set_plot,'ps'
+  fname=savepath+'thetabn_stats_'+event.date+'_'+event.label+'_distance'
+  device,file=fname+'.eps',/inches,xsize=10.0,ysize=8.0,$
+         /encaps,/color,/helvetica
+  loadct,0,/silent
+  PLOT, rad, allcrosses, PSYM = 10, $ 
+        TITLE = thlet+'!DBN!N Evolution', $
+        XTITLE =xtit, $
+        YTITLE = ytit, $
+        xticklen=-0.01,xtickformat='(f4.2)',$
+        xrange=xrng,yrange=yrng,xticks=4, $
+        xstyle=1,ystyle=1,color=0,background=255,$
+        xthick=3,ythick=3,thick=4,charsize=chsize,charthick=chthick,/nodata
+  
+  loadct,13,/silent
+  cols=findgen(nranges)*255./(nranges*1.0)
+  rvst=strtrim(string(rangevals,format='(i3)'),2)
+  for rr=0,nranges-1 do begin
+     bar_plot,valranges[*,rr,1],background=255,colors=fltarr(ntimes)+cols[rr],$
+              baselines=valranges[*,rr,0],/overplot
+     if rr eq 0 then sttr=' 0!Uo!N<'+thlet+'!DBN!N<'+rvst[0]+'!Uo!N' $
+     else sttr=rvst[rr-1]+'!Uo!N'+'<'+thlet+'!DBN!N<'+rvst[rr]+'!Uo!N'
+     xyouts,!p.position[0]+0.02,!p.position[3]-0.05-0.05*rr,sttr,charsize=chsize,$
+            charthick=chthick,color=cols[rr],/norm
+  endfor
+  
+  
+  
+  ;tvlct,rr,gg,bb,/get
+  ;image=tvrd(true=1)
+  device,/close
+  exec='convert -flatten '+fname+'.eps '+fname+'.png ; rm -rf '+fname+'.eps '
+  spawn,exec
+  ;write_png,fname,image,rr,gg,bb
+  set_plot,'x'
+;-======================================================================
 
 
 ;+======================================================================
@@ -165,99 +268,5 @@ pro pfss_shock_plot_thetabn_stats,event
   set_plot,'x'
 ;-======================================================================
 
-
-
-  
-;+======================================================================
-  cthick=6
-  chsize=2.2
-  dummy = LABEL_DATE(DATE_FORMAT=['%H:%I'])
-  xtit='Time of '+event.date
-  ytit='# Shock-Interacting Fieldlines'
-  ;thlet='!4' + String("150B) + '!X'
-  thlet='!9'+String("161B)+'!X'
-  
-  !P.position=[0.16,0.14,0.94,0.92]
-  !P.charthick=4
-  !P.font=0
-  ;wdef,0,1000,800
-  set_plot,'ps'
-  fname=savepath+'thetabn_stats_'+event.date+'_'+event.label+'_time'
-  device,file=fname+'.eps',/inches,xsize=10.0,ysize=9.0,$
-         /encaps,/color,/helvetica
-  loadct,0,/silent
-  PLOT, tm, allcrosses, PSYM = 10, $ 
-        TITLE = thlet+'!DBN!N Evolution', $
-        XTITLE =xtit, $
-        YTITLE = ytit, $
-        XTICKUNITS = ['Time'],XTICKFORMAT='LABEL_DATE',$
-        xticklen=-0.01,$
-        xrange=xrng,yrange=yrng,xticks=4, $
-        xstyle=1,ystyle=1,color=0,background=255,$
-        xthick=4,ythick=4,thick=4,charsize=chsize,charthick=chthick,/nodata
-
-  loadct,13,/silent
-  cols=findgen(nranges)*255./(nranges*1.0)
-  rvst=strtrim(string(rangevals,format='(i3)'),2)
-  for rr=0,nranges-1 do begin
-     bar_plot,valranges[*,rr,1],background=255,colors=fltarr(ntimes)+cols[rr],$
-              baselines=valranges[*,rr,0],/overplot
-     if rr eq 0 then sttr=' 0!Uo!N<'+thlet+'!DBN!N<'+rvst[0]+'!Uo!N' $
-     else sttr=rvst[rr-1]+'!Uo!N'+'<'+thlet+'!DBN!N<'+rvst[rr]+'!Uo!N'
-     xyouts,!p.position[0]+0.02,!p.position[3]-0.05-0.05*rr,sttr,charsize=chsize,$
-            charthick=chthick,color=cols[rr],/norm
-  endfor
-  
-  ;tvlct,rr,gg,bb,/get
-  ;image=tvrd(true=1)
-  device,/close
-  exec='convert -flatten '+fname+'.eps '+fname+'.png ; rm -rf '+fname+'.eps '
-  spawn,exec
-  ;write_png,fname,image,rr,gg,bb
-  set_plot,'x'
-;-======================================================================
-  
-
-;+======================================================================
-  xtit='Shock Nose Distance, R!Ds!N'
-  rad=radiusfitlines/rsun*event.geomcorfactor+1
-  xrng=[min(rad),max(rad)]
-  ;wdef,0,1000,800
-  set_plot,'ps'
-  fname=savepath+'thetabn_stats_'+event.date+'_'+event.label+'_distance'
-  device,file=fname+'.eps',/inches,xsize=10.0,ysize=8.0,$
-         /encaps,/color,/helvetica
-  loadct,0,/silent
-  PLOT, rad, allcrosses, PSYM = 10, $ 
-        TITLE = thlet+'!DBN!N Evolution', $
-        XTITLE =xtit, $
-        YTITLE = ytit, $
-        xticklen=-0.01,xtickformat='(f4.2)',$
-        xrange=xrng,yrange=yrng,xticks=4, $
-        xstyle=1,ystyle=1,color=0,background=255,$
-        xthick=3,ythick=3,thick=4,charsize=chsize,charthick=chthick,/nodata
-  
-  loadct,13,/silent
-  cols=findgen(nranges)*255./(nranges*1.0)
-  rvst=strtrim(string(rangevals,format='(i3)'),2)
-  for rr=0,nranges-1 do begin
-     bar_plot,valranges[*,rr,1],background=255,colors=fltarr(ntimes)+cols[rr],$
-              baselines=valranges[*,rr,0],/overplot
-     if rr eq 0 then sttr=' 0!Uo!N<'+thlet+'!DBN!N<'+rvst[0]+'!Uo!N' $
-     else sttr=rvst[rr-1]+'!Uo!N'+'<'+thlet+'!DBN!N<'+rvst[rr]+'!Uo!N'
-     xyouts,!p.position[0]+0.02,!p.position[3]-0.05-0.05*rr,sttr,charsize=chsize,$
-            charthick=chthick,color=cols[rr],/norm
-  endfor
-  
-  
-  
-  ;tvlct,rr,gg,bb,/get
-  ;image=tvrd(true=1)
-  device,/close
-  exec='convert -flatten '+fname+'.eps '+fname+'.png ; rm -rf '+fname+'.eps '
-  spawn,exec
-  ;write_png,fname,image,rr,gg,bb
-  set_plot,'x'
-;-======================================================================
 
 end
