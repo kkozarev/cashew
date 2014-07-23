@@ -101,6 +101,10 @@ pro find_wave_frontedge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
         wave_frontedge[ii-sp].ind=mymaxima[mind,ii].ind+tmp
         datastruct.frontinds[mind,ii]=wave_frontedge[ii-sp].ind
         
+        if wave_frontedge[ii-sp].rad lt mymaxima[mind, ii].rad then begin
+           wave_frontedge[ii-sp].rad = mymaxima[mind, ii].rad
+        endif
+
         if plot eq 1 then begin
            cgPlot, [wave_frontedge[ii-sp].rad, wave_frontedge[ii-sp].rad], [-10,40], /Overplot
         endif

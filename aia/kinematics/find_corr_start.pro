@@ -1,9 +1,9 @@
 pro find_corr_start, data, time, yarray, datastruct, ht_km, fitrange, yrng, mind, maxRadIndex,$
                      startInd=startInd, mymaxima=mymaxima, wave_frontedge=wave_frontedge,$
-                     startCorr=startCorr
+                     startCorr=startCorr, constrain=constrain
 
   ; To print out additional information set debug to 1
-  debug = 1
+  debug = 0
 
   nt = n_elements(time)
   dat=data
@@ -38,17 +38,15 @@ pro find_corr_start, data, time, yarray, datastruct, ht_km, fitrange, yrng, mind
         
                                 ; Iteratively find the start position
   if frontDiff lt 0.0075 then begin
-     print, startCorr
-     print, startInd
      
      startCorr++
      startInd++
 
-     print, startCorr
-     print, startInd
 
-     help, wave_frontedge
-     print, wave_frontedge
+     if debug eq 1 then begin
+        help, wave_frontedge
+        print, wave_frontedge
+     endif
 
      fitrange[0] = startInd
      datastruct.xfitrange=fitrange
@@ -58,24 +56,43 @@ pro find_corr_start, data, time, yarray, datastruct, ht_km, fitrange, yrng, mind
                           numplotmax=3
      
      if keyword_set(constrain) then begin
+
         maxinds=jmap_filter_maxima_radial(time.relsec,ht_km,allmaxima,fitrange=datastruct.xfitrange) ;,outliers=outliers
         mymaxima=maxinds
+
      endif
 
            
      find_wave_frontedge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
                           maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge
 
-     help, wave_frontedge
-     print, wave_frontedge
+     if debug eq 1 then begin
+        help, wave_frontedge
+        print, wave_frontedge
+     endif
            
      find_corr_start, data, time, yarray, datastruct, ht_km, fitrange, yrng, mind, maxRadIndex,$
                       startInd=startInd, mymaxima=mymaxima, wave_frontedge=wave_frontedge,$
                       startCorr=startCorr
    
   endif else begin
+
      return
+     ;; aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
+     ;;                      yrange=[yarray[datastruct.yfitrange[0]],yarray[datastruct.yfitrange[1]]],$
+     ;;                      numplotmax=3
+     
+     ;; if keyword_set(constrain) then begin
+     ;;    maxinds=jmap_filter_maxima_radial(time.relsec,ht_km,allmaxima,fitrange=datastruct.xfitrange) ;,outliers=outliers
+     ;;    mymaxima=maxinds
+     ;; endif
+     
+     ;; find_wave_frontedge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
+     ;;                      maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge
+     
   endelse
+
+  return
 
 end
 

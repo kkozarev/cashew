@@ -2,7 +2,7 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
                     maxRadIndex=maxRadIndex, startCorr=startCorr, endCorr=endCorr
 
 ;PURPOSE
-;Procedure to automatically find start end times of the EUV front
+;Procedure to automatically find initial estimates of the start end times of the EUV front
 ;Takes data, sums up pixel intensities at each time step, determines
 ;start and end times from how the sum of intensities change
 ;
@@ -15,7 +15,7 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
 ;     ENDIND - index of front end position
 
   ; To print out additional information set debug to 1
-  debug = 1
+  debug = 0
 
   nt = n_elements(time)
   dat=data

@@ -10,7 +10,7 @@ rrange=[1.1,1.37]
 wav=['193','211']
 
 events=load_events_info()
-for ev=16, n_elements(events)-1 do begin
+for ev=9, n_elements(events)-1 do begin
    print, "CURRENT ITERATION", ev
 
    event=events[ev]

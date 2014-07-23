@@ -311,10 +311,10 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
         print, "Initial start index: ", startInd
         print, "Initial end index: ", endInd
         
-        aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]], data[*, yrng[0]:yrng[1]],$
-                           min=-40,max=50,fitrange=fitrange,$
-                           title=datastruct.imgtit[mind],$
-                           xtitle=datastruct.xtitle,ytitle=datastruct.ytitle,startInd=startInd,endInd=endInd, /auto
+        ;; aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]], data[*, yrng[0]:yrng[1]],$
+        ;;                    min=-40,max=50,fitrange=fitrange,$
+        ;;                    title=datastruct.imgtit[mind],$
+        ;;                    xtitle=datastruct.xtitle,ytitle=datastruct.ytitle,startInd=startInd,endInd=endInd, /auto
         
         fitrange=[startInd, endInd]
 
@@ -364,9 +364,7 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
 ;  oplot,time[sp+good_ind_pos].jd,yarray[datastruct.mymaxima[mind,sp+good_ind_pos]],psym=1,color=200,thick=4,symsize=2
                                 ;oplot,[time[sp].jd,time[sp].jd],[yarray[0],yarray[n_elements(yarray)-1]],color=255
                                 ;oplot,[time[ep].jd,time[ep].jd],[yarray[0],yarray[n_elements(yarray)-1]],color=255
-; stop
      
-     help, data
 
 ; Find the front edge of the wave
 
@@ -374,7 +372,7 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
                           maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge
 
 
-     help, data
+     
 
      for ii=sp,ep do begin
         
@@ -460,9 +458,11 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
      startCorr = 0
      endCorr = 0
      
+     if keyword_set(constrain) then print, "Constraining Data"
+
      find_corr_start, data, time, yarray, datastruct, ht_km, fitrange, yrng, mind,$
                       maxRadIndex, startInd=startInd, mymaxima=mymaxima,$
-                      wave_frontedge=wave_frontedge, startCorr=startCorr
+                      wave_frontedge=wave_frontedge, startCorr=startCorr, constrain=constrain
 
      find_corr_end, data, time, yarray, startInd=startInd, endInd=endInd, wave_frontedge=wave_frontedge,$
                     maxRadIndex=maxRadIndex, startCorr=startCorr, endCorr=endCorr
@@ -484,6 +484,22 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
   datastruct.xfitrange=fitrange
   sp=datastruct.xfitrange[0]
   ep=datastruct.xfitrange[1]
+                                ;Search for the edges of the wave
+  
+  
+                                ;To restore the plot information and overplot on them, do
+  datastruct.plotinfo[mind].p=!P
+  datastruct.plotinfo[mind].x=!X
+  datastruct.plotinfo[mind].y=!Y
+  
+ tmp=reform(mymaxima[0,*].ind)
+ datastruct.maxinds[mind,*]=reform(mymaxima[0,*].ind)
+  
+  ;Filter the maxima positions here for physicality
+  if keyword_set(constrain) then begin
+     maxinds=jmap_filter_maxima_radial(time.relsec,ht_km,allmaxima,fitrange=datastruct.xfitrange) ;,outliers=outliers
+     mymaxima=maxinds
+  endif
 
   device,window_state=win_open
   oplot,time.jd,reform(yarray[datastruct.maxinds[mind,*]]),psym=1,color=200,thick=4,symsize=2
@@ -509,6 +525,10 @@ loadct, 0, /silent
   print,'Fitting a second-order polynomial to the wave front edge positions...'
   dist=reform(wave_frontedge[0:ep-sp].rad)*DIST_FACTOR*height;*event.geomcorfactor
   time_good=time[sp:ep].relsec-time[sp].relsec
+  if n_elements(dist) lt 4 then begin
+     print, "Not enough data to smooth, exiting..."
+     return
+  endif
   dist=smooth(dist,4,/edge_truncate)
   bootstrap_sdo,dist,time_good,fit_line, p1, p2, p3, s1, s2, s3,parinfo=parinfo
   print,''
