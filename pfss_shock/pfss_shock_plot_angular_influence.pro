@@ -154,8 +154,8 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
 ;1. Plot the field lines on disk center.
      if sstep eq 0 then begin
         ;Get the field line info from the PFSS model results
-        if keyword_set(hires) then pfss_get_field_line_info,event,pfssLines,/hires $
-        else pfss_get_field_line_info,event,pfssLines,/lores
+        if keyword_set(hires) then pfss_get_field_line_info,event,pfssLines=pfssLines,/hires $
+        else pfss_get_field_line_info,event,pfssLines=pfssLines,/lores
         nlines=n_elements(pfssLines)
         ;maxnpts=n_elements(pfssLines[0].px)  
         maxnpts=n_elements(pfssLines[0].ptr)  

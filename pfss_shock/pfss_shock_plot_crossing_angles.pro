@@ -76,8 +76,8 @@ pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,
   
 ;Get the field line info from the PFSS model results
   if keyword_set(hires) then $
-     pfss_get_field_line_info,event,pfssLines,/hires $
-  else pfss_get_field_line_info,event,pfssLines,/lores
+     pfss_get_field_line_info,event,pfssLines=pfssLines,/hires $
+  else pfss_get_field_line_info,event,pfssLines=pfssLines,/lores
 ;DEBUG
 ;This simulates open field lines to help the plotting
 ;  nlins=n_elements(pfsslines)

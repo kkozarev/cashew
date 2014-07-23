@@ -126,8 +126,8 @@ if csgsfile eq '' then begin
 ;1. Plot the field lines on disk center.
      if sstep eq 0 then begin
         ;Get the field line info from the PFSS model results
-        if keyword_set(hires) then pfss_get_field_line_info,event,pfssLines,/hires $
-           else pfss_get_field_line_info,event,pfssLines,/lores
+        if keyword_set(hires) then pfss_get_field_line_info,event,pfssLines=pfssLines,/hires $
+           else pfss_get_field_line_info,event,pfssLines=pfssLines,/lores
         nlines=n_elements(pfssLines)
         maxnpts=n_elements(pfssLines[0].ptr)  
         stride=fix((1.*nlines)/2000.) ;assume that we want to see about 1000. field lines, for now.

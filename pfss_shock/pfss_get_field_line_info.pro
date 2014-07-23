@@ -1,4 +1,4 @@
-pro pfss_get_field_line_info,event,pfssLines,lores=lores,hires=hires,pfssfile=pfssfile,sph_data=sph_data
+pro pfss_get_field_line_info,event,pfssLines=pfssLines,lores=lores,hires=hires,pfssfile=pfssfile,sph_data=sph_data
 ;PURPOSE:
 ;This procedure returns a structure with info/cordinates for all pfss
 ;field lines
@@ -21,6 +21,14 @@ pro pfss_get_field_line_info,event,pfssLines,lores=lores,hires=hires,pfssfile=pf
 ;Written by Kamen Kozarev, 07/22/2014
 ;
   
+  if not keyword_set(pfssLines) and not keyword_set(sph_data) then begin
+     print,'You need to specify keyword pfssLines and/or keyword sph_data. Quitting...'
+     return
+  endif
+  
+;Set up the common block variables
+@pfss_data_block
+  
   ;Load the PFSS results, and use the information to create the structure
   pfsspath=event.pfsspath
   date=event.date
@@ -40,24 +48,36 @@ pro pfss_get_field_line_info,event,pfssLines,lores=lores,hires=hires,pfssfile=pf
      return
   endelse
   
-  ;SAVE THE FIELD LINE INFORMATION TO A STRUCTURE ARRAY
-  nlines=n_elements(nstep)*1.0D
-  pfssLine={npts:0L,ptr:dblarr(max(nstep)),ptth:dblarr(max(nstep)),ptph:dblarr(max(nstep)),$
-            open:0,linid:0L,color:0.}
-  pfssLines=replicate(pfssLine,nlines)
-  linecols=fix(abs(randomu(10L,nlines,/uniform))*255.)
-
+  if keyword_set(pfssLines) then begin
+;SAVE THE FIELD LINE INFORMATION TO A STRUCTURE ARRAY
+     nlines=n_elements(nstep)*1.0D
+     pfssLine={npts:0L,ptr:dblarr(max(nstep)),ptth:dblarr(max(nstep)),ptph:dblarr(max(nstep)),$
+               open:0,linid:0L,color:0.}
+     pfssLines=replicate(pfssLine,nlines)
+     linecols=fix(abs(randomu(10L,nlines,/uniform))*255.)
+     
 ;MAIN TIME LOOP
-  for ff=0.0D,nlines-1 do begin
-     npt=nstep[ff]              ;the number of points on this particular line.
-     pfssLines[ff].npts=npt
-     pfssLines[ff].ptr=ptr[0:npt-1,ff]
-     pfssLines[ff].ptth=ptth[0:npt-1,ff]
-     pfssLines[ff].ptph=ptph[0:npt-1,ff]
-     if kind[ff] eq 2 then pfssLines[ff].open=1 else pfssLines[ff].open=0
-     pfssLines[ff].linid=ff
-     pfssLines[ff].color=linecols[ff]
-     if ff mod 100 eq 0 then print,'pfss_get_info: Line #'+strtrim(string(fix(ff)),2)+'/'+strtrim(string(fix(nlines)),2)
-  endfor
-
+     for ff=0.0D,nlines-1 do begin
+        npt=nstep[ff]           ;the number of points on this particular line.
+        pfssLines[ff].npts=npt
+        pfssLines[ff].ptr=ptr[0:npt-1,ff]
+        pfssLines[ff].ptth=ptth[0:npt-1,ff]
+        pfssLines[ff].ptph=ptph[0:npt-1,ff]
+        if kind[ff] eq 2 then pfssLines[ff].open=1 else pfssLines[ff].open=0
+        pfssLines[ff].linid=ff
+        pfssLines[ff].color=linecols[ff]
+        if ff mod 100 eq 0 then print,'pfss_get_info: Line #'+strtrim(string(fix(ff)),2)+'/'+strtrim(string(fix(nlines)),2)
+     endfor
+  endif
+  
+  if keyword_set(sph_data) then begin
+;Create a structure to hold the results. The data are in 
+;(r,theta,phi) spherical/heliographic coordinate system:
+;r is the distance away from sun-center in units of solar
+;      radii, such that valid values are between 1 (the nominal
+;      photosphere and 2.5 (the radius of the source surface).
+;      theta and phi are respectively the colatitude and
+;      longitude in radians.
+     pfss_to_spherical,sph_data
+  endif
 end

@@ -42,7 +42,7 @@ end
 
 
 
-pro pfss_return_field_main,date,event=event,rstart=rstart,invdens=invdens,pfss_struct=pfss_struct,$
+pro pfss_return_field_main,date,event=event,rstart=rstart,invdens=invdens,$
                            save=save,path=path,box=box,lores=lores,hires=hires,_extra=_extra
 ;PURPOSE:
 ; Return the PFSS field model
@@ -112,15 +112,6 @@ endif
   if ind[0] gt -1 then ptth[ind]+=2*!PI
   ind=where(ptth ge 2*!PI)
   if ind[0] gt -1 then ptth[ind]-=2*!PI
-;Create a structure to hold the results. The data are in 
-;(r,theta,phi) spherical/heliographic coordinate system:
-;r is the distance away from sun-center in units of solar
-;      radii, such that valid values are between 1 (the nominal
-;      photosphere and 2.5 (the radius of the source surface).
-;      theta and phi are respectively the colatitude and
-;      longitude in radians.
-  pfss_to_spherical,sph_data
-  if keyword_set(pfss_struct) then pfss_struct=sph_data
   
 ;pfss_data is a structure array of type
 ;{spherical_field_data, $
@@ -144,7 +135,7 @@ endif
 ;the tags CRLN_OBS and CRLT_OBS
 ;carrCoords=get_stereo_lonlat(date,'Earth',/degrees,system='Carrington')
 ;print,carrCoords
-
+  
 ;Get the open field lines
 ;pfss_get_chfootprint,openfield,/quiet,/usecurrent,spacing=invdens;,/close
 
@@ -163,6 +154,7 @@ if keyword_set(hires) then stringres='hires'
         fname='pfss_results_'+dat+'_'+event.label+'_'+stringres+'.sav'
      endelse
      
-     save,filename=path+fname,kind,sph_data,nstep,ptph,ptr,ptth,rix,fname,nlat,nlon,/comm
+     save,filename=path+fname,/variables
+     ;save,filename=path+fname,kind,sph_data,nstep,ptph,ptr,ptth,rix,fname,nlat,nlon,/comm
   endif
 end
