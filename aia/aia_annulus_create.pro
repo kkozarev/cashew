@@ -117,7 +117,7 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
         rrang=[0.0,ring_width]
      endelse
      
-     ; Define x and y zero points for plotting     
+     ; Define x and y zero points for plotting
      x_pos = thrang[0]*180./!PI
      y_pos = r_in-1.
 
@@ -359,22 +359,40 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
               folder='arun/'
               prefix='annplot_'
               postfix='run'
-        endif else begin
+              savefolder=savepath + folder + passband +'/'
+              savefname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_'+img_strind+'.png'
+              searchfname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_*.png'
+              if keyword_set(force) and img_no eq lwr_img then begin
+                 res=file_search(savefolder+searchfname)
+                 if res[0] ne '' then spawn,'rm -rf '+savefolder+searchfname
+              endif        endif else begin
            if keyword_set(base) then begin
               folder='abase/'
               prefix='annplot_'
               postfix='base'
+              savefolder=savepath + folder + passband +'/'
+              savefname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_'+img_strind+'.png'
+              searchfname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_*.png'
+              if keyword_set(force) and img_no eq lwr_img then begin
+                 res=file_search(savefolder+searchfname)
+                 if res[0] ne '' then spawn,'rm -rf '+savefolder+searchfname
+              endif
            endif else begin
               folder='araw/'
               prefix='annplot_'
               postfix='raw'
+              savefolder=savepath + folder + passband +'/'
+              savefname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_'+img_strind+'.png'
+              searchfname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_*.png'
+              if keyword_set(force) and img_no eq lwr_img then begin
+                 res=file_search(savefolder+searchfname)
+                 if res[0] ne '' then spawn,'rm -rf '+savefolder+searchfname
+              endif
            endelse
         endelse
         if not dir_exist(savepath+folder+passband+'/') then spawn,'mkdir -m 775 '+savepath+folder+passband+'/'
         
-        write_png, savepath + folder + passband +'/' + $
-                   prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_'+img_strind+'.png', $
-                   TVRD(/true),r,g,b
+        write_png, savefolder+savefname, TVRD(/true),r,g,b
      endif  ;END PLOTTING
     
   endfor  ;ENDFOR TIMESTEP LOOP

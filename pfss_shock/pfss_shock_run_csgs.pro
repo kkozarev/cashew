@@ -167,7 +167,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   dt= time[1]-time[0]           ;The cadence (maxshockrad-minshockrad)*mpix/(nsteps*1.0)/vshock ;timestep in seconds
   
 ;Variables for the crossing points information
-  nmaxcrosses=2.0e5
+  nmaxcrosses=5.0e4
  ; allcrossPoints=fltarr(nsteps,3,nmaxcrosses)
   allcrossAngles=fltarr(nsteps,nmaxcrosses)
  ; allcrossBmag=fltarr(nsteps,nmaxcrosses)
