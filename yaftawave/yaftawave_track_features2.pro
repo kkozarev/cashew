@@ -1,16 +1,11 @@
 pro test_yaftawave_track_features2
-  set_plot,'x'
-  testpath='/home/kkozarev/algoTests/yafta/test/'
-  respath=testpath              ;+'test/'
+
+  event=load_events_info(label='110511_01')
+;  testpath='/home/kkozarev/algoTests/yafta/test/'
+;  respath=testpath              ;+'test/'
   
-  path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
-  label='37'
-  savepath='/Volumes/Backscratch/Users/kkozarev/testAIA/'+label+'/'
-  date='20110511'
-  wav='193'
-  file='normalized_AIA_'+date+'_'+label+'_'+wav+'_subdata.sav'
-  restore,path+label+'/'+file
-  nt=n_elements(subdata[0,0,*])
+ ; path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
+
   start_step=70
   end_step=90
   
@@ -23,15 +18,15 @@ pro test_yaftawave_track_features2
  ;                           savepath=savepath,min_size=200,/ps
   ;stop
   ;Run original size
-  yaftawave_track_features2, subindex,subdata,features,all_masks,start_step=start_step,end_step=end_step,savepath=savepath,/ps,/running
+  yaftawave_track_features2,event,features,all_masks,/ps,/running, min_size=200;,start_step=start_step,end_step=end_step,savepath=savepath
   stop
 
 end
 
 
-pro yaftawave_track_features2, subindex,subdata,features,all_masks,min_size=min_size,savepath=savepath,$
+pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepath=savepath,wav=wav,$
                               threshold=threshold,ps=ps,nohanning=nohanning, level=level,eventname=eventname,$
-                              start_step=start_step,end_step=end_step,rebin=rebin,running=running
+                              start_step=start_step,end_step=end_step,rebin=rebin,running=running,nodisk=nodisk
 ;PURPOSE
 ;This test is the state of YAFTAWave development as of 08/31/2011
 ;The skeleton of the procedure is taken from the original yafta test
@@ -50,6 +45,7 @@ pro yaftawave_track_features2, subindex,subdata,features,all_masks,min_size=min_
 ;OPTIONAL INPUT:
 ;       min_size - if set, this is the smallest number of pixels that
 ;                  are allowed in a feature.
+;       wav - a string holding the wavelength channel name
 ;       ps - if set, this keyword will contain a string folder name to
 ;            save .eps and .png files with the features from each time step.
 ;       threshold - if set, this keyword should contain a constant minimum pixel
@@ -81,7 +77,7 @@ pro yaftawave_track_features2, subindex,subdata,features,all_masks,min_size=min_
 ;Update: 09/12/2011 - KAK - This is an early production version of the
 ;                     yaftawave feature tracking routine for AIA data.
 ;
-
+  
 ;restore,testpath+'normalized_AIA_20110125_05_211_subdata_testdata.sav'
 ;enum='37'
 ;date='20110511'
@@ -90,70 +86,90 @@ pro yaftawave_track_features2, subindex,subdata,features,all_masks,min_size=min_
 ;restore,path+enum+'/'+file
 ;subdata=subdata[*,*,10:119]
 ;subindex=subindex[10:119]
+  
+  label=event.label
+  date=event.date
 
-if not keyword_set(eventname) then eventname='event'
-if not keyword_set (savepath) then savepath='./'
-nx = n_elements(subdata[*,0,0])
-ny = n_elements(subdata[0,*,0])
-nt = n_elements(subdata[0,0,*])
-if not keyword_set(start_step) then start_step=25
-if not keyword_set(end_step) then end_step=nt-1
-baseavgnsteps=5
+  if not keyword_set (event) then savepath='./' else savepath=event.yaftawavepath
+  if not keyword_set(wav) then wav='193'
+  aia_load_data,event.st,event.et,wav,subindex=subindex,subdata=subdata,event=event,/subroi
+  
+  nt=n_elements(subdata[0,0,*])
+  nx = n_elements(subdata[*,0,0])
+  ny = n_elements(subdata[0,*,0])
+  if not keyword_set(start_step) then start_step=1
+  if start_step eq 0 then start_step=1
+  if not keyword_set(end_step) then end_step=nt-1
+  baseavgnsteps=5
+  
 ;prepare base image
-baseim=fltarr(nx,ny)
-for i=start_step-baseavgnsteps,start_step-1 do baseim += subdata[*,*,i]
-baseim /=(1.0*baseavgnsteps)
-
-
-
+  baseim=fltarr(nx,ny)
+  for i=start_step,start_step+baseavgnsteps-1 do baseim += subdata[*,*,i]
+  baseim /=(1.0*baseavgnsteps)
+  
+  
+  
 ; set some parameters of tracking run
 ;====================================
-dx=subindex[0].IMSCL_MP*subindex[0].RSUN_REF/(1000.0*subindex[0].RSUN_OBS)   ; AIA Full Disk pixel size in km
-if not keyword_set(min_size) then min_size = 2000       ; only track features containing min_size pixels or more
-if keyword_set(rebin) then wdef,0,rebin[0],rebin[1] else wdef,0,nx,ny
-
-
+  dx=subindex[0].IMSCL_MP*subindex[0].RSUN_REF/(1000.0*subindex[0].RSUN_OBS) ; AIA Full Disk pixel size in km
+  if not keyword_set(min_size) then min_size = 2000                          ; only track features containing min_size pixels or more
+  if keyword_set(rebin) then wdef,0,rebin[0],rebin[1] else wdef,0,nx,ny
+  
+  
 ;THE STEP LOOP
-for t = start_step,end_step do begin
-   
-    wav=strtrim(string(subindex[t].wavelnth),2)
-    print, "Tracking step:",string(t+1)
-    filenum = STRMID(STRING(1000 + fix(t+1), FORMAT = '(I4)'), 1)
-    filename = savepath+STRCOMPRESS('ywave_'+'AIA_'+wav+'_'+strtrim(string(nx),2)+'_'+ filenum, /REMOVE_ALL)
+  for t = start_step,end_step do begin
+     
+     wav=strtrim(string(subindex[t].wavelnth),2)
+     print, "Tracking step:",string(t+1)
+     filenum = STRMID(STRING(1000 + fix(t+1), FORMAT = '(I4)'), 1)
+     filename = savepath+STRCOMPRESS('ywave_'+'AIA_'+wav+'_'+strtrim(string(nx),2)+'_'+ filenum, /REMOVE_ALL)
+     
+     
+                                ; get current data array (suffix "2" is from
+                                ; current step, "1" is from prev. step)
+                                ;===========================================
+     
+     
+     ;Despike the image, and subtract the base image from it.
+     ind=subindex[t]
+     
+     if keyword_set(running) then begin
+        img2=subdata[*,*,t]-subdata[*,*,t-1]
+     endif else begin
+        im=subdata[*,*,t]
+        img2 = im-baseim
+     endelse
+
+     ;Obtain some statistical information
+     mom=moment(img2)
+     meanv=mom[0]
+     stdv=sqrt(mom[1])
+     
     
-
-    ; get current data array (suffix "2" is from
-    ; current step, "1" is from prev. step)
-    ;===========================================
-
-
-    ;Despike the image, and subtract the base image from it.
-    ind=subindex[t]
-    im=subdata[*,*,t]
-    img2 = im-baseim
-    if keyword_set(running) then img2=subdata[*,*,t]-subdata[*,*,t-1]
-    
-    
-
+     if not keyword_set(threshold) then begin
+        if keyword_set(level) then thresh=stdv*level else thresh=stdv*0.60
+     endif else begin
+        thresh=threshold
+     endelse 
+     
 ;Here, enhance the brighter features some more:
 ;===========================================
-    eqim=adapt_hist_equal(img2)
-    img2=eqim
+   ; eqim=adapt_hist_equal(img2)
+   ; img2=eqim
     
 ;Apply a binary mask
-    imm=img2
-    imm[where(imm gt thresh)]*=100.0
-    imm[where(imm le thresh)]/=100.0
-    img2=imm
-
-;remove the disk so the algorithm doesn't get confused.
-    mom=moment(img2)
-    meanv=mom[0]
-    stdv=sqrt(mom[1])
-    resim=aia_hide_disk(subindex[t],img2,value=meanv)
-    img2=resim
-    ;tv,img2
+   ; imm=img2
+   ; imm[where(imm gt thresh)]*=100.0
+   ; imm[where(imm le thresh)]/=100.0
+   ; img2=imm
     
+    
+;remove the disk so the algorithm doesn't get confused.
+    if keyword_set(nodisk) then begin
+       resim=aia_hide_disk(subindex[t],img2,value=meanv)
+       img2=resim
+       
+    endif
     
 ;END DEBUG
 
@@ -163,13 +179,9 @@ for t = start_step,end_step do begin
        nx=rebin[0]
        ny=rebin[1]
     endif
-    ;tv,img2
+    tv,bytscl(img2,min=-40,max=50)
+    stop
 
-    if not keyword_set(threshold) then begin
-       if keyword_set(level) then thresh=stdv*level else thresh=stdv*0.60
-    endif else begin
-       thresh=threshold
-    endelse
 
     
     ; group pixels in current data array

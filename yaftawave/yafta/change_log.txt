@@ -1,0 +1,95 @@
+04 Mar 10 --- Added comment about OLD_MAX_LABEL keyword to 
+	      match_features_v01.pro, and modified YAFTA_test.pro and
+	      YAFTA_dualmask.pro to include use of this keyword.
+
+17 May 09 --- In plot_edges.pro, converted loop indices to FLOAT, for
+	      cases with very large numbers of features.
+
+02 Apr 09 --- Renamed YAFTA_display.pro to display_yafta.pro, to avoid
+              compilation problems with mixed CAPS in filenames.  Also
+              renamed two routines that display_yafta.pro calls.  Also
+              renamed tvread.pro to tvread_yafta.pro, to avoid
+              conflict with other versions of this routine (one of
+              which is distributed with SSWIDL).  Altered IDL programs
+              that call these two routines accordingly, and modified
+              documentation to reflect these changes.
+
+21 May 08 --- Fixed a bug in create_features.pro.  An error in the upper 
+	      limit of the primary FOR loop caused it to fail to include 
+	      pixels in the highest-labelled feature into the FEATURES 
+	      array of structures.  Thanks to Rhona Maclean for finding 
+	      this bug!
+
+02 May 08 --- Fixed a bug in alt_mask.pro; it failed to output mask
+              when /unipolar was set.  Renamed it contiguous_mask.pro,
+              and changed call in YAFTA_dualmask.pro. Modified YAFTA_Intro 
+	      document. alt_mask.pro is now considered obsolete.
+
+23 Apr 08 --- Updated YAFTA_Intro document (.tex, .pdf, .ps)
+
+02 Apr 08 --- Fixed bug introduced when including "setcolor" keyword in 
+	      plot_edges.pro.
+
+11 Mar 08 --- Included "setcolor" keyword in plot_edges.pro, to enable
+	      selection of edge color.
+
+07 May 07 --- Fixed bug in create_features.pro.  When local
+	      correlation tracking (LCT) velocities were passed to
+	      this routine to compute the flux-weighted average LCT
+	      velocity for each feature, the indices used for
+	      addresses of pixels in the LCT velocity arrays were
+	      incorrect.
+
+08 Jul 05 --- Added edgepix keyword to PLOT_EDGES.PRO, to return 1D 
+	      addresses of pixels on features' edges.
+
+28 Jun 05 --- R. Maclean (U. of St. Andrews) encountered a bug on a DEC 
+	      station, wherein IDL refused to concatenate the anonymous 
+	      structures "feature".  A work around was found, in which 
+	      named structures are used instead of anonymous structures. 
+	      by replacing 
+		 	feature = {label:label_j, ...
+	      with
+			feature = {feature,label:label_j, ...
+
+31 May 05 --- Added set_plot,'ps' before square_plot,'ps' in 
+	      YAFTA_test.pro
+	  --- Added "if not(keyword_set(ps)) then" prior to 
+	      "window,0" call in YAFTA_test.pro
+	  --- Changed not(keyword_set(ct)) to (n_elements(ct) eq 0)
+	      in PLOT_EDGES.PRO and PLOT_LABELS.PRO.
+
+19 May 05 --- Erroroneous comment in YAFTA_test.pro listed 1433 km 
+	      as MDI Hi-Res pixel size; this is actually MDI 
+	      Full-Disk pixel size.
+	      In CREATE_FEATURES.PRO, included a factor of 2 
+	      in .XY and .XYERR fields.
+
+17 May 05 --- Fixed three MAX_COL bugs in PLOT_EDGES.PRO
+	  --- Modified code for offset DX in PLOT_EDGES.PRO
+
+16 May 05 --- Included add'l fields in each structure FEATURE, 
+	      for calculating errors in position and moments.
+	      The square root of the product of the new fields, 
+	      XERR, YERR, X2ERR, Y2ERR, and XYERR, and the average 
+	      noise per pixel, gives the error in each of these 
+	      quantities.
+
+04 May 07 --- Renamed display.pro to YAFTA_display.pro, for version
+              control perposes.
+
+
+09 May 05 --- Wrote dual-label logic, for tracking both contiguous and 
+	      convex features in parallel.  Included new string-
+	      valued field ALT_LABEL, and routines ALT_MASK.PRO 
+	      (which uses IDL's LABEL_REGION.PRO) and MATCH_MASKS.PRO.
+	      Use main-level code YAFTA_DUALMASK.PRO for such tracking.
+
+28 Apr 05 --- Changed .SRC, .TRM, .LABEL fields to longword integer.
+	      (Integer overflow occurred w/more than ~32,000 features.)
+
+12 APR 05 --- Added .maxb field to structure in create_features.pro
+
+EOF
+
+
