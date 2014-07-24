@@ -368,11 +368,9 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
 
 ; Find the front edge of the wave
 
-     find_wave_frontedge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
-                          maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge
-
-
-     
+     find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
+                          maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge,$
+                          wave_backedge=wave_backedge
 
      for ii=sp,ep do begin
         
@@ -414,43 +412,40 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
 ;; ;---------------------------------------------------------------
         
         
-;+--------------------------------------------------------------
-;Find the back edge of the wave
-        oldv=1
-        if oldv gt 0 then begin
-;OLD VERSION, SEARCHING DOWN FROM INTENSITY PEAK
-           y=reform(datastruct.bdiff[ii,0:mymaxima[mind,ii].ind])
-           ;y=smooth(y,4,/edge_truncate)
-           np=n_elements(y)
-           y=reverse(y,1)       ;reverse the array so the search is the same
-           tmp=min(where(y le 0.3*max(y)))
-           if tmp[0] eq -1 then rad=yarray[mymaxima[mind,ii].ind-tmp]
-           wave_backedge[ii-sp].ind=mymaxima[mind,ii].ind-tmp
-           datastruct.backinds[mind,ii]=mymaxima[mind,ii].ind-tmp
-        endif
+;; ;+--------------------------------------------------------------
+;; ;Find the back edge of the wave
+;;         oldv=1
+;;         if oldv gt 0 then begin
+;; ;OLD VERSION, SEARCHING DOWN FROM INTENSITY PEAK
+;;            y=reform(datastruct.bdiff[ii,0:mymaxima[mind,ii].ind])
+;;            ;y=smooth(y,4,/edge_truncate)
+;;            np=n_elements(y)
+;;            y=reverse(y,1)       ;reverse the array so the search is the same
+;;            tmp=min(where(y le 0.3*max(y)))
+;;            if tmp[0] eq -1 then rad=yarray[mymaxima[mind,ii].ind-tmp]
+;;            wave_backedge[ii-sp].ind=mymaxima[mind,ii].ind-tmp
+;;            datastruct.backinds[mind,ii]=mymaxima[mind,ii].ind-tmp
+;;         endif
 
-        newv=0
-        if newv gt 0 then begin    
-;NEW VERSION, SEARCHING UP FROM BACKGROUND
-           y=reform(datastruct.bdiff[ii,0:maxind])
-           y=reverse(y,1)
-           y=smooth(y,4,/edge_truncate)
-           np=n_elements(y)
-           tmp=min(where(y gt 2.*bckg)) ;look for 20% increase above background
-           stop
-           if tmp[0] eq -1 then tmp=np-1
-           wave_backedge[ii-sp].rad=yarray[mymaxima[mind,ii].ind+tmp]
-           wave_backedge[ii-sp].ind=mymaxima[mind,ii].ind+tmp
-           datastruct.backinds[mind,ii]=mymaxima[mind,ii].ind+tmp
-        endif
-;---------------------------------------------------------------        
+;;         newv=0
+;;         if newv gt 0 then begin    
+;; ;NEW VERSION, SEARCHING UP FROM BACKGROUND
+;;            y=reform(datastruct.bdiff[ii,0:maxind])
+;;            y=reverse(y,1)
+;;            y=smooth(y,4,/edge_truncate)
+;;            np=n_elements(y)
+;;            tmp=min(where(y gt 2.*bckg)) ;look for 20% increase above background
+;;            stop
+;;            if tmp[0] eq -1 then tmp=np-1
+;;            wave_backedge[ii-sp].rad=yarray[mymaxima[mind,ii].ind+tmp]
+;;            wave_backedge[ii-sp].ind=mymaxima[mind,ii].ind+tmp
+;;            datastruct.backinds[mind,ii]=mymaxima[mind,ii].ind+tmp
+;;         endif
+;; ;---------------------------------------------------------------        
  
 
      endfor 
      loadct,0,/silent
-     
-;     mymaxima[0,startInd].rad = 1.11
-;    allmaxima[0,startInd].rad = 1.11
 
   if keyword_set(auto) then begin
      ; Correct start and end positions with maxima data
@@ -458,20 +453,20 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
      startCorr = 0
      endCorr = 0
      
-     if keyword_set(constrain) then print, "Constraining Data"
-
      find_corr_start, data, time, yarray, datastruct, ht_km, fitrange, yrng, mind,$
                       maxRadIndex, startInd=startInd, mymaxima=mymaxima,$
-                      wave_frontedge=wave_frontedge, startCorr=startCorr, constrain=constrain
+                      wave_frontedge=wave_frontedge, startCorr=startCorr, constrain=constrain,$
+                      wave_backedge=wave_backedge
 
      find_corr_end, data, time, yarray, startInd=startInd, endInd=endInd, wave_frontedge=wave_frontedge,$
-                    maxRadIndex=maxRadIndex, startCorr=startCorr, endCorr=endCorr
+                    wave_backedge=wave_backedge, maxRadIndex=maxRadIndex, startCorr=startCorr, endCorr=endCorr
            
      print, "Corrected start index: ", startInd
      print, "Corrected end index: ", endInd
 
-     ; Correct the positioning of the wave front edge
+     ; Correct the positioning of the wave edges
      wave_frontedge = wave_frontedge[startCorr:endCorr]
+     wave_backedge = wave_backedge[startCorr:endCorr]
 
      ; Plot new corrected region of interest 
      aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
@@ -512,9 +507,11 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
      
      oplot,[time[ii].jd,time[ii].jd],[mymaxima[mind,ii].rad,wave_frontedge[ii-sp].rad],$
            color=200,thick=2
+
+     oplot,[time[ii].jd,time[ii].jd],[mymaxima[mind,ii].rad,wave_backedge[ii-sp].rad],$
+           color=200,thick=2
 ;END DEBUG
   endfor
-
 
 loadct, 0, /silent
 
@@ -525,7 +522,7 @@ loadct, 0, /silent
   print,'Fitting a second-order polynomial to the wave front edge positions...'
   dist=reform(wave_frontedge[0:ep-sp].rad)*DIST_FACTOR*height;*event.geomcorfactor
   time_good=time[sp:ep].relsec-time[sp].relsec
-  if n_elements(dist) lt 4 then begin
+  if n_elements(dist) le 4 then begin
      print, "Not enough data to smooth, exiting..."
      return
   endif
@@ -553,6 +550,10 @@ loadct, 0, /silent
   print,'Fitting a second-order polynomial to the wave peak positions...'
   dist=reform(ht_km[mymaxima[mind,sp:ep].ind]);*event.geomcorfactor
   time_good=time[sp:ep].relsec-time[sp].relsec
+  if n_elements(dist) le 4 then begin
+     print, "Not enough data to smooth, exiting..."
+     return
+  endif
   dist=smooth(dist,4,/edge_truncate)
   ;bootstrap_sdo,dist,time_good,fit_line, p1, p2, p3, s1, s2, s3,parinfo=parinfo
   print,''

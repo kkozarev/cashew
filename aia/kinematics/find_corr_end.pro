@@ -1,5 +1,5 @@
 pro find_corr_end, data, time, rad, startInd=startInd, endInd=endInd, wave_frontedge=wave_frontedge,$
-                   maxRadIndex=maxRadIndex, startCorr=startCorr, endCorr=endCorr
+                   maxRadIndex=maxRadIndex, startCorr=startCorr, endCorr=endCorr, wave_backedge=wave_backedge
 ;PURPOSE                                                                                                  
 ;Procedure to find improved and final end position of the
 ;EUV wave.
@@ -14,7 +14,7 @@ pro find_corr_end, data, time, rad, startInd=startInd, endInd=endInd, wave_front
 
 
   ; To print out additional information set debug to 1
-  debug = 0
+  debug = 1
 
   nt = n_elements(time)
   dat=data
@@ -44,8 +44,8 @@ pro find_corr_end, data, time, rad, startInd=startInd, endInd=endInd, wave_front
   minEndArr = where(topDiff eq min(topDiff))
   if minEndArr[0] ne -1 then begin
      minEnd = minEndArr[0]
-     endInd = minEnd + startInd
-     endCorr = minEnd
+     endInd = minEnd + startInd + 1
+     endCorr = minEnd + 1
      if endCorr eq n_elements(wave_frontedge) then begin
         endInd = minEnd+startInd
         endCorr = minEnd

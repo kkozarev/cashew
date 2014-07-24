@@ -1,9 +1,9 @@
 pro find_corr_start, data, time, yarray, datastruct, ht_km, fitrange, yrng, mind, maxRadIndex,$
                      startInd=startInd, mymaxima=mymaxima, wave_frontedge=wave_frontedge,$
-                     startCorr=startCorr, constrain=constrain
+                     startCorr=startCorr, constrain=constrain, wave_backedge=wave_backedge
 
   ; To print out additional information set debug to 1
-  debug = 0
+  debug = 1
 
   nt = n_elements(time)
   dat=data
@@ -63,8 +63,8 @@ pro find_corr_start, data, time, yarray, datastruct, ht_km, fitrange, yrng, mind
      endif
 
            
-     find_wave_frontedge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
-                          maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge
+     find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
+                          maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge, wave_backedge=wave_backedge
 
      if debug eq 1 then begin
         help, wave_frontedge
@@ -73,7 +73,7 @@ pro find_corr_start, data, time, yarray, datastruct, ht_km, fitrange, yrng, mind
            
      find_corr_start, data, time, yarray, datastruct, ht_km, fitrange, yrng, mind, maxRadIndex,$
                       startInd=startInd, mymaxima=mymaxima, wave_frontedge=wave_frontedge,$
-                      startCorr=startCorr
+                      startCorr=startCorr, wave_backedge=wave_backedge
    
   endif else begin
 

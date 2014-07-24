@@ -15,7 +15,7 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
 ;     ENDIND - index of front end position
 
   ; To print out additional information set debug to 1
-  debug = 0
+  debug = 1
 
   nt = n_elements(time)
   dat=data
@@ -40,16 +40,16 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
   ; Plot a variety of Gaussian fits to
   ; see if this would be useful for
   ; start/end detection
-  ;; x = lindgen(n_elements(totalPixVals))
-  ;; gfit1 = gaussfit(x, totalPixVals, coeff, nterms=3)
-  ;; gfit2 = gaussfit(x, totalPixVals, coeff, nterms=4)
-  ;; gfit3 = gaussfit(x, totalPixVals, coeff, nterms=5)
-  ;; gfit4 = gaussfit(x, totalPixVals, coeff, nterms=6)
+  x = lindgen(n_elements(totalPixVals))
+  gfit1 = gaussfit(x, totalPixVals, coeff, nterms=3)
+  gfit2 = gaussfit(x, totalPixVals, coeff, nterms=4)
+  gfit3 = gaussfit(x, totalPixVals, coeff, nterms=5)
+  gfit4 = gaussfit(x, totalPixVals, coeff, nterms=6)
 
-  ;; cgPlot, gfit1, /overPlot, color='blue', /window
-  ;; cgPlot, gfit2, /overPlot, color='green', /window
-  ;; cgPlot, gfit3, /overPlot, color='red', /window
-  ;; cgPlot, gfit4, /overPlot, color='cyan', /window
+  cgPlot, gfit1, /overPlot, color='blue', /window
+  cgPlot, gfit2, /overPlot, color='green', /window
+  cgPlot, gfit3, /overPlot, color='red', /window
+  cgPlot, gfit4, /overPlot, color='cyan', /window
 
   prevVal = totalPixVals[0]
   maxDuration = 0
@@ -70,9 +70,9 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
      endif else begin
         maxDuration = 0 
      endelse
-; If we have exceeded the mean for 8 timesteps save
+; If we have exceeded the mean for 6 timesteps save
 ; this as the end of the quiet background of totalPixVals
-     if maxDuration gt 8 then begin
+     if maxDuration gt 6 then begin
         backgroundEnd = tt
         print, "Location of background end: ", backgroundEnd
         break
@@ -94,7 +94,7 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
   if backgroundEnd+20 gt n_elements(totalPixVals)-1 then endWindow = n_elements(totalPixVals)-1
   
 ; For a window around the end of the background compute the slope
-  for tt=backgroundEnd-8, endWindow do begin
+  for tt=backgroundEnd-6, endWindow do begin
      slope[tt] = (totalPixVals[tt] - totalPixVals[tt-1])
      if debug eq 1 then begin
         print, "Current step: ", tt
