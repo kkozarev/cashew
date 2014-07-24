@@ -9,12 +9,12 @@ pro test_pfss_return_field
      aia_carrington_latlon,event,lat,lon
      aclon=lon+event.arlon
      aclat=lat+event.arlat
-     ;box=[aclon-90.,aclat-90.,aclon+90.,aclat+90.]
+     box=[aclon-120.,aclat-120.,aclon+120.,aclat+120.]
      ;box=[aclon-45.,aclat-45.,aclon+45.,aclat+45.]
      ;pfss_return_field,event,invdens=0.5,/save;,box=box
                                 ;pfss_return_field,date,invdens=0.5,/save,event=event;,box=box
                                 ;pfss_return_field,date,invdens=8,/save,path=event.pfsspath,event=event;,box=box
-     pfss_return_field,event,/save
+     pfss_return_field,event,box=box,/hires,/save
   endif
   
   
@@ -42,7 +42,7 @@ end
 
 
 
-pro pfss_return_field_main,date,event=event,rstart=rstart,invdens=invdens,pfss_struct=pfss_struct,$
+pro pfss_return_field_main,date,event=event,rstart=rstart,invdens=invdens,$
                            save=save,path=path,box=box,lores=lores,hires=hires,_extra=_extra
 ;PURPOSE:
 ; Return the PFSS field model
@@ -100,11 +100,10 @@ endif
      pfss_field_start_coord,5,invdens,radstart=rstart,bbox=box $
   else $
      pfss_field_start_coord,5,invdens,radstart=rstart
- 
+
 
 ;  trace the field lines passing through the starting point arrays
   pfss_trace_field, kind
-;@pfss_data_block
   ind=where(ptph lt 0.0)
   if ind[0] gt -1 then ptph[ind]+=2*!PI
   ind=where(ptph ge 2*!PI)
@@ -113,15 +112,6 @@ endif
   if ind[0] gt -1 then ptth[ind]+=2*!PI
   ind=where(ptth ge 2*!PI)
   if ind[0] gt -1 then ptth[ind]-=2*!PI
-;Create a structure to hold the results. The data are in 
-;(r,theta,phi) spherical/heliographic coordinate system:
-;r is the distance away from sun-center in units of solar
-;      radii, such that valid values are between 1 (the nominal
-;      photosphere and 2.5 (the radius of the source surface).
-;      theta and phi are respectively the colatitude and
-;      longitude in radians.
-  pfss_to_spherical,sph_data
-  if keyword_set(pfss_struct) then pfss_struct=sph_data
   
 ;pfss_data is a structure array of type
 ;{spherical_field_data, $
@@ -145,9 +135,9 @@ endif
 ;the tags CRLN_OBS and CRLT_OBS
 ;carrCoords=get_stereo_lonlat(date,'Earth',/degrees,system='Carrington')
 ;print,carrCoords
-
+  
 ;Get the open field lines
-pfss_get_chfootprint,openfield,/quiet,/usecurrent,spacing=invdens;,/close
+;pfss_get_chfootprint,openfield,/quiet,/usecurrent,spacing=invdens;,/close
 
 ;Save the structure and Carrington coordinates of SDO to a sav file:
 stringres='lores'
@@ -164,6 +154,7 @@ if keyword_set(hires) then stringres='hires'
         fname='pfss_results_'+dat+'_'+event.label+'_'+stringres+'.sav'
      endelse
      
-     save,sph_data,openfield,nstep,filename=path+fname,kind,/comm,/variables,/compress
+     save,filename=path+fname,/variables
+     ;save,filename=path+fname,kind,sph_data,nstep,ptph,ptr,ptth,rix,fname,nlat,nlon,/comm
   endif
 end

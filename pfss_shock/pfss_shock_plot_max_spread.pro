@@ -34,9 +34,9 @@ return
   lon=ind_arr[0].crln_obs*!PI/180.
   maxFootpointExtent=fltarr(sstep)
   for sstep=0,nsteps-1 do begin
-     pmax=max(abs(endpointCoords[sstep,*,*].ptph-lon))
-     pmin=
-     plotmax[sstep]=max(endpointCoords[sstep,*,*].ptph-lon)
+     ;pmax=max(abs(endpointCoords[sstep,*,*].ptph-lon))
+     ;pmin=
+     ;plotmax[sstep]=max(endpointCoords[sstep,*,*].ptph-lon)
   
   
 end

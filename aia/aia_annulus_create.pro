@@ -71,8 +71,6 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
 ;   2013/09/30, Kamen Kozarev - Added savename, savepath keywords
 ;   2013/11/13, Kamen Kozarev - Integrated the event structure
 
-
-
   date=event.date
   if not keyword_set(wav) then passband = '193' else passband = wav
   if not keyword_set(savepath) then savepath=event.savepath+'annulusplot/'

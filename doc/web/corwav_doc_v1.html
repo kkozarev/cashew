@@ -439,9 +439,17 @@ IDL> pfss_shock_plot_angular_influence,event[,/topview]
     	<p>CorWav has procedures for plotting radio data from the eCallisto and RSTN catalogs, as well as from Nancay Radio Heliograph, and X-ray imaging data from RHESSI. The radio output files will be stored in the 'radio/' folder of the event(s).</p>
         <p>To plot eCallisto data, you first need to download the fits files from <a href="http://soleil.i4ds.ch/solarradio/callistoQuicklooks/" target="_blank">the eCallisto website</a> for the dates you are interested in. Then save the data in the appropriate 'Callisto_data' folder, and you can plot them by running
 <pre><code>
-IDL> callisto_plot_spectra,event[,timerange=timerange,freqrange=freqrange]
+IDL> callisto_plot_spectrum,event[,timerange=timerange,freqrange=freqrange]
 </code></pre></p>
-<p> To plot data from the Radio Solar Telescope Network (RSTN), first <a href="http://www.ngdc.noaa.gov/stp/space-weather/solar-data/solar-features/solar-radio/rstn-spectral/" target="_blank">download daily .srs files</a> from one of the five functioning stations (Learmonth, Palehua, San Vito, and Sagamore Hill). After that, you can run
+<p> To plot data from the Radio Solar Telescope Network (RSTN), first
+        <a
+        href="http://www.ngdc.noaa.gov/stp/space-weather/solar-data/solar-features/solar-radio/rstn-spectral/"
+        target="_blank">download daily .srs files</a> from one of the five functioning stations (Learmonth, Palehua, San Vito, and
+        Sagamore Hill). Alternatively, you can download the daily files automatically using
+<pre><code>
+IDL> rstn_download_data,event
+</code></pre>
+After that, you can run
 <pre><code>
 IDL> rstn_plot_spectrum,event[,full=full,frange=frange,trange=trange,datarange=datarange]
 </code></pre>

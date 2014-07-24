@@ -1,4 +1,4 @@
-pro test_rstn_download_files
+pro test_rstn_download_data
 
 one=0
 if one eq 1 then begin
@@ -6,13 +6,13 @@ if one eq 1 then begin
   ;download_rstn_files_date, date
   ;stop
   events=load_events_info(label='110607_01')
-  for ev=0,n_elements(events)-1 do rstn_download_files,events[ev]
+  for ev=0,n_elements(events)-1 do rstn_download_data,events[ev]
 endif
 
 all=1
 if all eq 1 then begin
    events=load_events_info()
-   for ev=0,n_elements(events)-1 do rstn_download_files,events[ev]
+   for ev=0,n_elements(events)-1 do rstn_download_data,events[ev]
 endif
 
 end
@@ -37,7 +37,7 @@ date=strjoin(strsplit(res[0],'/',/extract))
 fulldate=date+' '+res[1]
 
 ;Download the radio data
-   rstn_download_files_date, fulldate, dlpath=dlpath
+   rstn_download_data_date, fulldate, dlpath=dlpath
 ;Plot the radio spectrum for ten minutes before until an hour after
 ;the quoted EUV wave start time.
    trange=[aia_augment_timestring(datetime,-600),aia_augment_timestring(datetime,3600)]
@@ -49,7 +49,7 @@ endwhile
 end
 
 
-pro rstn_download_files, event,force=force
+pro rstn_download_data, event,force=force
   baseurl='http://www.ngdc.noaa.gov/stp/space-weather/solar-data/solar-features/solar-radio/rstn-spectral/'
   shortdate=strmid(event.date,2,6)
   year=strmid(event.date,0,4)
@@ -113,7 +113,7 @@ pro rstn_download_files, event,force=force
 end
 
 
-pro rstn_download_files_date, date, dlpath=dlpath
+pro rstn_download_data_date, date, dlpath=dlpath
   baseurl='http://www.ngdc.noaa.gov/stp/space-weather/solar-data/solar-features/solar-radio/rstn-spectral/'
   datapath='/data/george/corwav/RSTN_data/'
   shortdate=strmid(date,2,6)

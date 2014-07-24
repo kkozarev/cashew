@@ -21,6 +21,10 @@ function aia_get_arcoords, index, angular_coords, subroi_start, arlonlat=arlonla
 ;01/2012, Kamen Kozarev: Introduced WCS procedures to make this more
 ;accurate. 
 ;
+if n_elements(angular_coords) lt 2 then begin
+   print,'Input coordinates not an array (angular_coords[2]). Quitting...'
+   return
+endif
 
 pscale=index.imscl_mp ;arcsecs per pixel
 acx=angular_coords[0]*1.0 ;arcsecs

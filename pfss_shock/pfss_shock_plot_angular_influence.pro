@@ -1,12 +1,12 @@
 pro test_pfss_shock_plot_angular_influence
 ;Testing the CSGS angular influence plotting procedure
-event=load_events_info(label='test')
-pfss_shock_plot_angular_influence,event,/topview
+event=load_events_info(label='110511_01')
+pfss_shock_plot_angular_influence,event,/lores;/topview
 ;pfss_shock_plot_angular_influence,event
 end
 
 
-pro pfss_shock_plot_angular_influence,event,topview=topview
+pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lores
 ;PURPOSE:
 ;Visualize the time-dependent CSGS model with interacting field lines.
 ;
@@ -42,10 +42,12 @@ pro pfss_shock_plot_angular_influence,event,topview=topview
   datapath=savepath
   pfsspath=event.pfsspath
   
-  wavefile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed.sav'
+  wavefile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed_radial.sav'
   
   ;Find a file to load with the latest results of applying the CSGS model
-  csgsfile=find_latest_file(event.pfsspath+'csgs_results_*') 
+  ;csgsfile=find_latest_file(event.pfsspath+'csgs_results_*')
+  csgsfile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_lores.sav')
+  if keyword_set(hires) then csgsfile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_hires.sav')
   if csgsfile eq '' then begin
      print,'The CSGS file is not properly set or does not exist. Quitting.'
      return
@@ -151,6 +153,9 @@ pro pfss_shock_plot_angular_influence,event,topview=topview
 ;+==============================================================================
 ;1. Plot the field lines on disk center.
      if sstep eq 0 then begin
+        ;Get the field line info from the PFSS model results
+        if keyword_set(hires) then pfss_get_field_line_info,event,pfssLines=pfssLines,/hires $
+        else pfss_get_field_line_info,event,pfssLines=pfssLines,/lores
         nlines=n_elements(pfssLines)
         ;maxnpts=n_elements(pfssLines[0].px)  
         maxnpts=n_elements(pfssLines[0].ptr)  
@@ -161,20 +166,14 @@ pro pfss_shock_plot_angular_influence,event,topview=topview
         pfss_cartpos=fltarr(nlines,3,maxnpts)
         for ff=0.0D,nlines-1 do begin
            ;the number of points in this particular line.
-           npt=pfssLines[ff].npts      
-           ;px=pfssLines[ff].px[0:npt-1]
-           ;py=pfssLines[ff].py[0:npt-1]
-           ;pz=pfssLines[ff].pz[0:npt-1]
-           ;pfss_sphtocart,pfssLines[ff].ptr,pfssLines[ff].ptth,pfssLines[ff].ptph,$
-           ;               carrlon,carrlat,px,pz,py
+           npt=pfssLines[ff].npts
            
            pfss_sphtocart,pfssLines[ff].ptr,pfssLines[ff].ptth,pfssLines[ff].ptph,$
                           carrlon-sunrot[0]*!PI/180.,carrlat-sunrot[1]*!PI/180.,px,pz,py
            pos = transpose([[reform(px[0:npt-1])],[reform(py[0:npt-1])],[reform(pz[0:npt-1])]])
            
            ;The order of the operations is rotate, scale, translate
-           ;pos = transform_volume(pos,scale=[sunrad,sunrad,sunrad])
-           
+           ;pos = transform_volume(pos,scale=[sunrad,sunrad,sunrad])          
            pos = transform_volume(pos,scale=[sunrad,sunrad,sunrad]) ;,centre_rotation=suncenter,rotation=pfssrot)
            pos = transform_volume(pos,translate=suncenter)
            if keyword_set(topview) then pos = transform_volume(pos,rotation=[90.,0,0],centre_rotation=suncenter)

@@ -4,11 +4,11 @@ pro test_aia_make_images
   ;You can run this for a single or few events, like so
   one=1
   if one eq 1 then begin
-     wavelengths=['193','211']
-     label=['100613_01'] ;'140418_01','140425_01'
+     wavelengths=['193']
+     label=['110511_01'] ;'140418_01','140425_01'
      events=load_events_info(label=label)
      for w=0,n_elements(wavelengths)-1 do for ev=0,n_elements(events)-1 do $
-        aia_make_images,events[ev],wavelengths[w],/base,/run,/raw
+        aia_make_images,events[ev],wavelengths[w],/base,/run,/raw,/force
   endif
   
   ;Alternatively, run it for all events
@@ -73,33 +73,48 @@ pro aia_make_images, event, wave, savepath=savepath,force=force,raw=raw,base=bas
   if keyword_set(raw) then begin
      imgtyp='raw'
      image_type=[image_type,imgtyp]
+     savefolder=savepath+imgtyp+'/'+wav+'/'
      infname='normalized_AIA_'+date+'_'+event.label+'_'+wav+'_subdata_'+imgtyp+'*.png'
-     if file_exist(savepath+infname) and not keyword_set(force) then begin
+     if file_exist(savefolder+infname) and not keyword_set(force) then begin
         print,''
         print,'These files exist. To overwrite, rerun with /force. Quitting...'
         print,''
         return
+     endif
+     if keyword_set(force) then begin
+        res=file_search(savefolder+infname)
+        if res[0] ne '' then spawn,'rm -rf '+savefolder+infname
      endif
   endif
   if keyword_set(base) then begin
      imgtyp='base'
      image_type=[image_type,imgtyp]
+     savefolder=savepath+imgtyp+'/'+wav+'/'
      infname='normalized_AIA_'+date+'_'+event.label+'_'+wav+'_subdata_'+imgtyp+'*.png'
-     if file_exist(savepath+infname) and not keyword_set(force) then begin
+     if file_exist(savefolder+infname) and not keyword_set(force) then begin
         print,''
         print,'These files exist. To overwrite, rerun with /force. Quitting...'
         print,''
         return
      endif
+     if keyword_set(force) then begin
+        res=file_search(savefolder+infname)
+        if res[0] ne '' then spawn,'rm -rf '+savefolder+infname
+     endif
   endif
   if keyword_set(run) then begin
      imgtyp='run'
      image_type=[image_type,imgtyp]
-     if file_exist(savepath+infname) and not keyword_set(force) then begin
+     savefolder=savepath+imgtyp+'/'+wav+'/'
+     if file_exist(savefolder+infname) and not keyword_set(force) then begin
         print,''
         print,'These files exist. To overwrite, rerun with /force. Quitting...'
         print,''
         return
+     endif
+     if keyword_set(force) then begin
+        res=file_search(savefolder+infname)
+        if res[0] ne '' then spawn,'rm -rf '+savefolder+infname
      endif
   endif
   if image_type[0] eq '' and n_elements(image_type) eq 1 then begin
