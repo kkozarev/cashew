@@ -33,7 +33,7 @@ pro test_pfss_shock_run_csgs
 ; model.
   
   event=load_events_info(label='110511_01')
-  pfss_shock_run_csgs,event,/lores;,/plot;,/png
+  pfss_shock_run_csgs,event,/hires;,/plot;,/png
 
 end
 ;---------------------------------------------------------------------
@@ -219,10 +219,10 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
            carrlat=subindex[sstep].crlt_obs*!PI/180.0  ;b
            
            ;Get all the necessary information from the PFSS model
-           stop
+           sph_data=0
            if keyword_set(hires) then $
-              pfss_get_field_line_info,event,pfssLines,pfssfile=pfssfile,sph_data=sph_data,/hires $
-           else pfss_get_field_line_info,event,pfssLines,pfssfile=pfssfile,sph_data=sph_data,/lores
+              pfss_get_field_line_info,event,pfssLines=pfssLines,pfssfile=pfssfile,sph_data=sph_data,/hires $
+           else pfss_get_field_line_info,event,pfssLines=pfssLines,pfssfile=pfssfile,sph_data=sph_data,/lores
            
            nlines=n_elements(pfssLines)
           ;   pfss_sphtocart,ptr,ptth,ptph,carrlon,carrlat,pfss_px,pfss_pz,pfss_py
@@ -263,7 +263,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
            
         endif
 ;-==============================================================================
-  
+
         
 ;PLOT THE AIA IMAGE!
            if keyword_set(plot) or keyword_set(png) then begin
