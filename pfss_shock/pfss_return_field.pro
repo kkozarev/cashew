@@ -9,12 +9,12 @@ pro test_pfss_return_field
      aia_carrington_latlon,event,lat,lon
      aclon=lon+event.arlon
      aclat=lat+event.arlat
-     ;box=[aclon-90.,aclat-90.,aclon+90.,aclat+90.]
+     box=[aclon-120.,aclat-120.,aclon+120.,aclat+120.]
      ;box=[aclon-45.,aclat-45.,aclon+45.,aclat+45.]
      ;pfss_return_field,event,invdens=0.5,/save;,box=box
                                 ;pfss_return_field,date,invdens=0.5,/save,event=event;,box=box
                                 ;pfss_return_field,date,invdens=8,/save,path=event.pfsspath,event=event;,box=box
-     pfss_return_field,event,/hires,/save
+     pfss_return_field,event,box=box,/hires,/save
   endif
   
   

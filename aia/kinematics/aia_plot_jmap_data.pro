@@ -22,8 +22,6 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
        xstyle=1,ystyle=1,$
        charsize=3,charthick=2,$
        xticks=6,yticks=6,color=255
-;       ytitle=ytitle,$
-;       title=title,$
   
   for t=0,nt-2 do begin
      xmin=times[t]

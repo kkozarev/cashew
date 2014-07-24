@@ -20,12 +20,7 @@ pro pfss_get_field_line_info,event,pfssLines=pfssLines,lores=lores,hires=hires,p
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 07/22/2014
 ;
-  
-  if not keyword_set(pfssLines) and not keyword_set(sph_data) then begin
-     print,'You need to specify keyword pfssLines and/or keyword sph_data. Quitting...'
-     return
-  endif
-  
+   
 ;Set up the common block variables
 @pfss_data_block
   
@@ -33,11 +28,10 @@ pro pfss_get_field_line_info,event,pfssLines=pfssLines,lores=lores,hires=hires,p
   pfsspath=event.pfsspath
   date=event.date
   label=event.label
-  pfssfname=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav')
-  if keyword_set(lores) then pfssfname=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_lores.sav')
+  pfssfname=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_lores.sav')
   if keyword_set(hires) then pfssfname=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav')
   if keyword_set(pfssfile) then pfssfname=pfssfile
-
+  
   ;Load the PFSS model results
   print,'Loading PFSS File '+pfssfname
   if pfssfname[0] ne '' then begin
@@ -47,8 +41,7 @@ pro pfss_get_field_line_info,event,pfssLines=pfssLines,lores=lores,hires=hires,p
      print,'No PFSS data present. Quitting...'
      return
   endelse
-  
-  if keyword_set(pfssLines) then begin
+
 ;SAVE THE FIELD LINE INFORMATION TO A STRUCTURE ARRAY
      nlines=n_elements(nstep)*1.0D
      pfssLine={npts:0L,ptr:dblarr(max(nstep)),ptth:dblarr(max(nstep)),ptph:dblarr(max(nstep)),$
@@ -66,9 +59,8 @@ pro pfss_get_field_line_info,event,pfssLines=pfssLines,lores=lores,hires=hires,p
         if kind[ff] eq 2 then pfssLines[ff].open=1 else pfssLines[ff].open=0
         pfssLines[ff].linid=ff
         pfssLines[ff].color=linecols[ff]
-        if ff mod 100 eq 0 then print,'pfss_get_info: Line #'+strtrim(string(fix(ff)),2)+'/'+strtrim(string(fix(nlines)),2)
+        if ff mod 100 eq 0 then print,'pfss_get_info: Line #'+strtrim(string(ff,format='(i7)'),2)+'/'+strtrim(string(nlines,format='(i7)'),2)
      endfor
-  endif
   
   if keyword_set(sph_data) then begin
 ;Create a structure to hold the results. The data are in 
