@@ -137,23 +137,26 @@ if keyword_set(force) then print,'FORCE!'
 
 if keyword_set(event) then path=event.savepath else path='./'
 if keyword_set(event) then aiafov=event.aiafov else aiafov=[1024,1024]
+
 if keyword_set(savefile) then begin
    if savefile eq '' then begin
-      datfname=''
-      subfname=''
+      datfname=path+'normalized_AIA_'+date+'_'+label+'_'+wav+'.sav'
+      subfname=path+'normalized_AIA_'+date+'_'+label+'_'+wav+'_subdata.sav'
    endif else begin
       datfname=savefile+'.sav'
       subfname=savefile+'_subdata.sav'
    endelse
-endif
-if not keyword_set(event) then begin
+endif else begin
    datfname=path+'normalized_AIA_'+date+'_'+label+'_'+wav+'.sav'
    subfname=path+'normalized_AIA_'+date+'_'+label+'_'+wav+'_subdata.sav'
-endif else begin
+endelse
+
+
+if keyword_set(event) then begin
    datfname=path+event.aia_savename+wav+'.sav'
    subfname=path+event.aia_savename+wav+'_subdata.sav'
-endelse
-if not keyword_set(savefile) then savefile=''
+endif
+
 
 if not keyword_set(force) and keyword_set(subroi) and file_exist(subfname) then begin
    restore,subfname
@@ -397,14 +400,16 @@ if not keyword_set(original) then for i=0,nfiles-1 do data[*,*,i]/=index[i].expt
 if loud eq 1 then print,"making the map in aia_load_data"
 index2map,index,data,map
 
-
 ;Make subroi data array.
 if keyword_set(subroi) then begin
    if keyword_set(event) then fov=event.aiafov else fov=[1024,1024]
    newcoords=aia_autoselect_subroi(index[0],coords,event=event)
    subdata=aia_inspect_data(index,data,autoregion=newcoords,event=event)
    subindex=aia_update_subdata_index(index,[newcoords[0],newcoords[1]],fov,coords)
-endif
+   if subfname ne '' then save,subindex,subdata,filename=subfname
+endif else begin
+   if datfname ne '' then save,index,data,filename=datfname
+endelse
 
 if keyword_set(submap) then begin
 ;   if not keyword_set(map) then begin
@@ -416,13 +421,6 @@ if keyword_set(submap) then begin
       aia_inspect_map,map,submap=submap
 ;   endelse
 endif
-
-;optionally, save everything
-if savefile ne '' then begin
-   save,index,data,filename=datfname
-   if keyword_set(subroi) then save,subindex,subdata,filename=subfname
-endif
-
 
 ;if keyword_set(archive) then begin
 ;   save,index,data,filename=path+datfname

@@ -71,7 +71,7 @@ nonz  = where(abs(img) gt threshold)
 pos_msk = img
 below = where(img lt threshold, n_below)
 if (n_below ne 0) then pos_msk(below) = 0
-pos_lab = label_region(pos_msk, all_neighbors=all_neighbors)
+pos_lab = label_region(pos_msk, all_neighbors=all_neighbors,/ulong)
 n_pos = max(pos_lab)
 
 ; if necessary, label negatives
@@ -81,7 +81,7 @@ if (keyword_set(unipolar)) then mask = pos_lab else begin
 	neg_msk = -img
 	below = where(-img lt threshold, n_below)
 	if (n_below ne 0) then neg_msk(below) = 0
-	neg_lab = label_region(neg_msk, all_neighbors=all_neighbors)
+	neg_lab = label_region(neg_msk, all_neighbors=all_neighbors,/ulong)
 	n_neg = max(neg_lab)
 
 

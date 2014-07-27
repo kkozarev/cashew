@@ -45,7 +45,6 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
   AXIS, XAXIS=1,XRANGE=xrange, /SAVE, color=0,xthick=3,xticks=6,xtickformat='(A1)',xstyle=1
  
   if keyword_set(fitrange) then begin
-     
 
 
      ;; yrng=yrange
@@ -62,20 +61,22 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
      
      
      loadct, 0, /silent
-   
+     
      if ~(keyword_set(auto)) then begin
         print,''
         print,'Select starting point:'
         cursor,x,y,/down,/data
         ;plots,x,y,psym=5,symsize=2,thick=2,color=100
         sp=min(where((times-x) gt 0.0))
-        oplot,[times[sp],times[sp]],yrange,color=255
+        dt=(times[sp]-times[sp-1])/2.
+        oplot,[times[sp]-dt,times[sp]-dt],yrange,color=255
 
         print,'Select ending point:'
         cursor,x,y,/down,/data
         ;plots,x,y,psym=5,symsize=2,thick=2,color=200
         ep=min(where((times-x) gt 0.0))
-        oplot,[times[ep],times[ep]],yrange,color=255
+        dt=(times[ep]-times[ep-1])/2.
+        oplot,[times[ep]-dt,times[ep]-dt],yrange,color=255
      endif 
      
      if keyword_set(startInd) then begin

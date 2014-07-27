@@ -254,7 +254,7 @@ SccsId = '@(#)imgexp.pro 2.2 7/16/93 Fen Tamanaha'
 ;
     p = [dev_x_range(0),dev_y_range(0), $
 		dev_x_range(0)+dev_x_width,dev_y_range(0)+dev_y_width]
-
+    
 ;
 ; If the plotting device has scalable pixels, then manual expansion is not
 ;	necessary unless interpolation is desired.  If the the pixels are

@@ -59,10 +59,9 @@ pro pfss_get_field_line_info,event,pfssLines=pfssLines,lores=lores,hires=hires,p
         if kind[ff] eq 2 then pfssLines[ff].open=1 else pfssLines[ff].open=0
         pfssLines[ff].linid=ff
         pfssLines[ff].color=linecols[ff]
-        if ff mod 100 eq 0 then print,'pfss_get_info: Line #'+strtrim(string(ff,format='(i7)'),2)+'/'+strtrim(string(nlines,format='(i7)'),2)
+      ; if ff mod 100 eq 0 then print,'pfss_get_info: Line #'+strtrim(string(ff,format='(i7)'),2)+'/'+strtrim(string(nlines,format='(i7)'),2)
      endfor
-  
-  if keyword_set(sph_data) then begin
+
 ;Create a structure to hold the results. The data are in 
 ;(r,theta,phi) spherical/heliographic coordinate system:
 ;r is the distance away from sun-center in units of solar
@@ -71,5 +70,4 @@ pro pfss_get_field_line_info,event,pfssLines=pfssLines,lores=lores,hires=hires,p
 ;      theta and phi are respectively the colatitude and
 ;      longitude in radians.
      pfss_to_spherical,sph_data
-  endif
 end

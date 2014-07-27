@@ -28,16 +28,6 @@ pro test_aia_annulus_create
   endif
 end
 
-
-pro aia_annulus_create,event,run=run,base=base,raw=raw,remove_aec=remove_aec,_extra=_extra;
-  if keyword_set(raw) then aia_annulus_create_main, event, /raw, /remove_aec, _extra=_extra
-  if keyword_set(base) then aia_annulus_create_main, event, /base, /remove_aec, _extra=_extra
-  if keyword_set(run) then aia_annulus_create_main, event, /run, /remove_aec, _extra=_extra
-  if not keyword_set(run) and (not keyword_set(base)) and (not keyword_set(raw)) then $
-     aia_annulus_create_main, event, /remove_aec, _extra=_extra
-end 
-
-
 pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, centerlat=centerlat, ring_width=ring_width,thrange=thrange,rrange=rrange,datascale=datascale,savename=savename,savepath=savepath,annulus_data=annulus_data,full=full,force=force,remove_aec=remove_aec,plot=plot
 ;PURPOSE:
 ; Routine to produce RD polar-deprojected data using an annulus technique applied to SDO
@@ -354,18 +344,19 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
                     pos = [0.1, 0.1, 0.95, 0.95], min = int_range[0]
 
 ; Save the image as a PNG
-              
+        
         if keyword_set(run) then begin
-              folder='arun/'
-              prefix='annplot_'
-              postfix='run'
-              savefolder=savepath + folder + passband +'/'
-              savefname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_'+img_strind+'.png'
-              searchfname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_*.png'
-              if keyword_set(force) and img_no eq lwr_img then begin
-                 res=file_search(savefolder+searchfname)
-                 if res[0] ne '' then spawn,'rm -rf '+savefolder+searchfname
-              endif        endif else begin
+           folder='arun/'
+           prefix='annplot_'
+           postfix='run'
+           savefolder=savepath + folder + passband +'/'
+           savefname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_'+img_strind+'.png'
+           searchfname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_*.png'
+           if keyword_set(force) and img_no eq lwr_img then begin
+              res=file_search(savefolder+searchfname)
+              if res[0] ne '' then spawn,'rm -rf '+savefolder+searchfname
+           endif 
+        endif else begin
            if keyword_set(base) then begin
               folder='abase/'
               prefix='annplot_'
@@ -391,9 +382,8 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
            endelse
         endelse
         if not dir_exist(savepath+folder+passband+'/') then spawn,'mkdir -m 775 '+savepath+folder+passband+'/'
-        
         write_png, savefolder+savefname, TVRD(/true),r,g,b
-     endif  ;END PLOTTING
+     endif                      ;END PLOTTING
     
   endfor  ;ENDFOR TIMESTEP LOOP
   
@@ -415,4 +405,14 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
   endif
 
   if keyword_set(annulus_data) then annulus_data=projdata
+end
+
+
+
+pro aia_annulus_create,event,run=run,base=base,raw=raw,remove_aec=remove_aec,_extra=_extra;
+  if keyword_set(raw) then aia_annulus_create_main, event, /raw, /remove_aec, _extra=_extra
+  if keyword_set(base) then aia_annulus_create_main, event, /base, /remove_aec, _extra=_extra
+  if keyword_set(run) then aia_annulus_create_main, event, /run, /remove_aec, _extra=_extra
+  if not keyword_set(run) and (not keyword_set(base)) and (not keyword_set(raw)) then $
+     aia_annulus_create_main, event, /remove_aec, _extra=_extra
 end

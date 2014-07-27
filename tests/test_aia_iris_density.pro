@@ -16,7 +16,7 @@ pro test_aia_iris_density,saved=saved
   tmp2=tmp.int+tmp.frac
   trange=[tmp1,tmp2]
   
-  
+ 
   if keyword_set(saved) then begin
      res=file_search(savename+'.sav')
      if res[0] ne '' then begin
@@ -26,7 +26,7 @@ pro test_aia_iris_density,saved=saved
         return
      endelse
   endif else begin
-                                
+                stop                
 ;Get the pixel to arcsec transformation of AIA data
   aia_transform_px2arcsec,event,axcoords,aycoords
   
@@ -87,9 +87,22 @@ endelse
           xticks=6,yticks=6,color=255
      
      ydata=aycoords[yind]
+     
+     ;Tried FFT for removal of noise - didn't really work...
+     ;ffTransform = FFT(emarray)
+     ;powerSpectrum = ABS(ffTransform)^2
+     ;scaledPowerSpect = ALOG10(powerSpectrum)
+     ;scaledPS0 = scaledPowerSpect - MAX(scaledPowerSpect)
+     ;mask = REAL_PART(scaledPS0) GT -7
+     ;maskedTransform = ffTransform*mask
+     ;emarray_fft = REAL_PART(FFT(maskedTransform, /inverse))
+     
      density=alog10(sqrt(emarray/los_depth)) ;/(2*sqrt(2*alog(2)))
-     min=min(density) ;10.2
-     max=max(density) ;11.2
+     
+     
+     
+     min=min(density)           ;10.2
+     max=max(density)           ;11.2
      
 ;loadct,4,/silent
      for t=0,nt-2 do begin

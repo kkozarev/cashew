@@ -90,10 +90,10 @@ if (n_elements(peakthreshold) eq 0) then begin
 endif
 
 orig_mask = mask      ; save input mask --- nice to have for debugging
-n_lab = max(abs(mask))
+n_lab = max(abs(mask))*1.
 new_mask = fltarr(nx,ny)
 
-for j = 1,n_lab do begin
+for j = 1.,n_lab do begin
     where_j = (where(abs(mask) eq j, size_j))
     peakfield = max(abs(img(where_j)))
     

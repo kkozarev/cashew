@@ -34,7 +34,7 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
      totalPixVals[tt]=tmp
   endfor
      
-  cgplot, totalPixVals, /window
+  ;cgplot, totalPixVals, /window
 
 
   ; Plot a variety of Gaussian fits to
