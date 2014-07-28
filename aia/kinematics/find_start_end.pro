@@ -28,96 +28,65 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
 
   ; Go through and sum up the intensities for each time step
   totalPixVals=dblarr(nt)
-
   for tt=0,nt-1 do begin
      tmp=total(dat[tt,*])
      totalPixVals[tt]=tmp
   endfor
 
-  
+  ; Smooth the sum of the pixel intensities for min detection
   totalSmoothVals = smooth(totalPixVals, 6, /edge_truncate)
+  tmp = lindgen(n_elements(totalSmoothVals))
 
+  ; Compute minima and maxima to center Gaussian fit on first wave
+  maxima = get_local_maxima(totalSmoothVals, tmp)
+  minind = lclxtrem(totalSmoothVals-smooth(totalSmoothVals, 20, /edge_truncate), 10)
+
+  firstMaxInd = where(maxima.ind eq min(maxima.ind))
+  goodMinInd = min(where(minind gt maxima[firstMaxInd].ind))
+
+  if goodMinInd eq -1 then begin
+     minind[goodMinInd] = n_elements(data)-1
+  endif
+
+  x = lindgen(n_elements(totalPixVals))
+
+  ; If more than one max is found, use the first otherwise there is
+  ; only one wave present in the data and filtering is unnecessary
+  if n_elements(maxima) gt 1 then begin
+     ; Correct for smoothing
+     corr = 0
+     if minind[goodMinInd] + corr gt n_elements(totalPixVals)-1 then corr=0
+     gaussData = totalPixVals[0:minind[goodMinInd]+corr]
+     x = x[0:minind[goodMinInd]+corr]
+  endif else begin
+     gaussData = totalPixVals
+
+  endelse 
      
   ;cgplot, totalPixVals, /window
-
-
   cgplot, totalSmoothVals, /window
 
-  slope = dblarr(nt)
-  concavity = dblarr(nt)
-
-; Compute Slope
-  for i = 1, n_elements(totalSmoothVals)-1 do begin
-     slope[i] = (totalSmoothVals[i] - totalSmoothVals[i-1])
-  endfor
-  
- endPoint = 0
-  done = 0
-
-  while (done eq 0) do begin
-;; ;  cgplot, slope, color='blue', /overplot, /window
-     maxPosDuration = 0
-     for i = endPoint, n_elements(slope)-1 do begin
-        print, i
-        if slope[i] gt 0 then begin
-           maxPosDuration++
-        endif else begin
-           print, "Breaking"
-           endPoint = i+1
-           break
-        endelse
-     endfor
-     
-     if maxPosDuration gt 6 then done = 1
-  endwhile
-        
-; Find maxima to give GaussFit a good guess
-  currentMax = 0
-  currentMaxInd = 0
-
-  maxStr = {val:0.0, ind:0}
-  maxStruct = replicate(maxStr, n_elements(totalPixVals)-1)
-
-  for i = 0, n_elements(totalPixVals)-1 do begin
-     if totalPixVals[i] gt currentMax then begin
-        maxStruct[i].val = totalPixVals[i]
-        maxStruct[i].ind = i
-        currentMax = totalPixVals[i]
-        currentMaxInd = i
-     endif 
-  endfor
-
-stop
-
-
-;estimates = [9000,30,10]
-
-
-  ; Plot a variety of Gaussian fits to
-  ; see if this would be useful for
-  ; start/end detection
-  x = lindgen(n_elements(totalPixVals))
-;  gfit1 = gaussfit(x, totalPixVals, coeff, nterms=3)
-  gfit2 = gaussfit(x[0:18], totalPixVals[0:18], coeff, estimates=estimates, nterms=3)
-;  gfit3 = gaussfit(x, totalPixVals, coeff, nterms=5)
-;  gfit4 = gaussfit(x, totalPixVals, coeff, nterms=6)
-
-;  cgPlot, gfit1, /overPlot, color='blue', /window
+  gfit2 = gaussfit(x, gaussData, coeff, estimates=estimates, nterms=4)
   cgPlot, gfit2, /overPlot, color='green', /window
-;  cgPlot, gfit3, /overPlot, color='red', /window
-;  cgPlot, gfit4, /overPlot, color='cyan', /window
+  
+  ; If the peak or stdev is outrageous, refit with all of the data
+  if coeff[2] gt n_elements(totalPixVals)/2 || coeff[0] lt 0 then begin
+     x = lindgen(n_elements(totalPixVals))
+     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=4)
+  endif
+
+
+  help, coeff, /str
+  print, coeff
 
   minusTwoSigma = coeff[1] - 2*coeff[2]
   plusTwoSigma = coeff[1] + 2*coeff[2]
-  plusFourSigma = coeff[1] + 4*coeff[2]
   
   cgPlot, [plusTwoSigma, plusTwoSigma], [0, 800], /Overplot, /window
   cgPlot, [minusTwoSigma, minusTwoSigma], [0, 800], /Overplot, /window  
-  cgPlot, [plusFourSigma, plusFourSigma], [0, 800], /OverPlot, /window
 
-  prevVal = totalPixVals[0]
-  maxDuration = 0
-
+  ;; prevVal = totalPixVals[0]
+  ;; maxDuration = 0
 ;; ; Primary scan - look for data which exceeds a running 
 ;; ; mean of totalPixVals
 ;;   currentMean = totalPixVals[0]
@@ -146,18 +115,34 @@ stop
 ; Improved Primary scan, using GaussFit to provide initial starting
 ; time guess
 
-  gaussStartInd = round(minusTwoSigma)
-  startGuess = gaussStartInd
-  
-  gaussEndInd = round(plusTwoSigma)
-  endGuess = gaussEndInd
+  startGuess = round(minusTwoSigma)
+  endGuess = round(plusTwoSigma)
 
+  backgroundLevel = mean(totalPixVals[0:startGuess])
+  backgroundThresh = backgroundLevel + 0.50*backgroundLevel
+
+  ; Make sure the first maxima is sufficiently above background
+  if maxima[firstMaxInd].val lt backgroundThresh then begin
+     if debug eq 1 then print, "Below background threshold, recomputing..."
+     x = lindgen(n_elements(totalPixVals))
+     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=4)
+     cgPlot, gfit2, /OverPlot, color='green', /window
+
+     minusTwoSigma = coeff[1] - 2*coeff[2]
+     plusTwoSigma = coeff[1] + 2*coeff[2]
   
+     cgPlot, [plusTwoSigma, plusTwoSigma], [0, 800], /Overplot, /window
+     cgPlot, [minusTwoSigma, minusTwoSigma], [0, 800], /Overplot, /window  
+
+     startGuess = round(minusTwoSigma)
+     endGuess = round(plusTwoSigma)
+  endif
+
   if debug eq 1 then begin
-     print, "Two sigma Gauss Index"
-     print, gaussStartInd
      print, "Gaussian based start index guess"
      print, startGuess
+     print, "Gaussian based end index guess"
+     print, endGuess
   endif
   
   backgroundEnd = startGuess
@@ -176,7 +161,7 @@ stop
   endWindow = backgroundEnd+20
   startWindow = backgroundEnd
   if backgroundEnd+20 gt n_elements(totalPixVals)-1 then endWindow = n_elements(totalPixVals)-1
-  if startWindow lt 0 then startWindow = 0
+  if startWindow le 0 then startWindow = 1
   
 ; For a window around the end of the background compute the slope
   for tt=startWindow, endWindow do begin
@@ -200,47 +185,41 @@ stop
      print, "Using Gaussian based start index guess"
      startInd = startGuess
   endif
+
+; To find the end position, define a threshold
+; based on the mean pixel value of the background
+  backgroundLevel = mean(totalPixVals[0:backgroundEnd])
   
-  endInd = endGuess
+; Look for when the Gaussian fit crosses 10% of this threshold
+  threshold = 0.10
+  endLevel = backgroundLevel + threshold*backgroundLevel
 
-;; ; To find the end position, define a threshold
-;; ; based on the mean pixel value of the background
-;;   backgroundLevel = mean(totalPixVals[0:startInd])
-  
-;; ; Look for when we are within 10% of this threshold
-;;   threshold = 0.10
-;;   endLevel = backgroundLevel + threshold*backgroundLevel
+  endInd = -1  
+  for tt=startInd, nt-1 do begin
+     ;print, totalPixVals[tt]
+     ; Save the first instance of falling below the
+     ; threshold as the end index
+     if tt eq n_elements(totalPixVals) then break
+     if tt eq n_elements(gfit2) then break
 
-;;   endInd = -1  
-;;   for tt=startInd, nt-1 do begin
-;;      ;print, totalPixVals[tt]
-;;      ; Save the first instance of falling below the
-;;      ; threshold as the end index
-;;      if totalPixVals[tt] lt endLevel then begin
-;;         endTime = time[tt]
-;;         endInd = tt
-;;         if debug eq 1 then print, "End Index: ", endInd
-;;         break
-;;      endif
-;;   endfor
+     if gfit2[tt] lt endLevel then begin
+        endTime = time[tt]
+        endInd = tt
+        if debug eq 1 then print, "End Index: ", endInd
+        break
+     endif
+  endfor
 
-;;   if endInd eq -1 then begin
-;;      print, "Could not find valid ending point, exiting..."
-;;      return
-;;   endif
-
-; Better Gaussian based end time detection
-
-
-
-
+  if endInd eq -1 then begin
+     print, "Could not find valid ending point, using Gaussian based guess"
+     endInd = endGuess
+     if endInd gt n_elements(totalPixVals)-1 then endInd = n_elements(totalPixVals)-2
+     return
+  endif
 
   print, "Start Index: ", startInd
   print, "Start Time: ", time[startInd]
   print, "End Index: ", endInd
   print, "End Time: ", time[endInd]
-  
-stop       
-
 
 end

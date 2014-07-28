@@ -82,15 +82,17 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
      if keyword_set(startInd) then begin
         loadct, 1, /silent
         print, "Plotting automatically detected start position"
-        oplot,[times[startInd],times[startInd]],yrange,thick=3,color=100
         sp = startInd
+        dt=(times[sp]-times[sp-1])/2.
+        oplot,[times[startInd]-dt,times[startInd]-dt],yrange,thick=3,color=100
      endif
    
      if keyword_set(endInd) then begin
         loadct, 1, /silent
         print, "Plotting automatically detected start position"
-        oplot,[times[endInd],times[endInd]],yrange,thick=3,color=100
         ep = endInd
+        dt=(times[ep]-times[ep-1])/2.
+        oplot,[times[endInd]-dt,times[endInd]-dt],yrange,thick=3,color=100
      endif
 
      loadct, 0, /silent

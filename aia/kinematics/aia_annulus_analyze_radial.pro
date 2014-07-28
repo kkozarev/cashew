@@ -219,6 +219,8 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
      
      device,window_state=win_open
      dt=(time[1:n_elements(time)-1].jd-time[0:n_elements(time)-2].jd)/2.
+
+     dt = [dt, dt[0]]
      
      oplot,time.jd-dt,reform(yarray[datastruct.maxinds[mind,*]]),psym=1,color=200,thick=4,symsize=2
      loadct,8,/silent
@@ -371,15 +373,13 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
      oplot,[time[ii].jd-dt[ii],time[ii].jd-dt[ii]],[mymaxima[mind,ii].rad,wave_frontedge[ii-sp].rad],$
            color=200,thick=2
 
-     oplot,[time[ii].jd,time[ii].jd],[mymaxima[mind,ii].rad,wave_backedge[ii-sp].rad],$
+     oplot,[time[ii].jd-dt[ii],time[ii].jd-dt[ii]],[mymaxima[mind,ii].rad,wave_backedge[ii-sp].rad],$
            color=200,thick=2
 ;END DEBUG
   endfor
 
 loadct, 0, /silent
 
-
-return
 
 ;--------------------------------------------------
 ;Do second order polynomial fitting for the wave fronts edges

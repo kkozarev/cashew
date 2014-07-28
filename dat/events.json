@@ -333,7 +333,7 @@
 	"loop": false,
 	"filament": true,
 	"comment": "Eastern event with interesting type III and type II bursts.",
-	"web": true,
+	"web": false,
 	"rstn_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/11/06/BIR_20131106_134500_03.fit.gz.png",
 	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=day&dayofyear=20131106&survey_type=2"
