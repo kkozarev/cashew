@@ -69,7 +69,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   
 ;LOAD DATA
   print,''
-  print,'Loading data...'
+  print,'Executing pfss_shock_run_csgs...'
   
   wav='193'
   evnum=event.label
@@ -92,6 +92,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   if keyword_set(hires) then pfssfile=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav')
   
   aiafile=file_search(datapath+'normalized_'+eventname+'_subdata.sav')
+  stop
   shockfile=file_search(event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed_radial.sav')
   
   
@@ -105,7 +106,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   endif else begin
      print,'No Shock data present. Quitting...'
      return
-  endelse  
+  endelse 
   
   print,'Loading AIA File '+aiafile
   if aiafile[0] ne '' then begin
@@ -167,7 +168,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   dt= time[1]-time[0]           ;The cadence (maxshockrad-minshockrad)*mpix/(nsteps*1.0)/vshock ;timestep in seconds
   
 ;Variables for the crossing points information
-  nmaxcrosses=2.0e5
+  nmaxcrosses=5.0e4
  ; allcrossPoints=fltarr(nsteps,3,nmaxcrosses)
   allcrossAngles=fltarr(nsteps,nmaxcrosses)
  ; allcrossBmag=fltarr(nsteps,nmaxcrosses)
@@ -219,10 +220,9 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
            carrlat=subindex[sstep].crlt_obs*!PI/180.0  ;b
            
            ;Get all the necessary information from the PFSS model
-           stop
            if keyword_set(hires) then $
-              pfss_get_field_line_info,event,pfssLines,pfssfile=pfssfile,sph_data=sph_data,/hires $
-           else pfss_get_field_line_info,event,pfssLines,pfssfile=pfssfile,sph_data=sph_data,/lores
+              pfss_get_field_line_info,event,pfssLines=pfssLines,pfssfile=pfssfile,sph_data=sph_data,/hires $
+           else pfss_get_field_line_info,event,pfssLines=pfssLines,pfssfile=pfssfile,sph_data=sph_data,/lores
            
            nlines=n_elements(pfssLines)
           ;   pfss_sphtocart,ptr,ptth,ptph,carrlon,carrlat,pfss_px,pfss_pz,pfss_py
@@ -251,7 +251,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
                                      scale=[sunrad,sunrad,sunrad])
               pos = transform_volume(pos,translate=[xcenter,ycenter,zcenter])
               pfss_cartpos[ff,*,0:npt-1]=pos
-              if ff mod 100 eq 0 then print,'PFSS section, line #'+strtrim(string(fix(ff)),2)+'/'+strtrim(string(fix(nlines)),2)
+              ;if ff mod 100 eq 0 then print,'PFSS section, line #'+strtrim(string(fix(ff)),2)+'/'+strtrim(string(fix(nlines)),2)
            endfor
            
            ;Free some memory
@@ -260,10 +260,10 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
            pfss_pz=0
            pfss_py=0
            pos=0
-           
+           print,'PFSS section'
         endif
 ;-==============================================================================
-  
+
         
 ;PLOT THE AIA IMAGE!
            if keyword_set(plot) or keyword_set(png) then begin
@@ -504,8 +504,6 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
 ;   maxLonExtent[sstep]=max(tmp)*180./!PI
 ;endfor
 
-stop
-
 ;Save the results to a file
      resstr='_hires'
      if keyword_set(lores) then resstr='_lores'
@@ -516,4 +514,4 @@ stop
           suncenter,nsteps,sc,radiusfitlines,ind_arr,subindex,$
           vertex_list,vert_rotmat,vert_transmat
 ;-==============================================================================     
-end ; END AIA_MODEL_SHOCK_PFSS
+end ; END PFSS_SHOCK_RUN_CSGS

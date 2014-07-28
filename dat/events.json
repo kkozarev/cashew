@@ -104,8 +104,8 @@
 	"label": "110511_01",
 	"coordX": 785,
 	"coordY": 399,
-	"st": "2011/05/11 02:10:00",
-	"et": "2011/05/11 02:40:00",
+	"st": "2011/05/11 02:20:00",
+	"et": "2011/05/11 02:35:00",
 	"aiafov": [1024,2048],
 	"flareclass": "B8.1",
 	"typeII": true,
@@ -138,7 +138,7 @@
 	"label": "110809_01",
 	"coordX": 883,
 	"coordY": 269,
-	"st": "2011/08/09 07:55:00",
+	"st": "2011/08/09 08:00:00",
 	"et": "2011/08/09 08:20:00",
 	"aiafov": [1024,2048],
 	"flareclass": "X6.9",
@@ -576,5 +576,22 @@
 	"web": true,
 	"rstn_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2014/07/08/ESSEN_20140708_161503_58.fit.gz.png",
+	"nrh_lookup": ""
+}
+{
+	"label": "paper",
+	"coordX": 785,
+	"coordY": 399,
+	"st": "2011/05/11 02:20:00",
+	"et": "2011/05/11 02:35:00",
+	"aiafov": [1024,1024],
+	"flareclass": "B8.1",
+	"typeII": true,
+	"loop": true,
+	"filament": true,
+	"comment": "Huge shock wave originates inside the limb, with clear lateral expansion.",
+	"web": false,
+	"rstn_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/culgoora/images/11/20110804spectrograph.gif",
+	"callisto_lookup": "",
 	"nrh_lookup": ""
 }

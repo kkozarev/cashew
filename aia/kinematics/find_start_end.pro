@@ -33,8 +33,13 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
      tmp=total(dat[tt,*])
      totalPixVals[tt]=tmp
   endfor
+
   
   totalSmoothVals = smooth(totalPixVals, 6, /edge_truncate)
+
+     
+  ;cgplot, totalPixVals, /window
+
 
   cgplot, totalSmoothVals, /window
 

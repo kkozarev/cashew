@@ -23,7 +23,7 @@ function aia_get_arcoords, index, angular_coords, subroi_start, arlonlat=arlonla
 ;
 if n_elements(angular_coords) lt 2 then begin
    print,'Input coordinates not an array (angular_coords[2]). Quitting...'
-   return
+   return,-1
 endif
 
 pscale=index.imscl_mp ;arcsecs per pixel

@@ -5,11 +5,10 @@ pro test_pfss_return_field
   one=1
   if one eq 1 then begin
      event=load_events_info(label='110511_01')
-     date=event.st
      aia_carrington_latlon,event,lat,lon
      aclon=lon+event.arlon
      aclat=lat+event.arlat
-     box=[aclon-120.,aclat-120.,aclon+120.,aclat+120.]
+     box=[aclon-90.,aclat-90.,aclon+90.,aclat+90.]
      ;box=[aclon-45.,aclat-45.,aclon+45.,aclat+45.]
      ;pfss_return_field,event,invdens=0.5,/save;,box=box
                                 ;pfss_return_field,date,invdens=0.5,/save,event=event;,box=box
@@ -24,22 +23,11 @@ pro test_pfss_return_field
      events=load_events_info()
      for ev=0,n_elements(events)-1 do begin
         event=events[ev]
-        date=event.st
-        pfss_return_field,date,invdens=1,/save,path=event.pfsspath,event=event
+        pfss_return_field,event,invdens=1,/save
      endfor
   endif
 
 end
-
-
-pro pfss_return_field,event,lores=lores,hires=hires,_extra=_extra
-  date=event.st
-  all=0
-  if (not keyword_set(hires)) and (not keyword_set(lores)) then all=1
-  if (keyword_set(lores)) or (all eq 1) then pfss_return_field_main,date,event=event,/lores,_extra=_extra
-  if (keyword_set(hires)) or (all eq 1) then pfss_return_field_main,date,event=event,/hires,_extra=_extra
-end
-
 
 
 pro pfss_return_field_main,date,event=event,rstart=rstart,invdens=invdens,$
@@ -96,9 +84,17 @@ endif
   endif
   
   
-  if keyword_set(box) then $
+  ;if not keyword_set(box) then begin
+  ;   aia_carrington_latlon,event,lat,lon
+  ;   aclon=lon+event.arlon
+  ;   aclat=lat+event.arlat
+  ;   box=[aclon-90.,aclat-90.,aclon+90.,aclat+90.]
+  ;endif
+  ;   pfss_field_start_coord,5,invdens,radstart=rstart,bbox=box
+  
+ if keyword_set(box) then $
      pfss_field_start_coord,5,invdens,radstart=rstart,bbox=box $
-  else $
+ else $
      pfss_field_start_coord,5,invdens,radstart=rstart
 
 
@@ -157,4 +153,13 @@ if keyword_set(hires) then stringres='hires'
      save,filename=path+fname,/variables
      ;save,filename=path+fname,kind,sph_data,nstep,ptph,ptr,ptth,rix,fname,nlat,nlon,/comm
   endif
+end
+
+
+pro pfss_return_field,event,lores=lores,hires=hires,_extra=_extra
+  date=event.st
+  all=0
+  if (not keyword_set(hires)) and (not keyword_set(lores)) then all=1
+  if (keyword_set(lores)) or (all eq 1) then pfss_return_field_main,date,event=event,/lores,_extra=_extra
+  if (keyword_set(hires)) or (all eq 1) then pfss_return_field_main,date,event=event,/hires,_extra=_extra
 end
