@@ -3,7 +3,7 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
                          wave_backedge=wave_backedge
         
 
-  plot = 1
+  plot = 0
 
   loadct, 0
 

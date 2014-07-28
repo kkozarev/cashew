@@ -516,6 +516,8 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
 loadct, 0, /silent
 
 
+return
+
 ;--------------------------------------------------
 ;Do second order polynomial fitting for the wave fronts edges
   print,''

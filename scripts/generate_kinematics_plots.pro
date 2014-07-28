@@ -7,7 +7,7 @@ pro generate_kinematics_plots
 
 
 rrange=[1.1,1.37]
-wav=['193','211']
+wav=['193']
 
 events=load_events_info()
 for ev=5, n_elements(events)-1 do begin

@@ -3,24 +3,10 @@ pro find_corr_start, data, time, yarray, datastruct, ht_km, fitrange, yrng, mind
                      startCorr=startCorr, constrain=constrain, wave_backedge=wave_backedge
 
   ; To print out additional information set debug to 1
-  debug = 1
+  debug = 0
 
   nt = n_elements(time)
   dat=data
-  
-  ; Set the initial start correction to zero
-  ;startCorr = 0
-
-  ;; ind=where(dat lt 0.0)
-  ;; if ind[0] gt -1 then dat[ind] = 0.0
-
-  ;; ; Go through and sum up the intensities for each time step
-  ;; totalPixVals=dblarr(nt)
-
-  ;; for tt=0,nt-1 do begin
-  ;;    tmp=total(dat[tt,*])
-  ;;    totalPixVals[tt]=tmp
-  ;; endfor
      
 
 ; Peform a secondary scan and bring up the end index depending
@@ -78,17 +64,6 @@ pro find_corr_start, data, time, yarray, datastruct, ht_km, fitrange, yrng, mind
   endif else begin
 
      return
-     ;; aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
-     ;;                      yrange=[yarray[datastruct.yfitrange[0]],yarray[datastruct.yfitrange[1]]],$
-     ;;                      numplotmax=3
-     
-     ;; if keyword_set(constrain) then begin
-     ;;    maxinds=jmap_filter_maxima_radial(time.relsec,ht_km,allmaxima,fitrange=datastruct.xfitrange) ;,outliers=outliers
-     ;;    mymaxima=maxinds
-     ;; endif
-     
-     ;; find_wave_frontedge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
-     ;;                      maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge
      
   endelse
 
