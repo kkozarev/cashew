@@ -1,15 +1,14 @@
-pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=mymaxima, wave_frontedge=wave_frontedge,$
-                    maxRadIndex=maxRadIndex, startCorr=startCorr, endCorr=endCorr
+pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd
 
 ;PURPOSE
 ;Procedure to automatically find initial estimates of the start end times of the EUV front
 ;Takes data, sums up pixel intensities at each time step, determines
-;start and end times from how the sum of intensities change
+;start and end times from a Gaussian fit and how the sum of intensities change
 ;
 ;INPUTS
 ;     DATA - annulus data from aia_annulus_analyze_radial.pro
 ;     TIME - array of times to corresponding annulus data
-;
+;     RAD - array of radii used in the data
 ;OUTPUTS
 ;     STARTIND - index of front start position
 ;     ENDIND - index of front end position
@@ -19,9 +18,6 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
 
   nt = n_elements(time)
   dat=data
-  
-  ; Set the initial start correction to zero
-  startCorr = 0
 
   ind=where(dat lt 0.0)
   if ind[0] gt -1 then dat[ind] = 0.0
@@ -55,17 +51,24 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
   if n_elements(maxima) gt 1 then begin
      ; Correct for smoothing
      corr = 0
-     if minind[goodMinInd] + corr gt n_elements(totalPixVals)-1 then corr=0
-     gaussData = totalPixVals[0:minind[goodMinInd]+corr]
-     x = x[0:minind[goodMinInd]+corr]
+
+     ; Make sure to not prematurely cut off the Gaussian fit if
+     ; we have found the biggest one
+     if maxima[firstMaxInd].val eq max(maxima.val) then begin
+        gaussData = totalPixVals
+     endif else begin
+        if minind[goodMinInd] + corr gt n_elements(totalPixVals)-1 then corr=0
+        gaussData = totalPixVals[0:minind[goodMinInd]+corr]
+        x = x[0:minind[goodMinInd]+corr]
+     endelse
   endif else begin
      gaussData = totalPixVals
-
   endelse 
      
   ;cgplot, totalPixVals, /window
   cgplot, totalSmoothVals, /window
 
+  ; Compute a Gaussian fit to determine start and end times
   gfit2 = gaussfit(x, gaussData, coeff, estimates=estimates, nterms=4)
   cgPlot, gfit2, /overPlot, color='green', /window
   
@@ -75,15 +78,35 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
      gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=4)
   endif
 
-
-  help, coeff, /str
-  print, coeff
-
   minusTwoSigma = coeff[1] - 2*coeff[2]
   plusTwoSigma = coeff[1] + 2*coeff[2]
   
   cgPlot, [plusTwoSigma, plusTwoSigma], [0, 800], /Overplot, /window
   cgPlot, [minusTwoSigma, minusTwoSigma], [0, 800], /Overplot, /window  
+  
+
+  ; Refit the Gaussian with all of the
+  ; data if the initial start guess is negative
+  if minusTwoSigma lt 0 then begin
+     x = lindgen(n_elements(totalPixVals))
+     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=4)
+
+     minusTwoSigma = coeff[1] - 2*coeff[2]
+     plusTwoSigma = coeff[1] + 2*coeff[2]
+
+     if minusTwoSigma lt 0 then begin
+        startInd = -1
+        endInd = -1
+        print, "No valid start point found, exiting..."
+        return
+     endif
+       
+     cgPlot, [plusTwoSigma, plusTwoSigma], [0, 800], /Overplot, /window
+     cgPlot, [minusTwoSigma, minusTwoSigma], [0, 800], /Overplot, /window  
+  endif
+     
+;--------------------------------------------------------------------
+; OLD VERSION - Exceed a running mean for a specified number of time steps
 
   ;; prevVal = totalPixVals[0]
   ;; maxDuration = 0
@@ -112,7 +135,10 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
 ;;      endif
 ;;   endfor
 
-; Improved Primary scan, using GaussFit to provide initial starting
+;--------------------------------------------------------------------
+
+; NEW VERSION
+; Use GaussFit to provide initial starting and ending
 ; time guess
 
   startGuess = round(minusTwoSigma)
@@ -186,6 +212,12 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
      startInd = startGuess
   endif
 
+  ; If the Gaussian fit is incomplete, force a gaussian fit over all data
+  if startInd gt n_elements(gfit2)-1 then begin
+     x = lindgen(n_elements(totalPixVals))
+     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=4)
+  endif
+
 ; To find the end position, define a threshold
 ; based on the mean pixel value of the background
   backgroundLevel = mean(totalPixVals[0:backgroundEnd])
@@ -194,15 +226,12 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
   threshold = 0.10
   endLevel = backgroundLevel + threshold*backgroundLevel
 
-  endInd = -1  
-  for tt=startInd, nt-1 do begin
-     ;print, totalPixVals[tt]
-     ; Save the first instance of falling below the
-     ; threshold as the end index
-     if tt eq n_elements(totalPixVals) then break
-     if tt eq n_elements(gfit2) then break
+  if debug eq 1 then print, "Background threshold at: ", endLevel
 
-     if gfit2[tt] lt endLevel then begin
+  ; First try and find when the data crosses the background
+  endInd = -1
+  for tt = startInd, nt -1 do begin
+     if totalPixVals[tt] lt endLevel then begin
         endTime = time[tt]
         endInd = tt
         if debug eq 1 then print, "End Index: ", endInd
@@ -210,6 +239,25 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd, mymaxima=
      endif
   endfor
 
+  ; If unsuccesful, find where the Gaussian crosses the background
+  if endInd eq -1 then begin
+     for tt=startInd, nt-1 do begin
+                                ;print, totalPixVals[tt]
+                                ; Save the first instance of falling below the
+                                ; threshold as the end index
+        if tt eq n_elements(totalPixVals) then break
+        if tt eq n_elements(gfit2) then break
+        
+        if gfit2[tt] lt endLevel then begin
+           endTime = time[tt]
+           endInd = tt
+           if debug eq 1 then print, "End Index: ", endInd
+           break
+        endif
+     endfor
+  endif
+
+  ; If nothing works use the Gaussian based two sigma guess
   if endInd eq -1 then begin
      print, "Could not find valid ending point, using Gaussian based guess"
      endInd = endGuess

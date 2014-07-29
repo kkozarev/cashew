@@ -1,7 +1,24 @@
 pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
                          maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge,$
                          wave_backedge=wave_backedge
-        
+;PURPOSE
+;Procedure to find the edges of the EUV wave using a Gaussian fit
+;At each timestep a Gaussian is fitted to the radial data and the
+;wave edges are defined at +/- one sigma
+;
+;INPUTS
+;     DATA - annulus data from aia_annulus_analyze_radial.pro
+;     YARRAY - array of radii used in the data
+;     YRNG - range through which yarray contains valid data
+;     FITRANGE - list containing [startInd, endInd]
+;     MYMAXIMA - structure containing maxima within the fitrange
+;     TIME - array of times to corresponding annulus data
+;
+;OUTPUTS
+;     WAVE_FRONTEDGE - Structure storing the positions of the front of
+;                      the wave
+;     WAVE_BACKEDGE - Structure storing the positions of the back of
+;                     the wave
 
   plot = 0
 
@@ -16,28 +33,25 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
   nSigma = 1.0
 
 ;  cgPlot, yarray, data[0,*]
-  for ii=sp, ep do begin
 
+  ; Determine the wave edge for each timestep within
+  ; the region of interest 
+  for ii=sp, ep do begin
+     
      alt=0
 
      newtime = time.jd
      caldat, newtime[ii], m, d, y, h, m, s 
 
      col = dat[ii,*]
-
-           ;color=255.0*(col-min)/(max-min) ; Scale Colors
-
-     ;      col=reverse(col)           
-     ;      yarray = reverse(yarray)
-
      colSmooth = smooth(col, 8, /edge_truncate)     
-     
      
      ;gfit1 = gaussfit(rad, colSmooth, coeff, nterms=3)
      ;gfit2 = gaussfit(rad, colSmooth, coeff, nterms=4)
      ;gfit3 = gaussfit(rad, colSmooth, coeff, nterms=5)
-     gfit4 = gaussfit(rad, colSmooth, coeff, nterms=6)
 
+     ; Fit a Gaussian to determine front and back edges
+     gfit4 = gaussfit(rad, colSmooth, coeff, nterms=6)
 
      if plot eq 1 then begin
         print, h, ":", m
@@ -45,14 +59,9 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
         
         print, "COEFF"
         print, coeff
-        
-
-        
-
         print, "One Sigma"
         print, coeff[1]+nSigma*coeff[2]
 
-     
         ;cgPlot, rad, gfit1, /overPlot, col='blue'
         ;cgPlot, rad, gfit2, /overPlot, col='green'
         ;cgPlot, rad, gfit3, /overPlot, col='red'
@@ -63,13 +72,17 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
      gaussCenter = coeff[1]
      gaussStdev = coeff[2]
 
+     ; If the Gaussian fit is bad, use the searching down from
+     ; intensity peak method instead
      if gaussHeight lt 0 then alt=1
      if gaussHeight gt 200 then alt=1
 
      if alt eq 0 then begin
+        ; Calculate front and back edges
         frontEdge = gaussCenter+nsigma*gaussStdev
         backEdge = gaussCenter-nsigma*gaussStdev
 
+        ; Chop off the front edge at the last location of viable data
         if frontEdge gt yarray[maxRadIndex] then frontEdge = yarray[maxRadIndex]        
         if frontEdge lt mymaxima[mind, ii].rad then frontEdge = mymaxima[mind,ii].rad
         
@@ -103,7 +116,7 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
            ;; /Overplot
 
         endif
-
+        ; If Gaussian fit fails, use old method
      endif else begin
         ;OLD VERSION, SEARCHING DOWN FROM INTENSITY PEAK
         y=reform(datastruct.bdiff[ii,mymaxima[mind,ii].ind:*])
@@ -121,7 +134,7 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
         endif
 
         ;Find the back edge of the wave
-
+        
 ;OLD VERSION, SEARCHING DOWN FROM INTENSITY PEAK
         y=reform(datastruct.bdiff[ii,0:mymaxima[mind,ii].ind])
         y=smooth(y,2,/edge_truncate)
@@ -146,6 +159,8 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
 
      endelse
 
+     ; Get keyboard input to iterate through plots
+     ; during plot mode
      if plot eq 1 then begin
         test = get_kbrd(1)
      endif

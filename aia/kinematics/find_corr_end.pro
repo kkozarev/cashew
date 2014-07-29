@@ -1,16 +1,21 @@
 pro find_corr_end, data, time, rad, startInd=startInd, endInd=endInd, wave_frontedge=wave_frontedge,$
-                   maxRadIndex=maxRadIndex, startCorr=startCorr, endCorr=endCorr, wave_backedge=wave_backedge
+                   maxRadIndex=maxRadIndex, endCorr=endCorr
 ;PURPOSE                                                                                                  
-;Procedure to find improved and final end position of the
+;Procedure to find the improved and final end position of the
 ;EUV wave.
 ;                                                                                                         
 ;INPUTS                                                                                                   
 ;     DATA - annulus data from aia_annulus_analyze_radial.pro                                             
-;            TIME - array of times to corresponding annulus data                                                 
+;     TIME - array of times to corresponding annulus data                                                 
+;     RAD - array of radii from annulus plots
+;     STARTIND - index of the start of EUV wave
+;     WAVE_FRONTEDGE - structure containing frontedge positions
+;     MAXRADINDEX - Radius of last viable AIA data
 ;                                                      
 ;OUTPUTS                                                                                                  
-;     STARTIND - index of front start position                                                            
 ;     ENDIND - index of front end position         
+;     ENDCORR - number of corrections applied to end index
+;    
 
 
   ; To print out additional information set debug to 1
@@ -18,9 +23,6 @@ pro find_corr_end, data, time, rad, startInd=startInd, endInd=endInd, wave_front
 
   nt = n_elements(time)
   dat=data
-  
-  ; Set the initial start correction to zero
-  startCorr = 0
 
   ind=where(dat lt 0.0)
   if ind[0] gt -1 then dat[ind] = 0.0

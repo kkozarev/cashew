@@ -170,6 +170,7 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
         ;Exit if a good start position is not found
         if startInd eq -1 then return
         if endInd eq -1 then return
+        if startInd eq endInd then return
         
         print, "Initial start index: ", startInd
         print, "Initial end index: ", endInd
