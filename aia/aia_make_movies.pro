@@ -3,12 +3,13 @@ pro test_aia_make_movies
   ;You can run this for a single event, like so
   one=1
   if one eq 1 then begin
-     label='100613_01'
+     label='110511_01'
      event=load_events_info(label=label)
      wavelengths=['193']
      movie_types=['araw','abase','arun','raw','base','run']
      movie_types=['pfss_shock','thetabn','thetabn_cumulative','pfss_spread']
      movie_types=['run','base','raw']
+     movie_types=['ywave']
      wavelengths=['193','211']
      for w=0,n_elements(wavelengths)-1 do begin
         wavelength=wavelengths[w]
@@ -67,12 +68,15 @@ pro aia_make_movies, event, wav=wav, FRAMES_PER_SECOND = frames_per_second, PATH
 ;            'pfss_shock' - the PFSS/Shock model images
 ;            'thetabn' - the plots of ThetaBN angle as a
 ;                         function of the shock surface position
-;            'thetabn_cumulative' - the plots of cumulative ThetaBN angle as a
+;            'thetabn_hires' - same as 'thetabn' but with high PFSS resolution
+;            'thetabn_oplot' - the plots of cumulative ThetaBN angle as a
 ;                         function of the shock surface position
+;            'thetabn_oplot_hires' - same as thetabn_oplot but with
+;                                    high PFSS resolution
 ;            'pfss_spread' - the plots of PFSS interacting field lines
 ;                            showing the angular spread of shock
 ;                            influence
-
+;            'ywave' - the plots of YAFTA/Wave tracking results
 ;
 ;            Default is 'raw'
 ;	WAV: wavelength of the AIA channel, 
@@ -160,10 +164,20 @@ if movie_type eq 'em_baseratio' then begin
    moviefname = movie_path + pngfname + '_teem_em_ratios.mp4'
 endif
 
+if movie_type eq 'pfss_shock_hires' then begin
+   savepath=event.pfsspath
+   movie_path=event.moviepath
+   pngfname='aia_pfss_shock_'+date+'_'+label+'_hires'
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%03d.png'
+   imgsearch = savepath + pngfname + '_???.png'
+   moviefname = movie_path + pngfname + '.mp4'
+endif
+
 if movie_type eq 'pfss_shock' then begin
    savepath=event.pfsspath
    movie_path=event.moviepath
-   pngfname='aia_pfss_shock_'+date+'_'+label
+   pngfname='aia_pfss_shock_'+date+'_'+label+'_lores'
    ;The png image files
    imgfnames = savepath + pngfname + '_%03d.png'
    imgsearch = savepath + pngfname + '_???.png'
@@ -173,17 +187,37 @@ endif
 if movie_type eq 'thetabn' then begin
    savepath=event.pfsspath
    movie_path=event.moviepath
-   pngfname='thetabn_'+date+'_'+label
+   pngfname='thetabn_'+date+'_'+label+'_lores'
    ;The png image files
    imgfnames = savepath + pngfname + '_%03d.png'
    imgsearch = savepath + pngfname + '_???.png'
    moviefname = movie_path + pngfname + '.mp4'
 endif
 
-if movie_type eq 'thetabn_cumulative' then begin
+if movie_type eq 'thetabn_hires' then begin
    savepath=event.pfsspath
    movie_path=event.moviepath
-   pngfname='thetabn_'+date+'_'+label
+   pngfname='thetabn_'+date+'_'+label+'_hires'
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%03d.png'
+   imgsearch = savepath + pngfname + '_???.png'
+   moviefname = movie_path + pngfname + '.mp4'
+endif
+
+if movie_type eq 'thetabn_oplot' then begin
+   savepath=event.pfsspath
+   movie_path=event.moviepath
+   pngfname='thetabn_'+date+'_'+label+'_lores'
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%03d_oplot.png'
+   imgsearch = savepath + pngfname + '_???_oplot.png'
+   moviefname = movie_path + pngfname + '_oplot.mp4'
+endif
+
+if movie_type eq 'thetabn_oplot_hires' then begin
+   savepath=event.pfsspath
+   movie_path=event.moviepath
+   pngfname='thetabn_'+date+'_'+label+'_hires'
    ;The png image files
    imgfnames = savepath + pngfname + '_%03d_oplot.png'
    imgsearch = savepath + pngfname + '_???_oplot.png'
@@ -197,6 +231,16 @@ if movie_type eq 'pfss_spread' then begin
    ;The png image files
    imgfnames = savepath + pngfname + '_%03d.png'
    imgsearch = savepath + pngfname + '_???.png'
+   moviefname = movie_path + pngfname + '.mp4'
+endif
+
+if movie_type eq 'ywave' then begin
+   savepath=event.yaftawavepath
+   movie_path=event.moviepath
+   pngfname='yaftawave_'+date+'_'+label+'_'+wavelength
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%06d.png'
+   imgsearch = savepath + pngfname + '_??????.png'
    moviefname = movie_path + pngfname + '.mp4'
 endif
 

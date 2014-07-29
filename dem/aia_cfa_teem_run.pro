@@ -85,8 +85,8 @@ pro aia_cfa_teem_run,event,savepath=savepath,fileset=fileset,remove_aec=remove_a
   
 ;Obtain all the necessary filenames
   for w=0,nwave-1 do begin
-     if keyword_set(remove_aec) then ftmp=aia_file_search(st,et,wave[w],/remove_aec,/check171) $
-     else ftmp=aia_file_search(st,et,wave[w],/check171)
+     if keyword_set(remove_aec) then ftmp=aia_file_search(st,et,wave[w],/check171,event=event,/remove_aec) $
+     else ftmp=aia_file_search(st,et,wave[w],/check171,event=event,/remove_aec)
      
                                 ;Create the filename structure
      if w eq 0 then begin
@@ -114,9 +114,10 @@ pro aia_cfa_teem_run,event,savepath=savepath,fileset=fileset,remove_aec=remove_a
   for ff=0,nfiles-1 do begin
      stepfiles=[files[ff].w131,files[ff].w171,files[ff].w193,files[ff].w211,files[ff].w335,files[ff].w94]
      
-                                ;Get the file names of the resulting maps and tables
+;Get the file names of the resulting maps and tables
      tmp=strsplit(files[ff].w171,'_',/extract)
      mind=n_elements(tmp)-2
+     
      tmp=tmp[mind]
      tmpstr=+strmid(tmp,0,2)+strmid(tmp,2,2)+strmid(tmp,4,2)
      
