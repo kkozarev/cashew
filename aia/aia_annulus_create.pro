@@ -3,7 +3,7 @@ pro test_aia_annulus_create
 ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
-     event=load_events_info(label='test')
+     event=load_events_info(label='140108_01')
      ;aia_annulus_create,event,/force
      ;aia_annulus_create,event,/force
      rrange=[1.0,1.3]
@@ -416,3 +416,4 @@ pro aia_annulus_create,event,run=run,base=base,raw=raw,remove_aec=remove_aec,_ex
   if not keyword_set(run) and (not keyword_set(base)) and (not keyword_set(raw)) then $
      aia_annulus_create_main, event, /remove_aec, _extra=_extra
 end
+

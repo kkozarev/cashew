@@ -180,7 +180,7 @@
 	"loop": false,
 	"filament": true,
 	"comment": "Faint, far inside the limb, possibly a loop in front of filament.",
-	"web": true,
+	"web": false,
 	"rstn_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2011/11/09/BIR_20111109_130000_02.fit.gz.png",
 	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=1300&dayofyear=20111109&survey_type=2"
@@ -333,7 +333,7 @@
 	"loop": false,
 	"filament": true,
 	"comment": "Eastern event with interesting type III and type II bursts.",
-	"web": true,
+	"web": false,
 	"rstn_lookup": "",
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2013/11/06/BIR_20131106_134500_03.fit.gz.png",
 	"nrh_lookup": "http://secchirh.obspm.fr/survey.php?hour=day&dayofyear=20131106&survey_type=2"
@@ -593,5 +593,22 @@
 	"web": false,
 	"rstn_lookup": "http://www.ips.gov.au/Category/World%20Data%20Centre/Data%20Display%20and%20Download/Spectrograph/station/culgoora/images/11/20110804spectrograph.gif",
 	"callisto_lookup": "",
+	"nrh_lookup": ""
+}
+{
+	"label": "140225_01",
+	"coordX": -972,
+	"coordY": -214,
+	"st": "2014/02/25 00:39:00",
+	"et": "2014/02/25 00:49:00",
+	"aiafov": [1024,2048],
+	"flareclass": "X4.9",
+	"typeII": true,
+	"loop": false,
+	"filament": true,
+	"comment": "Fast moving filament driven eruption with large EUV wave"
+	"web": true,
+	"rstn_lookup": "",
+	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2014/02/25/KASI_20140225_004500_59.fit.gz.png",
 	"nrh_lookup": ""
 }

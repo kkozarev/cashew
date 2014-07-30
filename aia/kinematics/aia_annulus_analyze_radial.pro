@@ -152,8 +152,9 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
 
      maxRadIndex = min(where(data[0,*] eq 0.0))
 
+;     help, maxRadIndex
 
-                                ;Find start and end positions
+     ;Find start and end positions
      if keyword_set(auto) then begin
         if keyword_set(gradient) then begin
            make_gradient_map, time.jd, yarray, data, yrng, intensityData=intensityData
@@ -166,9 +167,10 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
         
         find_start_end, data[*, yrng[0]:yrng[1]], time, yarray, startInd=startInd, endInd=endInd
         
-                                ;Exit if a good start position is not found
+        ;Exit if a good start position is not found
         if startInd eq -1 then return
         if endInd eq -1 then return
+        if startInd eq endInd then return
         
         print, "Initial start index: ", startInd
         print, "Initial end index: ", endInd
@@ -179,7 +181,7 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
         ;;                    xtitle=datastruct.xtitle,ytitle=datastruct.ytitle,startInd=startInd,endInd=endInd, /auto
         
         fitrange=[startInd, endInd]
-        
+
      endif else begin
         
         aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
@@ -218,6 +220,8 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
      
      device,window_state=win_open
      dt=(time[1:n_elements(time)-1].jd-time[0:n_elements(time)-2].jd)/2.
+
+     dt = [dt, dt[0]]
      
      oplot,time.jd-dt,reform(yarray[datastruct.maxinds[mind,*]]),psym=1,color=200,thick=4,symsize=2
      loadct,8,/silent
@@ -228,144 +232,109 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
 ;  oplot,time[sp+good_ind_pos].jd,yarray[datastruct.mymaxima[mind,sp+good_ind_pos]],psym=1,color=200,thick=4,symsize=2
                                 ;oplot,[time[sp].jd,time[sp].jd],[yarray[0],yarray[n_elements(yarray)-1]],color=255
                                 ;oplot,[time[ep].jd,time[ep].jd],[yarray[0],yarray[n_elements(yarray)-1]],color=255
-     
+
+; Find the front edge of the wave
+
+     find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
+                          maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge,$
+                          wave_backedge=wave_backedge
+
      for ii=sp,ep do begin
-;+--------------------------------------------------------------
-;Find the front edge of the wave
-        oldv=1
-        if oldv gt 0 then begin
-;OLD VERSION, SEARCHING DOWN FROM INTENSITY PEAK
-           y=reform(datastruct.bdiff[ii,mymaxima[mind,ii].ind:*])
-           y=smooth(y,2,/edge_truncate)
-           np=n_elements(y)
-           tmp=min(where(y le 0.3*max(y)))
-           if tmp[0] eq -1 then tmp=np-1
-           wave_frontedge[ii-sp].rad=yarray[mymaxima[mind,ii].ind+tmp]
-           wave_frontedge[ii-sp].ind=mymaxima[mind,ii].ind+tmp
-           datastruct.frontinds[mind,ii]=wave_frontedge[ii-sp].ind
-        endif
         
-        newv=0
-        if newv gt 0 then begin
-;NEW VERSION,SEARCHING UP FROM BACKGROUND 
-           maxind=mymaxima[mind,ii].ind-datastruct.yfitrange[0]
-           ylim=datastruct.yfitrange[1]
-           y=reform(datastruct.bdiff[ii,maxind:ylim])
-           ;y=smooth(y,4,/edge_truncate)
-           np=n_elements(y)
-           y=reverse(y)
-           ;y[where(y le 0.0)]=1.0e-10
-           bind=20
-           bckg=abs(avg(y[0:bind-1]))
-           tmp=min(where(y gt (y[np-1]-bckg)*0.2)) ;look for 25% increase above background
-           tmp=np-tmp                              ;since data is reversed, reverse the index as well.
-           if tmp[0] eq -1 then tmp=0
-           wave_frontedge[ii-sp].rad=yarray[mymaxima[mind,ii].ind+tmp]
-           wave_frontedge[ii-sp].ind=mymaxima[mind,ii].ind+tmp
-           datastruct.frontinds[mind,ii]=mymaxima[mind,ii].ind+tmp
-        endif
-
-
-;;         min=-40
-;;         max=50
-;;         data=data[*, yrng[0]:yrng[1]]
-;;         yarray=yarray[yrng[0]:yrng[1]]
+;; ;+--------------------------------------------------------------
+;; ;Find the front edge of the wave
+;;         oldv=1
+;;         if oldv gt 0 then begin
+;; ;OLD VERSION, SEARCHING DOWN FROM INTENSITY PEAK
+;;            y=reform(datastruct.bdiff[ii,mymaxima[mind,ii].ind:*])
+;;            y=smooth(y,2,/edge_truncate)
+;;            np=n_elements(y)
+;;            tmp=min(where(y le 0.25*max(y)))
+;;            if tmp[0] eq -1 then tmp=np-1
+;;            wave_frontedge[ii-sp].rad=yarray[mymaxima[mind,ii].ind+tmp]
+;;            wave_frontedge[ii-sp].ind=mymaxima[mind,ii].ind+tmp
+;;            datastruct.frontinds[mind,ii]=wave_frontedge[ii-sp].ind
+;;         endif
         
-;;         loadct, 0
-
-;;         cgPlot, yarray, data[0,*]
-;;         for i=0, n_elements(data[*,0])-1 do begin
-;;            newtime = time.jd
-;;            caldat, newtime[i], m, d, y, h, m, s 
-;;            print, h, ":", m
+;;         newv=0
+;;         if newv gt 0 then begin
+;; ;NEW VERSION,SEARCHING UP FROM BACKGROUND 
+;;            maxind=mymaxima[mind,ii].ind-datastruct.yfitrange[0]
+;;            ylim=datastruct.yfitrange[1]
+;;            y=reform(datastruct.bdiff[ii,maxind:ylim])
+;;            ;y=smooth(y,4,/edge_truncate)
+;;            np=n_elements(y)
+;;            y=reverse(y)
+;;            ;y[where(y le 0.0)]=1.0e-10
+;;            bind=20
+;;            bckg=abs(avg(y[0:bind-1]))
+;;            tmp=min(where(y gt (y[np-1]-bckg)*0.2)) ;look for 25% increase above background
+;;            tmp=np-tmp                              ;since data is reversed, reverse the index as well.
+;;            if tmp[0] eq -1 then tmp=0
+;;            wave_frontedge[ii-sp].rad=yarray[mymaxima[mind,ii].ind+tmp]
+;;            wave_frontedge[ii-sp].ind=mymaxima[mind,ii].ind+tmp
+;;            datastruct.frontinds[mind,ii]=mymaxima[mind,ii].ind+tmp
+;;         endif
            
-;;            col = data[i,*]
-
-;;            color=255.0*(col-min)/(max-min) ; Scale Colors
-
-;; ;           color=reverse(color)           
-;;  ;          yarray = reverse(yarray)
-
-;;            cgPlot, yarray, color
-
-;;           ; Plot a variety of Gaussian fits to
-;;           ; see if this would be useful for
-;;           ; start/end detection
-           
-
-
-;;            gfit1 = gaussfit(yarray, color, coeff, nterms=3)
-;;            gfit2 = gaussfit(yarray, color, coeff, nterms=4)
-;;            gfit3 = gaussfit(yarray, color, coeff, nterms=5)
-;;            gfit4 = gaussfit(yarray, color, coeff, nterms=6)
-
-;;            cgPlot, yarray, gfit1, /overPlot, color='blue'
-;;            cgPlot, yarray, gfit2, /overPlot, color='green'
-;;            cgPlot, yarray, gfit3, /overPlot, color='red'
-;;            cgPlot, yarray, gfit4, /overPlot, color='cyan'
-
-
-
-
-;;            test = get_kbrd(1)
-              
-;;         endfor
-
-;;         stop
-           
-;---------------------------------------------------------------
+;; ;---------------------------------------------------------------
         
         
-;+--------------------------------------------------------------
-;Find the back edge of the wave
-        oldv=1
-        if oldv gt 0 then begin
-;OLD VERSION, SEARCHING DOWN FROM INTENSITY PEAK
-           y=reform(datastruct.bdiff[ii,0:mymaxima[mind,ii].ind])
-           ;y=smooth(y,4,/edge_truncate)
-           np=n_elements(y)
-           y=reverse(y,1)       ;reverse the array so the search is the same
-           tmp=min(where(y le 0.3*max(y)))
-           if tmp[0] eq -1 then rad=yarray[mymaxima[mind,ii].ind-tmp]
-           wave_backedge[ii-sp].ind=mymaxima[mind,ii].ind-tmp
-           datastruct.backinds[mind,ii]=mymaxima[mind,ii].ind-tmp
-        endif
+;; ;+--------------------------------------------------------------
+;; ;Find the back edge of the wave
+;;         oldv=1
+;;         if oldv gt 0 then begin
+;; ;OLD VERSION, SEARCHING DOWN FROM INTENSITY PEAK
+;;            y=reform(datastruct.bdiff[ii,0:mymaxima[mind,ii].ind])
+;;            ;y=smooth(y,4,/edge_truncate)
+;;            np=n_elements(y)
+;;            y=reverse(y,1)       ;reverse the array so the search is the same
+;;            tmp=min(where(y le 0.3*max(y)))
+;;            if tmp[0] eq -1 then rad=yarray[mymaxima[mind,ii].ind-tmp]
+;;            wave_backedge[ii-sp].ind=mymaxima[mind,ii].ind-tmp
+;;            datastruct.backinds[mind,ii]=mymaxima[mind,ii].ind-tmp
+;;         endif
 
-        newv=0
-        if newv gt 0 then begin    
-;NEW VERSION, SEARCHING UP FROM BACKGROUND
-           y=reform(datastruct.bdiff[ii,0:maxind])
-           y=reverse(y,1)
-           y=smooth(y,4,/edge_truncate)
-           np=n_elements(y)
-           tmp=min(where(y gt 2.*bckg)) ;look for 20% increase above background
-           stop
-           if tmp[0] eq -1 then tmp=np-1
-           wave_backedge[ii-sp].rad=yarray[mymaxima[mind,ii].ind+tmp]
-           wave_backedge[ii-sp].ind=mymaxima[mind,ii].ind+tmp
-           datastruct.backinds[mind,ii]=mymaxima[mind,ii].ind+tmp
-        endif
-;---------------------------------------------------------------        
+;;         newv=0
+;;         if newv gt 0 then begin    
+;; ;NEW VERSION, SEARCHING UP FROM BACKGROUND
+;;            y=reform(datastruct.bdiff[ii,0:maxind])
+;;            y=reverse(y,1)
+;;            y=smooth(y,4,/edge_truncate)
+;;            np=n_elements(y)
+;;            tmp=min(where(y gt 2.*bckg)) ;look for 20% increase above background
+;;            stop
+;;            if tmp[0] eq -1 then tmp=np-1
+;;            wave_backedge[ii-sp].rad=yarray[mymaxima[mind,ii].ind+tmp]
+;;            wave_backedge[ii-sp].ind=mymaxima[mind,ii].ind+tmp
+;;            datastruct.backinds[mind,ii]=mymaxima[mind,ii].ind+tmp
+;;         endif
+;; ;---------------------------------------------------------------        
  
 
      endfor 
      loadct,0,/silent
-     
-;     mymaxima[0,startInd].rad = 1.11
-;    allmaxima[0,startInd].rad = 1.11
 
   if keyword_set(auto) then begin
      ; Correct start and end positions with maxima data
-     find_start_end, data[*, yrng[0]:yrng[1]], time, yarray, startInd=startInd, endInd=endInd,$
-                     myMaxima=mymaxima, wave_frontedge=wave_frontedge, maxRadIndex=maxRadIndex,$
-                     startCorr=startCorr, endCorr=endCorr
+     
+     startCorr = 0
+     endCorr = 0
+     
+     find_corr_start, data, time, yarray, datastruct, ht_km, fitrange, yrng, mind,$
+                      maxRadIndex, startInd=startInd, mymaxima=mymaxima,$
+                      wave_frontedge=wave_frontedge, startCorr=startCorr, constrain=constrain,$
+                      wave_backedge=wave_backedge
 
+     find_corr_end, data, time, yarray, startInd=startInd, endInd=endInd, wave_frontedge=wave_frontedge,$
+                    wave_backedge=wave_backedge, maxRadIndex=maxRadIndex, startCorr=startCorr, endCorr=endCorr
+           
      print, "Corrected start index: ", startInd
      print, "Corrected end index: ", endInd
 
-     ; Correct the positioning of the wave front edge
+     ; Correct the positioning of the wave edges
      wave_frontedge = wave_frontedge[startCorr:endCorr]
-     
+     wave_backedge = wave_backedge[startCorr:endCorr]
+
      ; Plot new corrected region of interest 
      aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
                         min=-40,max=50,fitrange=fitrange,$
@@ -377,6 +346,22 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
   datastruct.xfitrange=fitrange
   sp=datastruct.xfitrange[0]
   ep=datastruct.xfitrange[1]
+                                ;Search for the edges of the wave
+  
+  
+                                ;To restore the plot information and overplot on them, do
+  datastruct.plotinfo[mind].p=!P
+  datastruct.plotinfo[mind].x=!X
+  datastruct.plotinfo[mind].y=!Y
+  
+ tmp=reform(mymaxima[0,*].ind)
+ datastruct.maxinds[mind,*]=reform(mymaxima[0,*].ind)
+  
+  ;Filter the maxima positions here for physicality
+  if keyword_set(constrain) then begin
+     maxinds=jmap_filter_maxima_radial(time.relsec,ht_km,allmaxima,fitrange=datastruct.xfitrange) ;,outliers=outliers
+     mymaxima=maxinds
+  endif
 
   device,window_state=win_open
   oplot,time.jd-dt,reform(yarray[datastruct.maxinds[mind,*]]),psym=1,color=200,thick=4,symsize=2
@@ -387,6 +372,9 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
 ;DEBUG    
 ;Overplot the front edge 
      oplot,[time[ii].jd-dt[ii],time[ii].jd-dt[ii]],[mymaxima[mind,ii].rad,wave_frontedge[ii-sp].rad],$
+           color=200,thick=2
+
+     oplot,[time[ii].jd-dt[ii],time[ii].jd-dt[ii]],[mymaxima[mind,ii].rad,wave_backedge[ii-sp].rad],$
            color=200,thick=2
 ;END DEBUG
   endfor
@@ -400,6 +388,10 @@ loadct, 0, /silent
   print,'Fitting a second-order polynomial to the wave front edge positions...'
   dist=reform(wave_frontedge[0:ep-sp].rad)*DIST_FACTOR*height;*event.geomcorfactor
   time_good=time[sp:ep].relsec-time[sp].relsec
+  if n_elements(dist) le 4 then begin
+     print, "Not enough data to smooth, exiting..."
+     return
+  endif
   dist=smooth(dist,4,/edge_truncate)
   bootstrap_sdo,dist,time_good,fit_line, p1, p2, p3, s1, s2, s3,parinfo=parinfo
   print,''
@@ -424,6 +416,10 @@ loadct, 0, /silent
   print,'Fitting a second-order polynomial to the wave peak positions...'
   dist=reform(ht_km[mymaxima[mind,sp:ep].ind]);*event.geomcorfactor
   time_good=time[sp:ep].relsec-time[sp].relsec
+  if n_elements(dist) le 4 then begin
+     print, "Not enough data to smooth, exiting..."
+     return
+  endif
   dist=smooth(dist,4,/edge_truncate)
   ;bootstrap_sdo,dist,time_good,fit_line, p1, p2, p3, s1, s2, s3,parinfo=parinfo
   print,''
