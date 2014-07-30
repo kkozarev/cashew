@@ -17,9 +17,11 @@ pro test_yaftawave_track_features2
  ;                           savepath=savepath,min_size=200,/ps
   ;stop
   ;Run original size
-  yaftawave_track_features2,event,features,all_masks,/ps,min_size=2000,level=2;,start_step=start_step,end_step=end_step,savepath=savepath
-  stop
-
+  
+  ;yaftawave_track_features2,event,features,all_masks,/ps,min_size=2000,level=2,savepath=event.yaftawavepath+'2000px/'
+  ;yaftawave_track_features2,event,features,all_masks,/ps,min_size=4000,level=2;,savepath=event.yaftawavepath+'4000px/'
+  yaftawave_track_features2,event,features,all_masks,/ps,min_size=10000,level=2,savepath=event.yaftawavepath+'10000px/'
+  yaftawave_track_features2,event,features,all_masks,/ps,min_size=14000,level=2,savepath=event.yaftawavepath+'14000px/'
 end
 
 
@@ -88,8 +90,10 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
   set_plot,'x'
   label=event.label
   date=event.date
-
-  if not keyword_set (event) then savepath='./' else savepath=event.yaftawavepath
+  
+  if not keyword_set(savepath) then $
+     if not keyword_set (event) then savepath='./' else savepath=event.yaftawavepath
+  
   if not keyword_set(wav) then wav='193'
   aia_load_data,event.st,event.et,wav,subindex=subindex,subdata=subdata,event=event,/subroi
   
@@ -117,13 +121,16 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
   if not keyword_set(ps) then if keyword_set(rebin) then wdef,0,rebin[0],rebin[1] else wdef,0,nx,ny
   
   
-;THE STEP LOOP
+;THE TIME STEP LOOP
   for t = data_start_step,data_end_step do begin
-     
+     tmp=subindex[t].date_obs
+     tmp=strsplit(tmp,'T:.',/extract)
+     strtime=tmp[1]+tmp[2]+tmp[3]
      wav=strtrim(string(subindex[t].wavelnth),2)
      print, "Tracking step:",string(t+1)
      filenum = STRMID(STRING(1000 + fix(t+1), FORMAT = '(I4)'), 1)
-     filename = savepath+STRCOMPRESS('ywave_'+'AIA_'+wav+'_'+strtrim(string(nx),2)+'_'+ filenum, /REMOVE_ALL)
+     filename = savepath+'yaftawave_'+event.date+'_'+event.label+'_'+wav+'_'+strtime
+;filename = savepath+STRCOMPRESS('ywave_'+'AIA_'+wav+'_'+strtrim(string(nx),2)+'_'+ filenum, /REMOVE_ALL)
      
      
                                 ; get current data array (suffix "2" is from
@@ -242,20 +249,20 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
     img1 = temporary(img2)
     mask1 = temporary(mask2)
     features1 = temporary(features2)
-
+    
     if keyword_set(ps) then begin
        set_plot,'ps'
        device,/color,filename=STRCOMPRESS(filename+'.eps',/re),/inches,xsize=event.aiafov[0]/102.4,ysize=event.aiafov[1]/102.4
     endif
-
+    
     ; graphical output of features, labels
     ;=========================================
     if not keyword_set(ps) then wdef,0,nx,ny
     ;Calculate the arcsec values of the pixels along the X- and Y-axes.
-    x_values=ind.IMSCL_MP*(findgen(event.aiafov[0])+ind.subroi_x0-2048.)
-    y_values=ind.IMSCL_MP*(findgen(event.aiafov[1])+ind.subroi_y0-2048.)
+    ;x_values=ind.IMSCL_MP*(findgen(event.aiafov[0])+ind.subroi_x0-2048.)
+    ;y_values=ind.IMSCL_MP*(findgen(event.aiafov[1])+ind.subroi_y0-2048.)
     ;Plot the image
-    display_yafta,bytscl(origim,min=-50,max=40),x_values,y_values,$
+    display_yafta,bytscl(origim,min=-50,max=40),$;x_values,y_values,$
                   tit=ind.origin+'/'+ind.instrume+$
                   '/'+ind.wave_str+'  '+ind.date_obs+'   '+filenum,/aspect
     plot_edges,mask1,thick=4
@@ -290,7 +297,7 @@ features = all_features
 
 ; Write data to YAFTA_output.sav
 ;=====================================
-save,subindex,subdata,features,all_masks,thresh,min_size,dx,$
-	filename=savepath+'yaftawave_output_'+eventname+'_AIA_'+wav+'.sav'
+save,features,all_masks,thresh,min_size,dx,$
+	filename=savepath+'yaftawave_'+event.date+'_'+event.label+'_'+wav+'.sav'
 
 end
