@@ -97,6 +97,8 @@ function jmap_filter_maxima_radial,time,height,mymaxima,fitrange=fitrange
         maxinds[0,fitrange[0]+tt+1].rad=ht[tt+1]/RSUN
      endif
      
+     stop
+
     change=0 
   endfor
   
@@ -106,7 +108,8 @@ end
 
 
 ;+============================================================================
-pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,constrain=constrain, auto=auto, gradient=gradient
+pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,constrain=constrain,$
+                              auto=auto, gradient=gradient
 
   RSUN=6.96e5  ;Solar radius in km.
   nmeas=n_elements(datastruct.imgtit)
@@ -326,7 +329,7 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
                       wave_backedge=wave_backedge
 
      find_corr_end, data, time, yarray, startInd=startInd, endInd=endInd, wave_frontedge=wave_frontedge,$
-                    wave_backedge=wave_backedge, maxRadIndex=maxRadIndex, startCorr=startCorr, endCorr=endCorr
+                   maxRadIndex=maxRadIndex, endCorr=endCorr
            
      print, "Corrected start index: ", startInd
      print, "Corrected end index: ", endInd

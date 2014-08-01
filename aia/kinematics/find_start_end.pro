@@ -14,7 +14,7 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd
 ;     ENDIND - index of front end position
 
   ; To print out additional information set debug to 1
-  debug = 1
+  debug = 0
 
   nt = n_elements(time)
   dat=data

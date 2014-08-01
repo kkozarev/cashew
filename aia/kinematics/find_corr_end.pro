@@ -46,8 +46,8 @@ pro find_corr_end, data, time, rad, startInd=startInd, endInd=endInd, wave_front
   minEndArr = where(topDiff eq min(topDiff))
   if minEndArr[0] ne -1 then begin
      minEnd = minEndArr[0]
-     endInd = minEnd + startInd + 1
-     endCorr = minEnd + 1
+     endInd = minEnd + startInd
+     endCorr = minEnd
      if endCorr eq n_elements(wave_frontedge) then begin
         endInd = minEnd+startInd
         endCorr = minEnd
