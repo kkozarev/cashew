@@ -612,3 +612,21 @@
 	"callisto_lookup": "http://soleil.i4ds.ch/solarradio/qkl/2014/02/25/KASI_20140225_004500_59.fit.gz.png",
 	"nrh_lookup": ""
 }
+
+{
+	"label": "140407_01",
+	"coordX": 900,
+	"coordY": -608,
+	"st": "2014/04/07 20:50:00",
+	"et": "2014/04/07 21:23:00",
+	"aiafov": [1024,1024],
+	"flareclass": "",
+	"typeII": false,
+	"loop": false,
+	"filament": true,
+	"comment": "Slower filament with clear EUV wave with nearly no lateral expansion, data cuts out during event"
+	"web": true,
+	"rstn_lookup": "",
+	"callisto_lookup": "",
+	"nrh_lookup": ""
+}
