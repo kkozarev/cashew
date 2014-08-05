@@ -1,4 +1,4 @@
-pro find_start_end_tangential, data, time, rad, startInd=startInd, endInd=endInd
+pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, maxYInd=maxYInd
 
 ;PURPOSE
 ;Procedure to automatically find initial estimates of the start end times of the EUV front
@@ -8,16 +8,16 @@ pro find_start_end_tangential, data, time, rad, startInd=startInd, endInd=endInd
 ;INPUTS
 ;     DATA - annulus data from aia_annulus_analyze_radial.pro
 ;     TIME - array of times to corresponding annulus data
-;     RAD - array of radii used in the data
+
 ;OUTPUTS
 ;     STARTIND - index of front start position
 ;     ENDIND - index of front end position
 
   ; To print out additional information set debug to 1
-  debug = 0
+  debug = 1
 
   nt = n_elements(time)
-  dat=data
+  dat=data[*,0:maxYInd]
 
   ind=where(dat lt 0.0)
   if ind[0] gt -1 then dat[ind] = 0.0
@@ -202,7 +202,7 @@ pro find_start_end_tangential, data, time, rad, startInd=startInd, endInd=endInd
 ; slope, finding the place where we have a large slope within
 ; the background window should mark the start of the front.
 ; Save this as the starting index
-  startInd = min(where(slope gt 225))
+  startInd = min(where(slope gt 250))
 
   if debug eq 1 then print, "Slope detected start: ", startInd
 
@@ -229,7 +229,7 @@ pro find_start_end_tangential, data, time, rad, startInd=startInd, endInd=endInd
   if debug eq 1 then print, "Background threshold at: ", endLevel
 
   ;; ; First try and find when the data crosses the background
-   endInd = -1
+  endInd = -1
   ;; for tt = startInd, nt -1 do begin
   ;;    if totalPixVals[tt] lt endLevel then begin
   ;;       endTime = time[tt]

@@ -22,7 +22,7 @@ pro find_corr_start_tangential, data, time, yarray, datastruct, ht_km, height, f
 
 
   ; To print out additional information set debug to 1
-  debug = 0
+  debug = 1
 
   nt = n_elements(time)
   dat=data
@@ -37,8 +37,6 @@ pro find_corr_start_tangential, data, time, yarray, datastruct, ht_km, height, f
 ; and the wave front edge, frontDiff
 
   frontDiff = abs(wave_frontedge[0].rad - mymaxima[0,startInd].rad)        
-        
-  print, yrng
 
 ; Iteratively find the start position
 
@@ -50,6 +48,10 @@ pro find_corr_start_tangential, data, time, yarray, datastruct, ht_km, height, f
      
      startCorr++
      startInd++
+
+     ; Advance wave edges
+     wave_frontedge = wave_frontedge[1:*]
+     wave_backedge = wave_backedge[1:*]
 
      if debug eq 1 then begin
         help, wave_frontedge
@@ -79,6 +81,7 @@ pro find_corr_start_tangential, data, time, yarray, datastruct, ht_km, height, f
 
      print, yrng
      if debug eq 1 then begin
+        print, "In tang corr start"
         help, wave_frontedge
         print, wave_frontedge
      endif

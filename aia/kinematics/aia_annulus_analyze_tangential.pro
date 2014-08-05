@@ -143,14 +143,20 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
   parinfo[2].limited[0]=1
   parinfo[2].limits[0]=-1500.0
   
-  yrng=datastruct.yfitrange
+  yrngOrig=datastruct.yfitrange
+  yrng = datastruct.yfitrange
   !p.multi=datastruct.multi
   device,window_state=win_open
   
   
 ;LOOP OVER MEASUREMENTS!
-;  for mind=0,nlatmeas-1 do begin
-  for mind=0,0 do begin
+  for mind=0, nlatmeas-1 do begin
+;  for mind = 2,2   do begin
+     yrng = yrngOrig
+
+     wave_frontedge=0
+     wave_backedge=wave_frontedge
+
      data=indata[*,*,mind]
      height=datastruct.lat_heights[mind]
      
@@ -179,7 +185,10 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
                              yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
                              numplotmax=3
         
-        find_start_end_tangential, data[*, yrng[0]:yrng[1]], time, yarray, startInd=startInd, endInd=endInd
+        filter_tangential_data, data[*, yrng[0]:yrng[1]], time, yarray, yrng=yrng, maxYInd=maxYInd, maxFrontEdge=maxFrontEdge
+;        datastruct.yfitrange = yrng
+
+        find_start_end_tangential, data[*, yrng[0]:yrng[1]], time, startInd=startInd, endInd=endInd, maxYind=maxYInd
         
 ;Exit if a good start position is not found
         if startInd eq -1 then return
@@ -208,7 +217,7 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
      sp=datastruct.xfitrange[0]
      ep=datastruct.xfitrange[1]
  ;Search for the edges of the wave
-     wave_frontedge=replicate({rad:0.0D,ind:0L},ep-sp+1)
+     wave_frontedge=replicate({rad:0.0D,yind:0L,xind:0L},ep-sp)
      wave_backedge=wave_frontedge
      
 ;To restore the plot information and overplot on them, do
@@ -228,7 +237,7 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
      
 ;Filter the maxima positions here for physicality
                                 ;outliers=1
-     maxinds=jmap_filter_maxima_tangential(time.relsec, mind, ht_km, height, mymaxima,fitrange=datastruct.xfitrange) ;,outliers=outliers
+     maxinds=jmap_filter_maxima_tangential(time.relsec, mind, ht_km[yrng[0]:yrng[1]], height, mymaxima,fitrange=datastruct.xfitrange) ;,outliers=outliers
      
      good_ind_pos=where(maxinds.ind ge 0)
      good_max_inds=maxinds[good_ind_pos]
@@ -243,6 +252,8 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
      find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, mind,$
                                 maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge,$
                                 wave_backedge=wave_backedge
+     print, "Printing front edge in main program"
+     print, wave_frontedge
 
                                 ;for ii=sp,ep do begin
                                 ;  if maxinds[ii-sp] gt 0.0 then begin
@@ -342,7 +353,7 @@ if keyword_set(auto) then begin
 
 
      find_corr_end_tangential, data, time, yarray, startInd=startInd, endInd=endInd, wave_frontedge=wave_frontedge,$
-                   maxRadIndex=maxRadIndex, endCorr=endCorr
+                   maxRadIndex=maxRadIndex, endCorr=endCorr, maxFrontEdge=maxFrontEdge
 
      print, "Corrected start index: ", startInd
      print, "Corrected end index: ", endInd
@@ -350,10 +361,16 @@ if keyword_set(auto) then begin
      if endCorr le startCorr then begin
         endCorr = n_elements(wave_frontedge)-1
      endif
+     
+     print, "Before correct"
+     print, wave_frontedge
 
      ; Correct the positioning of the wave edges
-     wave_frontedge = wave_frontedge[startCorr:endCorr]
-     wave_backedge = wave_backedge[startCorr:endCorr]
+     wave_frontedge = wave_frontedge[0:endCorr]
+     wave_backedge = wave_backedge[0:endCorr]
+
+     print, "After correct"
+     print, wave_frontedge
 
      ; Plot new corrected region of interest 
      aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
@@ -395,7 +412,7 @@ if keyword_set(auto) then begin
 
   oplot,time[sp:ep].jd-dt[sp:ep],reform(mymaxima[0,sp:ep].rad),psym=1,color=200,thick=4,symsize=2
   
-  for ii=sp,ep-1 do begin
+  for ii=sp,ep do begin
 ;     oplot, [time[ii].jd - dt[ii]], [yarray[mymaxima[ii-sp]]], psym=1, color=200, thick=4, symsize=2
 ;DEBUG    
 ;Overplot the front edge 
@@ -410,8 +427,9 @@ if keyword_set(auto) then begin
 
 loadct, 0, /silent
 
+
 ; No fitting for now
-continue
+;continue
   
 ;--------------------------------------------------
 ;Do second order polynomial fitting for the wave fronts
@@ -881,15 +899,15 @@ pro aia_annulus_analyze_tangential,event,datapath=datapath,savepath=savepath,$
   lat_data_left.xfitrange=[sp,ep]
   lat_data_right.xfitrange=[sp,ep]
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;Plot the Left Tangential Data!
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  !p.multi=lat_data_left.multi
-  tmpdata=lat_data_left.data
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;Plot the Left Tangential Data!
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;   !p.multi=lat_data_left.multi
+;;   tmpdata=lat_data_left.data
  
-  nbase=5
-  base=total(tmpdata[0:nbase-1,*,*],1)/(nbase*1.0)
-  for tt=0,nsteps-1 do tmpdata[tt,*,*]=reform(tmpdata[tt,*,*]-base)
+;;   nbase=5
+;;   base=total(tmpdata[0:nbase-1,*,*],1)/(nbase*1.0)
+;;   for tt=0,nsteps-1 do tmpdata[tt,*,*]=reform(tmpdata[tt,*,*]-base)
  
 ;; ;Plot the Left Tangential positions
 ;;   ;wdef,lat_data_left.winind,lat_data_left.winsize[0],lat_data_left.winsize[1]
@@ -914,8 +932,8 @@ pro aia_annulus_analyze_tangential,event,datapath=datapath,savepath=savepath,$
 ;;   ;; lat_data_left.plotinfo.x=!X
 ;;   ;; lat_data_left.plotinfo.y=!Y
 ;;   write_png,savepath+lat_data_left.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 
