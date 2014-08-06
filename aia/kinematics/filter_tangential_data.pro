@@ -15,7 +15,7 @@ tmp = lindgen(n_elements(smoothAnglePixVals))
 
 ;cgPlot, smoothAnglePixVals, yarray, /window
 
-gfit = gaussfit(tmp, smoothAnglePixVals, coeff, nterms=6)
+gfit = gaussfit(tmp, smoothAnglePixVals, coeff, nterms=4)
 
 cgPlot, tmp, smoothAnglePixVals, /window
 cgPlot, tmp, gfit, col='blue', /window, /overPlot
@@ -32,7 +32,10 @@ frontEdgeCutoff = gaussCenter+1.75*gaussStdev
 maxFrontEdge = round(frontEdgeCutoff)
 maxYInd = dataCutoff
 
-
+if gaussCenter lt -100 || gaussStdev gt 200 || gaussHeight lt 0 then begin
+   maxFrontEdge = yrng[1]
+   maxYind = yrng[1]
+endif
 
 ;; maxima = get_local_maxima(smoothAnglePixVals, yarray)
 ;; minind = lclxtrem(smoothAnglePixVals-smooth(smoothAnglePixVals, 20, /edge_truncate), 10)
@@ -56,6 +59,5 @@ maxYInd = dataCutoff
 
 ;;    yrng[1] = upperMin
 ;; endif
-
 
 end

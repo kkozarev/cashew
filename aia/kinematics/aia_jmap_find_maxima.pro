@@ -51,11 +51,11 @@ function get_local_maxima, column,dist,yind=yind,gaussfit=gaussfit
            res=gaussfit(locy,locarr,aa)
 ;Follow up with a Levenberg-Marquardt fitting algorigthm
            res=lmfit(locy,locarr,aa,/double,function_name='gaussianfit',sigma=sigma)
-           if cc eq 0 then print,aa[1],dist[lmaxind]
+;           if cc eq 0 then print,aa[1],dist[lmaxind]
            maxima[cc].gfit[0]=aa[1]                        ;X-location (radial) of the peak
            maxima[cc].gfit[1]=max(res)                     ;Y-location (intensity) of the peak
            maxima[cc].gfit[2]=2*sqrt(2*alog(2)*aa[2]^2)    ;The FWHM of the gaussian fit
-           if maxima[cc].gfit[2] eq 'Inf' or maxima[cc].gfit[cc,2] eq 'NaN' then maxima[cc].gfit[cc,2]=1.0e-10
+           if maxima[cc].gfit[2] eq 'Inf' or maxima[cc].gfit[2] eq 'NaN' then maxima[cc].gfit[2]=1.0e-10
            maxima[cc].gfit[3]=sigma[1]    ;The error in radial position of the maximum
            maxima[cc].gfit[4]=sigma[0]    ;The error in the fitted peak value
            zz=(locy-aa[1])/aa[2]

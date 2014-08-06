@@ -1,6 +1,6 @@
 pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, mind,$
                          maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge,$
-                         wave_backedge=wave_backedge
+                         wave_backedge=wave_backedge, maxYInd=maxYInd
 ;PURPOSE
 ;Procedure to find the edges of the EUV wave using a Gaussian fit
 ;At each timestep a Gaussian is fitted to the radial data and the
@@ -20,7 +20,7 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
 ;     WAVE_BACKEDGE - Structure storing the positions of the back of
 ;                     the wave
 
-  plot = 0
+  plot = 1
   debug = 0
 
   loadct, 0
@@ -28,12 +28,10 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
   sp=fitrange[0]
   ep=fitrange[1]
 
-  rad = yarray[yrng[0]:yrng[1]]
-  dat = data[*,yrng[0]:yrng[1]]
+  rad = yarray[yrng[0]:maxYInd]
+  dat = data[*,yrng[0]:maxYInd]
 
   nSigma = 1.0
-
-  print, wave_frontedge
 
 ;  cgPlot, yarray, data[0,*]
 
@@ -101,6 +99,8 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
 
         ; Refit with new data
         gfit4 = gaussfit(rad, colSmooth, coeff, nterms=4)
+        print, coeff
+        
         if plot eq 1 then begin
            cgPlot, rad, gfit4, /overPlot, col='red', /window
         endif
@@ -113,7 +113,34 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
         frontEdge = gaussCenter+nsigma*gaussStdev
         backEdge = gaussCenter-nsigma*gaussStdev
         
-        if gaussHeight lt 0 then alt = 1
+        if gaussHeight lt 0 || gaussStdev lt 0 || gaussStdev gt 6.0 then begin
+           negInd = where(colSmooth[0,*] lt 0) 
+
+           if negInd[0] eq -1 then begin
+              alt = 1
+              break
+           endif
+
+           colSmooth[0, negInd] = average 
+
+           gfit4 = gaussfit(rad, colSmooth, coeff, nterms=4)
+           print, coeff
+
+           if plot eq 1 then begin
+              cgPlot, rad, gfit4, /overPlot, col='red', /window
+           endif
+           
+           gaussHeight = coeff[0]
+           gaussCenter = coeff[1]
+           gaussStdev = coeff[2]
+           
+           if gaussStdev lt 0 || gaussStdev gt 6.0 then begin
+              alt=1
+           endif
+           ; Calculate front and back edges
+           frontEdge = gaussCenter+nsigma*gaussStdev
+           backEdge = gaussCenter-nsigma*gaussStdev
+        endif
      endif
         
      if frontEdge lt 0 then alt=1
@@ -121,10 +148,10 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
      if alt eq 0 then begin
         
         ; Chop off the front edge at the last location of viable data
-        if frontEdge gt yarray[maxRadIndex] then begin
-           print, "Chopping front edge"
-           frontEdge = yarray[maxRadIndex]        
-        endif
+        ;; if frontEdge gt yarray[maxYInd] then begin
+        ;;    print, "Chopping front edge"
+        ;;    frontEdge = yarray[maxYInd]        
+        ;; endif
 
         if frontEdge lt mymaxima[0, ii].rad then begin
            print, "Front edge behind maxima, assigning max value"

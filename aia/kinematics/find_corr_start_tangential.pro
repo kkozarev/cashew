@@ -1,6 +1,6 @@
 pro find_corr_start_tangential, data, time, yarray, datastruct, ht_km, height, fitrange, yrng, mind, maxRadIndex,$
                      startInd=startInd, mymaxima=mymaxima, wave_frontedge=wave_frontedge,$
-                     startCorr=startCorr, constrain=constrain, wave_backedge=wave_backedge
+                     startCorr=startCorr, constrain=constrain, wave_backedge=wave_backedge, maxYInd=maxYInd
 ;PURPOSE                                                                                                  
 ;Procedure to find the improved and final start position of the
 ;EUV wave.
@@ -37,6 +37,11 @@ pro find_corr_start_tangential, data, time, yarray, datastruct, ht_km, height, f
 ; and the wave front edge, frontDiff
 
   frontDiff = abs(wave_frontedge[0].rad - mymaxima[0,startInd].rad)        
+  
+  if debug eq 1 then begin
+     print, "Front Diff is: "
+     print, frontDiff
+  endif
 
 ; Iteratively find the start position
 
@@ -77,7 +82,9 @@ pro find_corr_start_tangential, data, time, yarray, datastruct, ht_km, height, f
 
      ; Compute the edge with the new maxima
      find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, mind,$
-                          maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge, wave_backedge=wave_backedge
+                                maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge,$
+                                wave_backedge=wave_backedge, maxYInd=maxYInd
+                                
 
      print, yrng
      if debug eq 1 then begin
@@ -89,7 +96,7 @@ pro find_corr_start_tangential, data, time, yarray, datastruct, ht_km, height, f
      ; Recursively check the next start position
      find_corr_start_tangential, data, time, yarray, datastruct, ht_km, height, fitrange, yrng, mind, maxRadIndex,$
                       startInd=startInd, mymaxima=mymaxima, wave_frontedge=wave_frontedge,$
-                      startCorr=startCorr, wave_backedge=wave_backedge
+                      startCorr=startCorr, wave_backedge=wave_backedge, maxYInd=maxYInd
    
   endif else begin
 

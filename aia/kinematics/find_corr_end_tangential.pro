@@ -27,6 +27,15 @@ pro find_corr_end_tangential, data, time, rad, startInd=startInd, endInd=endInd,
   ind=where(dat lt 0.0)
   if ind[0] gt -1 then dat[ind] = 0.0
 
+  if debug eq 1 then begin
+     print, "Current frontedge"
+     help, wave_frontedge
+     print, wave_frontedge
+     
+     print, "Max front edge value: "
+     print, rad[maxFrontEdge]
+  endif
+
 
      ; Compute the difference between the last point of valid data
      ; in topDiff, and the difference between the current maxima
@@ -44,6 +53,7 @@ pro find_corr_end_tangential, data, time, rad, startInd=startInd, endInd=endInd,
      ; If we exceed this, we have likely hit the plateau in the
      ; tangential data where overexpansion has ceased.
      if wave_frontedge[i].rad gt rad[maxFrontEdge] then begin
+        if debug eq 1 then print, "Greater than wavefront edge, removing point"
         endInd = i + startInd
         endCorr = i
         return

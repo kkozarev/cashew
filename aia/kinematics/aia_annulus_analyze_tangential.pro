@@ -150,8 +150,8 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
   
   
 ;LOOP OVER MEASUREMENTS!
-  for mind=0, nlatmeas-1 do begin
-;  for mind = 2,2   do begin
+;  for mind=0, nlatmeas-1 do begin
+  for mind = 1, 1   do begin
      yrng = yrngOrig
 
      wave_frontedge=0
@@ -251,7 +251,7 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
      
      find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, mind,$
                                 maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge,$
-                                wave_backedge=wave_backedge
+                                wave_backedge=wave_backedge, maxYInd=maxYInd
      print, "Printing front edge in main program"
      print, wave_frontedge
 
@@ -349,7 +349,7 @@ if keyword_set(auto) then begin
      find_corr_start_tangential, data, time, yarray, datastruct, ht_km, height, fitrange, yrng, mind,$
                       maxRadIndex, startInd=startInd, mymaxima=mymaxima,$
                       wave_frontedge=wave_frontedge, startCorr=startCorr, constrain=constrain,$
-                      wave_backedge=wave_backedge
+                      wave_backedge=wave_backedge, maxYInd=maxYInd
 
 
      find_corr_end_tangential, data, time, yarray, startInd=startInd, endInd=endInd, wave_frontedge=wave_frontedge,$
@@ -426,7 +426,6 @@ if keyword_set(auto) then begin
   endfor
 
 loadct, 0, /silent
-
 
 ; No fitting for now
 ;continue
