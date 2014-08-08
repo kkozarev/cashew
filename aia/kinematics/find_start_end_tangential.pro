@@ -13,6 +13,8 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
 ;     STARTIND - index of front start position
 ;     ENDIND - index of front end position
 
+;  .r aia_jmap_find_maxima
+  
   ; To print out additional information set debug to 1
   debug = 1
 
@@ -36,22 +38,30 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
   ; Compute minima and maxima to center Gaussian fit on first wave
   maxima = get_local_maxima(totalSmoothVals, tmp)
 
-  ; Briefly filter maxima to remove really small peaks or ones which 
-  ; don't exceed twice the running average
-  newMaxima=replicate({val:0.0D,ind:0L,rad:0.0D,gfit:dblarr(5),nmax:0}, n_elements(maxima)-1)
-  goodData = 0
+  ;; ; Briefly filter maxima to remove really small peaks or ones which 
+  ;; ; don't exceed twice the running average
+  ;; newMaxima=replicate({val:0.0D,ind:0L,rad:0.0D,gfit:dblarr(5),nmax:0}, n_elements(maxima))
+  ;; goodData = 0
   
-  for i=0, n_elements(maxima)-1 do begin
-     average = mean(totalSmoothVals[0:maxima[i].ind])
-     if ~(maxima[i].val lt 2.0*average) && ~(maxima[i].val lt 100) then begin
-        newMaxima[goodData] = maxima[i]
-        goodData++
-     endif
-  endfor
+  ;; for i=0, n_elements(maxima)-1 do begin
+  ;;    average = mean(totalSmoothVals[0:maxima[i].ind])
+  ;;    ;; if ~(maxima[i].val lt 2.0*average) && ~(maxima[i].val lt 100) then begin
+  ;;    ;;    newMaxima[goodData] = maxima[i]
+  ;;    ;;    goodData++
+  ;;    ;; endif
+  ;;    if ~(maxima[i].val lt 2.0*average) then begin
+  ;;       newMaxima[goodData] = maxima[i]
+  ;;       goodData++
+  ;;    endif
+
+  ;; endfor
+
+  newMaxima=maxima
+  goodData =1 
   
   if goodData eq 0 then begin
      print, "No valid maxima data found, exiting..."
-     startEnd = -1
+     startInd = -1
      endInd = -1
      return
   endif
@@ -92,14 +102,14 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
   cgplot, totalSmoothVals, /window
 
   ; Compute a Gaussian fit to determine start and end times
-  gfit2 = gaussfit(x, gaussData, coeff, estimates=estimates, nterms=6)
+  gfit2 = gaussfit(x, gaussData, coeff, estimates=estimates, nterms=4)
   cgPlot, gfit2, /overPlot, color='green', /window
   
   ; If the peak or stdev is outrageous, refit with all of the data
   if coeff[2] gt n_elements(totalPixVals)/2 || coeff[0] lt 0 then begin
      if debug eq 1 then print, "Peak or Stdev is unrealistic, refitting..."
      x = lindgen(n_elements(totalPixVals))
-     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=6)
+     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=4)
   endif
 
   minusTwoSigma = coeff[1] - 2*coeff[2]
@@ -114,7 +124,7 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
   if minusTwoSigma lt 0 then begin
      if debug eq 1 then print, "Initial start guess is negative, refitting..."
      x = lindgen(n_elements(totalPixVals))
-     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=6)
+     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=4)
 
      minusTwoSigma = coeff[1] - 2*coeff[2]
      plusTwoSigma = coeff[1] + 3*coeff[2]
@@ -176,7 +186,7 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
   if newMaxima[firstMaxInd].val lt backgroundThresh then begin
      if debug eq 1 then print, "Below background threshold, recomputing..."
      x = lindgen(n_elements(totalPixVals))
-     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=6)
+     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=4)
      cgPlot, gfit2, /OverPlot, color='green', /window
 
      minusTwoSigma = coeff[1] - 2*coeff[2]
@@ -241,7 +251,7 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
   if startInd gt n_elements(gfit2)-1 then begin
      if debug eq 1 then print, "Forcing fit over all data"
      x = lindgen(n_elements(totalPixVals))
-     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=6)
+     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=4)
   endif
 
 ; To find the end position, define a threshold

@@ -20,7 +20,7 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
 ;     WAVE_BACKEDGE - Structure storing the positions of the back of
 ;                     the wave
 
-  plot = 1
+  plot = 0
   debug = 0
 
   loadct, 0
@@ -45,10 +45,20 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
      caldat, newtime[ii], m, d, y, h, m, s 
 
      col = dat[ii,*]
-     colSmooth = smooth(col, 25, /edge_truncate)    
+     colSmooth = smooth(col, 20, /edge_truncate)  
+     colSmooth = reform(colSmooth)
 
      ; Fit a Gaussian to determine front and back edges
-     gfit4 = gaussfit(rad, colSmooth, coeff, nterms=4)
+    ; gfit4 = gaussfit(rad, colSmooth, coeff, nterms=4)
+
+     estimates = fltarr(4)
+     estimates[0] = colSmooth[mymaxima[0, ii].ind]
+     estimates[1] = mymaxima[0, ii].rad
+     estimates[2] = 2.0
+
+     print, estimates
+     gfit4 = mpFitPeak(rad, colSmooth, coeff, nterms=4, estimates=estimates)
+
 
      if plot eq 1 then begin
         print, h, ":", m
@@ -62,16 +72,6 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
          cgPlot, rad, gfit4, /overPlot, col='cyan', /window
       endif
 
-     if debug eq 1 then begin
-        print, "COEFF"
-        print, coeff
-        print, "One Sigma"
-        print, coeff[1]+nSigma*coeff[2]
-
-        print, "Maximum value is: "
-        print, mymaxima[0, ii].rad
-     endif
-
      gaussHeight = coeff[0]
      gaussCenter = coeff[1]
      gaussStdev = coeff[2]
@@ -82,24 +82,34 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
      
      ; If the Gaussian fit is bad, use the searching down from
      ; intensity peak method instead
-     if gaussHeight gt 300 then alt = 1
+     ;; if gaussHeight gt 300 then alt = 1
+     ;; if gaussStdev gt 10 then alt=1
+
 
      ; Try excluding some initial points in case there are really
      ; negative values preventing the Gaussian fit from working
-     if gaussHeight lt 0 then begin
+     if (gaussHeight lt 0) || (gaussHeight gt 300) || (gaussStdev gt 5) then begin
         ; Set initial negative values to the mean
-        average = mean(colSmooth[0, *])
+        average = mean(colSmooth)
         for i = 0, n_elements(rad)-1 do begin
-           if colSmooth[0, i] lt 0 then begin
-              colSmooth[0, i] = average
+           if colSmooth[i] lt 0 then begin
+              colSmooth[i] = average
            endif else begin
               break
            endelse
         endfor
 
         ; Refit with new data
-        gfit4 = gaussfit(rad, colSmooth, coeff, nterms=4)
-        print, coeff
+;        gfit4 = gaussfit(rad, colSmooth, coeff, nterms=4)
+
+      
+        gfit4 = mpFitPeak(rad, colSmooth, coeff, nterms=4, estimates=estimates)
+        
+        if debug eq 1 then begin
+           print, "COEFF"
+           print, coeff
+        endif
+
         
         if plot eq 1 then begin
            cgPlot, rad, gfit4, /overPlot, col='red', /window
@@ -108,43 +118,55 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
         gaussHeight = coeff[0]
         gaussCenter = coeff[1]
         gaussStdev = coeff[2]
-
-        ; Calculate front and back edges
+        
+                                ; Calculate front and back edges
         frontEdge = gaussCenter+nsigma*gaussStdev
         backEdge = gaussCenter-nsigma*gaussStdev
         
-        if gaussHeight lt 0 || gaussStdev lt 0 || gaussStdev gt 6.0 then begin
-           negInd = where(colSmooth[0,*] lt 0) 
-
+        if gaussHeight lt 0 || gaussStdev lt 0 || gaussStdev gt 5 then begin
+           negInd = where(colSmooth lt 0) 
+           
            if negInd[0] eq -1 then begin
               alt = 1
-              break
-           endif
+           endif else begin
+              
+              colSmooth[negInd] = average 
+              
+              ;; gfit4 = gaussfit(rad, colSmooth, coeff, nterms=4)
+              ;; print, coeff
+              
+              
+              gfit4 = mpFitPeak(rad, colSmooth, coeff, nterms=4, estimates=estimates)
+              
+              if debug eq 1 then begin
+                 print, "COEFF"
+                 print, coeff
+              endif
 
-           colSmooth[0, negInd] = average 
-
-           gfit4 = gaussfit(rad, colSmooth, coeff, nterms=4)
-           print, coeff
-
-           if plot eq 1 then begin
-              cgPlot, rad, gfit4, /overPlot, col='red', /window
-           endif
-           
-           gaussHeight = coeff[0]
-           gaussCenter = coeff[1]
-           gaussStdev = coeff[2]
-           
-           if gaussStdev lt 0 || gaussStdev gt 6.0 then begin
-              alt=1
-           endif
-           ; Calculate front and back edges
-           frontEdge = gaussCenter+nsigma*gaussStdev
-           backEdge = gaussCenter-nsigma*gaussStdev
+              if plot eq 1 then begin
+                 cgPlot, rad, gfit4, /overPlot, col='red', /window
+              endif
+              
+              gaussHeight = coeff[0]
+              gaussCenter = coeff[1]
+              gaussStdev = coeff[2]
+              
+              if gaussHeight lt 0 || gaussStdev lt 0 || gaussStdev gt 5.0 then begin
+                 alt=1
+              endif
+              
+              if gaussHeight gt 300 then alt = 1
+              
+              
+                                ; Calculate front and back edges
+              frontEdge = gaussCenter+nsigma*gaussStdev
+              backEdge = gaussCenter-nsigma*gaussStdev
+           endelse
         endif
-     endif
         
-     if frontEdge lt 0 then alt=1
-
+        if frontEdge lt 0 then alt=1
+     endif
+     
      if alt eq 0 then begin
         
         ; Chop off the front edge at the last location of viable data

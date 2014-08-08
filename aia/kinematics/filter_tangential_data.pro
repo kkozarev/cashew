@@ -17,6 +17,14 @@ tmp = lindgen(n_elements(smoothAnglePixVals))
 
 gfit = gaussfit(tmp, smoothAnglePixVals, coeff, nterms=4)
 
+
+if finite(coeff[0]) eq 0 then begin
+   print, "Gaussian fit failed... exiting"
+   maxFrontEdge = -1
+   maxYind = yrng[1]
+   return
+endif 
+
 cgPlot, tmp, smoothAnglePixVals, /window
 cgPlot, tmp, gfit, col='blue', /window, /overPlot
 
@@ -27,7 +35,7 @@ gaussStdev = coeff[2]
 dataCutoff = gaussCenter+2.5*gaussStdev
 dataCutoff = round(dataCutoff)
 
-frontEdgeCutoff = gaussCenter+1.75*gaussStdev
+frontEdgeCutoff = gaussCenter+1.25*gaussStdev
 
 maxFrontEdge = round(frontEdgeCutoff)
 maxYInd = dataCutoff
@@ -59,5 +67,6 @@ endif
 
 ;;    yrng[1] = upperMin
 ;; endif
+
 
 end

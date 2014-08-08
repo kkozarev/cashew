@@ -96,8 +96,6 @@ function jmap_filter_maxima_radial,time,height,mymaxima,fitrange=fitrange
         maxinds[0,fitrange[0]+tt+1].ind=min(where(height-ht[tt+1] gt 0.))
         maxinds[0,fitrange[0]+tt+1].rad=ht[tt+1]/RSUN
      endif
-     
-     stop
 
     change=0 
   endfor

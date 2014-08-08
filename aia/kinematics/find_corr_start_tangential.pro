@@ -68,7 +68,7 @@ pro find_corr_start_tangential, data, time, yarray, datastruct, ht_km, height, f
      
      ; Update maxima
      aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
-                          yrange=[yarray[datastruct.yfitrange[0]],yarray[datastruct.yfitrange[1]]],$
+                          yrange=[yarray[datastruct.yfitrange[0]],yarray[maxYind]],$
                           numplotmax=3
        print, yrng
 

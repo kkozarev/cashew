@@ -31,7 +31,7 @@ function get_local_maxima, column,dist,yind=yind,gaussfit=gaussfit
   for ii=0,n_elements(minind)-1 do begin
      if ii lt n_elements(minind)-1 then begin
 ;This is a filter that lets through only the biggest maxima.
-        if (minind[ii+1]-minind[ii] le 6) then continue
+        if (minind[ii+1]-minind[ii] le 2) then continue
         
         locarr=column[minind[ii]:minind[ii+1]]
         locy=dist[minind[ii]+yindrange[0]:minind[ii+1]+yindrange[0]]

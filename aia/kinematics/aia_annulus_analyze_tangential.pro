@@ -150,16 +150,17 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
   
   
 ;LOOP OVER MEASUREMENTS!
-;  for mind=0, nlatmeas-1 do begin
-  for mind = 1, 1   do begin
+  for mind=0, nlatmeas-1 do begin
+;  for mind = 0, 0    do begin
      yrng = yrngOrig
-
+     
      wave_frontedge=0
      wave_backedge=wave_frontedge
-
      data=indata[*,*,mind]
      height=datastruct.lat_heights[mind]
      
+     if n_elements(data[0,*])-1 lt yrng[1] then yrng[1] = n_elements(data[0,*])-1
+
      ht_km=yarr*DIST_FACTOR*height
      if mind eq 0 then wdef,datastruct.winind,datastruct.winsize[0],datastruct.winsize[1]
   
@@ -177,17 +178,28 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
 ;Find start and end positions
      if keyword_set(auto) then begin
         if keyword_set(gradient) then begin
-           make_gradient_map, time.jd, yarray, data, yrng, intensityData=intensityData
-           data = intensityData
+
+           bin_aia_data, time.jd, yarray, data, yrng, binData=binData
+           
+           make_gradient_map_tangential, time.jd, yarray, binData, yrng, intensityData=intensityData
+
+           mask_gradient_data, time.jd, yarray, data, yrng, intensityData, correctData=correctData
+
+           data = correctData
+
         endif
+           
+;;         filter_tangential_data, data[*, yrng[0]:yrng[1]], time, yarray, yrng=yrng, maxYInd=maxYInd, maxFrontEdge=maxFrontEdge
+;; ;        datastruct.yfitrange = yrng
+        maxYInd = yrng[1]
+        maxFrontEdge = yrng[1]
         
         aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
-                             yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
+                             yrange=[yarr[datastruct.yfitrange[0]],yarr[maxYInd]],$
                              numplotmax=3
-        
-        filter_tangential_data, data[*, yrng[0]:yrng[1]], time, yarray, yrng=yrng, maxYInd=maxYInd, maxFrontEdge=maxFrontEdge
-;        datastruct.yfitrange = yrng
 
+        print, mymaxima
+        
         find_start_end_tangential, data[*, yrng[0]:yrng[1]], time, startInd=startInd, endInd=endInd, maxYind=maxYInd
         
 ;Exit if a good start position is not found
@@ -199,13 +211,15 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
         print, "Initial end index: ", endInd
         
         fitrange=[startInd, endInd]
-        
+           
      endif else begin
         
         aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
                            min=-40,max=50,fitrange=fitrange,$
                            title=datastruct.imgtit[mind],$
                            xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
+
+        
         
         aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
                              yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
@@ -225,10 +239,10 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
      datastruct.plotinfo[mind].x=!X
      datastruct.plotinfo[mind].y=!Y
 
-                                ;Fit the maxima and overplot them...
-     aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima, allmaxima=allmaxima,$
-                          yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
-                          numplotmax=3
+     ;;                            ;Fit the maxima and overplot them...
+     ;; aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima, allmaxima=allmaxima,$
+     ;;                      yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
+     ;;                      numplotmax=3
 
 ;  jmap_find_maxima,data[*,yrng[0]:yrng[1]],time,yarray[yrng[0]:yrng[1]],$
 ;                   mymaxima=mymaxima,numplotmax=3               
@@ -237,7 +251,7 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
      
 ;Filter the maxima positions here for physicality
                                 ;outliers=1
-     maxinds=jmap_filter_maxima_tangential(time.relsec, mind, ht_km[yrng[0]:yrng[1]], height, mymaxima,fitrange=datastruct.xfitrange) ;,outliers=outliers
+     maxinds=jmap_filter_maxima_tangential(time.relsec, mind, ht_km[yrng[0]:maxYInd], height, mymaxima,fitrange=datastruct.xfitrange) ;,outliers=outliers
      
      good_ind_pos=where(maxinds.ind ge 0)
      good_max_inds=maxinds[good_ind_pos]
@@ -351,9 +365,12 @@ if keyword_set(auto) then begin
                       wave_frontedge=wave_frontedge, startCorr=startCorr, constrain=constrain,$
                       wave_backedge=wave_backedge, maxYInd=maxYInd
 
+     help, wave_frontedge
 
      find_corr_end_tangential, data, time, yarray, startInd=startInd, endInd=endInd, wave_frontedge=wave_frontedge,$
                    maxRadIndex=maxRadIndex, endCorr=endCorr, maxFrontEdge=maxFrontEdge
+
+     help, wave_frontedge
 
      print, "Corrected start index: ", startInd
      print, "Corrected end index: ", endInd
@@ -794,11 +811,6 @@ pro aia_annulus_analyze_tangential,event,datapath=datapath,savepath=savepath,$
   endelse
   
   lat_deg_array=findgen(arxcentind)*ang_step ;The tangential angle positions  
-
-  ;; arcToDeg = 1/0.000277777778
-  ;; lat_arcsec_array = lat_deg_array*arcToDeg
-  ;; lat_rsun_array = lat_arcsec_array/ind_arr[0].rsun_obs
-  ;; lat_km_array = lat_rsun_array * RSUN
   
 ;DEBUG
   ;make sure there are no negative values in the data.
@@ -898,41 +910,41 @@ pro aia_annulus_analyze_tangential,event,datapath=datapath,savepath=savepath,$
   lat_data_left.xfitrange=[sp,ep]
   lat_data_right.xfitrange=[sp,ep]
 
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;Plot the Left Tangential Data!
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;   !p.multi=lat_data_left.multi
-;;   tmpdata=lat_data_left.data
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Plot the Left Tangential Data!
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  !p.multi=lat_data_left.multi
+  tmpdata=lat_data_left.data
  
-;;   nbase=5
-;;   base=total(tmpdata[0:nbase-1,*,*],1)/(nbase*1.0)
-;;   for tt=0,nsteps-1 do tmpdata[tt,*,*]=reform(tmpdata[tt,*,*]-base)
+  nbase=5
+  base=total(tmpdata[0:nbase-1,*,*],1)/(nbase*1.0)
+  for tt=0,nsteps-1 do tmpdata[tt,*,*]=reform(tmpdata[tt,*,*]-base)
  
-;; ;Plot the Left Tangential positions
-;;   ;wdef,lat_data_left.winind,lat_data_left.winsize[0],lat_data_left.winsize[1]
-;;   for rr=0,nlatmeas-1 do begin
-;;      tmp=reform(tmpdata[*,*,rr])
-;;      ;REVERSE THE IMAGE COLUMNS SO THE AR IS ALWAYS IN THE BOTTOM
-;;      tmp=reverse(tmp,2)
-;;      ;DESPIKE THE IMAGE
-;;      tmp=despike_gen(tmp)
-;;      tmpdata[*,*,rr]=tmp
-;;      lat_data_left.bdiff[*,*,rr]=tmp
-;;      ;glind=where(goodlats[rr,*] ge 0.0)   
+;Plot the Left Tangential positions
+  ;wdef,lat_data_left.winind,lat_data_left.winsize[0],lat_data_left.winsize[1]
+  for rr=0,nlatmeas-1 do begin
+     tmp=reform(tmpdata[*,*,rr])
+     ;REVERSE THE IMAGE COLUMNS SO THE AR IS ALWAYS IN THE BOTTOM
+     tmp=reverse(tmp,2)
+     ;DESPIKE THE IMAGE
+     tmp=despike_gen(tmp)
+     tmpdata[*,*,rr]=tmp
+     lat_data_left.bdiff[*,*,rr]=tmp
+     ;glind=where(goodlats[rr,*] ge 0.0)   
      
-;;     ; dat=reform(tmp)
-;;     ; dat2=gmascl(dat,gamma=4)
-;;     ; dat2=double(dat2)
-;;   endfor
-;; ;Everything else is here
-;;   annulus_fit_maxima_tangential,event,lat_data_left.bdiff,lat_data_left,time,lat_deg_array,$
-;;                                 constrain=constrain, auto=auto, gradient=gradient, y_rsun_array=y_rsun_array
-;;   ;; lat_data_left.plotinfo.p=!P
-;;   ;; lat_data_left.plotinfo.x=!X
-;;   ;; lat_data_left.plotinfo.y=!Y
-;;   write_png,savepath+lat_data_left.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
-;; ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ; dat=reform(tmp)
+    ; dat2=gmascl(dat,gamma=4)
+    ; dat2=double(dat2)
+  endfor
+;Everything else is here
+  annulus_fit_maxima_tangential,event,lat_data_left.bdiff,lat_data_left,time,lat_deg_array,$
+                                constrain=constrain, auto=auto, gradient=gradient, y_rsun_array=y_rsun_array
+  lat_data_left.plotinfo[0].p=!P
+  lat_data_left.plotinfo[0].x=!X
+  lat_data_left.plotinfo[0].y=!Y
+  write_png,savepath+lat_data_left.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 
@@ -958,15 +970,16 @@ pro aia_annulus_analyze_tangential,event,datapath=datapath,savepath=savepath,$
      ;dat2=double(dat2)
   endfor
      ;Everything else is here
+
   annulus_fit_maxima_tangential,event,lat_data_right.bdiff,lat_data_right,time,lat_deg_array,$
                                 constrain=constrain, auto=auto, gradient=gradient, y_rsun_array=y_rsun_array
                                 
-;;   ;; lat_data_right.plotinfo.p=!P
-;;   ;; lat_data_right.plotinfo.x=!X
-;;   ;; lat_data_right.plotinfo.y=!Y
-;;   write_png,savepath+lat_data_right.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  lat_data_right.plotinfo[0].p=!P
+  lat_data_right.plotinfo[0].x=!X
+  lat_data_right.plotinfo[0].y=!Y
+  write_png,savepath+lat_data_right.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   
   save,filename=savepath+event.annplot.analyzed_savename+wav+'_analyzed_tangential.sav',lat_data_left,lat_data_right,ind_arr,nsteps,$
          ncols,nrows,wav,htind,yradlimind,lat_deg_array,y_arcsec_array,$
