@@ -151,7 +151,7 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
   
 ;LOOP OVER MEASUREMENTS!
   for mind=0, nlatmeas-1 do begin
-;  for mind = 0, 0    do begin
+;  for mind = 2, 2    do begin
      yrng = yrngOrig
      
      wave_frontedge=0
@@ -201,6 +201,7 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
         print, mymaxima
         
         find_start_end_tangential, data[*, yrng[0]:yrng[1]], time, startInd=startInd, endInd=endInd, maxYind=maxYInd
+      
         
 ;Exit if a good start position is not found
         if startInd eq -1 then return
@@ -251,8 +252,10 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
      
 ;Filter the maxima positions here for physicality
                                 ;outliers=1
-     maxinds=jmap_filter_maxima_tangential(time.relsec, mind, ht_km[yrng[0]:maxYInd], height, mymaxima,fitrange=datastruct.xfitrange) ;,outliers=outliers
-     
+      maxinds=jmap_filter_maxima_tangential(time.relsec, mind, ht_km[yrng[0]:maxYInd], height, mymaxima,fitrange=datastruct.xfitrange) ;,outliers=outliers
+     ;; mymaxima = maxinds 
+
+
      good_ind_pos=where(maxinds.ind ge 0)
      good_max_inds=maxinds[good_ind_pos]
      device,window_state=win_open
@@ -445,6 +448,7 @@ if keyword_set(auto) then begin
 loadct, 0, /silent
 
 ; No fitting for now
+;test = get_kbrd(1)
 ;continue
   
 ;--------------------------------------------------
@@ -455,7 +459,7 @@ loadct, 0, /silent
   ;dist=reform(wave_frontedge[good_ind_pos].val)*DIST_FACTOR*height
   time_good=time[sp:ep].relsec-time[sp].relsec
   dist=smooth(dist,2)
-  bootstrap_sdo,dist,time_good,fit_line, p1, p2, p3, s1, s2, s3,parinfo=parinfo
+  bootstrap_sdo,dist,time_good,fit_line, p1, p2, p3, s1, s2, s3,parinfo=parinfo, /linear
   print,''
   print,''
   wave_fits=p1[0] + p2[0] * (time_good)+ 0.5 * p3[0] * (time_good)^2
@@ -538,34 +542,35 @@ loadct, 0, /silent
   print,tmpstr
   xyouts,!x.window[0]+xmargin,!P.position[3]-2*ymargin,tmpstr,/norm,charsize=1.4,color=255
   
-;initial speed
-  v0=datastruct.fitparams[mind,1].front
-  errv0=datastruct.fitsigma[mind,1].front
+;average speed
+  vavg=datastruct.fitparams[mind,1].front
+  errvavg=datastruct.fitsigma[mind,1].front
 
-  tmpstr=datastruct.kinquantity[2]+' = '+strtrim(string(v0,format='(f9.2)'),2)+datastruct.kinunit[2];' +/-'+strtrim(string(errv0,format='(f9.2)'),2)+datastruct.kinunit[2]
-  datastruct.kinvalue[mind,2].max=v0
-  datastruct.kinsigma[mind,2].max=errv0
+  tmpstr='V!Davg!N = '+strtrim(string(vavg,format='(f9.2)'),2)+datastruct.kinunit[2];' +/-'+strtrim(string(errv0,format='(f9.2)'),2)+datastruct.kinunit[2]
+  datastruct.kinvalue[mind,2].max=vavg
+  datastruct.kinsigma[mind,2].max=errvavg
   print,tmpstr
   xyouts,!x.window[0]+xmargin,!P.position[3]-3*ymargin,tmpstr,/norm,charsize=1.4,color=255
-  
-;final speed
-  accel=datastruct.fitparams[mind,2].front
-  vf=(v0+accel*(time[ep].relsec-time[sp].relsec))
-  tmpstr=datastruct.kinquantity[3]+' = '+strtrim(string(vf,format='(f9.2)'),2)+datastruct.kinunit[3]
-  datastruct.kinvalue[mind,3].max=vf
-  print,tmpstr
-  xyouts,!x.window[0]+xmargin,!P.position[3]-4*ymargin,tmpstr,/norm,charsize=1.4,color=255
-  
-;acceleration
-  accel=accel
-  erraccel=datastruct.fitsigma[mind,2].front
 
-  tmpstr=datastruct.kinquantity[4]+' = '+strtrim(string(accel,format='(f9.2)'),2)+datastruct.kinunit[4] ;' +/-'+strtrim(string(erraccel,format='(f9.2)'),2)+datastruct.kinunit[4]
-  datastruct.kinvalue[mind,4].max=accel
-  datastruct.kinsigma[mind,4].max=erraccel
-  print,tmpstr
-  print,''
-  xyouts,!x.window[0]+xmargin,!P.position[3]-5*ymargin,tmpstr,/norm,charsize=1.4,color=255
+  
+;; ;final speed
+;;   accel=datastruct.fitparams[mind,2].front
+;;   vf=(v0+accel*(time[ep].relsec-time[sp].relsec))
+;;   tmpstr=datastruct.kinquantity[3]+' = '+strtrim(string(vf,format='(f9.2)'),2)+datastruct.kinunit[3]
+;;   datastruct.kinvalue[mind,3].max=vf
+;;   print,tmpstr
+;;   xyouts,!x.window[0]+xmargin,!P.position[3]-4*ymargin,tmpstr,/norm,charsize=1.4,color=255
+  
+;; ;acceleration
+;;   accel=accel
+;;   erraccel=datastruct.fitsigma[mind,2].front
+
+;;   tmpstr=datastruct.kinquantity[4]+' = '+strtrim(string(accel,format='(f9.2)'),2)+datastruct.kinunit[4] ;' +/-'+strtrim(string(erraccel,format='(f9.2)'),2)+datastruct.kinunit[4]
+;;   datastruct.kinvalue[mind,4].max=accel
+;;   datastruct.kinsigma[mind,4].max=erraccel
+;;   print,tmpstr
+;;   print,''
+;;   xyouts,!x.window[0]+xmargin,!P.position[3]-5*ymargin,tmpstr,/norm,charsize=1.4,color=255
 endfor
 
   return

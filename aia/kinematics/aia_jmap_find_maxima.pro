@@ -64,9 +64,12 @@ function get_local_maxima, column,dist,yind=yind,gaussfit=gaussfit
      endif
   endfor
   
+  if cc gt 0 then begin
 ;Order the local maxima by size
-  maxima=maxima[0:cc-1]
-  maxima.nmax=cc
+     maxima=maxima[0:cc-1]
+     maxima.nmax=cc
+  endif
+  
   sort=reverse(sort(maxima.val))
   ordmaxima=maxima[sort]
   

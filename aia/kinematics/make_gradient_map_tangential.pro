@@ -8,7 +8,7 @@ pro make_gradient_map_tangential, times, rad, data, yrng, intensityData=intensit
 ;  data[ind] =  
 
   ; Select a number of points for a window to average over
-  nPts = 3
+  nPts = 10
   window = indgen(nPts)
   start = nPts
 
@@ -20,16 +20,16 @@ pro make_gradient_map_tangential, times, rad, data, yrng, intensityData=intensit
         ; Take surrounding pixels and create an intensity score
         
         if t eq 0 then begin
-           ;; for i = 0, n_elements(window)-1 do begin
-           ;;    rightDiff = abs(data[t+i,r]-data[t+i+1,r])
-           ;;    print, rightDiff
-           ;;    meanDiff = meanDiff+rightDiff
-           ;; endfor
+           for i = 0, n_elements(window)-1 do begin
+              rightDiff = abs(data[t+i,r]-data[t+i+1,r])
+              print, rightDiff
+              meanDiff = meanDiff+rightDiff
+           endfor
            meanDiff = meanDiff / n_elements(window)
            intensityData[t,r] = meanDiff
         endif else if t eq n_elements(times)-1 then begin      
            for i = 0, n_elements(window)-1 do begin
-              leftDiff = abs(data[t-i,r]-data[t-i-1, r])
+              leftDiff = abs(data[t,r]-data[t-i-1, r])
               meanDiff = meanDiff+leftDiff
            endfor
            meanDiff = meanDiff / n_elements(window)
@@ -40,7 +40,7 @@ pro make_gradient_map_tangential, times, rad, data, yrng, intensityData=intensit
            for i=0, n_elements(window)-1 do begin
               if t - i le 1 then break
               nIterations++
-              leftDiff = abs(data[t-i,r]-data[t-i-1,r])
+              leftDiff = abs(data[t,r]-data[t-i-1,r])
               meanDiff = meanDiff + leftDiff
            endfor
            ;; for i = 0, n_elements(window)-1 do begin
@@ -68,5 +68,6 @@ pro make_gradient_map_tangential, times, rad, data, yrng, intensityData=intensit
   intensityData = intensityData
   cgimage, intensityData[*, yrng[0]:yrng[1]]
  
+  
 end
          

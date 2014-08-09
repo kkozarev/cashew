@@ -32,7 +32,7 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
   endfor
 
   ; Smooth the sum of the pixel intensities for min detection
-  totalSmoothVals = smooth(totalPixVals, 10, /edge_truncate)
+  totalSmoothVals = smooth(totalPixVals, 4, /edge_truncate)
   tmp = lindgen(n_elements(totalSmoothVals))
 
   ; Compute minima and maxima to center Gaussian fit on first wave
@@ -88,28 +88,28 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
      ; Make sure to not prematurely cut off the Gaussian fit if
      ; we have found the biggest one
      if (newMaxima[firstMaxInd].val eq max(newMaxima.val)) || (newMaxima[firstMaxInd].ind eq minind[goodMinInd]) then begin
-        gaussData = totalPixVals
+        gaussData = totalSmoothVals
      endif else begin
-        if minind[goodMinInd] + corr gt n_elements(totalPixVals)-1 then corr=0
-        gaussData = totalPixVals[0:minind[goodMinInd]+corr]
+        if minind[goodMinInd] + corr gt n_elements(totalSmoothVals)-1 then corr=0
+        gaussData = totalSmoothVals[0:minind[goodMinInd]+corr]
         x = x[0:minind[goodMinInd]+corr]
      endelse
   endif else begin
-     gaussData = totalPixVals
+     gaussData = totalSmoothVals
   endelse 
      
   ;cgplot, totalPixVals, /window
   cgplot, totalSmoothVals, /window
 
   ; Compute a Gaussian fit to determine start and end times
-  gfit2 = gaussfit(x, gaussData, coeff, estimates=estimates, nterms=4)
+  gfit2 = gaussfit(x, gaussData, coeff, estimates=estimates, nterms=6)
   cgPlot, gfit2, /overPlot, color='green', /window
   
   ; If the peak or stdev is outrageous, refit with all of the data
-  if coeff[2] gt n_elements(totalPixVals)/2 || coeff[0] lt 0 then begin
+  if coeff[2] gt n_elements(totalSmoothVals)/2 || coeff[0] lt 0 then begin
      if debug eq 1 then print, "Peak or Stdev is unrealistic, refitting..."
-     x = lindgen(n_elements(totalPixVals))
-     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=4)
+     x = lindgen(n_elements(totalSmoothVals))
+     gfit2 = gaussfit(x, totalSmoothVals, coeff, estimates=estimates, nterms=6)
   endif
 
   minusTwoSigma = coeff[1] - 2*coeff[2]
@@ -123,8 +123,8 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
   ; data if the initial start guess is negative
   if minusTwoSigma lt 0 then begin
      if debug eq 1 then print, "Initial start guess is negative, refitting..."
-     x = lindgen(n_elements(totalPixVals))
-     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=4)
+     x = lindgen(n_elements(totalSmoothVals))
+     gfit2 = gaussfit(x, totalSmoothVals, coeff, estimates=estimates, nterms=6)
 
      minusTwoSigma = coeff[1] - 2*coeff[2]
      plusTwoSigma = coeff[1] + 3*coeff[2]
@@ -179,14 +179,14 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
   startGuess = round(minusTwoSigma)
   endGuess = round(plusTwoSigma)
 
-  backgroundLevel = mean(totalPixVals[0:startGuess])
+  backgroundLevel = mean(totalSmoothVals[0:startGuess])
   backgroundThresh = backgroundLevel + 0.50*backgroundLevel
 
   ; Make sure the first maxima is sufficiently above background
   if newMaxima[firstMaxInd].val lt backgroundThresh then begin
      if debug eq 1 then print, "Below background threshold, recomputing..."
-     x = lindgen(n_elements(totalPixVals))
-     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=4)
+     x = lindgen(n_elements(totalSmoothVals))
+     gfit2 = gaussfit(x, totalSmoothVals, coeff, estimates=estimates, nterms=6)
      cgPlot, gfit2, /OverPlot, color='green', /window
 
      minusTwoSigma = coeff[1] - 2*coeff[2]
@@ -221,12 +221,12 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
 ; Select an end window location for slope computation
   endWindow = backgroundEnd+20
   startWindow = backgroundEnd
-  if backgroundEnd+20 gt n_elements(totalPixVals)-1 then endWindow = n_elements(totalPixVals)-1
+  if backgroundEnd+20 gt n_elements(totalSmoothVals)-1 then endWindow = n_elements(totalSmoothVals)-1
   if startWindow le 0 then startWindow = 1
   
 ; For a window around the end of the background compute the slope
   for tt=startWindow, endWindow do begin
-     slope[tt] = (totalPixVals[tt] - totalPixVals[tt-1])
+     slope[tt] = (totalSmoothVals[tt] - totalSmoothVals[tt-1])
      if debug eq 1 then begin
         print, "Current step: ", tt
         print, "Current slope: ", slope[tt]
@@ -237,7 +237,7 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
 ; slope, finding the place where we have a large slope within
 ; the background window should mark the start of the front.
 ; Save this as the starting index
-  startInd = min(where(slope gt 250))
+  startInd = min(where(slope gt 50))
 
   if debug eq 1 then print, "Slope detected start: ", startInd
 
@@ -251,12 +251,13 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
   if startInd gt n_elements(gfit2)-1 then begin
      if debug eq 1 then print, "Forcing fit over all data"
      x = lindgen(n_elements(totalPixVals))
-     gfit2 = gaussfit(x, totalPixVals, coeff, estimates=estimates, nterms=4)
+     gfit2 = gaussfit(x, totalSmoothVals, coeff, estimates=estimates, nterms=6)
   endif
+
 
 ; To find the end position, define a threshold
 ; based on the mean pixel value of the background
-  backgroundLevel = mean(totalPixVals[0:backgroundEnd])
+  backgroundLevel = mean(totalSmoothVals[0:backgroundEnd])
   
 ; Look for when the Gaussian fit crosses 10% of this threshold
   threshold = 0.10
@@ -280,7 +281,7 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
                                 ;print, totalPixVals[tt]
                                 ; Save the first instance of falling below the
                                 ; threshold as the end index
-     if tt eq n_elements(totalPixVals) then break
+     if tt eq n_elements(totalSmoothVals) then break
      if tt eq n_elements(gfit2) then break
      
      if gfit2[tt] lt endLevel then begin
@@ -300,7 +301,7 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
   if endInd eq -1 then begin
      print, "Could not find valid ending point, using Gaussian based guess"
      endInd = endGuess
-     if endInd gt n_elements(totalPixVals)-1 then endInd = n_elements(totalPixVals)-2
+     if endInd gt n_elements(totalSmoothVals)-1 then endInd = n_elements(totalSmoothVals)-2
      return
   endif
 
@@ -308,5 +309,6 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
   print, "Start Time: ", time[startInd]
   print, "End Index: ", endInd
   print, "End Time: ", time[endInd]
- 
+
+
 end

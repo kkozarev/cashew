@@ -48,6 +48,20 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
      colSmooth = smooth(col, 20, /edge_truncate)  
      colSmooth = reform(colSmooth)
 
+     nPos = where(col gt 1.0)
+
+     if n_elements(nPos) lt 3 then begin
+        wave_frontedge[ii-sp].rad = mymaxima[0, ii].rad
+        wave_backedge[ii-sp].rad = mymaxima[0, ii].rad
+        return
+     endif
+        
+     
+     if plot eq 1 then begin
+        print, h, ":", m
+        cgPlot, rad, colSmooth, col='brown', /window
+     endif
+
      ; Fit a Gaussian to determine front and back edges
     ; gfit4 = gaussfit(rad, colSmooth, coeff, nterms=4)
 
@@ -57,12 +71,10 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
      estimates[2] = 2.0
 
      print, estimates
-     gfit4 = mpFitPeak(rad, colSmooth, coeff, nterms=4, estimates=estimates)
+     gfit4 = mpFitPeak(rad, colSmooth, coeff, nterms=4);, estimates=estimates)
+     
 
-
-     if plot eq 1 then begin
-        print, h, ":", m
-        cgPlot, rad, colSmooth, col='brown', /window
+   if plot eq 1 then begin
         
         print, "COEFF"
         print, coeff
@@ -88,7 +100,7 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
 
      ; Try excluding some initial points in case there are really
      ; negative values preventing the Gaussian fit from working
-     if (gaussHeight lt 0) || (gaussHeight gt 300) || (gaussStdev gt 5) then begin
+     if (gaussHeight lt 0) || (gaussHeight gt 300) || (gaussStdev gt 8) then begin
         ; Set initial negative values to the mean
         average = mean(colSmooth)
         for i = 0, n_elements(rad)-1 do begin
@@ -103,7 +115,7 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
 ;        gfit4 = gaussfit(rad, colSmooth, coeff, nterms=4)
 
       
-        gfit4 = mpFitPeak(rad, colSmooth, coeff, nterms=4, estimates=estimates)
+        gfit4 = mpFitPeak(rad, colSmooth, coeff, nterms=4);, estimates=estimates)
         
         if debug eq 1 then begin
            print, "COEFF"
@@ -123,7 +135,7 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
         frontEdge = gaussCenter+nsigma*gaussStdev
         backEdge = gaussCenter-nsigma*gaussStdev
         
-        if gaussHeight lt 0 || gaussStdev lt 0 || gaussStdev gt 5 then begin
+        if gaussHeight lt 0 || gaussStdev lt 0 || gaussStdev gt 8 then begin
            negInd = where(colSmooth lt 0) 
            
            if negInd[0] eq -1 then begin
@@ -136,7 +148,7 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
               ;; print, coeff
               
               
-              gfit4 = mpFitPeak(rad, colSmooth, coeff, nterms=4, estimates=estimates)
+              gfit4 = mpFitPeak(rad, colSmooth, coeff, nterms=4);, estimates=estimates)
               
               if debug eq 1 then begin
                  print, "COEFF"
@@ -151,7 +163,7 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
               gaussCenter = coeff[1]
               gaussStdev = coeff[2]
               
-              if gaussHeight lt 0 || gaussStdev lt 0 || gaussStdev gt 5.0 then begin
+              if gaussHeight lt 0 || gaussStdev lt 0 || gaussStdev gt 8.0 then begin
                  alt=1
               endif
               
@@ -175,10 +187,10 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
         ;;    frontEdge = yarray[maxYInd]        
         ;; endif
 
-        if frontEdge lt mymaxima[0, ii].rad then begin
-           print, "Front edge behind maxima, assigning max value"
-           frontEdge = mymaxima[0,ii].rad
-        endif
+        ;; if frontEdge lt mymaxima[0, ii].rad then begin
+        ;;    print, "Front edge behind maxima, assigning max value"
+        ;;    frontEdge = mymaxima[0,ii].rad
+        ;; endif
         
         wave_frontedge[ii-sp].rad = frontEdge
         wave_frontedge[ii-sp].yind = mymaxima[0,ii].ind
@@ -216,7 +228,12 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
      endif else begin
         ;OLD VERSION, SEARCHING DOWN FROM INTENSITY PEAK
         y=reform(datastruct.bdiff[ii,mymaxima[0,ii].ind:*])
-        y=smooth(y,2,/edge_truncate)
+        if n_elements(y) gt 2 then begin
+           y=smooth(y,2,/edge_truncate)
+        endif else begin
+           wave_frontedge[ii-sp].rad = mymaxima[0, ii].rad
+           continue
+        endelse
 ;        cgPlot, y
         np=n_elements(y)
         tmp=min(where(y le 0.25*max(y)))
@@ -230,15 +247,20 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
         wave_frontedge[ii-sp].xind = ii
         datastruct.frontinds[mind,ii]=wave_frontedge[ii-sp].yind
         
-        if wave_frontedge[ii-sp].rad lt mymaxima[0, ii].rad then begin
-           wave_frontedge[ii-sp].rad = mymaxima[0, ii].rad
-        endif
+        ;; if wave_frontedge[ii-sp].rad lt mymaxima[0, ii].rad then begin
+        ;;    wave_frontedge[ii-sp].rad = mymaxima[0, ii].rad
+        ;; endif
 
         ;Find the back edge of the wave
         
 ;OLD VERSION, SEARCHING DOWN FROM INTENSITY PEAK
         y=reform(datastruct.bdiff[ii,0:mymaxima[0,ii].ind])
-        y=smooth(y,2,/edge_truncate)
+        if n_elements(y) gt 2 then begin
+           y=smooth(y,2,/edge_truncate)
+        endif else begin
+           wave_frontedge[ii-sp].rad = mymaxima[0, ii].rad
+           continue
+        endelse 
         np=n_elements(y)
         y=reverse(y,1)          ;reverse the array so the search is the same
        ; cgPlot, y, color='blue'

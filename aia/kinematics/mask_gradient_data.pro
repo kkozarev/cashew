@@ -10,7 +10,7 @@ print, background
 
 ;threshold = background
 
-threshold = 25.0
+threshold = 30.0
 
 newData = data
 nExceed = 0 
@@ -40,7 +40,6 @@ endfor
    ;; endif
 
 correctData = data / newData
-
 
 end
 
