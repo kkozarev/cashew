@@ -54,4 +54,6 @@ endfor
 
 cgImage, binData, /window
 
+
+stop
 end

@@ -948,8 +948,8 @@ pro aia_annulus_analyze_tangential,event,datapath=datapath,savepath=savepath,$
   lat_data_left.plotinfo[0].x=!X
   lat_data_left.plotinfo[0].y=!Y
   write_png,savepath+lat_data_left.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 

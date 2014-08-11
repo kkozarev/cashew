@@ -67,7 +67,6 @@ pro make_gradient_map_tangential, times, rad, data, yrng, intensityData=intensit
 
   intensityData = intensityData
   cgimage, intensityData[*, yrng[0]:yrng[1]]
- 
   
 end
          
