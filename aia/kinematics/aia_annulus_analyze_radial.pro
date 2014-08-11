@@ -96,7 +96,7 @@ function jmap_filter_maxima_radial,time,height,mymaxima,fitrange=fitrange
         maxinds[0,fitrange[0]+tt+1].ind=min(where(height-ht[tt+1] gt 0.))
         maxinds[0,fitrange[0]+tt+1].rad=ht[tt+1]/RSUN
      endif
-     
+
     change=0 
   endfor
   
@@ -106,7 +106,8 @@ end
 
 
 ;+============================================================================
-pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,constrain=constrain, auto=auto, gradient=gradient
+pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,constrain=constrain,$
+                              auto=auto, gradient=gradient
 
   RSUN=6.96e5  ;Solar radius in km.
   nmeas=n_elements(datastruct.imgtit)
@@ -201,7 +202,7 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
      sp=datastruct.xfitrange[0]
      ep=datastruct.xfitrange[1]
                                 ;Search for the edges of the wave
-     wave_frontedge=replicate({rad:0.0D,ind:0L},ep-sp+1)
+     wave_frontedge=replicate({rad:0.0D,yind:0L, xind:0L},ep-sp+1)
      wave_backedge=wave_frontedge
      
                                 ;To restore the plot information and overplot on them, do
@@ -326,7 +327,7 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
                       wave_backedge=wave_backedge
 
      find_corr_end, data, time, yarray, startInd=startInd, endInd=endInd, wave_frontedge=wave_frontedge,$
-                    wave_backedge=wave_backedge, maxRadIndex=maxRadIndex, startCorr=startCorr, endCorr=endCorr
+                   maxRadIndex=maxRadIndex, endCorr=endCorr
            
      print, "Corrected start index: ", startInd
      print, "Corrected end index: ", endInd
@@ -509,6 +510,17 @@ loadct, 0, /silent
   xyouts,!x.window[0]+xmargin,!P.position[3]-5*ymargin,tmpstr,/norm,charsize=3,color=255,charthick=2
 endfor
 
+;Compute wave thickness
+for ii = 0, n_elements(wave_frontedge)-1 do begin
+   datastruct.wavethick[sp+ii] = wave_frontedge[ii].rad - wave_backedge[ii].rad
+endfor
+
+print, "Calculated Wave Thickness: "
+print, datastruct.wavethick[sp:ep]
+
+print, "Calculated Average Wave Intensities: "
+print, datastruct.avgIntense[sp:ep]
+
 end
 ;-============================================================================
 
@@ -674,6 +686,8 @@ pro aia_annulus_analyze_radial,event,datapath=datapath,savepath=savepath,thrange
            maxinds:intarr(1,nsteps),$
            frontinds:intarr(1,nsteps),$
            backinds:intarr(1,nsteps),$
+           wavethick:fltarr(1, nsteps),$
+           avgIntense:fltarr(1, nsteps),$
            xtitle:'Time of '+event.date,ytitle:'R!Dsun!N',$
            imgtit:'AIA/'+wav+' BDiff Radial Positions',$
            savename:'annplot_'+date+'_'+event.label+'_'+wav+'_radial_auto.png',$

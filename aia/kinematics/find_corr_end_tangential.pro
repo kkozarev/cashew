@@ -1,5 +1,5 @@
-pro find_corr_end, data, time, rad, startInd=startInd, endInd=endInd, wave_frontedge=wave_frontedge,$
-                   maxRadIndex=maxRadIndex, endCorr=endCorr
+pro find_corr_end_tangential, data, time, rad, startInd=startInd, endInd=endInd, wave_frontedge=wave_frontedge,$
+                   maxRadIndex=maxRadIndex, endCorr=endCorr, maxFrontEdge=maxFrontEdge
 ;PURPOSE                                                                                                  
 ;Procedure to find the improved and final end position of the
 ;EUV wave.
@@ -19,13 +19,22 @@ pro find_corr_end, data, time, rad, startInd=startInd, endInd=endInd, wave_front
 
 
   ; To print out additional information set debug to 1
-  debug = 0
+  debug = 1
 
   nt = n_elements(time)
   dat=data
 
   ind=where(dat lt 0.0)
   if ind[0] gt -1 then dat[ind] = 0.0
+
+  if debug eq 1 then begin
+     print, "Current frontedge"
+     help, wave_frontedge
+     print, wave_frontedge
+     
+     print, "Max front edge value: "
+     print, rad[maxFrontEdge]
+  endif
 
 
      ; Compute the difference between the last point of valid data
@@ -39,6 +48,17 @@ pro find_corr_end, data, time, rad, startInd=startInd, endInd=endInd, wave_front
         print, "top diff: ", topDiff[i]
      endif
      
+     ; Test to see if we pass the maxFrontEdge value found by
+     ; filtering the kinematics data
+     ; If we exceed this, we have likely hit the plateau in the
+     ; tangential data where overexpansion has ceased.
+     if wave_frontedge[i].rad gt rad[maxFrontEdge] then begin
+        if debug eq 1 then print, "Greater than wavefront edge, removing point"
+        endInd = i + startInd
+        endCorr = i
+        return
+     endif
+
   endfor
      
      ; Update the endIndex to cutoff once we reach
@@ -46,6 +66,10 @@ pro find_corr_end, data, time, rad, startInd=startInd, endInd=endInd, wave_front
   minEndArr = where(topDiff eq min(topDiff))
   if minEndArr[0] ne -1 then begin
      minEnd = minEndArr[0]
+     
+     print, "minEnd is:"
+     print, minEnd
+
      endInd = minEnd + startInd
      endCorr = minEnd
      if endCorr eq n_elements(wave_frontedge) then begin
