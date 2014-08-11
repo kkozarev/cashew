@@ -21,6 +21,7 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
 ;                     the wave
 
   plot = 0
+  debug = 0
 
   loadct, 0
 
@@ -45,13 +46,20 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
 
      col = dat[ii,*]
      colSmooth = smooth(col, 8, /edge_truncate)     
+
+; Filter out the negative data
+     average = mean(colSmooth)
+     negInd = where(colSmooth lt 0) 
+     if negInd[0] ne -1.0 then begin
+        colSmooth[negInd] = average 
+     endif
      
      ;gfit1 = gaussfit(rad, colSmooth, coeff, nterms=3)
      ;gfit2 = gaussfit(rad, colSmooth, coeff, nterms=4)
      ;gfit3 = gaussfit(rad, colSmooth, coeff, nterms=5)
 
      ; Fit a Gaussian to determine front and back edges
-     gfit4 = gaussfit(rad, colSmooth, coeff, nterms=6)
+     gfit4 = mpfitpeak(rad, colSmooth, coeff, nterms=4)
 
      if plot eq 1 then begin
         print, h, ":", m
@@ -87,10 +95,12 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
         if frontEdge lt mymaxima[mind, ii].rad then frontEdge = mymaxima[mind,ii].rad
         
         wave_frontedge[ii-sp].rad = frontEdge
-        wave_frontedge[ii-sp].ind = mymaxima[mind,ii].ind
+        wave_frontedge[ii-sp].yind = mymaxima[mind,ii].ind
+        wave_frontedge[ii-sp].xind = ii
 
         wave_backedge[ii-sp].rad = backEdge
-        wave_backedge[ii-sp].ind = mymaxima[mind, ii].ind
+        wave_backedge[ii-sp].yind = mymaxima[mind, ii].ind
+        wave_backedge[ii-sp].xind = ii
 
         ;; print, "Printing new version backedge"
         ;; print, mymaxima[mind, ii].rad
@@ -126,8 +136,9 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
         tmp=min(where(y le 0.25*max(y)))
         if tmp[0] eq -1 then tmp=np-1
         wave_frontedge[ii-sp].rad=yarray[mymaxima[mind,ii].ind+tmp]
-        wave_frontedge[ii-sp].ind=mymaxima[mind,ii].ind+tmp
-        datastruct.frontinds[mind,ii]=wave_frontedge[ii-sp].ind
+        wave_frontedge[ii-sp].yind=mymaxima[mind,ii].ind+tmp
+        wave_frontedge[ii-sp].xind=ii
+        datastruct.frontinds[mind,ii]=wave_frontedge[ii-sp].yind
         
         if wave_frontedge[ii-sp].rad lt mymaxima[mind, ii].rad then begin
            wave_frontedge[ii-sp].rad = mymaxima[mind, ii].rad
@@ -144,7 +155,8 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
         tmp=min(where(y le 0.25*mymaxima[mind,ii].rad))
         if tmp[0] eq -1 then tmp=np-1
 
-        wave_backedge[ii-sp].ind=mymaxima[mind,ii].ind-tmp
+        wave_backedge[ii-sp].yind=mymaxima[mind,ii].ind-tmp
+        wave_backedge[ii-sp].xind = ii
         wave_backedge[ii-sp].rad = yarray[mymaxima[mind,ii].ind-tmp]
 
         ;; print, "Printing maxima in old version"
@@ -164,6 +176,13 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
      if plot eq 1 then begin
         test = get_kbrd(1)
      endif
+
+     nearestStart =value_locate(rad, wave_frontedge[ii-sp].rad)
+     nearestEnd = value_locate(rad, wave_backedge[ii-sp].rad)
+
+;     if nearestStart gt n_elements(y
+
+     datastruct.avgIntense[ii] = mean(col[nearestEnd:nearestStart])
      
   endfor
   

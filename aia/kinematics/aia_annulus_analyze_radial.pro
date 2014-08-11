@@ -202,7 +202,7 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
      sp=datastruct.xfitrange[0]
      ep=datastruct.xfitrange[1]
                                 ;Search for the edges of the wave
-     wave_frontedge=replicate({rad:0.0D,ind:0L},ep-sp+1)
+     wave_frontedge=replicate({rad:0.0D,yind:0L, xind:0L},ep-sp+1)
      wave_backedge=wave_frontedge
      
                                 ;To restore the plot information and overplot on them, do
@@ -510,6 +510,17 @@ loadct, 0, /silent
   xyouts,!x.window[0]+xmargin,!P.position[3]-5*ymargin,tmpstr,/norm,charsize=3,color=255,charthick=2
 endfor
 
+;Compute wave thickness
+for ii = 0, n_elements(wave_frontedge)-1 do begin
+   datastruct.wavethick[sp+ii] = wave_frontedge[ii].rad - wave_backedge[ii].rad
+endfor
+
+print, "Calculated Wave Thickness: "
+print, datastruct.wavethick[sp:ep]
+
+print, "Calculated Average Wave Intensities: "
+print, datastruct.avgIntense[sp:ep]
+
 end
 ;-============================================================================
 
@@ -675,6 +686,8 @@ pro aia_annulus_analyze_radial,event,datapath=datapath,savepath=savepath,thrange
            maxinds:intarr(1,nsteps),$
            frontinds:intarr(1,nsteps),$
            backinds:intarr(1,nsteps),$
+           wavethick:fltarr(1, nsteps),$
+           avgIntense:fltarr(1, nsteps),$
            xtitle:'Time of '+event.date,ytitle:'R!Dsun!N',$
            imgtit:'AIA/'+wav+' BDiff Radial Positions',$
            savename:'annplot_'+date+'_'+event.label+'_'+wav+'_radial_auto.png',$
