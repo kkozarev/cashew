@@ -31,7 +31,7 @@ function get_local_maxima, column,dist,yind=yind,gaussfit=gaussfit
   for ii=0,n_elements(minind)-1 do begin
      if ii lt n_elements(minind)-1 then begin
 ;This is a filter that lets through only the biggest maxima.
-        if (minind[ii+1]-minind[ii] le 6) then continue
+        if (minind[ii+1]-minind[ii] le 2) then continue
         
         locarr=column[minind[ii]:minind[ii+1]]
         locy=dist[minind[ii]+yindrange[0]:minind[ii+1]+yindrange[0]]
@@ -51,11 +51,11 @@ function get_local_maxima, column,dist,yind=yind,gaussfit=gaussfit
            res=gaussfit(locy,locarr,aa)
 ;Follow up with a Levenberg-Marquardt fitting algorigthm
            res=lmfit(locy,locarr,aa,/double,function_name='gaussianfit',sigma=sigma)
-           if cc eq 0 then print,aa[1],dist[lmaxind]
+;           if cc eq 0 then print,aa[1],dist[lmaxind]
            maxima[cc].gfit[0]=aa[1]                        ;X-location (radial) of the peak
            maxima[cc].gfit[1]=max(res)                     ;Y-location (intensity) of the peak
            maxima[cc].gfit[2]=2*sqrt(2*alog(2)*aa[2]^2)    ;The FWHM of the gaussian fit
-           if maxima[cc].gfit[2] eq 'Inf' or maxima[cc].gfit[cc,2] eq 'NaN' then maxima[cc].gfit[cc,2]=1.0e-10
+           if maxima[cc].gfit[2] eq 'Inf' or maxima[cc].gfit[2] eq 'NaN' then maxima[cc].gfit[2]=1.0e-10
            maxima[cc].gfit[3]=sigma[1]    ;The error in radial position of the maximum
            maxima[cc].gfit[4]=sigma[0]    ;The error in the fitted peak value
            zz=(locy-aa[1])/aa[2]
@@ -64,9 +64,12 @@ function get_local_maxima, column,dist,yind=yind,gaussfit=gaussfit
      endif
   endfor
   
+  if cc gt 0 then begin
 ;Order the local maxima by size
-  maxima=maxima[0:cc-1]
-  maxima.nmax=cc
+     maxima=maxima[0:cc-1]
+     maxima.nmax=cc
+  endif
+  
   sort=reverse(sort(maxima.val))
   ordmaxima=maxima[sort]
   

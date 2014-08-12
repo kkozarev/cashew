@@ -3,7 +3,7 @@ pro test_aia_annulus_create
 ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
-     event=load_events_info(label='test')
+     event=load_events_info(label='140108_01')
      ;aia_annulus_create,event,/force
      ;aia_annulus_create,event,/force
      rrange=[1.0,1.3]
@@ -181,7 +181,7 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
      p = wcs_get_pixel(wcs, [0,0])  
      xpol = new_r*cos(new_theta)+p[0]  
      ypol = new_r*sin(new_theta)+p[1]
-     
+          
 ;Create the base difference image here
      if keyword_set(base) then begin
         for img_no = 0, lwr_img - 1 do begin
@@ -353,8 +353,8 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
            savefname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_'+img_strind+'.png'
            searchfname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_*.png'
            if keyword_set(force) and img_no eq lwr_img then begin
-              tmp=file_search(savefolder+searchfname)
-              if tmp[0] ne '' then spawn,'rm -rf '+savefolder+searchfname
+              res=file_search(savefolder+searchfname)
+              if res[0] ne '' then spawn,'rm -rf '+savefolder+searchfname
            endif 
         endif else begin
            if keyword_set(base) then begin

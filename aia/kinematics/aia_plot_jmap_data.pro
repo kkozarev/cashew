@@ -15,7 +15,7 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
   plot,times,rad,$
        xrange=xrange,$
        yrange=yrange,$
-       ytickformat='(f4.2)',$
+       ytickformat='(f6.2)',$
        xtickformat='LABEL_DATE',$
        xtickunit='Time',xtitle='',ytitle='',$
        /nodata,_extra=extra,$
@@ -39,7 +39,7 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
   endfor
   
   xyouts,!P.position[0]+0.15,!P.position[3]+0.02,extra.title,color=0,charsize=3,/norm
-  AXIS, YAXIS=0,YRANGE=yrange, /SAVE, color=0,ythick=3,yticks=6,charsize=3,_extra=extra,ystyle=1,ytickformat='(f4.2)'
+  AXIS, YAXIS=0,YRANGE=yrange, /SAVE, color=0,ythick=3,yticks=6,charsize=3,_extra=extra,ystyle=1,ytickformat='(f6.2)'
   AXIS, YAXIS=1,YRANGE=yrange, /SAVE, color=0,ythick=3,yticks=6,ytickformat='(A1)',ystyle=1
   AXIS, XAXIS=0,XRANGE=xrange, /SAVE, color=0,xthick=3,xticks=6,xtickformat='LABEL_DATE',xtickunit='Time',charsize=3,_extra=extra,xstyle=1
   AXIS, XAXIS=1,XRANGE=xrange, /SAVE, color=0,xthick=3,xticks=6,xtickformat='(A1)',xstyle=1
@@ -82,15 +82,17 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
      if keyword_set(startInd) then begin
         loadct, 1, /silent
         print, "Plotting automatically detected start position"
-        oplot,[times[startInd],times[startInd]],yrange,thick=3,color=100
         sp = startInd
+        dt=(times[sp]-times[sp-1])/2.
+        oplot,[times[startInd]-dt,times[startInd]-dt],yrange,thick=3,color=100
      endif
    
      if keyword_set(endInd) then begin
         loadct, 1, /silent
         print, "Plotting automatically detected start position"
-        oplot,[times[endInd],times[endInd]],yrange,thick=3,color=100
         ep = endInd
+        dt=(times[ep]-times[ep-1])/2.
+        oplot,[times[endInd]-dt,times[endInd]-dt],yrange,thick=3,color=100
      endif
 
      loadct, 0, /silent
