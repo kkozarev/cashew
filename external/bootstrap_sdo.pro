@@ -1,4 +1,4 @@
-pro bootstrap_sdo, distance, time, error=error, fit_line, p1, p2, p3, s1, s2, s3, _extra=_extra
+pro bootstrap_sdo, distance, time, error=error, fit_line, p1, p2, p3, s1, s2, s3, _extra=_extra,linear=linear
 ;+
 ; NAME:
 ;       bootstrap_sdo
@@ -54,7 +54,7 @@ if not keyword_set(error) then error=fltarr(n_elements(time))+1.0e-33
   ;fit_model = 'p[1] * (x - p[0]) + (1./2.) * p[2] * (x - p[0])^2.'
 
   fit_model = 'p[0] + p[1] * (x) + (1./2.) * p[2] * (x)^2.'
-  
+  if keyword_set(linear) then fit_model = 'p[0] + p[1] * (x)'
   
   fit = mpfitexpr(fit_model, time, distance, h_error, [0., 0.2, 0.00005], perror=perror, $
                   bestnorm = bestnorm, /quiet, _extra=_extra)
@@ -63,6 +63,8 @@ if not keyword_set(error) then error=fltarr(n_elements(time))+1.0e-33
   ;yfit = fit[1]*(time-fit[0]) + (1./2.)*fit[2]*(time-fit[0])^2.
   
   yfit = fit[0] + fit[1]*(time) + (1./2.)*fit[2]*(time)^2.
+  
+  if keyword_set(linear) then yfit = fit[0] + fit[1]*(time)
   
   x_r = time
   
@@ -111,5 +113,6 @@ if not keyword_set(error) then error=fltarr(n_elements(time))+1.0e-33
   ;fit_line = p2[0]*(x - p1[0]) + (1./2.)*p3[0]*(x - p1[0])^2.
   
   fit_line = p1[0] + p2[0]*(x) + (1./2.)*p3[0]*(x)^2.
+  if keyword_set(linear) then fit_line = p1[0] + p2[0]*(x)
   
 end
