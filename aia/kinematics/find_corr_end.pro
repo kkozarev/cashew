@@ -19,7 +19,7 @@ pro find_corr_end, data, time, rad, startInd=startInd, endInd=endInd, wave_front
 
 
   ; To print out additional information set debug to 1
-  debug = 0
+  debug = 1
 
   nt = n_elements(time)
   dat=data

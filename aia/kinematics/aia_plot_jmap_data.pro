@@ -1,4 +1,4 @@
-pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,max=max,fitrange=fitrange,_extra=extra,startInd=startInd,endInd=endInd, auto=auto
+pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,max=max,fitrange=fitrange,title=title,_extra=extra,startInd=startInd,endInd=endInd, auto=auto
 !P.position=[0.15,0.15,0.94,0.9]
 ;This procedure will plot the jmap-extracted profiles with x- and y-axes
   if keyword_set(ct) then loadct,ct,/silent
@@ -38,7 +38,7 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
      endfor
   endfor
   
-  xyouts,!P.position[0]+0.15,!P.position[3]+0.02,extra.title,color=0,charsize=3,/norm
+  xyouts,!P.position[0]+0.15,!P.position[3]+0.02, title,color=0,charsize=3,/norm
   AXIS, YAXIS=0,YRANGE=yrange, /SAVE, color=0,ythick=3,yticks=6,charsize=3,_extra=extra,ystyle=1,ytickformat='(f6.2)'
   AXIS, YAXIS=1,YRANGE=yrange, /SAVE, color=0,ythick=3,yticks=6,ytickformat='(A1)',ystyle=1
   AXIS, XAXIS=0,XRANGE=xrange, /SAVE, color=0,xthick=3,xticks=6,xtickformat='LABEL_DATE',xtickunit='Time',charsize=3,_extra=extra,xstyle=1
