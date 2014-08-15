@@ -13,10 +13,10 @@ pro find_start_end_tangential, data, time, startInd=startInd, endInd=endInd, max
 ;     STARTIND - index of front start position
 ;     ENDIND - index of front end position
 
-;  .r aia_jmap_find_maxima
+
   
   ; To print out additional information set debug to 1
-  debug = 1
+  debug = 0
 
   nt = n_elements(time)
   dat=data[*,0:maxYInd]

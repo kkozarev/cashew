@@ -1,11 +1,22 @@
 pro make_gradient_map_tangential, times, rad, data, yrng, intensityData=intensityData
-  
+ 
+;PURPOSE
+;Compute the average x-gradient over a specified number of points
+;from data passed in through the data variable. Generally the data
+;needs to be binned using bin_aia_data before taking the gradient
+;
+;INPUTS
+;     DATA - annulus data from aia_annulus_analyze_radial.pro
+;     TIMES - array of times to corresponding annulus data
+;     RAD - array of radii used in the data
+;     YRNG - array of indices indicating range of valid rad data
+;OUTPUTS
+;     INTENSITYDATA - array containing computed gradient scores
+
+ 
   ; Just take gradient in the x direction for tangential plots
 
   intensityData = dblarr(n_elements(times), n_elements(rad))
-
- ; ind = where(data lt 0)
-;  data[ind] =  
 
   ; Select a number of points for a window to average over
   nPts = 10
@@ -18,8 +29,8 @@ pro make_gradient_map_tangential, times, rad, data, yrng, intensityData=intensit
         currentPixel = data[t, r]
         skip = 0
         ; Take surrounding pixels and create an intensity score
-        
         if t eq 0 then begin
+           ; Average over the specified window
            for i = 0, n_elements(window)-1 do begin
               rightDiff = abs(data[t+i,r]-data[t+i+1,r])
               print, rightDiff
@@ -27,7 +38,8 @@ pro make_gradient_map_tangential, times, rad, data, yrng, intensityData=intensit
            endfor
            meanDiff = meanDiff / n_elements(window)
            intensityData[t,r] = meanDiff
-        endif else if t eq n_elements(times)-1 then begin      
+        endif else if t eq n_elements(times)-1 then begin 
+           ; Average over the specified window
            for i = 0, n_elements(window)-1 do begin
               leftDiff = abs(data[t,r]-data[t-i-1, r])
               meanDiff = meanDiff+leftDiff
@@ -37,30 +49,16 @@ pro make_gradient_map_tangential, times, rad, data, yrng, intensityData=intensit
         endif else begin
            nIterations = 0
            meanDiff = 0
+           ; Average over the specified window
            for i=0, n_elements(window)-1 do begin
               if t - i le 1 then break
               nIterations++
               leftDiff = abs(data[t,r]-data[t-i-1,r])
               meanDiff = meanDiff + leftDiff
            endfor
-           ;; for i = 0, n_elements(window)-1 do begin
-           ;;    if t+i gt n_elements(times)-2 then break
-           ;;    nIterations++
-           ;;    rightDiff = abs(data[t+i,r]-data[t+i+1,r])
-           ;;    meanDiff = meanDiff + rightDiff
-           ;; endfor
            meanDiff = meanDiff / nIterations
            intensityData[t,r] = meanDiff
         endelse
-
-        
-        ;; if data[t,r] gt 0 && meanDiff lt 20 then begin
-        ;;    intensityData[t,r] = data[t,r]
-        ;;    ;print, "time is:"
-        ;;    ;print, times[t]
-        ;;    print, "Diff is:"
-        ;;    print, meanDiff
-        ;; endif
 
      endfor
   endfor

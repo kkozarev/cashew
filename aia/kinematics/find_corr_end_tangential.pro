@@ -19,7 +19,7 @@ pro find_corr_end_tangential, data, time, rad, startInd=startInd, endInd=endInd,
 
 
   ; To print out additional information set debug to 1
-  debug = 1
+  debug = 0
 
   nt = n_elements(time)
   dat=data

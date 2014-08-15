@@ -22,7 +22,7 @@ pro find_corr_start_tangential, data, time, yarray, datastruct, ht_km, height, f
 
 
   ; To print out additional information set debug to 1
-  debug = 1
+  debug = 0
 
   nt = n_elements(time)
   dat=data

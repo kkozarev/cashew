@@ -1,9 +1,26 @@
 pro bin_aia_data, time, yarray, data, yrng, binData=binData
+  
+;PURPOSE                                                                                             
+;Procedure to assign AIA data to constant valued bins in order
+;to enable the gradient code to work correctly. Bins are determined
+;by computing a quiet average in the upper left corner of the data
+;and basing the bins off of number of standard deviations above
+;the mean                                                                                                    
+;INPUTS 
+;     DATA - annulus data from aia_annulus_analyze_radial.pro                                         
+;     TIME - array of times to corresponding annulus data                                             
+;     YARRAY - array of y-axis used in the kinematics data
+;     YRNG - indices indicating the current range of valid yarray data
+;
+;OUTPUTS                                                                                              
+;     BINDATA - Binned version of DATA ready for gradient
+
 
 
 binData = data
 
-; Compute thresholds from background average
+; Compute thresholds from background average in upper
+; left corner over 5 time steps
 backgroundMean = mean(data[0:5, 100:n_elements(data[0,*])-1])
 backgroundStdev = stddev(data[0:5, 100:n_elements(data[0,*])-1])
 
@@ -13,26 +30,20 @@ print, backgroundMean
 print, "Background stdev is"
 print, backgroundStdev
 
-
-;; for t=0, n_elements(data[*,0])-1 do begin
-;;    for r=0, n_elements(data[0,*])-1 do begin
-;;       bindata[t,r] = 0.0
-;;       if data[t, r] lt 0.0 then begin
-;;          binData[t, r] = -10.0
-;;       endif else if data[t, r] gt 50.0 && data[t,r] lt 75.0 then begin
-;;          binData[t,r] = 25.0
-;;       endif else if data[t,r] gt 75.0 then begin
-;;          binData[t,r] = 150.0
-;;       endif
-;;    endfor
-;; endfor 
-
 firstBin = backgroundMean +3*backgroundStdev
 secondBin = backgroundMean + 4*backgroundStdev
 thirdBin = backgroundMean + 6*backgroundStdev
 fourthBin = backgroundMean + 8*backgroundStdev
 
-
+; Assign data to corresponding bins
+; The assigned values were chosen somewhat arbitrarily, but with the
+; general scale in mind that small gradients should be valued less 
+; than large gradients. There might be a better way to do this. 
+; Ultimately, pixel intensities exceeding 8 standard deviations 
+; should receive a high value after binning the data to ensure
+; the corresponding gradient value is similarly high. Data near the
+; mean should not have large gradients and are thus assigned smaller
+; differences between each bin
 for t=0, n_elements(data[*,0])-1 do begin
    for r=0, n_elements(data[0,*])-1 do begin
       bindata[t,r] = 0.0
@@ -99,6 +110,7 @@ endfor
 ;;    AXIS, XAXIS=0,XRANGE=xrange, /SAVE, color=0,xthick=3,xticks=6,xtickformat='LABEL_DATE',xtickunit='Time',charsize=3,_extra=extra,xstyle=1, xtitle=xtitle
 ;;    AXIS, XAXIS=1,XRANGE=xrange, /SAVE, color=0,xthick=3,xticks=6,xtickformat='(A1)',xstyle=1
 
-;  cgImage, binData
+; Plot binned data and return
+cgImage, binData
 
 end

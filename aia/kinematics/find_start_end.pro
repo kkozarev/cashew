@@ -14,7 +14,7 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd
 ;     ENDIND - index of front end position
 
   ; To print out additional information set debug to 1
-  debug = 1
+  debug = 0
 
   nt = n_elements(time)
   dat=data
@@ -69,14 +69,14 @@ x=lindgen(n_elements(totalPixVals))
 gaussData=totalPixVals
 
 
- ; cgplot, totalPixVals, /window
+  cgplot, totalPixVals, /window
 
-  cgplot, time.jd, totalSmoothVals, title="Summed Pixel Intensities vs Time", xtickformat='LABEL_DATE',$
-          xtickunit='Time', xtitle='Time (UT)', ytitle='Summed Pixel Intensities', thick=3, /window
+;  cgplot, time.jd, totalSmoothVals, title="Summed Pixel Intensities vs Time", xtickformat='LABEL_DATE',$
+;          xtickunit='Time', xtitle='Time (UT)', ytitle='Summed Pixel Intensities', thick=3, /window
 
   ; Compute a Gaussian fit to determine start and end times
   gfit2 = gaussfit(x, gaussData, coeff, estimates=estimates, nterms=4)
-  cgPlot, time.jd, gfit2, /overPlot, color='green', /window, thick=3
+  cgPlot, gfit2, /overPlot, color='green', /window
 
   ; If the peak or stdev is outrageous, refit with all of the data
   if coeff[2] gt n_elements(totalPixVals)/2 || coeff[0] lt 0 then begin
