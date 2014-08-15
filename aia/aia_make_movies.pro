@@ -3,14 +3,15 @@ pro test_aia_make_movies
   ;You can run this for a single event, like so
   one=1
   if one eq 1 then begin
-     label='110511_01'
+     label='140331_01'
      event=load_events_info(label=label)
      wavelengths=['193']
      movie_types=['araw','abase','arun','raw','base','run']
      movie_types=['pfss_shock','thetabn','thetabn_cumulative','pfss_spread']
-     movie_types=['run','base','raw']
+     movie_types=['run']
      movie_types=['ywave']
-     wavelengths=['193','211']
+     movie_types=['run','base','raw']
+     wavelengths=['171','131']
      for w=0,n_elements(wavelengths)-1 do begin
         wavelength=wavelengths[w]
         for mt=0,n_elements(movie_types)-1 do begin
@@ -66,6 +67,7 @@ pro aia_make_movies, event, wav=wav, FRAMES_PER_SECOND = frames_per_second, PATH
 ;            'em_baseratio' - Plot a base ratio of the Aschwanden
 ;                             model EM.
 ;            'pfss_shock' - the PFSS/Shock model images
+;            'pfss_shock_hires' - same as 'pfss_shock', but with high PFSS resolution
 ;            'thetabn' - the plots of ThetaBN angle as a
 ;                         function of the shock surface position
 ;            'thetabn_hires' - same as 'thetabn' but with high PFSS resolution
@@ -76,6 +78,13 @@ pro aia_make_movies, event, wav=wav, FRAMES_PER_SECOND = frames_per_second, PATH
 ;            'pfss_spread' - the plots of PFSS interacting field lines
 ;                            showing the angular spread of shock
 ;                            influence
+;            'pfss_spread_hires' - same as pfss_spread but with high
+;                                  PFSS resolution
+;            'pfss_spread_topview' - the plots of PFSS interacting field lines
+;                            showing the angular spread of shock
+;                            influence
+;            'pfss_spread_topview_hires' - same as pfss_spread_topview but with high
+;                                  PFSS resolution
 ;            'ywave' - the plots of YAFTA/Wave tracking results
 ;
 ;            Default is 'raw'
@@ -118,10 +127,9 @@ path_call = ' -i '
 full_path = path
 filetype = movie_type + '_'
 
-
-
 ffmpeg_params1 = ' -an -pix_fmt "yuv420p" -vcodec "libx264" -level 41 -crf 18.0 -b "28311k" -r '
 ffmpeg_params2 = ' -bufsize "28311k" -maxrate "28311k" -g "100" -coder 1 -profile main -preset faster -qdiff 4 -qcomp 0.7 -directpred 3 -flags +loop+mv4 -cmp +chroma -partitions +parti4x4+partp8x8+partb8x8 -subq 7 -me_range 16 -keyint_min 1 -sc_threshold 40 -i_qfactor 0.71 -rc_eq ''blurCplx^(1-qComp)'' -b_strategy 1 -bidir_refine 1 -refs 6 -deblockalpha 0 -deblockbeta 0 -trellis 1 -x264opts keyint=10:min-keyint=1:bframes=1 -threads 2 '
+
 
 savepath=path+'png/'
 movie_path=path+'movies/'
@@ -227,7 +235,37 @@ endif
 if movie_type eq 'pfss_spread' then begin
    savepath=event.pfsspath
    movie_path=event.moviepath
-   pngfname='aia_pfss_shock_angular_influence_'+date+'_'+label
+   pngfname='aia_pfss_shock_angular_influence_'+date+'_'+label+'_lores'
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%03d.png'
+   imgsearch = savepath + pngfname + '_???.png'
+   moviefname = movie_path + pngfname + '.mp4'
+endif
+
+if movie_type eq 'pfss_spread_hires' then begin
+   savepath=event.pfsspath
+   movie_path=event.moviepath
+   pngfname='aia_pfss_shock_angular_influence_'+date+'_'+label+'_hires'
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%03d.png'
+   imgsearch = savepath + pngfname + '_???.png'
+   moviefname = movie_path + pngfname + '.mp4'
+endif
+
+if movie_type eq 'pfss_spread_topview' then begin
+   savepath=event.pfsspath
+   movie_path=event.moviepath
+   pngfname='aia_pfss_shock_angular_influence_'+date+'_'+label+'_topview_lores'
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%03d.png'
+   imgsearch = savepath + pngfname + '_???.png'
+   moviefname = movie_path + pngfname + '.mp4'
+endif
+
+if movie_type eq 'pfss_spread_topview_hires' then begin
+   savepath=event.pfsspath
+   movie_path=event.moviepath
+   pngfname='aia_pfss_shock_angular_influence_'+date+'_'+label+'_topview_hires'
    ;The png image files
    imgfnames = savepath + pngfname + '_%03d.png'
    imgsearch = savepath + pngfname + '_???.png'
@@ -265,7 +303,7 @@ if n_elements(imgs) lt 6 then begin
 endif
 
 ;Create a temporary folder to order the images properly.
-tmpdir="$HOME/tmpdir_"+strtrim(string(fix(floor(randomn(2)*100000))),2)+'/'
+tmpdir=movie_path+"tmpdir_"+strtrim(string(fix(floor(randomn(2)*100000))),2)+'/'
 res=file_test(tmpdir,/directory)
 if res then spawn,'rm '+tmpdir+'*' $
 

@@ -2,13 +2,13 @@ pro test_aia_load_data
 ;Run for one or a few events like this:
   one=1
   if one eq 1 then begin
-     labels=['140418_01']
+     labels=['paper']
      for ev=0,n_elements(labels)-1 do begin
         label=labels[ev]
         event=load_events_info(label=label)
         wav='193'
         ;aia_load_data,event.st,event.et,wav,event=event,/nodata
-        aia_load_data,event.st,event.et,wav,event=event,subdata=subdata,subindex=subindex,/subroi,/force
+        aia_load_data,event.st,event.et,wav,event=event,/force,/subroi
      endfor
   endif
   
@@ -228,7 +228,7 @@ endif else begin
    endif
    
 ;First search on the local archive in the CfA and JSOC formats
-   files=aia_file_search(starttime,endtime,wave,loud=loud,missing=locmissing,path=locarc,remove_aec=remove_aec)
+   files=aia_file_search(starttime,endtime,wave,loud=loud,missing=locmissing,path=locarc)
    if files[0] eq '' then files=aia_file_search(starttime,endtime,wave,loud=loud,missing=locmissing,/jsoc,path=locarc,remove_aec=remove_aec)
    
 ;Then check the cfa archive...
@@ -397,11 +397,12 @@ endif
 ;Normalize the data
 if not keyword_set(original) then for i=0,nfiles-1 do data[*,*,i]/=index[i].exptime
 
+
 if loud eq 1 then print,"making the map in aia_load_data"
 index2map,index,data,map
 
 ;Make subroi data array.
-if keyword_set(subroi) then begin
+if keyword_set(subroi) or keyword_set(subdata) or keyword_set(subindex) then begin
    if keyword_set(event) then fov=event.aiafov else fov=[1024,1024]
    newcoords=aia_autoselect_subroi(index[0],coords,event=event)
    subdata=aia_inspect_data(index,data,autoregion=newcoords,event=event)
@@ -411,24 +412,20 @@ endif else begin
    if datfname ne '' then save,index,data,filename=datfname
 endelse
 
-if keyword_set(submap) then begin
+
 ;   if not keyword_set(map) then begin
 ;      print,''
 ;      print,'The /map keyword should be selected! Making map for you...'
 ;      index2map,index,data,map
 ;      aia_inspect_map,map,submap=submap
 ;   endif else begin
-      aia_inspect_map,map,submap=submap
+;      aia_inspect_map,map,submap=submap
 ;   endelse
-endif
+
 
 ;if keyword_set(archive) then begin
 ;   save,index,data,filename=path+datfname
 ;   if keyword_set(subroi) then save,subindex,subdata,filename=path+subfname
 ;endif
-
-
-
-
 
 end

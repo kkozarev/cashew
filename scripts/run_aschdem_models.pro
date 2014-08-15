@@ -7,7 +7,5 @@ pro run_aschdem_models
      date=event.st
      if ev eq 8 then continue
      aia_cfa_teem_run,event,/remove_aec
-     stop
-  endfor
-  
+  endfor  
 end

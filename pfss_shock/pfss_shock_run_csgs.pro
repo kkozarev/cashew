@@ -13,18 +13,18 @@ function bfield_pfss,ptc,sph_data
 end
 
 
-function fieldline_isopen,ptc,sph_data
-  ;Find out if the field line is open or not.
-  r2d=180./!PI
-  d2r=!PI/180.
-  isopen=0
-  irc=get_interpolation_index(*sph_data.rix,ptc[0])
-  ithc=get_interpolation_index(*sph_data.lat,90-ptc[1]*r2d)
-  iphc=get_interpolation_index(*sph_data.lon,(ptc[2]*r2d+360) mod 360)
-  brc=interpolate(*sph_data.br,iphc,ithc,irc)
-  if brc gt 0 then isopen=1 else isopen=-1
-  return,isopen
-end
+;function fieldline_isopenfieldline_isopen,ptc,sph_data
+;  ;Find out if the field line is open or not.
+;  r2d=180./!PI
+;  d2r=!PI/180.
+;  isopen=0
+;  irc=get_interpolation_index(*sph_data.rix,ptc[0])
+;  ithc=get_interpolation_index(*sph_data.lat,90-ptc[1]*r2d)
+;  iphc=get_interpolation_index(*sph_data.lon,(ptc[2]*r2d+360) mod 360)
+;  brc=interpolate(*sph_data.br,iphc,ithc,irc)
+;  if brc gt 0 then isopen=1 else isopen=-1
+;  return,isopen
+;end
 
 
 ;+--------------------------------------------------------------------
@@ -32,8 +32,9 @@ pro test_pfss_shock_run_csgs
 ; A small procedure to run several instances of the coronal shock
 ; model.
   
-  event=load_events_info(label='110511_01')
-  pfss_shock_run_csgs,event,/lores;,/plot;,/png
+  event=load_events_info(label='130423_01')
+  pfss_shock_run_csgs,event,/lores,/newtimes
+  pfss_shock_run_csgs,event,/hires,/newtimes;,/plot;,/png
 
 end
 ;---------------------------------------------------------------------
@@ -41,7 +42,7 @@ end
 
 
 ;+--------------------------------------------------------------------
-pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
+pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes=newtimes
 ;This procedure runs the pfss/shock model for estimating shock
 ;orientation to magnetic fields, and 
 ;PURPOSE:
@@ -55,7 +56,12 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
 ;       event - an event structure 
 ;
 ;KEYWORDS:
-;
+;       plot - plot the result of running the model
+;       png - the same, but save the plots to png files
+;       hires - use a high resolution PFSS model
+;       lores - use a low resolution PFSS model (default)
+;       newtimes - if a different time resolution AIA data is loaded,
+;                  use the timestamps of that to calculate the CSGS radii.
 ;OUTPUTS:
 ;
 ; 
@@ -77,7 +83,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   sts=event.st
   std=event.et
   date=event.date
-  eventname='AIA_'+date+'_'+evnum+'_'+wav
+  eventname='AIA_'+date+'_'+label+'_'+wav
 
 ;Figure out the name of the local machine.
   pcname=hostname()
@@ -92,7 +98,6 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   if keyword_set(hires) then pfssfile=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav')
   
   aiafile=file_search(datapath+'normalized_'+eventname+'_subdata.sav')
-  stop
   shockfile=file_search(event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed_radial.sav')
   
   
@@ -112,19 +117,13 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   if aiafile[0] ne '' then begin
      restore,aiafile[0]
      if not keyword_set(png) and not keyword_set(plot) then subdata=0
+     aiatime=anytim(subindex.date_obs)
+     aiatime=aiatime-aiatime[0]
   endif else begin
      print,'No AIA data present. Quitting...'
      return
   endelse
 
-  ;Load the PFSS model results
-;  print,'Loading PFSS File '+pfssfile
-;  if pfssfile[0] ne '' then begin
-;     restore,pfssfile[0]
-;  endif else begin
-;     print,'No PFSS data present. Quitting...'
-;     return
-;  endelse
 ;--------------------------------------------------------------
 
 
@@ -134,16 +133,21 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   loadct,8,/silent
   sp=rad_data.xfitrange[0]
   ep=rad_data.xfitrange[1]
-  time=(rad_data.time[sp:ep]-rad_data.time[sp])
-  nsteps=n_elements(time)                                
+  time=(rad_data.time[sp:ep]-rad_data.time[sp])                              
   RSUN=ind_arr[0].rsun_ref/1000. ;Solar radius in km.  
   KMPX=ind_arr[0].IMSCL_MP*ind_arr[0].RSUN_REF/(1000.0*ind_arr[0].RSUN_OBS)
-  fit=reform(rad_data.fitparams[0,*].front)
-  radiusfitlines=(fit[0]+fit[1]*time+0.5*fit[2]*time^2)/RSUN
-  radiusfitlines-=1.
+  if keyword_set(newtimes) then begin
+     newtime=aiatime
+     pfss_shock_generate_csgs_radii,ind_arr,rad_data,radiusfitlines,newtime=newtime,tindrange=tindrange
+     time=newtime
+     sp=tindrange[0]
+     ep=tindrange[1]
+  endif else begin
+     pfss_shock_generate_csgs_radii,ind_arr,rad_data,radiusfitlines
+  endelse
   radiusfitlines*=RSUN*event.geomcorfactor
   radius=radiusfitlines/kmpx
-  
+  nsteps=n_elements(time)
   lon=event.arlon
   lat=event.arlat
   
@@ -156,14 +160,14 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   sunrad=subindex[0].r_sun+10;For some reason the R_SUN variable is 10 px short...
   minshockrad=radius[0]/kmpx
   maxshockrad=radius[nsteps-1]/kmpx
-  subindex=ind_arr[sp:ep]
+  subindex=subindex[sp:ep]
   
   rsun_m=subindex[0].rsun_ref ;Solar radius in m.
   minAU=1.49598e11 ;m in AU
   mpix=rsun_m/sunrad ;conversion between pixels and m.
   
   shockthick=3.0                ;shock thickness, in pixels
-    
+  
 ;Calculate the number of steps and their size.
   dt= time[1]-time[0]           ;The cadence (maxshockrad-minshockrad)*mpix/(nsteps*1.0)/vshock ;timestep in seconds
   
@@ -176,7 +180,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
   allcrosses=fltarr(nsteps)
   
 ;A structure array that will hold the information about the field-shock crossings
-  crossPoint={px:0.0D,py:0.0D,pz:0.0D,thbn:0.0D,linid:0L,bmag:0.0D}
+  crossPoint={rpx:0.0D,rpy:0.0D,rpz:0.0D,px:0.0D,py:0.0D,pz:0.0D,thbn:0.0D,linid:0L,bmag:0.0D,open:0}
   crossPoints=replicate(crossPoint,nsteps,nmaxcrosses)
            
 ;--------------------------------------------------------------
@@ -352,15 +356,22 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
         
         cross_points=fltarr(3,ncrosses)
         cross_bmag=fltarr(ncrosses)
-        for cross=0,ncrosses-1 do begin
+        for cross=0,ncrosses-1 do begin 
            cross_points[*,cross]=reform(pfss_cartpos[pind[0,cross],*,pind[1,cross]])
            crossPoints[sstep,cross].px=cross_points[0,cross]
            crossPoints[sstep,cross].py=cross_points[1,cross]
            crossPoints[sstep,cross].pz=cross_points[2,cross]
+           
+           pt=(reform(cross_points[*,cross])-suncenter)/sunrad
+           crossPoints[sstep,cross].rpx=pt[0] ;X-, Y-, and Z- positions of the point in Rsun
+           crossPoints[sstep,cross].rpy=pt[1]
+           crossPoints[sstep,cross].rpz=pt[2]
+           
            sphpt=cart2sph([cross_points[0,cross]-xcenter,cross_points[1,cross]-ycenter,cross_points[2,cross]-zcenter]/sunrad)
            cross_bmag[cross]=bfield_pfss(sphpt,sph_data)
            crossPoints[sstep,cross].bmag=cross_bmag[cross]
            crossPoints[sstep,cross].linid=reform(pind[0,cross])
+           crossPoints[sstep,cross].open=pfsslines[crossPoints[sstep,cross].linid].open
            ;if ff mod 100 eq 0 then print,'CSGS section, cross #'+strtrim(string(cross),2)
         endfor
         
@@ -511,7 +522,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores
      print,'Saving file '+pfsspath+fname
      save,filename=pfsspath+fname,$
           allcrosses,dt,radius,time,rotationAngles,crossPoints,carrlon,carrlat,$
-          suncenter,nsteps,sc,radiusfitlines,ind_arr,subindex,$
+          suncenter,nsteps,sc,radiusfitlines,subindex,$
           vertex_list,vert_rotmat,vert_transmat
 ;-==============================================================================     
 end ; END PFSS_SHOCK_RUN_CSGS

@@ -4,11 +4,11 @@ pro test_aia_cfa_teem_run
  ;You can run for one or several events, like this.
   one=1
   if one eq 1 then begin
-     events=load_events_info(label=['test'])
+     events=load_events_info(label=['paper'])
 ;    To do (1): '131107_01','131029_01','131119_01','131207_01'
 ;    To do (2): '110804_01','110809_01','110211_02','110128_01','110125_01','120728_01','121007_01'
 ;    Currently being calculated (remove when done): '131105_01', '130517_01', '130501_01'
-     for ev=0,n_elements(events)-1 do aia_cfa_teem_run,events[ev],/remove_aec
+     for ev=0,n_elements(events)-1 do aia_cfa_teem_run,events[ev],/remove_aec,/force
   endif
   
   
@@ -126,6 +126,7 @@ pro aia_cfa_teem_run,event,savepath=savepath,fileset=fileset,remove_aec=remove_a
      table_fname=savepath+prefix+'_'+'teem'
      teem_table=table_fname+'_table.sav' ; (savefile that contains DEM loopup table)
      teem_map=teem_fname+'_map'
+     teem_tot=teem_fname+'_tot.sav'
      
      if not file_exist(teem_map+'.sav') or keyword_set(force) then begin
 ;Make some initial tests on the data for fitness determination   
@@ -134,6 +135,7 @@ pro aia_cfa_teem_run,event,savepath=savepath,fileset=fileset,remove_aec=remove_a
            aia_cfa_coalign_test,stepfiles,table_fname,wave,io,ct,nsig,nsm,h_km,dx,dy
         endif
         aia_cfa_teem_map,stepfiles,arcoords,wave,npix,teem_table,teem_map,event=event
+        aia_cfa_teem_total,stepfiles,arcoords,wave,npix,q94,teem_table,teem_map+'.sav',teem_tot,event=event
      endif
      
      aia_cfa_teem_disp,teem_map,te_range,st

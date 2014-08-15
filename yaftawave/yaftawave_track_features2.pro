@@ -1,11 +1,11 @@
 pro test_yaftawave_track_features2
-
+  
   event=load_events_info(label='110511_01')
 ;  testpath='/home/kkozarev/algoTests/yafta/test/'
 ;  respath=testpath              ;+'test/'
   
  ; path='/Volumes/Backscratch/Users/kkozarev/AIA/events/'
-  
+   
   ;Rebin to 512^2 pixels
   ;yaftawave_track_features2,event,features512,all_masks512,$
   ;         rebin=[event.aiafov[0]/2.,event.aiafov[1]/2.],$
@@ -19,13 +19,11 @@ pro test_yaftawave_track_features2
   ;Run original size
   
   ;yaftawave_track_features2,event,features,all_masks,/ps,min_size=2000,level=2,savepath=event.yaftawavepath+'2000px/'
-  ;yaftawave_track_features2,event,features,all_masks,/ps,min_size=4000,level=2;,savepath=event.yaftawavepath+'4000px/'
-  yaftawave_track_features2,event,features,all_masks,/ps,min_size=10000,level=2,savepath=event.yaftawavepath+'10000px/'
-  yaftawave_track_features2,event,features,all_masks,/ps,min_size=14000,level=2,savepath=event.yaftawavepath+'14000px/'
+  yaftawave_track_features2,event,features,all_masks,/ps,min_size=2000,rebin=[512,1024];,/dilate;,savepath=event.yaftawavepath+'14000px/'
 end
 
 
-pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepath=savepath,wav=wav,$
+pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepath=savepath,wav=wav,dilate=dilate,$
                               threshold=threshold,ps=ps,nohanning=nohanning, level=level,eventname=eventname,$
                               start_step=start_step,end_step=end_step,rebin=rebin,running=running,nodisk=nodisk
 ;PURPOSE
@@ -96,21 +94,42 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
   
   if not keyword_set(wav) then wav='193'
   aia_load_data,event.st,event.et,wav,subindex=subindex,subdata=subdata,event=event,/subroi
-  
+  stop
   nt=n_elements(subdata[0,0,*])
+
+  if keyword_set(rebin) then begin
+     if n_elements(rebin) ne 2 then begin
+        print,'Keyword rebin must be a 2-element array. Continuing with original dimensions...'
+     endif else begin
+        newsubdata=dblarr(rebin[0],rebin[1],nt)
+        for i=0,nt-1 do $
+           newsubdata[*,*,i]=rebin(reform(subdata[*,*,i]),rebin[0],rebin[1])
+        subdata=newsubdata
+     endelse
+  endif
   nx = n_elements(subdata[*,0,0])
   ny = n_elements(subdata[0,*,0])
+  
   if not keyword_set(wav) then wav='193'
-  if not keyword_set(start_step) then start_step=1
-  if start_step eq 0 then start_step=1
-  if not keyword_set(end_step) then end_step=nt-1
   baseavgnsteps=5
-  data_start_step=start_step+baseavgnsteps
+  
+  if keyword_set(start_step) then begin
+     if start_step eq 0 then start_step=1
+     data_start_step=start_step
+  endif else begin
+     start_step=1
+     data_start_step=baseavgnsteps+1
+  endelse
+  if keyword_set(end_step) then begin
+     
+  endif else begin
+     end_step=nt-1
+  endelse
   data_end_step=end_step
 
 ;prepare base image
   baseim=fltarr(nx,ny)
-  for i=start_step,data_start_step-1 do baseim += subdata[*,*,i]
+  for i=0,baseavgnsteps-1 do baseim += subdata[*,*,i]
   baseim /=(1.0*baseavgnsteps)
   
   
@@ -118,7 +137,7 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
 ;====================================
   dx=subindex[0].IMSCL_MP*subindex[0].RSUN_REF/(1000.0*subindex[0].RSUN_OBS) ; AIA Full Disk pixel size in km
   if not keyword_set(min_size) then min_size = 2000                          ; only track features containing min_size pixels or more
-  if not keyword_set(ps) then if keyword_set(rebin) then wdef,0,rebin[0],rebin[1] else wdef,0,nx,ny
+  if not keyword_set(ps) then wdef,0,nx,ny
   
   
 ;THE TIME STEP LOOP
@@ -132,14 +151,13 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
      filename = savepath+'yaftawave_'+event.date+'_'+event.label+'_'+wav+'_'+strtime
 ;filename = savepath+STRCOMPRESS('ywave_'+'AIA_'+wav+'_'+strtrim(string(nx),2)+'_'+ filenum, /REMOVE_ALL)
      
-     
                                 ; get current data array (suffix "2" is from
                                 ; current step, "1" is from prev. step)
                                 ;===========================================
      
      
      ;Despike the image, and subtract the base image from it.
-     ind=subindex[t]
+     timind=subindex[t]
      
      if keyword_set(running) then begin
         img2=subdata[*,*,t]-subdata[*,*,t-1]
@@ -149,7 +167,10 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
         img2 = im-baseim
         origim=img2
      endelse
-     img2=smooth(img2,4)
+     img2=smooth(img2,2,/edge_truncate)
+     ;img2[where(img2 lt 0.0)]=0.0
+     
+     ;img2=img2^2
      
      
      ;Obtain some statistical information
@@ -159,53 +180,47 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
      
      
      if not keyword_set(threshold) then begin
-        if keyword_set(level) then thresh=stdv*level else thresh=stdv*0.60
+        if keyword_set(level) then thresh=stdv*level else thresh=stdv*0.2
      endif else begin
         thresh=threshold
      endelse
-
+print,stdv,thresh
+;stop
 ;Here, enhance the brighter features some more:
 ;===========================================
   ;  eqim=adapt_hist_equal(img2)
   ;  img2=eqim
-    
+     
 ;Apply a binary mask
-   ; imm=img2
-   ; ind=where(imm ge thresh)
-   ; if ind[0] ne -1 then imm[ind]*=100.0
-   ; ind=where(imm le thresh)
-   ; if ind[0] ne -1 then imm[ind]/=100.0
-   ; img2=imm
-    
+;    imm=img2
+;    imm=origim
+;    ind=where(imm ge thresh)
+;    if ind[0] ne -1 then imm[ind]*=2.0
+;    ind=where(imm le thresh)
+;    if ind[0] ne -1 then imm[ind]=0.0
+;    img2=imm
+;    set_plot,'x'
+;  stop  
     
 ;remove the disk so the algorithm doesn't get confused.
     if keyword_set(nodisk) then begin
-       resim=aia_hide_disk(subindex[t],img2,value=meanv)
+       resim=aia_hide_disk(timind,img2,value=meanv)
        img2=resim
        ;if keyword_set(rebin) then resim=rebin(resim,rebin[0],rebin[1])
     endif
     
-
-    if keyword_set(rebin) then begin
-       img2=rebin(img2,rebin[0],rebin[1])
-       nx=rebin[0]
-       ny=rebin[1]
-    endif
     ;tv,img2;bytscl(img2,min=-40,max=50)
-    
-    
-    
     
     ; group pixels in current data array
     ;=====================================
-    rankdown, img2, mask2, threshold=threshold,/pad; , pad=1
-    
-    contiguous_mask,img2,mask2,threshold=threshold,/pad
+    rankdown, img2, mask2, threshold=thresh,/pad; , pad=1
+    ; do same for contiguous pixel groupings & their structures
+    contiguous_mask,img2,mask2,threshold=thresh,/pad
     
     ; defines structures for current data array
     ;============================================
-    create_features,img2, mask2, features2, min_size=min_size, $
-                    vx=vx, vy=vy, peakthreshold=peakthreshold , dx=dx
+    create_features,img2, mask2, features2, min_size=min_size, /unipolar, $
+                    vx=vx, vy=vy, peakthreshold=peakthreshold, dx=dx
     
     ;error management - if no features are
     ;detected, move on to the next image
@@ -217,7 +232,53 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
     endif
        
     features2.step=t+1 ; insert current time step
+    
+    ;Optionally, dilate the masks to make the features smoother
+    ;========================================= 
+    dil_features=features2
+    if keyword_set(dilate) then begin
+       newmask=mask2
+       newmask[*,*]=0
+       origmask=newmask
+       for ff=0,n_elements(dil_features)-1 do begin
+          mask_str=dil_features[ff].mask_str
+          addresses=long(strsplit(mask_str,/extract))
+          dil_mask = origmask
+          dil_mask[addresses] =dil_features[ff].label
+          ;s1 = replicate(1,3,3) ; dilates to nearest neighbors
+          ;dilate1 = (dilate(dil_mask, s1))*dil_features[ff].label
+          s2 = replicate(1,5,5) ; dilates to 2 nearest neighbors
+          dilate2 = (dilate(dil_mask, s2))*dil_features[ff].label
+          ;s3 = replicate(1,7,7) ; dilates to 3 nearest neighbors
+          ;dilate3 = (dilate(dil_mask, s3))*dil_features[ff].label
+          ;s4 = replicate(1,9,9) ; dilates to 4 nearest neighbors
+          ;dilate4 = (dilate(dil_mask, s4))*dil_features[ff].label
+          newmask+=dilate2
+          dil_features[ff].mask_str=strjoin(string(where(newmask eq dil_features[ff].label)))
+          dil_features[ff].size=n_elements(where(newmask eq dil_features[ff].label))
+;          display_yafta,bytscl(origim,min=-50,max=40), /asp
+;          plot_edges, dilmask
+;          stop
+;          plot_edges, dilate1
+;          stop
+;          plot_edges, dilate2
+;          stop
+;          plot_edges, dilate3
+          ;stop
+       endfor
+       dil_mask=newmask
+       ;mask2=newmask
+       ;features2=dil_features
 
+
+;DEBUGGG
+;TRY TO FIX THE OVERLAPPING PIXELS IN THE DILATED IMAGES
+       dil_max_label=max([dil_features.label, features2.label])
+       match_features_v01, features2, dil_features, mask2, dil_mask, img2, img2, $
+                           old_max_label=dil_max_label
+;DEBUGGG
+    endif
+    
 
     ; after at least two steps, begin matching
     ;========================================= 
@@ -231,7 +292,7 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
         ; concantenate masks from current step with prev. steps' masks
         ;==============================================================
         all_masks = [[[all_masks]],[[mask2]]]
-
+        if keyword_set(dilate) then all_dil_masks = [[[all_dil_masks]],[[dil_mask]]]
         ; concantenate features from current step with prev. steps'
         ;==========================================================
         if (n_elements(all_features) eq 0) then  all_features = features1 $
@@ -241,32 +302,41 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
         ;=============================================================
         old_max_label = max([all_features.label, features2.label]) 
     
-    endif else all_masks = mask2  ; store current mask
+     endif else begin
+        all_masks = mask2       ; store current mask
+        if keyword_set(dilate) then all_dil_masks = dil_mask
+     endelse
 
     ; raname current data array, mask, and
     ; feature as same from previous step
-    ;=========================================
+    ;=========================================    
     img1 = temporary(img2)
     mask1 = temporary(mask2)
     features1 = temporary(features2)
     
     if keyword_set(ps) then begin
        set_plot,'ps'
-       device,/color,filename=STRCOMPRESS(filename+'.eps',/re),/inches,xsize=event.aiafov[0]/102.4,ysize=event.aiafov[1]/102.4
+       device,/color,filename=STRCOMPRESS(filename+'.eps',/re),/inches,xsize=nx/102.4,ysize=ny/102.4
     endif
     
     ; graphical output of features, labels
     ;=========================================
     if not keyword_set(ps) then wdef,0,nx,ny
     ;Calculate the arcsec values of the pixels along the X- and Y-axes.
-    ;x_values=ind.IMSCL_MP*(findgen(event.aiafov[0])+ind.subroi_x0-2048.)
-    ;y_values=ind.IMSCL_MP*(findgen(event.aiafov[1])+ind.subroi_y0-2048.)
+    ;x_values=timind.IMSCL_MP*(findgen(event.aiafov[0])+timind.subroi_x0-2048.)
+    ;y_values=timind.IMSCL_MP*(findgen(event.aiafov[1])+timind.subroi_y0-2048.)
     ;Plot the image
+    
     display_yafta,bytscl(origim,min=-50,max=40),$;x_values,y_values,$
-                  tit=ind.origin+'/'+ind.instrume+$
-                  '/'+ind.wave_str+'  '+ind.date_obs+'   '+filenum,/aspect
-    plot_edges,mask1,thick=4
-    plot_labels,features1,thick=4
+                  tit=timind.origin+'/'+timind.instrume+$
+                  '/'+timind.wave_str+'  '+timind.date_obs+'   '+filenum,/aspect
+    if keyword_set(dilate) then begin
+       plot_edges,dil_mask,thick=4
+       plot_labels,dil_features,thick=4
+    endif else begin
+       plot_edges,mask1,thick=4
+       plot_labels,features1,thick=4
+    endelse
     
     ; for generating graphical output
     ;================================
@@ -279,15 +349,19 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
         ;print,exec
         spawn,exec
      endif
-
-;stop
-
-endfor
-
+    
 ; Include most recent step's features.
 ;=====================================
-if t eq data_start_step then all_features=features1 else $
-   all_features = [all_features, features1]
+    if t eq data_start_step then begin
+       all_features=features1
+       if keyword_set(dilate) then all_dil_features=dil_features
+    endif else begin
+       all_features = [all_features, features1]
+       if keyword_set(dilate) then all_dil_features=[all_dil_features,dil_features]
+    endelse
+
+;stop
+ endfor
 
 
 ; Rename for use with YAFTA_IDL.pro
@@ -297,7 +371,9 @@ features = all_features
 
 ; Write data to YAFTA_output.sav
 ;=====================================
-save,features,all_masks,thresh,min_size,dx,$
-	filename=savepath+'yaftawave_'+event.date+'_'+event.label+'_'+wav+'.sav'
+if keyword_set(dilate) then save,features,all_masks,all_dil_features,all_dil_masks,thresh,min_size,dx,$
+                                filename=savepath+'yaftawave_'+event.date+'_'+event.label+'_'+wav+'_dilate.sav' $
+else save,features,all_masks,thresh,min_size,dx,$
+          filename=savepath+'yaftawave_'+event.date+'_'+event.label+'_'+wav+'.sav'
 
 end

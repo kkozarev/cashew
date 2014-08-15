@@ -1,12 +1,12 @@
 pro test_pfss_shock_plot_crossing_angles
 ;Testing the shock crossing angles plotting procedure
-event=load_events_info(label='110511_01')
+event=load_events_info(label='paper')
 
-pfss_shock_plot_crossing_angles,event,/lores,/oplot
+pfss_shock_plot_crossing_angles,event,/hires,/oplot
 
 end
 
-pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,lores=lores
+pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,lores=lores,pfssLines=pfssLines
 ;PURPOSE:
 ;Plot the crossing points on the polar projection of the shock
 ;surface with their color signifying the crossing angle.
@@ -46,14 +46,15 @@ pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,
 ;
 
   savepath=event.pfsspath
-  if not keyword_set(infile) then infile=find_latest_file(event.pfsspath+'csgs_results_*')
-  if keyword_set(hires) then infile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'hires.sav')
-  if keyword_set(hires) then infile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'lores.sav')  
+  ;if not keyword_set(infile) then infile=find_latest_file(event.pfsspath+'csgs_results_*')
+  infile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_lores.sav')
+  if keyword_set(hires) then infile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_hires.sav')
+  
   if infile[0] eq '' then begin
      print,'The file to load is not properly set or does not exist. Quitting.'
      return
   endif
-
+  
   print,''
   print,'Loading file '+infile
   print,''
@@ -75,9 +76,11 @@ pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,
   if not keyword_set(datapath) then datapath=savepath
   
 ;Get the field line info from the PFSS model results
-  if keyword_set(hires) then $
-     pfss_get_field_line_info,event,pfssLines=pfssLines,/hires $
-  else pfss_get_field_line_info,event,pfssLines=pfssLines,/lores
+  if not keyword_set(pfssLines) then $
+     if keyword_set(hires) then $
+        pfss_get_field_line_info,event,pfssLines=pfssLines,/hires $
+     else pfss_get_field_line_info,event,pfssLines=pfssLines,/lores
+  
 ;DEBUG
 ;This simulates open field lines to help the plotting
 ;  nlins=n_elements(pfsslines)
@@ -117,7 +120,10 @@ pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,
   device,set_resolution=[1000,800],SET_PIXEL_DEPTH=24,DECOMPOSED=0
   ;!P.background=0
   chsize=2
+
+;THE TIMESTEP LOOP!
   for sstep=0,nsteps-1 do begin
+
      shockrad=radiusfitlines[sstep]/kmpx
      shscale=maxshockrad/shockrad
      ncrosses=allcrosses[sstep]
@@ -139,6 +145,18 @@ pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,
      ;Plot Axes and the shock mesh
      loadct,0,/silent
      
+     if keyword_set(oplot) then begin 
+        if sstep eq 0 then begin
+           PLOT, flx/maxshockrad, fly/maxshockrad, PSYM = 3, $ 
+                 TITLE = thlet+'!DBN!N at B-Shock Crossings', $
+                 XTITLE = 'X', $
+                 YTITLE = 'Y', $
+                 xrange=xrng,yrange=yrng,$
+                 xstyle=1,ystyle=1,color=0,background=255,$
+                 xthick=3,ythick=3,thick=3,charsize=chsize,/nodata
+           PLOTS,vertex_list[0,*]/maxshockrad,vertex_list[1,*]/maxshockrad,psym=3,color=0 ,/data
+        endif
+     endif else begin
         PLOT, flx/maxshockrad, fly/maxshockrad, PSYM = 3, $ 
               TITLE = thlet+'!DBN!N at B-Shock Crossings', $
               XTITLE = 'X', $
@@ -146,9 +164,14 @@ pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,
               xrange=xrng,yrange=yrng,$
               xstyle=1,ystyle=1,color=0,background=255,$
               xthick=3,ythick=3,thick=3,charsize=chsize,/nodata
-        ;if keyword_set(oplot) and sstep gt 0 then goto,next
         PLOTS,vertex_list[0,*]/maxshockrad,vertex_list[1,*]/maxshockrad,psym=3,color=0 ,/data
-     
+     endelse
+;Save the !X and !Y global variables, since fcolorbar modifies them...
+     if sstep eq 0 then begin
+        saveX=!X
+        saveY=!Y
+     endif
+
      if keyword_set(oplot) and sstep gt 0 then begin
         xyouts,0.171,0.885,strtime[sstep-1],charsize=chsize,charthick=2,/norm,color=255
      endif
@@ -160,41 +183,65 @@ pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,
      ;If the field line is open, plot an open circle, else a filled circle
      closedsym=1
      opensym=6
-     symind=pfsslines[crossPoints[sstep,0:ncrosses-1].linid].open
-     tmpind=where(symind eq 1)
-     if tmpind[0] ne -1 then symind[tmpind]=opensym
-     tmpind=where(symind eq 0)
-     if tmpind[0] ne -1 then symind[tmpind]=closedsym
+     symind=reform(pfsslines[crossPoints[sstep,0:ncrosses-1].linid].open)
+     openind=where(symind eq 1)
+     if openind[0] ne -1 then symind[openind]=opensym
+     closedind=where(symind eq 0)
+     if closedind[0] ne -1 then symind[closedind]=closedsym
      symind=reform(symind)  
      
-     for pp=0,ncrosses-1 do begin
-        PLOTS,flx[pp]/maxshockrad,fly[pp]/maxshockrad,psym=sym(closedsym),$
-              symsize=1.8,color=(th[pp]-minn)/(maxx-minn)*255.,/data     
-        if symind[pp] eq opensym then begin
-           loadct,0,/silent
-           PLOTS,flx[pp]/maxshockrad,fly[pp]/maxshockrad,psym=sym(closedsym),$
-                 symsize=1.0,color=255,/data
-           loadct,13,/silent
-        endif
-     endfor    
+     ;Plot the closed field line crossings
+     if closedind[0] ne -1 then begin
+        PLOTS,flx[closedind]/maxshockrad,fly[closedind]/maxshockrad,psym=sym(closedsym),$
+              symsize=1.8,color=(th[closedind]-minn)/(maxx-minn)*255.,/data     
+     endif
+
+     ;Plot the open field line crossings
+     if openind[0] ne -1 then begin
+        PLOTS,flx[openind]/maxshockrad,fly[openind]/maxshockrad,psym=sym(closedsym),$
+              symsize=1.8,color=(th[openind]-minn)/(maxx-minn)*255.,/data    
+        loadct,0,/silent
+        PLOTS,flx[openind]/maxshockrad,fly[openind]/maxshockrad,psym=sym(closedsym),$
+              symsize=1.2,color=0,/data
+        PLOTS,flx[openind]/maxshockrad,fly[openind]/maxshockrad,psym=sym(closedsym),$
+              symsize=0.8,color=255,/data
+        loadct,13,/silent
+     endif
      
+     ;for pp=0,ncrosses-1 do begin
+     ;   PLOTS,flx[pp]/maxshockrad,fly[pp]/maxshockrad,psym=sym(closedsym),$
+     ;         symsize=1.8,color=(th[pp]-minn)/(maxx-minn)*255.,/data     
+     ;   if symind[pp] eq opensym then begin
+     ;      loadct,0,/silent
+     ;      PLOTS,flx[pp]/maxshockrad,fly[pp]/maxshockrad,psym=sym(closedsym),$
+     ;            symsize=1.0,color=255,/data
+     ;      loadct,13,/silent
+     ;   endif
+     ;endfor
+     
+
      fcolorbar, MIN=minn,MAX=maxx,Divisions=4, $
                 Color=0,VERTICAL=1,RIGHT=1, TITLE=thlet+'!DBN!N [deg]',$
                 CHARSIZE=chsize, charthick=2, format='(i)',Position=[0.89, 0.4, 0.92, 0.8]
      
+     !X=saveX
+     !Y=saveY
+
      if sstep lt nsteps then begin
         image=tvrd(true=1)
         in=strtrim(string(sstep),2)
         if sstep lt 100 then in='0'+in
         if sstep lt 10 then in='0'+in
-        fname=datapath+'thetabn_'+event.date+'_'+event.label+'_'+in
-        if keyword_set(oplot) then fname=fname+'_oplot'
+        resolution='lores'
+        if keyword_set(hires) then resolution='hires'
+        fname=datapath+'thetabn_'+event.date+'_'+event.label+'_'+resolution+'_'+in
+        if keyword_set(oplot) then fname=datapath+'thetabn_'+event.date+'_'+event.label+'_'+resolution+'_oplot_'+in
         fname+='.png'
         write_png,fname,image,rr,gg,bb
      endif
      
      print,'Saving image '+in
-     
+
   endfor
 ;---------------------------------------------------------------------------------------
 end

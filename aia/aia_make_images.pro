@@ -4,8 +4,8 @@ pro test_aia_make_images
   ;You can run this for a single or few events, like so
   one=1
   if one eq 1 then begin
-     wavelengths=['193']
-     label=['110511_01'] ;'140418_01','140425_01'
+     wavelengths=['171','131']
+     label=['140331_01'] ;'140418_01','140425_01'
      events=load_events_info(label=label)
      for w=0,n_elements(wavelengths)-1 do for ev=0,n_elements(events)-1 do $
         aia_make_images,events[ev],wavelengths[w],/base,/run,/raw,/force
@@ -129,7 +129,7 @@ pro aia_make_images, event, wave, savepath=savepath,force=force,raw=raw,base=bas
   
   ;Load the data
   ;restore,event.savepath+'normalized_AIA_20110511_37_193_subdata.sav'
-  aia_load_event,event,wav,index=index,data=data,coords=coords,subdata=subdata,subindex=subindex,/remove_aec,/subroi
+  aia_load_data,event,wav,index=index,data=data,coords=coords,subdata=subdata,subindex=subindex,/remove_aec,/subroi
   nsteps=n_elements(subindex)
   
   ;Set up base image

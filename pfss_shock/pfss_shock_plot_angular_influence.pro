@@ -1,12 +1,11 @@
 pro test_pfss_shock_plot_angular_influence
 ;Testing the CSGS angular influence plotting procedure
-event=load_events_info(label='110511_01')
-pfss_shock_plot_angular_influence,event,/lores;/topview
-;pfss_shock_plot_angular_influence,event
+event=load_events_info(label='paper')
+pfss_shock_plot_angular_influence,event,/lores,/newtimes
+;pfss_shock_plot_angular_influence,event,/hires,/newtimes,/topview
 end
 
-
-pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lores
+pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lores,pfssLines=pfssLines,newtimes=newtimes
 ;PURPOSE:
 ;Visualize the time-dependent CSGS model with interacting field lines.
 ;
@@ -65,8 +64,21 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
   ;Load the CSGS model results
   print ,'Loading CSGS File '+csgsfile
   restore,csgsfile
-  
+
+  ;Restore just the subindex from the AIA data
+  aiafile=file_search(event.savepath+'normalized_'+eventname+'_subdata.sav')
+  print,'Loading AIA File '+aiafile
+  if aiafile[0] ne '' then begin
+     restore,aiafile[0]
+     subdata=0
+     aiatime=anytim(subindex.date_obs)
+     aiatime=aiatime-aiatime[0]
+  endif else begin
+     print,'No AIA data present. Quitting...'
+     return
+  endelse
 ;-==============================================================================
+
 
 
 ;+==============================================================================
@@ -80,25 +92,29 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
   zcenter=0
   suncenter=[xcenter,ycenter,zcenter]
   sunrad=winsize/(2.*2.62) ;Make sure the full 2.54Rsun of the PFSS lines are visible
-  maxnumlines=5000 ;maximum number of PFSS field lines to plot for the context coronal image
-
-  sp=rad_data.xfitrange[0]
-  ep=rad_data.xfitrange[1]
-  time=(rad_data.time[sp:ep]- rad_data.time[sp])*3600.
-  plot_times=ind_arr[sp:ep].date_obs
-  nsteps=n_elements(time)
+  maxnumlines=5000         ;maximum number of PFSS field lines to plot for the context coronal image
   RSUN=subindex[0].rsun_ref/1000. ;Solar radius in km.  
   KMPX=ind_arr[0].IMSCL_MP*ind_arr[0].RSUN_REF/(1000.0*ind_arr[0].RSUN_OBS)
-  fit=reform(rad_data.fitparams[0,*].front)
-  radiusfitlines=(fit[0]+fit[1]*time+0.5*fit[2]*time^2)/RSUN
-  radiusfitlines-=1.
+  sp=rad_data.xfitrange[0]
+  ep=rad_data.xfitrange[1]
+  time=(rad_data.time[sp:ep]- rad_data.time[sp])
+  plot_times=ind_arr[sp:ep].date_obs
+  
+if keyword_set(newtimes) then begin
+     newtime=aiatime
+     pfss_shock_generate_csgs_radii,ind_arr,rad_data,radiusfitlines,newtime=newtime,tindrange=tindrange
+     time=newtime
+     sp=tindrange[0]
+     ep=tindrange[1]
+     plot_times=subindex[sp:ep].date_obs
+  endif else begin
+     pfss_shock_generate_csgs_radii,ind_arr,rad_data,radiusfitlines
+  endelse
+  
   radius=radiusfitlines*sunrad*event.geomcorfactor
-  ;radiusfitlines*=RSUN*event.geomcorfactor
-  ;radius=radiusfitlines/kmpx
-
+  nsteps=n_elements(time)
   set_plot,'z'
   
-
 ;-==============================================================================
 
 
@@ -134,7 +150,6 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
         rotationAngles={genrot:genrot,pfssrot:pfssrot,csgsrot:csgsrot}   
      endif
      
-     
      loadct,0,/silent
 
      device,set_resolution=[winsize,winsize],SET_PIXEL_DEPTH=24, DECOMPOSED=0
@@ -148,18 +163,35 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
      ;Plot the limb location
      circ=aia_circle(xcenter,ycenter,sunrad,/plot,color=0)
      ;Print the time of this step.
-     xyouts,0.64*winsize,0.975*winsize,plot_times[sstep],/device,charsize=2,charthick=2.4
+     xyouts,0.5*winsize,0.965*winsize,plot_times[sstep],/device,charsize=2.4,charthick=3
      
 ;+==============================================================================
 ;1. Plot the field lines on disk center.
      if sstep eq 0 then begin
         ;Get the field line info from the PFSS model results
-        if keyword_set(hires) then pfss_get_field_line_info,event,pfssLines=pfssLines,/hires $
-        else pfss_get_field_line_info,event,pfssLines=pfssLines,/lores
+          if not keyword_set(pfssLines) then $
+             if keyword_set(hires) then pfss_get_field_line_info,event,pfssLines=pfssLines,/hires $
+             else pfss_get_field_line_info,event,pfssLines=pfssLines,/lores
         nlines=n_elements(pfssLines)
         ;maxnpts=n_elements(pfssLines[0].px)  
         maxnpts=n_elements(pfssLines[0].ptr)  
         
+        nplotLines=1000.
+        if (keyword_set(lores)) then begin
+           stride=1
+           plotLinesIndex=lonarr(nlines)
+        endif else begin
+           plotLinesIndex=lonarr(nplotLines+1)
+           stride=fix((1.*nlines)/nPlotLines) ;assume that we want to see about 1000. field lines, for now.
+           if stride eq 0 then stride=1
+        endelse
+        cc=0
+        for ll=0.D,nlines-1,stride do begin
+           if cc gt nplotLines then break
+           plotLinesIndex[cc]=ll
+           cc++
+        endfor
+
         if maxnumlines gt nlines then maxnumlines=nlines
         
 ;Apply the rotations and translations and plot
@@ -188,22 +220,22 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
      
      ;ii=0L
      ;Find the cadence, at which to plot lines
-     plotcad=nlines/(maxnumlines)
-     for ff=0L,nlines-1,plotcad do begin
+     ;for ff=0L,nlines-1,stride do begin
+     for ll=0.0D,nplotLines-1 do begin
+        ff=plotLinesIndex[ll]
         npt=pfssLines[ff].npts
         ;Plot the field lines
-                                ;if pfss_cartpos[ff,2,0] gt 0.0 and
-                                ;pfss_cartpos[ff,2,npt-1] gt 0.0 then
-                                ;$
+        ;if pfss_cartpos[ff,2,0] gt 0.0 and
+        ;pfss_cartpos[ff,2,npt-1] gt 0.0 then
+        ;$
 ;if not keyword_set(topview) then
-           plots,reform(pfss_cartpos[ff,*,0:npt-1]),/device,color=250,thick=2.
+           plots,reform(pfss_cartpos[ff,*,0:npt-1]),/device,color=255,thick=1.2
            ;ii++
      endfor
-
      
 ;-==============================================================================
      
-
+     
 
 ;+==============================================================================
 ;3. CALCULATE AND PLOT THE CSGS MODEL
@@ -224,7 +256,7 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
      vert_rotmat=!P.T
      loadct,9,/silent
      plots,vertex_list,color=0,thick=0.05,/device
-     plots,vertex_list,color=180,thick=0.1,symsize=0.6,psym=sym(1),/device
+     plots,vertex_list,color=180,thick=0.05,symsize=0.1,psym=sym(1),/device
 
 ;-==============================================================================
 
@@ -233,26 +265,39 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
 ;+==============================================================================
 ;Plot the field lines that pass through the shock surface
      ncrosses=allcrosses[sstep]
-     
-        cpsx=crossPoints[sstep,0:ncrosses-1].px
-        cpsy=crossPoints[sstep,0:ncrosses-1].py
-        cpsz=crossPoints[sstep,0:ncrosses-1].pz 
-        pind=reform(crossPoints[sstep,0:ncrosses-1].linid)
-        
-       ; if sstep eq 0 then begin
-       ;    colors=abs(randomu(10L,max(allcrosses)))*255.
-       ;    ;colors=findgen(ncrosses)*255./(ncrosses*1.)
-       ; endif
+     cpsx=crossPoints[sstep,0:ncrosses-1].px
+     cpsy=crossPoints[sstep,0:ncrosses-1].py
+     cpsz=crossPoints[sstep,0:ncrosses-1].pz 
+     pind=reform(crossPoints[sstep,0:ncrosses-1].linid)
      
      loadct,13,/silent
      
-     for ff=0,ncrosses-1 do begin
+;     if sstep eq 0 then begin
+;        nPlotLines=50.
+;        crossPlotLinesIndex=lonarr(nplotLines+1)
+;        stride=fix((1.*max(ncrosses))/nPlotLines) ;assume that we want to see about 1000. field lines, for now.
+;        if (stride eq 0) or (keyword_set(lores)) then stride=1
+;        cc=0
+;        for ll=0.D,ncrosses-1,stride do begin
+;           crossPlotLinesIndex[cc]=ll
+;           cc++
+;        endfor     
+;     endif
+stride=1 
+
+     for ff=0.D,ncrosses-1,stride do begin
         lind=pind[ff]
         npt=pfssLines[lind].npts
-        if pfss_cartpos[ff,2,0] gt 0.0 and pfss_cartpos[ff,2,npt-1] gt 0.0 then $
+        if pfssLines[lind].open eq 1 then color=110 else color=230
+        if pfss_cartpos[ff,2,0] gt 0.0 and pfss_cartpos[ff,2,npt-1] gt 0.0 then begin
+           loadct,0,/silent
            plots,reform(pfss_cartpos[lind,*,0:npt-1]),$
-                 color=pfssLines[lind].color,/device,psym=sym(1),symsize=1 ;colors[ff]
-
+                 color=0,/device,psym=sym(1),symsize=0.8
+           loadct,13,/silent
+           plots,reform(pfss_cartpos[lind,*,0:npt-1]),$
+                 color=color,/device,psym=sym(1),symsize=0.5
+        endif
+           
 ;plot the points of crossing in red.
     ; plots,[cpsx,cpsy,cpsz],color=240,psym=sym(1),symsize=1.4,/device
      endfor
@@ -287,15 +332,16 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
      endif
 ;-==============================================================================
 
-
      tvlct,rr,gg,bb,/get
      image=tvrd(true=1)
      stp=strtrim(string(sstep),2)
      if stp lt 100 then stp='0'+stp
      if stp lt 10 then stp='0'+stp
-     fname='aia_pfss_shock_angular_influence_'+event.date+'_'+event.label+'_'+stp+'.png'
+     resolution='lores'
+     if keyword_set(hires) then resolution='hires'
+     fname='aia_pfss_shock_angular_influence_'+event.date+'_'+event.label+'_'+resolution+'_'+stp+'.png'
      if keyword_set(topview) then fname='aia_pfss_shock_angular_influence_'+$
-                                        event.date+'_'+event.label+'_topview_'+stp+'.png'
+                                        event.date+'_'+event.label+'_topview_'+resolution+'_'+stp+'.png'
      write_png,pfsspath+fname,image,rr,gg,bb
   endfor                        ;END TIMESTEP LOOP
   set_plot,'x'
