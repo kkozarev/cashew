@@ -65,13 +65,19 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd
      gaussData = totalPixVals
   endelse 
      
-  ;cgplot, totalPixVals, /window
-  cgplot, totalSmoothVals, /window
+x=lindgen(n_elements(totalPixVals))
+gaussData=totalPixVals
+
+
+  cgplot, totalPixVals, /window
+
+;  cgplot, time.jd, totalSmoothVals, title="Summed Pixel Intensities vs Time", xtickformat='LABEL_DATE',$
+;          xtickunit='Time', xtitle='Time (UT)', ytitle='Summed Pixel Intensities', thick=3, /window
 
   ; Compute a Gaussian fit to determine start and end times
   gfit2 = gaussfit(x, gaussData, coeff, estimates=estimates, nterms=4)
   cgPlot, gfit2, /overPlot, color='green', /window
-  
+
   ; If the peak or stdev is outrageous, refit with all of the data
   if coeff[2] gt n_elements(totalPixVals)/2 || coeff[0] lt 0 then begin
      x = lindgen(n_elements(totalPixVals))
@@ -81,9 +87,16 @@ pro find_start_end, data, time, rad, startInd=startInd, endInd=endInd
   minusTwoSigma = coeff[1] - 2*coeff[2]
   plusTwoSigma = coeff[1] + 2*coeff[2]
   
+  ;; timeTwoSigma = time[round(plusTwoSigma)].jd
+  ;; mtimeTwoSigma = time[round(minusTwoSigma)].jd
+
+  ;; cgPlot, [timeTwoSigma, timeTwoSigma], [0, 4000], /Overplot, /window
+  ;; cgPlot, [mtimeTwoSigma, mtimeTwoSigma], [0, 4000], /Overplot, /window  
+  
   cgPlot, [plusTwoSigma, plusTwoSigma], [0, 800], /Overplot, /window
   cgPlot, [minusTwoSigma, minusTwoSigma], [0, 800], /Overplot, /window  
   
+
 
   ; Refit the Gaussian with all of the
   ; data if the initial start guess is negative

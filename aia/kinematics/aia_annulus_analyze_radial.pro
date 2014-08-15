@@ -114,6 +114,7 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
   nt=n_elements(time)
   yarray=yarr
   
+  savepath=event.savepath+'annulusplot/'
   
   ;The info to pass to the position fitting routine for the fitting parameters
   parinfo = replicate({value:0.D, limited:[0,0], limits:[0.D,0.D]}, 3)
@@ -333,8 +334,8 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
      print, "Corrected end index: ", endInd
 
      ; Correct the positioning of the wave edges
-     wave_frontedge = wave_frontedge[startCorr:endCorr]
-     wave_backedge = wave_backedge[startCorr:endCorr]
+     wave_frontedge = wave_frontedge[0:endCorr]
+     wave_backedge = wave_backedge[0:endCorr]
 
      ; Plot new corrected region of interest 
      aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
@@ -520,6 +521,17 @@ print, datastruct.wavethick[sp:ep]
 
 print, "Calculated Average Wave Intensities: "
 print, datastruct.avgIntense[sp:ep]
+
+waveProperties = [datastruct.wavethick, datastruct.avgIntense]
+
+fname=savepath+'wave_properties.txt'
+;print, fname
+
+openw, lun, fname, /get_lun
+printf, lun, waveProperties
+free_lun, lun
+
+
 
 end
 ;-============================================================================

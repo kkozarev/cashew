@@ -59,7 +59,13 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
      ;gfit3 = gaussfit(rad, colSmooth, coeff, nterms=5)
 
      ; Fit a Gaussian to determine front and back edges
+     
      gfit4 = mpfitpeak(rad, colSmooth, coeff, nterms=4)
+
+     if finite(coeff[0]) eq 0 then begin
+        coeff=[0, 0, 0]
+        alt=1
+     endif
 
      if plot eq 1 then begin
         print, h, ":", m
@@ -76,6 +82,7 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
          cgPlot, rad, gfit4, /overPlot, col='cyan'
      endif
 
+     
      gaussHeight = coeff[0]
      gaussCenter = coeff[1]
      gaussStdev = coeff[2]
@@ -84,6 +91,8 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
      ; intensity peak method instead
      if gaussHeight lt 0 then alt=1
      if gaussHeight gt 200 then alt=1
+
+     if gaussCenter gt yarray[maxRadIndex] then alt=1
 
      if alt eq 0 then begin
         ; Calculate front and back edges
@@ -179,11 +188,15 @@ pro find_wave_edge, data, yarray, yrng, time, fitrange, mymaxima, mind,$
 
      nearestStart =value_locate(rad, wave_frontedge[ii-sp].rad)
      nearestEnd = value_locate(rad, wave_backedge[ii-sp].rad)
+     
+     if wave_backedge[ii-sp].rad lt min(rad) then nearestEnd = rad[0]
 
 ;     if nearestStart gt n_elements(y
-
-     datastruct.avgIntense[ii] = mean(col[nearestEnd:nearestStart])
-     
+     if nearestStart eq -1.0 || nearestEnd eq -1.0 then begin
+        datastruct.avgIntense[ii] = -1.0
+     endif else begin
+        datastruct.avgIntense[ii] = mean(col[nearestEnd:nearestStart])
+     endelse
   endfor
-  
+
 end

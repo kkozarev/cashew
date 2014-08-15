@@ -37,7 +37,7 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
 
   ; Determine the wave edge for each timestep within
   ; the region of interest 
-  for ii=sp, ep-1 do begin
+  for ii=sp, ep do begin
      
      alt=0
 
@@ -176,15 +176,15 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
      if alt eq 0 then begin
         
         ; Chop off the front edge at the last location of viable data
-        ;; if frontEdge gt yarray[maxYInd] then begin
-        ;;    print, "Chopping front edge"
-        ;;    frontEdge = yarray[maxYInd]        
-        ;; endif
+         if frontEdge gt yarray[maxYInd] then begin
+            print, "Chopping front edge"
+            frontEdge = yarray[maxYInd]        
+         endif
 
-        ;; if frontEdge lt mymaxima[0, ii].rad then begin
-        ;;    print, "Front edge behind maxima, assigning max value"
-        ;;    frontEdge = mymaxima[0,ii].rad
-        ;; endif
+         if frontEdge lt mymaxima[0, ii].rad then begin
+            print, "Front edge behind maxima, assigning max value"
+            frontEdge = mymaxima[0,ii].rad
+         endif
         
         wave_frontedge[ii-sp].rad = frontEdge
         wave_frontedge[ii-sp].yind = mymaxima[0,ii].ind
@@ -241,9 +241,9 @@ pro find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, min
         wave_frontedge[ii-sp].xind = ii
         datastruct.frontinds[mind,ii]=wave_frontedge[ii-sp].yind
         
-        ;; if wave_frontedge[ii-sp].rad lt mymaxima[0, ii].rad then begin
-        ;;    wave_frontedge[ii-sp].rad = mymaxima[0, ii].rad
-        ;; endif
+         if wave_frontedge[ii-sp].rad lt mymaxima[0, ii].rad then begin
+            wave_frontedge[ii-sp].rad = mymaxima[0, ii].rad
+         endif
 
         ;Find the back edge of the wave
         

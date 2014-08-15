@@ -122,6 +122,7 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
   nt=n_elements(time)
   yarray=yarr
   
+  savepath=event.savepath+'annulusplot/'
 
   ;The info to pass to the position fitting routine for the fitting parameters
   parinfo = replicate({value:0.D, limited:[0,0], limits:[0.D,0.D]}, 3)
@@ -151,7 +152,7 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
   
 ;LOOP OVER MEASUREMENTS!
   for mind=0, nlatmeas-1 do begin
-;  for mind = 2, 2    do begin
+;  for mind = 0, 0   do begin
      yrng = yrngOrig
      
      wave_frontedge=0
@@ -174,7 +175,9 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
      endif
      
 ;     help, maxRadIndex
-     
+     maxYInd = yrng[1]
+
+
 ;Find start and end positions
      if keyword_set(auto) then begin
         if keyword_set(gradient) then begin
@@ -217,10 +220,7 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
         
         aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
                            min=-40,max=50,fitrange=fitrange,$
-                           title=datastruct.imgtit[mind],$
-                           xtitle=datastruct.xtitle,ytitle=datastruct.ytitle
-
-        
+                           xtitle=datastruct.xtitle,ytitle=datastruct.ytitle ; title=datastruct.imgtit[mind],$
         
         aia_jmap_find_maxima,data,time.relsec,yarray,mymaxima=mymaxima,allmaxima=allmaxima,$
                              yrange=[yarr[datastruct.yfitrange[0]],yarr[datastruct.yfitrange[1]]],$
@@ -232,7 +232,7 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
      sp=datastruct.xfitrange[0]
      ep=datastruct.xfitrange[1]
  ;Search for the edges of the wave
-     wave_frontedge=replicate({rad:0.0D,yind:0L,xind:0L},ep-sp)
+     wave_frontedge=replicate({rad:0.0D,yind:0L,xind:0L},ep-sp+1)
      wave_backedge=wave_frontedge
      
 ;To restore the plot information and overplot on them, do
@@ -269,8 +269,6 @@ pro annulus_fit_maxima_tangential,event,indata,datastruct,time,yarr,constrain=co
      find_wave_edge_tangential, data, yarray, yrng, time, fitrange, mymaxima, mind,$
                                 maxRadIndex, datastruct=datastruct, wave_frontedge=wave_frontedge,$
                                 wave_backedge=wave_backedge, maxYInd=maxYInd
-     print, "Printing front edge in main program"
-     print, wave_frontedge
 
                                 ;for ii=sp,ep do begin
                                 ;  if maxinds[ii-sp] gt 0.0 then begin
@@ -375,6 +373,11 @@ if keyword_set(auto) then begin
 
      help, wave_frontedge
 
+     if startInd eq endInd then begin
+        print, "No valid start/end data found..."
+        continue
+     endif 
+
      print, "Corrected start index: ", startInd
      print, "Corrected end index: ", endInd
 
@@ -394,9 +397,8 @@ if keyword_set(auto) then begin
 
      ; Plot new corrected region of interest 
      aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],data[*,yrng[0]:yrng[1]],$
-                        min=-40,max=50,fitrange=fitrange,$
-                        title=datastruct.imgtit[mind],$
-                        xtitle=datastruct.xtitle,ytitle=datastruct.ytitle, /auto, startInd=startInd, endInd=endInd  
+                        min=-40,max=50,fitrange=fitrange,$ ;title=datastruct.imgtit[mind],$ 
+                        xtitle=datastruct.xtitle,ytitle=datastruct.ytitle, /auto, startInd=startInd, endInd=endInd 
 
   endif
   
@@ -424,7 +426,6 @@ if keyword_set(auto) then begin
   dt=(time[1:n_elements(time)-1].jd-time[0:n_elements(time)-2].jd)/2.
   dt = [dt, dt[0]]
  
-  print, reform(yarray[datastruct.maxinds[0, sp]])
   oplot,time.jd-dt,reform(yarray[datastruct.maxinds[0,*]]),psym=1,color=200,thick=4,symsize=2
   loadct,8,/silent
    
@@ -462,7 +463,7 @@ loadct, 0, /silent
   bootstrap_sdo,dist,time_good,fit_line, p1, p2, p3, s1, s2, s3,parinfo=parinfo, /linear
   print,''
   print,''
-  wave_fits=p1[0] + p2[0] * (time_good)+ 0.5 * p3[0] * (time_good)^2
+  wave_fits=p1[0] + p2[0] * (time_good);+ 0.5 * p3[0] * (time_good)^2
   wave_fits=wave_fits/DIST_FACTOR/height
   datastruct.fitparams[mind,0].front=p1[0]
   datastruct.fitparams[mind,1].front=p2[0]
@@ -472,8 +473,9 @@ loadct, 0, /silent
   datastruct.fitsigma[mind,2].front=s3[0]
 ;  wave_rads=rad_data.fitparams[0,0].front+rad_data.fitparams[0,1].front*wave_times+0.5*(rad_data.fitparams[0,2].front)^2
 ;--------------------------------------------------
-  ;oplot,time[sp:ep],wave_fits,thick=3
-  oplot,time.jd[sp+good_ind_pos],wave_fits,thick=3
+  oplot,time[sp:ep].jd,wave_fits,thick=3
+
+;  oplot,time.jd[sp+good_ind_pos],wave_fits,thick=3
   
   
 ;; ;--------------------------------------------------
@@ -552,6 +554,9 @@ loadct, 0, /silent
   print,tmpstr
   xyouts,!x.window[0]+xmargin,!P.position[3]-3*ymargin,tmpstr,/norm,charsize=1.4,color=255
 
+  tmpstr='R = '+strtrim(string(datastruct.lat_heights[mind],format='(f5.3)'),2)+' R!Ds!N'
+  xyouts,!x.window[0]+xmargin,!P.position[3]-4*ymargin,tmpstr,/norm,charsize=1.4,color=255
+
   
 ;; ;final speed
 ;;   accel=datastruct.fitparams[mind,2].front
@@ -571,10 +576,12 @@ loadct, 0, /silent
 ;;   print,tmpstr
 ;;   print,''
 ;;   xyouts,!x.window[0]+xmargin,!P.position[3]-5*ymargin,tmpstr,/norm,charsize=1.4,color=255
+
+  tvlct,ct_rr,ct_gg,ct_bb,/get
+  write_png,savepath+datastruct.savename+strtrim(string(mind+1),2)+'_manual.png',tvrd(/true),ct_rr,ct_gg,ct_bb
+
 endfor
-
-  return
-
+  
 end
 ;-============================================================================
 
@@ -671,7 +678,7 @@ pro aia_annulus_analyze_tangential,event,datapath=datapath,savepath=savepath,$
                  title = 'Annulusplot, AIA/'+wav+' '+date, max = 50, $
                  origin = [0,0], charthick = 1.2, charsize=3, $
                  scale = [ang_step, res/ind_arr[0].cdelt1], $
-                 pos = [0.1, 0.1, 0.95, 0.95], min = -40
+                 pos = [0.1, 0.1, 0.9, 0.9], min = -40
   endif else begin
      
      img=reform(subprojdata[fix(nsteps/3),*,*]-subprojdata[fix(nsteps/3)-1,*,*])
@@ -680,7 +687,7 @@ pro aia_annulus_analyze_tangential,event,datapath=datapath,savepath=savepath,$
                  title = 'Annulusplot, AIA/'+wav+' '+date, max = 50, $
                  origin = [thrang[0]*180./!PI,r_in], charthick = 1.2, charsize=3,$
                  scale = [ang_step, res/ind_arr[0].cdelt1], $
-                 pos = [0.1, 0.1, 0.95, 0.95], min = -40, font_name='Hershey 5'
+                 pos = [0.1, 0.1, 0.9, 0.9], min = -40, font_name='Hershey 5'
   endelse
   
   
@@ -849,7 +856,7 @@ pro aia_annulus_analyze_tangential,event,datapath=datapath,savepath=savepath,$
                 lat_heights:lat_heights,$
                 wav:wav,$
                 data:left_lat_data,bdiff:left_lat_data,winind:1,$
-                savename:'annplot_'+date+'_'+event.label+'_'+wav+'_tangential.png',$
+                savename:'annplot_'+date+'_'+event.label+'_'+wav+'_tangential_left_',$
                 plotinfo:replicate({p:!P, x:!X, y:!Y},nlatmeas),$
                 kinquantity:['Th!D0!N','Th!D1!N','V!Dth,0!N','V!Dth,1!N','a'],$
                 kinunit:['!Uo!N','!Uo!N',' km/s',' km/s',' km/s!U2!N'],$
@@ -869,8 +876,8 @@ pro aia_annulus_analyze_tangential,event,datapath=datapath,savepath=savepath,$
                 }
   for rr=0,nlatmeas-1 do $
      if rr eq midind then $
-        lat_data_left.imgtit[rr]='AIA/'+wav+' Left Tangential Positions | Start at '+ind_arr[0].date_obs+'!C R = '+$
-     strtrim(string(lat_heights[rr],format='(f5.3)'),2)+' R!Ds!N' $
+        lat_data_left.imgtit[rr]='AIA/'+wav+' Tangential Positions'$; | Start at '+ind_arr[0].date_obs+'!C R = '+$
+;     strtrim(string(lat_heights[rr],format='(f5.3)'),2)+' R!Ds!N' $
      else lat_data_left.imgtit[rr]='R = '+ strtrim(string(lat_heights[rr],format='(f5.3)'),2)+' R!Ds!N'
 
   
@@ -879,7 +886,7 @@ pro aia_annulus_analyze_tangential,event,datapath=datapath,savepath=savepath,$
                  wav:wav,$
                  lat_heights:lat_heights,$
                  data:right_lat_data,bdiff:right_lat_data,winind:2,$
-                 savename:event.annplot.analyzed_savename+wav+'_tangential_right.png',$
+                 savename:event.annplot.analyzed_savename+wav+'_tangential_right_',$
                  plotinfo:replicate({p:!P, x:!X, y:!Y},nlatmeas),$
                  kinquantity:['Th!D0!N','Th!D1!N','V!Dth,0!N','V!Dth,1!N','a'],$
                  kinunit:['!Uo!N','!Uo!N',' km/s',' km/s',' km/s!U2!N'],$
@@ -899,8 +906,8 @@ pro aia_annulus_analyze_tangential,event,datapath=datapath,savepath=savepath,$
                  }
   for rr=0,nlatmeas-1 do $
      if rr eq midind then $
-        lat_data_right.imgtit[rr]='AIA/'+wav+' Right Tangential Positions | Start at '+ind_arr[0].date_obs+'!C R = '+$
-     strtrim(string(lat_heights[rr],format='(f5.3)'),2)+' R!Ds!N' $
+        lat_data_right.imgtit[rr]='AIA/'+wav+' Tangential Positions' $; | Start at '+ind_arr[0].date_obs+'!C R = '+$
+;     strtrim(string(lat_heights[rr],format='(f5.3)'),2)+' R!Ds!N' $
      else lat_data_right.imgtit[rr]='R = '+strtrim(string(lat_heights[rr],format='(f5.3)'),2)+' R!Ds!N'
 
 ;;;;;;;;;;;;;;;;;
@@ -947,7 +954,7 @@ pro aia_annulus_analyze_tangential,event,datapath=datapath,savepath=savepath,$
   lat_data_left.plotinfo[0].p=!P
   lat_data_left.plotinfo[0].x=!X
   lat_data_left.plotinfo[0].y=!Y
-  write_png,savepath+lat_data_left.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
+ ; write_png,savepath+lat_data_left.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -982,7 +989,7 @@ pro aia_annulus_analyze_tangential,event,datapath=datapath,savepath=savepath,$
   lat_data_right.plotinfo[0].p=!P
   lat_data_right.plotinfo[0].x=!X
   lat_data_right.plotinfo[0].y=!Y
-  write_png,savepath+lat_data_right.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
+;  write_png,savepath+lat_data_right.savename,tvrd(/true),ct_rr,ct_gg,ct_bb
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   
