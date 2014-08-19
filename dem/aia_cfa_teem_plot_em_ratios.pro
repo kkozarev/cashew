@@ -1,16 +1,15 @@
 pro test_aia_cfa_teem_plot_em_ratios
 ;Test procedure for aia_cfa_teem_plot_em_ratios
-event=load_events_info(label='140331_01')
+event=load_events_info(label='paper')
 aia_cfa_teem_plot_em_ratios,event
 
 end
 
 
 pro aia_cfa_teem_plot_em_ratios,event
-  te_range=[0.5,10]*1.e6        ;   ([K], valid temperature range for DEM solutions)
 ;Find the files first
   path=event.aschdempath
-  fileset=file_basename(file_search(path+'aschdem_'+event.date+'_'+event.label+'*teem_map.sav'))
+  fileset=file_basename(file_search(path+'aschdem_'+event.date+'_'+event.label+'*teem_tot.sav'))
   nfiles=n_elements(fileset)
   for ff=0,nfiles-1 do begin
      res=strsplit(fileset[ff],'_',/extract)
@@ -18,7 +17,7 @@ pro aia_cfa_teem_plot_em_ratios,event
      infname=path+fileset[ff] ;'aschdem_'+event.date+'_'+event.label+'_'+dateobs+'_teem_map.sav'
      outfname=path+'aschdem_'+event.date+'_'+event.label+'_'+dateobs+'_teem_em_ratios.png'
      basefname=path+fileset[0]
-     aia_cfa_teem_plot_em_ratios_main,infname,outfname,basefname,te_range,dateobs
+     aia_cfa_teem_plot_em_ratios_main,infname,outfname,basefname,dateobs
   endfor
 
 end
@@ -54,21 +53,21 @@ pro aia_cfa_teem_plot_em_ratios_main,infname,outfname,basefname,te_range,dateobs
 set_plot,'z'
 
 restore,basefname
-basemap=10^em_map
-
+basemap=10^emlog
+te_range=minmax(10^telog)       ;   ([K], valid temperature range for DEM solutions)
 restore,infname
-ind	=where(em_map ne 0)
+ind	=where(emlog ne 0)
 ;statistic,te_map(ind),te_avg,te_sig
-statistic,em_map(ind),em_avg,em_sig
+statistic,emlog(ind),em_avg,em_sig
 nsig	=3
 em1	=em_avg-nsig*em_sig
 em2	=em_avg+nsig*em_sig
 ;te1	=alog10(te_range(0))
 ;te2	=alog10(te_range(1))
-dim	=size(em_map)
+dim	=size(emlog)
 nx	=dim(1)
 ny	=dim(2)
-inmap=10^em_map
+inmap=10^emlog
 
 ;rebin small images
 ;nx	=nx_
@@ -102,7 +101,7 @@ loadct,0,/silent
 plot,[0,0],[0,0],xticks=1,yticks=1,xminor=1,yminor=1
 ct=13
 rmin= 0.8;min(inmap/(basemap*1.0))
-rmax= 1.5;max(inmap/(basemap*1.0))
+rmax= 1.6;max(inmap/(basemap*1.0))
 loadct,ct,/silent
 tv,bytscl(inmap/(basemap*1.0),min=rmin,max=rmax),0,0
 ;loadct,5
