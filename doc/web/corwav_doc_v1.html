@@ -363,28 +363,30 @@ IDL> aia_cfa_teem_run,event,/remove_aec
 		<p>Next, the time series of EM and Tmax for particular regions around the EUV wave sheath can be extracted, assuming the wave kinematics measurements 
 		have been performed.</p>
 	    <pre><code>	
-IDL> aia_define_rois,event  
+IDL> aia_dem_define_subrois,event
+IDL> aia_aschdem_save_subrois,event
         </code></pre>
         <p>This procedure automatically positions 8 rectangular regions of interest (ROI) tangentially to the shock surface, four along the shock surface for the middle time step, 
         and four along a radial direction outward from the eruption source, like in the following image. The results are saved in the 
-        CORWAV/events/110511_01/ionization/ folder. </p>
+        CORWAV/events/110511_01/ionization/ folder. The aia_aschdem_save_subrois procedure extracts the DEM results at the previously defined ROIs.</p>
         <img src="png/aia_dem_rois.png" alt='AIA ROIs for DEM analysis'>
-        <p>The user can also choose to extract square ROIs interactively, using the aia_aschdem_define_rois procedure:
+        <p>The user can also choose to extract square ROIs interactively, using the aia_dem_define_subrois_manual procedure:
         <pre><code>	
-IDL> aia_aschdem_define_rois,event,numroi=8,roisize=10
+IDL> aia_dem_define_subrois_manual,event,numroi=8,roisize=10
+IDL> aia_aschdem_save_subrois,event
         </code></pre>
 		where numroi is the number of ROIs to select, and roisize gives the square ROI size, in pixels.</p>
         <p>Once the DEM model has been run, and the ROIs have been selected, we can plot time series of EM and Tmax for them, using the aia_dem_analyze procedure:</p>
         <pre><code>	
 IDL> trange='2011-05-11T'+['02:15:00','02:31:00']
-IDL> aia_dem_analyze,event,trange=trange
+IDL> aia_aschdem_analyze,event,trange=trange
         </code></pre>
         <p>Running this will produce individual PNG and SAV files for all selected regions in CORWAV/events/110511_01/dem/aschwanden/ with information on the time
         evolution of EM and Tmax. Here's a plot for one region for this particular event:</p>
         <img src="png/aia_dem_result.png" alt='AIA EM result' width=400>
 <p>In addition, the user may create plots of the base emission measure base ratios (ratio of each EM image to the pre-event image) like the one below by running:</p>
         <pre><code>	
-IDL> aia_cfa_teem_plot_em_ratios,event
+IDL> aia_aschdem_plot_em_ratios,event
         </code></pre>
 <img src="png/aia_dem_em_ratios.png" alt='AIA EM base ratios' width=400>
         <p><h3>7.2 PFSS+CSGS</h3></p>

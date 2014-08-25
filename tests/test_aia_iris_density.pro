@@ -38,14 +38,14 @@ pro test_aia_iris_density,saved=saved
   
 ;Find all the DEM result files
 ;aschdem_20140331_140331_01_075936_teem_map.sav
-  demfiles=file_search(event.aschdempath+'aschdem_'+event.date+'_'+event.label+'*_teem_map.sav')
-  if demfiles[0] ne '' then begin
-     nt=n_elements(demfiles)
+  totdemfiles=file_search(event.aschdempath+'aschdem_'+event.date+'_'+event.label+'*_teem_tot.sav')
+  if totdemfiles[0] ne '' then begin
+     nt=n_elements(totdemfiles)
      emarray=dblarr(nt,n_elements(yind))
      times=dblarr(nt)
      for ff=0,nt-1 do begin
-        restore,demfiles[ff]
-        emarray[ff,*]=reform(10^em_map[xind,yind])
+        restore,totdemfiles[ff]
+        emarray[ff,*]=reform(10^emlog[xind,yind])
         tmp=anytim2jd(dateobs)
         times[ff]=tmp.int+tmp.frac  
      endfor
@@ -66,7 +66,7 @@ pro test_aia_iris_density,saved=saved
 endelse
   
      los_depth=1.e4             ;line of sight depth, in km
-     los_depth*=1.e5
+     los_depth*=1.e5            ;convert to cm
      
 ;DO THE PLOTTING HERE!
      wdef,0,1000,900
@@ -98,7 +98,7 @@ endelse
      ;emarray_fft = REAL_PART(FFT(maskedTransform, /inverse))
      
      density=alog10(sqrt(emarray/los_depth)) ;/(2*sqrt(2*alog(2)))
-     stop
+     ;stop
      
      
      min=min(density)           ;10.2
@@ -125,5 +125,6 @@ endelse
                 CHARSIZE=2, charthick=2, format='(f5.2)',Position=[0.88, 0.14, 0.9, 0.92]
      write_png,savename+'.png',tvrd(/true),rr,gg,bb
   
+    
   
 end

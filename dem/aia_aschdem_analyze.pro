@@ -1,16 +1,16 @@
-pro test_aia_dem_analyze
+pro test_aia_aschdem_analyze
 
 ;The actual events and AIA channels which to measure...
   ;begstep=[25,30,10,30,20,5,35,1] ;these are the initial steps for which to run the algorithm
   ;endstep=[100,100,100,85,90,100,110,110] ;these are the final steps for which to run the algorithm
   trange='2011-05-11T'+['02:32:00','02:34:00']
   event=load_events_info(label='test')
-  aia_dem_analyze,event,trange=trange
+  aia_aschdem_analyze,event,trange=trange
 end
 
 
 
-pro aia_dem_analyze,event,trange=trange,savepath=savepath
+pro aia_aschdem_analyze,event,trange=trange,savepath=savepath
 ;This procedure will analyze the results from the ASCHWANDEN DEM
 ;calculations.
   if not keyword_set(savepath) then savepath=event.savepath
@@ -18,7 +18,7 @@ pro aia_dem_analyze,event,trange=trange,savepath=savepath
   evdate=event.date
   
   inpath=event.aschdempath
-  infile='dem_'+evdate+'_'+evlabel+'_teem_map_subrois.sav'
+  infile='aschdem_'+evdate+'_'+evlabel+'_teem_map_subrois.sav'
   
 ;Restore the DEM results
   restore, inpath+infile
@@ -46,7 +46,7 @@ pro aia_dem_analyze,event,trange=trange,savepath=savepath
   ntimes=endstep-begstep+1
   
   
-te=fltarr(nregions,ntimes)
+  te=fltarr(nregions,ntimes)
   ;This is the average value
   for r=0,nregions-1 do begin
      ntot=npix[r]
@@ -65,7 +65,6 @@ te=fltarr(nregions,ntimes)
      ntot=npix[r]
      for t=begstep,endstep do begin
         em[r,t-begstep]=total(emdata[r,t,*])/ntot
-;           chi[r,t-begstep]=sqrt(total(chidata[r,t,*,*]^2))
         chi[r,t-begstep]=total(chidata[r,t,*])/ntot
         sig[r,t-begstep]=sqrt(total(sigdata[r,t,*]^2)/(ntot-1))
         stderr[r,t-begstep]=sig[r,t-begstep]/sqrt(ntot)

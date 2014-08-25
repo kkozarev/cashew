@@ -1,22 +1,22 @@
-pro test_aia_cfa_teem_plot_em_ratios
+pro test_aia_aschdem_plot_em_ratios
 ;Test procedure for aia_cfa_teem_plot_em_ratios
 event=load_events_info(label='140331_01')
-aia_cfa_teem_plot_em_ratios,event
+aia_aschdem_plot_em_ratios,event
 
 end
 
 
-pro aia_cfa_teem_plot_em_ratios,event
+pro aia_aschdem_plot_em_ratios,event
   te_range=[0.5,10]*1.e6        ;   ([K], valid temperature range for DEM solutions)
 ;Find the files first
   path=event.aschdempath
-  fileset=file_basename(file_search(path+'aschdem_'+event.date+'_'+event.label+'*teem_map.sav'))
+  fileset=file_basename(file_search(path+'aschdem_'+event.date+'_'+event.label+'*teem_tot.sav'))
   nfiles=n_elements(fileset)
   for ff=0,nfiles-1 do begin
      res=strsplit(fileset[ff],'_',/extract)
      dateobs=res[4]
      infname=path+fileset[ff] ;'aschdem_'+event.date+'_'+event.label+'_'+dateobs+'_teem_map.sav'
-     outfname=path+'aschdem_'+event.date+'_'+event.label+'_'+dateobs+'_teem_em_ratios.png'
+     outfname=path+'aschdem_'+event.date+'_'+event.label+'_'+dateobs+'_teem_density.png'
      basefname=path+fileset[0]
      aia_cfa_teem_plot_em_ratios_main,infname,outfname,basefname,te_range,dateobs
   endfor
@@ -25,7 +25,7 @@ end
 
 
 
-pro aia_cfa_teem_plot_em_ratios_main,infname,outfname,basefname,te_range,dateobs
+pro aia_aschdem_plot_em_ratios_main,infname,outfname,basefname,te_range,dateobs
 ;+
 ; Project     : AIA/SDO
 ;
@@ -54,10 +54,10 @@ pro aia_cfa_teem_plot_em_ratios_main,infname,outfname,basefname,te_range,dateobs
 set_plot,'z'
 
 restore,basefname
-basemap=10^em_map
+basemap=10^emlog
 
 restore,infname
-ind	=where(em_map ne 0)
+ind	=where(emlog ne 0)
 ;statistic,te_map(ind),te_avg,te_sig
 statistic,em_map(ind),em_avg,em_sig
 nsig	=3

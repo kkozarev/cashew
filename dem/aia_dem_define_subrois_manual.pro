@@ -1,4 +1,4 @@
-pro test_aia_aschdem_define_rois
+pro test_aia_dem_define_subrois_manual
 ;The actual events and AIA channels to measure...
 
   waves=['193','211','335','171','94','131']
@@ -7,7 +7,7 @@ pro test_aia_aschdem_define_rois
   one=1
   if one eq 1 then begin
      event=load_events_info(label='test')
-     aia_aschdem_define_rois,event,numroi=8,roisize=10;,/automatic
+     aia_dem_define_subrois_manual,event,numroi=8,roisize=10;,/automatic
   endif
   
   
@@ -18,7 +18,7 @@ pro test_aia_aschdem_define_rois
      for ev=0,n_elements(events)-1 do begin
         event=events[ev]
         for w=0,n_elements(waves)-1 do begin
-           aia_aschdem_define_rois,event,waves=waves[w],numroi=8
+           aia_dem_define_subrois_manual,event,waves=waves[w],numroi=8
         endfor
      endfor
   endif
@@ -26,7 +26,7 @@ end
 
 
 
-pro aia_aschdem_define_rois,event,savepath=savepath,automatic=automatic,waves=waves,numroi=numroi,roisize=roisize
+pro aia_dem_define_subrois_manual,event,savepath=savepath,automatic=automatic,waves=waves,numroi=numroi,roisize=roisize
 ;PURPOSE:
 ;
 ;This procedure defines the ROIs for the ionization and DEM
@@ -39,7 +39,12 @@ pro aia_aschdem_define_rois,event,savepath=savepath,automatic=automatic,waves=wa
 ;       event - the event structure
 ;
 ;KEYWORDS:
-; 
+;       savepath - 
+;       automatic - 
+;       waves - 
+;       numroi - 
+;       roisize - 
+;
 ;
 ;OUTPUTS:
 ;
@@ -158,7 +163,7 @@ ionizpath=event.ionizationpath
            endif
            if wav eq 0 then begin
               ;Obtain the polygon of positions inside the rectangle.
-              reg_poly_ind=polyfillv([xr[0],xr[1],xr[1],xr[0]],[yr[0],yr[0],yr[1],yr[1]],1024,1024)
+              reg_poly_ind=polyfillv([xr[0],xr[1],xr[1],xr[0]],[yr[0],yr[0],yr[1],yr[1]],event.aiafov[0],event.aiafov[1])
               ;The two-dimensional position indices
               arrind=array_indices(baseim,reg_poly_ind)
               npix=n_elements(arrind[0,*])
@@ -167,12 +172,11 @@ ionizpath=event.ionizationpath
            endif
         endfor  
      endif else begin
-        
-        
+ 
 ;Define the regions using roiselect.pro
         ;DO IT ONLY FOR THE FIRST WAVELENGTH SO THE ROIS ARE THE SAME
         if wav eq 0 then begin
-           wdef,0,1024
+           wdef,0,event.aiafov[0],event.aiafov[1]
            print,'Showing the entire data sequence...'
            print,''
            
@@ -199,7 +203,7 @@ ionizpath=event.ionizationpath
               
               ;Obtain the polygon of positions inside the rectangle.
               reg_poly_ind=polyfillv([xr[0],xr[1],xr[1],xr[0]],[yr[0],yr[0],yr[1],yr[1]],$
-                                     1024,1024)
+                                     event.aiafov[0],event.aiafov[1])
               ;The two-dimensional position indices
               arrind=array_indices(baseim,reg_poly_ind)
               npix=n_elements(arrind[0,*])
@@ -233,6 +237,7 @@ ionizpath=event.ionizationpath
         endif                   ;if wav eq 0
         
      endelse                    ;if keyword_set(automatic)
+
 ;Update the index using add_tag
      newind=subindex
      newind=add_tag(newind,roiStart_x,'ROISTART_X')

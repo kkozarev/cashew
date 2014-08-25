@@ -1,41 +1,41 @@
-pro test_aia_cfa_teem_plot_em_ratios
+pro test_aia_aschdem_plot_em_ratios
 ;Test procedure for aia_cfa_teem_plot_em_ratios
 event=load_events_info(label='paper')
-aia_cfa_teem_plot_em_ratios,event
+aia_aschdem_plot_em_ratios,event
 
 end
 
 
-pro aia_cfa_teem_plot_em_ratios,event
+pro aia_aschdem_plot_em_ratios,event
 ;Find the files first
   path=event.aschdempath
   fileset=file_basename(file_search(path+'aschdem_'+event.date+'_'+event.label+'*teem_tot.sav'))
   nfiles=n_elements(fileset)
   for ff=0,nfiles-1 do begin
      res=strsplit(fileset[ff],'_',/extract)
-     dateobs=res[4]
+     dateobs=res[3]
      infname=path+fileset[ff] ;'aschdem_'+event.date+'_'+event.label+'_'+dateobs+'_teem_map.sav'
      outfname=path+'aschdem_'+event.date+'_'+event.label+'_'+dateobs+'_teem_em_ratios.png'
      basefname=path+fileset[0]
-     aia_cfa_teem_plot_em_ratios_main,infname,outfname,basefname,dateobs
+     aia_aschdem_plot_em_ratios_main,infname,outfname,basefname,dateobs
   endfor
 
 end
 
 
 
-pro aia_cfa_teem_plot_em_ratios_main,infname,outfname,basefname,te_range,dateobs
+pro aia_aschdem_plot_em_ratios_main,infname,outfname,basefname,te_range,dateobs
 ;+
 ; Project     : AIA/SDO
 ;
-; Name        : AIA_CFA_TEEM_PLOT_EM_RATIOS 
+; Name        : AIA_ASCHDEM_PLOT_EM_RATIOS 
 ;
 ; Category    : Display EM base ratios
 ;		previously calculted with AIA_CFA_TEEM_MAP.PRO
 ;
 ; Explanation : plots EM base ratios. Based on aia_cfa_teem_disp.pro
 ;
-; Syntax      : IDL>aia_teem_plot_em_ratios,event
+; Syntax      : IDL>aia_aschdem_em_ratios,event
 ;
 ; Inputs      : fileset  = initial part of filename
 ;		te_range(2) = min and max of valid DEM temperature range [K]
@@ -44,7 +44,7 @@ pro aia_cfa_teem_plot_em_ratios_main,infname,outfname,basefname,te_range,dateobs
 ;
 ; Outputs     : png-file
 ;
-; History     :  29-Jun-2014 - Kamen Kozarev - reworked aia_cfa_teem_disp.pro
+; History     :  29-Jun-2014 - Kamen Kozarev - based on aia_cfa_teem_disp.pro
 ;
 ; Contact     : kkozarev@cfa.harvard.edu
 ;-
