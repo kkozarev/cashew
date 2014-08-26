@@ -97,9 +97,9 @@ pro aia_aschdem_analyze,event,trange=trange,savepath=savepath
                                 ;Find the background level and maximum
                                 ;of the emission measure, get
                                 ; density compression from them.
-     rng=10
+     rng=3
      embckg=avg(em[r,0:rng-1])
-     denscompress=10^(maxe-embckg)
+     denscompress=sqrt(10^(maxe-embckg))
        ;Find the background level and maximum
        ;of the peak temperature, get
        ; their difference
@@ -124,7 +124,7 @@ pro aia_aschdem_analyze,event,trange=trange,savepath=savepath
           xrange=xrange,yrange=[mine,maxe],$
           /ynozero,thick=8,background=255,$
           color=0,xstyle=1,ystyle=8,$
-          XTICKUNITS = ['Time'], $  
+          XTICKUNITS = ['Time'], $
           XTICKFORMAT='LABEL_DATE',$
           xthick=4,ythick=4,ytickformat='(f6.2)',$
           charthick=2,charsize=1.8,xminor=4,/nodata
@@ -134,7 +134,7 @@ pro aia_aschdem_analyze,event,trange=trange,savepath=savepath
      oplot,[tm[maxe_ind],tm[maxe_ind]],[embckg-(maxe-embckg)*0.1,embckg+(maxe-embckg)*0.1],$
            color=0,thick=12
      xyouts,!p.position[0]+0.02,!p.position[3]-0.06,$
-            'EM!DW!N/EM!D0!N='+strtrim(string(denscompress,format='(f6.2)'),2),$
+            'r=sqrt(EM!DW!N/EM!D0!N)='+strtrim(string(denscompress,format='(f6.2)'),2),$
             color=0,charthick=2.4,charsize=2.2,/norm
 templot=1
 if templot gt 0 then begin     

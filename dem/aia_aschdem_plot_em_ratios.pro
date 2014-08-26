@@ -13,7 +13,8 @@ pro aia_aschdem_plot_em_ratios,event
   nfiles=n_elements(fileset)
   for ff=0,nfiles-1 do begin
      res=strsplit(fileset[ff],'_',/extract)
-     dateobs=res[3]
+     if n_elements(res) eq 6 then dateobs=res[3] else dateobs=res[4]
+     stop
      infname=path+fileset[ff] ;'aschdem_'+event.date+'_'+event.label+'_'+dateobs+'_teem_map.sav'
      outfname=path+'aschdem_'+event.date+'_'+event.label+'_'+dateobs+'_teem_em_ratios.png'
      basefname=path+fileset[0]
@@ -24,7 +25,7 @@ end
 
 
 
-pro aia_aschdem_plot_em_ratios_main,infname,outfname,basefname,te_range,dateobs
+pro aia_aschdem_plot_em_ratios_main,infname,outfname,basefname,dateobs
 ;+
 ; Project     : AIA/SDO
 ;

@@ -77,7 +77,7 @@ maxpix=max(npix)
 ;Find all of the files from the Aschwanden DEM run.
 demfile='aschdem_'+date+'_'+label+'*_teem_map.sav'
 demfiles=file_search(dempath,demfile)
-totdemfile'aschdem_'+date+'_'+label+'*_teem_tot.sav'
+totdemfile='aschdem_'+date+'_'+label+'*_teem_tot.sav'
 totdemfiles=file_search(dempath,totdemfile)
 if demfiles[0] eq '' then begin
    print,''
