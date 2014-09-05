@@ -529,7 +529,7 @@
 	"label": "110607_01",
 	"coordX": 611,
 	"coordY": -355,
-	"st": "2011/06/07 06:20:00",
+	"st": "2011/06/07 06:15:00",
 	"et": "2011/06/07 06:40:00",
 	"aiafov": [1024,2048],
 	"flareclass": "M2.5",
@@ -626,6 +626,24 @@
 	"filament": true,
 	"comment": "Slower filament with clear EUV wave with nearly no lateral expansion, data cuts out during event"
 	"web": true,
+	"rstn_lookup": "",
+	"callisto_lookup": "",
+	"nrh_lookup": ""
+}
+
+{
+	"label": "140824_01",
+	"coordX": -960,
+	"coordY": -192,
+	"st": "2014/08/24 12:06:00",
+	"et": "2014/08/24 12:21:00",
+	"aiafov": [1024,1024],
+	"flareclass": "",
+	"typeII": true,
+	"loop": false,
+	"filament": true,
+	"comment": "Interesting new event"
+	"web": false,
 	"rstn_lookup": "",
 	"callisto_lookup": "",
 	"nrh_lookup": ""

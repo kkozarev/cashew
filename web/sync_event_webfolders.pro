@@ -41,7 +41,7 @@ pro sync_event_webfolders,event,force=force, local=local
 ;Written by Kamen Kozarev, 01/2014
   folders=['radio','annulusplot','kinematics','pfss','swap','ionization','particles','png','movies','dem','yaftawave','euvi']
   subfolders={radio:['NRH','RSTN','Callisto'],annulusplot:['araw','abase','arun'],png:['raw','base','run'],dem:['aschwanden','weber']}
-  
+  usergroup='corwav'
   
   if size(event,/type) ne 8 then return
   
@@ -54,10 +54,8 @@ pro sync_event_webfolders,event,force=force, local=local
   endelse 
 
   if not dir_exist(events_path) then spawn, 'mkdir -m 775 '+events_path
-  
-
-  
   if not dir_exist(path) then spawn,'mkdir -m 775 '+path
+  
 
   for f=0,n_elements(folders)-1 do begin
      folder=folders[f]
@@ -100,7 +98,7 @@ pro sync_event_webfolders,event,force=force, local=local
         for i=0,n_elements(subfolders.radio)-1 do $
            if not dir_exist(path+folder+'/'+subfolders.radio[i]) then $
               spawn,'mkdir -m 775 '+path+folder+'/'+subfolders.radio[i]
-
+        
         files = file_search(path+folder+'/'+subfolders.radio[0]+'/*.png')
         if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.nrhpath+'*.png '+path+folder+'/'+subfolders.radio[0]
@@ -154,9 +152,14 @@ pro sync_event_webfolders,event,force=force, local=local
         if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.weberpath+'aschdem*series*.png '+path+folder+'/'+subfolders.dem[1]
      endif
+     
+     ;Make sure everyone in the user group can write to the folders
+     spawn,'chgrp -R '+usergroup+' '+path+'*'
+     spawn,'chmod -R ug+rw '+path+'*'
   endfor
 
-print,''
+
+print,'' 
 print,'Successfully sync-ed web folders for event '+event.label
 print,''
 end

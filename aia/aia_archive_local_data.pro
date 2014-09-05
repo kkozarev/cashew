@@ -1,3 +1,34 @@
+pro aia_archive_local_data_main,files,locarc,force=force
+;Copy the files from the CfA to the local archive one by one, checking their filenames and putting them
+;in the appropriate folders.
+  nf=n_elements(files)
+  cc=0
+  for f=0,nf-1 do begin
+     file=files[f]
+     if file eq '' then continue
+     tmp=strsplit(file,'AIA',/extract)
+     fname='AIA'+tmp[2]
+     tmm=strsplit(tmp[2],'_.',/extract)
+     yy=strmid(tmm[0],0,4)
+     mm=strmid(tmm[0],4,2)
+     dd=strmid(tmm[0],6,2)
+     hh=strmid(tmm[1],0,2)
+     outpath=locarc+yy+'/'+mm+'/'+dd+'/H'+hh+'00/'
+
+;check whether the file already was copied and skip unless forcing an overwrite.
+     if file_exist(outpath+fname) and not keyword_set(force) then continue 
+     cc++
+     print,'Copying file '+outpath+file
+     exec='cp '+file+' '+outpath
+     spawn,exec  
+  endfor
+  if cc eq 0 then print,'       No data to update.'
+  
+  
+end
+
+
+
 pro aia_archive_local_data,event=event,force=force
 ;PURPOSE:
 ;Copy AIA files from the CfA archive to the user's personal
@@ -40,34 +71,4 @@ pro aia_archive_local_data,event=event,force=force
      endfor
      print,''
   endfor
-end
-
-
-pro aia_archive_local_data_main,files,locarc,force=force
-;Copy the files from the CfA to the local archive one by one, checking their filenames and putting them
-;in the appropriate folders.
-  nf=n_elements(files)
-  cc=0
-  for f=0,nf-1 do begin
-     file=files[f]
-     if file eq '' then continue
-     tmp=strsplit(file,'AIA',/extract)
-     fname='AIA'+tmp[2]
-     tmm=strsplit(tmp[2],'_.',/extract)
-     yy=strmid(tmm[0],0,4)
-     mm=strmid(tmm[0],4,2)
-     dd=strmid(tmm[0],6,2)
-     hh=strmid(tmm[1],0,2)
-     outpath=locarc+yy+'/'+mm+'/'+dd+'/H'+hh+'00/'
-
-;check whether the file already was copied and skip unless forcing an overwrite.
-     if file_exist(outpath+fname) and not keyword_set(force) then continue 
-     cc++
-     print,'Copying file '+outpath+file
-     exec='cp '+file+' '+outpath
-     spawn,exec  
-  endfor
-  if cc eq 0 then print,'       No data to update.'
-  
-  
 end
