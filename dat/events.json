@@ -630,3 +630,39 @@
 	"callisto_lookup": "",
 	"nrh_lookup": ""
 }
+
+{
+	"label": "110307_01",
+	"coordX": 812,
+	"coordY": 701,
+	"st": "2011/03/07 19:38:00",
+	"et": "2011/03/07 19:58:00",
+	"aiafov": [1024,1024],
+	"flareclass": "M3.7",
+	"typeII": false,
+	"loop": false,
+	"filament": true,
+	"comment": "Fast moving filament driven eruption with large EUV wave"
+	"web": true,
+	"rstn_lookup": "",
+	"callisto_lookup": "",
+	"nrh_lookup": ""
+}
+
+{
+	"label": "110808_01",
+	"coordX": 879,
+	"coordY": 240,
+	"st": "2011/08/08 18:02:31",
+	"et": "2011/08/08 18:18:19",
+	"aiafov": [1024,2048],
+	"flareclass": "M3.5",
+	"typeII": false,
+	"loop": true,
+	"filament": false,
+	"comment": "Fast moving but faint loop eruption"
+	"web": true,
+	"rstn_lookup": "",
+	"callisto_lookup": "",
+	"nrh_lookup": ""
+}

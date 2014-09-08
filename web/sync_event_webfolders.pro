@@ -155,6 +155,8 @@ pro sync_event_webfolders,event,force=force, local=local
      ;Make sure everyone in the user group can write to the folders
      spawn,'chgrp '+usergroup+' '+path
      spawn,'chgrp -R '+usergroup+' '+path+'*'
+     spawn,'chmod -R ug+rw '+path
+     spawn,'chmod -R ug+rw '+path+'*'
   endfor
 
 
