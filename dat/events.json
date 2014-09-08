@@ -666,3 +666,58 @@
 	"callisto_lookup": "",
 	"nrh_lookup": ""
 }
+
+{
+	"label": "120517_01",
+	"coordX": 88,
+	"coordY": 7,
+	"st": "2012/05/17 01:31:00",
+	"et": "2012/05/17 01:44:19",
+	"aiafov": [1024,2048],
+	"flareclass": "M5.1",
+	"typeII": false,
+	"loop": false,
+	"filament": true,
+	"comment": "Strange event, I think there is a CBF in here after the initial loop eruption driven by a filament, might be too insignificant to look at"
+	"web": true,
+	"rstn_lookup": "",
+	"callisto_lookup": "",
+	"nrh_lookup": ""
+}
+
+{
+	"label": "130522_01",
+	"coordX": 883.2,
+	"coordY": 268.8,
+	"st": "2013/05/22 12:34:00",
+	"et": "2013/05/22 12:58:19",
+	"aiafov": [1024,2048],
+	"flareclass": "M5.0",
+	"typeII": false,
+	"loop": true,
+	"filament": false,
+	"comment": "Eruption appears to be loop driven and generates a CBF right before leaving the FOV"
+	"web": true,
+	"rstn_lookup": "",
+	"callisto_lookup": "",
+	"nrh_lookup": ""
+}
+
+{
+	"label": "130621_01",
+	"coordX": -883.2,
+	"coordY": -268.8,
+	"st": "2013/06/21 02:34:00",
+	"et": "2013/06/21 02:59:00",
+	"aiafov": [1024,2048],
+	"flareclass": "M2.9",
+	"typeII": false,
+	"loop": false,
+	"filament": true,
+	"comment": "Filament driven eruption with clear CBF, worth processing"
+	"web": true,
+	"rstn_lookup": "",
+	"callisto_lookup": "",
+	"nrh_lookup": ""
+}
+
