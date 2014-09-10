@@ -1,9 +1,9 @@
-pro test_aia_dem_define_subrois
+pro test_aia_dem_define_annuli
  ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
      event=load_events_info(label='test')
-     aia_dem_define_subrois,event,/force
+     aia_dem_define_annuli,event,/force
   endif
   
 ;Alternatively, run for all events
@@ -12,21 +12,18 @@ pro test_aia_dem_define_subrois
      events=load_events_info()
      for ev=0,n_elements(events)-1 do begin
         event=events[ev] 
-        aia_dem_define_subrois,event
+        aia_dem_define_annuli,event
      endfor
   endif
 
 end
 
 
-pro aia_dem_define_subrois,event,savepath=savepath,force=force
+pro aia_dem_define_annuli,event,savepath=savepath,force=force
 ;PURPOSE:
 ;
-;This procedure defines the AIA ROIs for the ionization and DEM
-;calculations. The difference between this procedure and
-;aia_dem_define_subrois_manual is that this one automatically positions 8 rectangular
-;regions tangentially to the shock surface, four along the shock
-;surface for the middle time step, and four along a radial direction.
+;This procedure defines circular annuli for the ionization and DEM
+;calculations. It is a variation on aia_dem_define_subrois
 ;Also, it only saves the pixel positions of each region, not the data itself.
 ;
 ;CATEGORY:
@@ -45,7 +42,7 @@ pro aia_dem_define_subrois,event,savepath=savepath,force=force
 ; aia_circle
 ;
 ;MODIFICATION HISTORY:
-;Written by Kamen Kozarev, 04/01/2014
+;Written by Kamen Kozarev, 08/26/2014
 ;
 
   wav='193'
@@ -65,7 +62,7 @@ pro aia_dem_define_subrois,event,savepath=savepath,force=force
      print,''
      return
   endif  
-  
+
 ;+==============================================================================
 ;LOAD THE DATA
   print,''
@@ -102,7 +99,7 @@ pro aia_dem_define_subrois,event,savepath=savepath,force=force
   radiusfitlines*=RSUN*event.geomcorfactor
   radius=radiusfitlines/kmpx ;The fitted radius values
   nsteps=n_elements(time)
-  rr=floor(nsteps-4)            ; this is the step of the region for which to save the positions.
+  rr=floor(nsteps-1)            ; this is the step of the region for which to save the positions.
   ;The angle corresponding to latitude of the active region
   rad_angle=atan((ar[1]-suncenter[1])/(ar[0]-suncenter[0]))
   ;The distance from the AR position to the shock front
@@ -127,7 +124,7 @@ pro aia_dem_define_subrois,event,savepath=savepath,force=force
   res=aia_circle(ar[0],ar[1],radius[rr],/plot)
   
 ;Calculate the region rectangle prototype
-  ROISIZE=[100,20]
+  ROISIZE=[100,10]
   regx=[0-roisize[0]/2.,0+roisize[0]/2.]
   regy=[0-roisize[1]/2.,0+roisize[1]/2.]
   regz=[0,0]
@@ -156,15 +153,10 @@ pro aia_dem_define_subrois,event,savepath=savepath,force=force
      reg = transform_volume(regvolume,rotation=[0,0,-(90-angle*180./!PI)],$
                              translate=[ar[0]+radius[rr]*cos(angle),ar[1]+radius[rr]*sin(angle),0])
     
-;Here, check if the points are within the image. If not, set them to
-;the image limits. NOTE: THIS IS A HACK! There should be a better way
-;to determine if a region is entirely outside the AIA FOV
-     ind=where(reg[0,*] ge event.aiafov[0])
-     if ind[0] ne -1 then reg[0,ind]=n_elements(im[*,0])-n_elements(ind)+ind
-     ind=where(reg[1,*] ge event.aiafov[1])
-     if ind[0] ne -1 then reg[1,ind]=n_elements(im[0,*])-n_elements(ind)+ind
-    
-     
+;Here, check if the points are within the image. If not, set them to the image limits
+     reg[0,where(reg[0,*] ge event.aiafov[0])]=event.aiafov[0]-1
+     reg[1,where(reg[1,*] ge event.aiafov[1])]=event.aiafov[1]-1
+
 ;Record the starting and ending positions
      roiStart_x[roi]=reg[0,0]
      roiEnd_x[roi]=reg[0,1]

@@ -26,7 +26,11 @@ pro make_webpage, All=all, webfilename=webfilename,_extra=_extra, local=local, n
 events=load_events_info()
 
 if keyword_set(local) then begin
-   path='/Volumes/Scratch/Users/kendrick/web/'
+   if file_search(local) eq '' then begin
+      print,"Keyword 'local' does not contain a valid path. Quitting..."
+      return
+   endif
+   path=local
 endif else begin
    path=getenv('CORWAV_WEB')+'events/'
 endelse

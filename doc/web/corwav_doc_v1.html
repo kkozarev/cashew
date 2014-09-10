@@ -406,30 +406,36 @@ IDL> pfss_return_field,event.st,/save,path=event.pfsspath,event=event
         <pre><code>	
 IDL> pfss_shock_run_csgs,event
         </code></pre>
-        <p>The image below illustrates the application of the PFSS+CSGS model. The loopy lines of varying colors represent the modeled coronal magnetic field lines near the time of the event.
-        The black and green meshed surface is the CSGS model for that time step, and the orange points represent the crossing points. This plot was created by running</p>
+        <p>The images below illustrate the application of the PFSS+CSGS model. The loopy lines of represent the modeled coronal magnetic field lines near the time of the event. Orange lines are magnetically closed, blue ones are open.
+        The black meshed surface is the CSGS model for that time step, and the green points represent the field line crossings. This plot was created by running</p>
         <pre><code>	
 IDL> pfss_shock_plot_csgs,event,/png
         </code></pre>
-        <img src="png/aia_pfss_csgs_combination.png" alt='AIA PFSS+CSGS Illustration' width=400>
+        <img src="png/aia_pfss_csgs_combination_1.png" alt='AIA PFSS+CSGS Illustration' width=400>
+        <img src="png/aia_pfss_csgs_combination_2.png" alt='AIA PFSS+CSGS Illustration' width=400>
         <p>To plot the values of the shock-crossing angle (known as ThetaBN) for all time steps, run pfss_shock_plot_crossing_angles. 
         It will produce one image for every time of the top-down view of the shock surface with the position of the shock crossings up to that time step (if you specify the /oplot keyword), 
-        and angle value color coded. Without the /oplot keyword, the image will only contain the current crossings positions and angle values.</p>
+        and color-coded angle value  (left image). Open field line crossings are open symbols. Without the /oplot keyword, the image will only contain the current crossings positions and angle values (right image).</p>
         <pre><code>	
 IDL> pfss_shock_plot_crossing_angles,event(,/oplot)
     	</code></pre>
-    	<img src="png/thetabn_crossings.png" alt='AIA ThetaBN shock crossing angle values' width=400><img src="png/thetabn_crossings_oplot.png" alt='AIA ThetaBN shock crossing angle values' width=400>
+    	<img src="png/thetabn_crossings_oplot.png" alt='AIA ThetaBN shock crossing angle values' width=400>
+        <img src="png/thetabn_crossings.png" alt='AIA ThetaBN shock crossing angle values' width=400>
     	<p> You can obtain some statistics on the ThetaBN values over time and make a plot of them, by running</p>
     	<pre><code>	
 IDL> pfss_shock_plot_thetabn_stats,event
     	</code></pre>
-    	<img src="png/thetabn_stats.png" alt='AIA ThetaBN value statistics' width=400>
+    	<img src="png/thetabn_stats.png" alt='AIA ThetaBN value statistics' width=320>
+        <img src="png/thetabn_stats_with_open.png" alt='AIA ThetaBN value statistics' width=320>
+        <img src="png/thetabn_stats_radpos.png" alt='AIA ThetaBN value statistics' width=260>
+<p>This procedure produces several statistical plots for the event: 1) one showing the crossing angles over time, 2) the same one augmented with plots of the open field lines crossed over time, and 3) a plot of the radial ranges of the open field crossings.</p>
     	<p>Finally, you can plot the coronal connectivity of the shock (all field lines that interact with the shock) for all time steps, using pfss_shock_plot_angular_influence. 
-    	It will produce PFSS images with crossing field lines highlighted, in a face-on view. The images can also be done in a top-down view, if we specify the /topview keyword:</p>
-    	<pre><code>	
+    	It will produce PFSS images with crossing field lines highlighted (orange for closed, light-blue for open), in a face-on view. The images can also be done in a top-down view, if we specify the /topview keyword:</p>
+    	<pre><code>
 IDL> pfss_shock_plot_angular_influence,event[,/topview]
     	</code></pre>
-    	<img src="png/pfss_connectivity.png" alt='AIA PFSS+CSGS connectivity' width=400> <img src="png/pfss_connectivity_topview.png" alt='AIA PFSS+CSGS connectivity, top view' width=400>
+    	<img src="png/pfss_connectivity.png" alt='AIA PFSS+CSGS connectivity' width=400>
+        <img src="png/pfss_connectivity_topview.png" alt='AIA PFSS+CSGS connectivity, top view' width=400>
 		<p>The top view has the advantage that it shows more readily the heliospheric connectivity, as well as the longitudinal range of magnetic field lines, which are nominally connected 
 		to near-Earth space (black arc), for solar wind speeds between 400 and 500 km/s.</p>
 		<p><b>All the plots shown in this section are generated automatically, and may be found in the /dem/aschwanden or /pfss/ folders of the respective event.</b></p>
@@ -439,43 +445,34 @@ IDL> pfss_shock_plot_angular_influence,event[,/topview]
         <section>
     	<h2 id="sec8"><b>8. Plotting radio and X-ray data.</b></h2>
     	<p>CorWav has procedures for plotting radio data from the eCallisto and RSTN catalogs, as well as from Nancay Radio Heliograph, and X-ray imaging data from RHESSI. The radio output files will be stored in the 'radio/' folder of the event(s).</p>
-        <p>To plot eCallisto data, you first need to download the fits files from <a href="http://soleil.i4ds.ch/solarradio/callistoQuicklooks/" target="_blank">the eCallisto website</a> for the dates you are interested in. Then save the data in the appropriate 'Callisto_data' folder, and you can plot them by running
+        <p>To plot eCallisto data, you first need to download the fits files from <a href="http://soleil.i4ds.ch/solarradio/callistoQuicklooks/" target="_blank">the eCallisto website</a> for the dates you are interested in. Then save the data in the appropriate 'Callisto_data' folder, and you can plot them by running:
 <pre><code>
 IDL> callisto_plot_spectrum,event[,timerange=timerange,freqrange=freqrange]
 </code></pre></p>
+<img src="png/callisto_radio_spectrum.png" alt='Callisto radio spectrum' width=600>
 <p> To plot data from the Radio Solar Telescope Network (RSTN), first
         <a
         href="http://www.ngdc.noaa.gov/stp/space-weather/solar-data/solar-features/solar-radio/rstn-spectral/"
         target="_blank">download daily .srs files</a> from one of the five functioning stations (Learmonth, Palehua, San Vito, and
-        Sagamore Hill). Alternatively, you can download the daily files automatically using
+        Sagamore Hill). Alternatively, you can download the daily files automatically using</p>
 <pre><code>
 IDL> rstn_download_data,event
 </code></pre>
-After that, you can run
+After that, run
 <pre><code>
 IDL> rstn_plot_spectrum,event[,full=full,frange=frange,trange=trange,datarange=datarange]
 </code></pre>
-The keywords of this procedure allow to plot the full data file, or choose time and frequency ranges, as well as a scaling of the plotted values. The default time range is set to be the same as the event's.</p>
+<img src="png/rstn_radio_spectrum.png" alt='Callisto radio spectrum' width=600>
+<p>The keywords of this procedure allow to plot the full data file, or choose time and frequency ranges, as well as a scaling of the plotted values. The default time range is set to be the same as the event's.</p>
 <a href="#top">Top</a>
         </section>        
 <!-- --------SECTION 9----------- -->
         <section>
     	<h2 id="sec9"><b>9. Updating the online database/webpage.</b></h2>
     	<p><b>This section describes the process for the local CfA webpage only!</b></p>
-    	<p>To update the web database page:<br>
-    	    Run the procedure <b>sync_event_webfolders</b> to copy/update all data products to the webpage folders.<br>
-    	    Run the procedure <b>create_coronalshocks_page</b> to create/update the webpage. The filename to update/create is 'coronalwaves.content'.<br>
-    	    Go to the web page main folder($CORWAV_WEB) and run the sync-ing script - <b>./sync_events</b><br>
-            Alternatively, instead of running the first two procedures, you can simply run the update_webpage procedure.
-    	    <!--Finally, run <b>svnlog HEAD</b> and add at the top of the text file ‘Approved by [YOURNAME]’. (ESC and then :wq to save and exit)--></p>
+    	<p>To update the web database page, run the update_webpage.csh script, which is in the /web folder of the repo:</p>
         <pre><code>
-IDL> sync_event_webfolders,event
-IDL> webpath=GETENV('CORWAV_WEB')
-IDL> fname='coronalwaves.content'
-IDL> create_coronalshocks_page,webpath+fname
-
-$> cd $CORWAV_WEB
-$CORWAV_WEB$> ./sync_events
+$> ./update_webpage.csh
         </code></pre>
         <a href="#top">Top</a>
         </section>
