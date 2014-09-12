@@ -4,6 +4,7 @@ function make_aia_dem_struct, chiantifix=chiantifix, xrt_filters=xrt_filters, ob
 
 ;; to massage the AIA responses into something that xrt_dem_iterative
 ;; recognizes
+;By Kathy Reeves
 
   if not keyword_set(logt_min) then logt_min = 5.5
   if not keyword_set(logt_max) then logt_max = 8.0
