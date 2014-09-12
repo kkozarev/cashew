@@ -146,7 +146,8 @@ endelse
      AXIS, YAXIS=0,YRANGE=yrange, color=255,ythick=1,yticks=6,ytickformat='(A1)',ystyle=1
      AXIS, YAXIS=1,YRANGE=yrange, color=255,ythick=1,yticks=6,ytickformat='(A1)',ystyle=1
      fcolorbar, MIN=min,MAX=max,Divisions=6, $
-                Color=255,VERTICAL=1,RIGHT=1, TITLE='Log (Density / cm!U-3!N)',$
+                Color=255,VERTICAL=1,RIGHT=1,TITLE='Log (Density / cm!U-3!N), LOS = '+$
+                strtrim(string(los_depth/1.e5,format='(f8.1)'),2)+' km',$
                 CHARSIZE=2, charthick=2, format='(f5.2)',Position=[0.88, 0.14, 0.9, 0.92]
      write_png,savename+'.png',tvrd(/true),rr,gg,bb
   

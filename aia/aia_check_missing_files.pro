@@ -1,4 +1,5 @@
 function aia_check_missing_files,files,cadence=cadence
+  if n_elements(files) lt 2 then return,''
 ;A function to check whether there are files missing
   if files[0] eq '' then return, ''
   if not keyword_set(cadence) then cadence=12.

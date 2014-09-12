@@ -79,7 +79,7 @@ pro create_event_folders,event,web=web
               spawn,'mkdir -m 775 '+path+folders[f]+'/'+subfolders.dem[i]
   endfor
   
-  spawn,'chgrp -R corwav '+path+'*'
+  spawn,'chgrp -R corwav '+path
   
 print,''
 print,'Successfully created folders for event '+event.label

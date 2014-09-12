@@ -152,6 +152,7 @@ pro sync_event_webfolders,event,force=force, local=local
         if files[0] eq '' or keyword_set(force) then $
            spawn,'cp '+event.weberpath+'aschdem*series*.png '+path+folder+'/'+subfolders.dem[1]
      endif
+
      ;Make sure everyone in the user group can write to the folders
      spawn,'chgrp -R '+usergroup+' '+path+'*'
      spawn,'chmod -R ug+rw '+path+'*'

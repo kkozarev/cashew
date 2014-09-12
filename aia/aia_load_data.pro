@@ -330,7 +330,7 @@ endif else begin
 ;            fname=aia_get_fname(s,stp,wv)
 ;                                ;print,dirpath+fname
 ;            file=file_search(dirpath+fname)
-;     e       if file ne '' then begin
+;            if file ne '' then begin
 ;                print,dirpath+fname
 ;                if n gt 0 then files=[files,file]
 ;                if n eq 0 then begin
