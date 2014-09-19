@@ -4,7 +4,7 @@ pro test_aia_cfa_teem_run
  ;You can run for one or several events, like this.
   one=1
   if one eq 1 then begin
-     events=load_events_info(label=['paper'])
+     events=load_events_info(label=['110607_01'])
 ;    To do (1): '131107_01','131029_01','131119_01','131207_01'
 ;    To do (2): '110804_01','110809_01','110211_02','110128_01','110125_01','120728_01','121007_01'
 ;    Currently being calculated (remove when done): '131105_01', '130517_01', '130501_01'
@@ -86,7 +86,7 @@ pro aia_cfa_teem_run,event,savepath=savepath,fileset=fileset,remove_aec=remove_a
 ;Obtain all the necessary filenames
   for w=0,nwave-1 do begin
      if keyword_set(remove_aec) then ftmp=aia_file_search(st,et,wave[w],/check171,event=event,/remove_aec) $
-     else ftmp=aia_file_search(st,et,wave[w],/check171,event=event,/remove_aec)
+     else ftmp=aia_file_search(st,et,wave[w],/check171,event=event)
      
                                 ;Create the filename structure
      if w eq 0 then begin

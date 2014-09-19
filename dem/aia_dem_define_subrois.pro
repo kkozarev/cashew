@@ -102,7 +102,7 @@ pro aia_dem_define_subrois,event,savepath=savepath,force=force
   radiusfitlines*=RSUN*event.geomcorfactor
   radius=radiusfitlines/kmpx ;The fitted radius values
   nsteps=n_elements(time)
-  rr=floor(nsteps-4)            ; this is the step of the region for which to save the positions.
+  rr=floor(nsteps/2.)            ; this is the step of the region for which to save the positions.
   ;The angle corresponding to latitude of the active region
   rad_angle=atan((ar[1]-suncenter[1])/(ar[0]-suncenter[0]))
   ;The distance from the AR position to the shock front
@@ -112,6 +112,7 @@ pro aia_dem_define_subrois,event,savepath=savepath,force=force
   
 ;Plot stuff
   ;wdef,0,1024
+  loadct,0,/silent
   wdef,0,event.aiafov[0],event.aiafov[1]
   ;im=reform(sqrt(subdata[*,*,20]))
   baseim=subdata[*,*,0]

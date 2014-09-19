@@ -1,5 +1,5 @@
 pro test_pfss_shock_plot_all
-event=load_events_info(label='130423_01')
+event=load_events_info(label='paper')
 pfss_shock_plot_all,event,/hires
 pfss_shock_plot_all,event,/lores
 end

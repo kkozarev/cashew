@@ -90,12 +90,17 @@ if csgsfile eq '' then begin
   loadct,13,/silent
   
  
-  maxf=0.0
-  minf=1.0e20
+;  maxf=0.0
+;  minf=1.0e20
+  minf=1.0
+  maxf=45.
+  
   for sstep=0,nsteps-2 do begin
      ncrosses=allcrosses[sstep]
      thb=crossPoints[sstep,0:ncrosses-1].thbn
      invcosthb=(1./(cos(!PI/180.*thb))^2)
+     minf=1.0
+     maxf=45.
      ;stop
      rmag=reform(sqrt(crossPoints[sstep,0:ncrosses-1].rpx^2+$
                       crossPoints[sstep,0:ncrosses-1].rpy^2+$
@@ -112,7 +117,7 @@ if csgsfile eq '' then begin
         ymax=freq[i]+1.0 ;Bin in 1 MHz frequency bins
         polyfill,[xmin,xmax,xmax,xmin],$
                  [ymin,ymin,ymax,ymax],$
-                 color=254.0*((invcosthb[i]-min(invcosthb))/(50-min(invcosthb))),/data
+                 color=254.0*((invcosthb[i]-minf)/(maxf-minf)),/data
 ;                 color=254.0*((thb[i]-min(thb))/(90.0-min(thb))),/data
 
 
@@ -126,7 +131,7 @@ if csgsfile eq '' then begin
   endfor
   
   ;MIN=0.0,MAX=90.0
-  fcolorbar, MIN=min(invcosthb),MAX=50,Divisions=4, $
+  fcolorbar, MIN=minf,MAX=maxf,Divisions=4, $
              Color=0,VERTICAL=1,RIGHT=1, TITLE=tit,$
              CHARSIZE=3,charthick=2, format='(f6.1)',Position=[0.88, 0.4, 0.9, 0.8]
 ;'sin('+thlet+'!DBN!N)'
