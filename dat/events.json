@@ -736,3 +736,39 @@
 	"callisto_lookup": "",
 	"nrh_lookup": ""
 }
+
+{
+	"label": "140106_01",
+	"coordX": 960,
+	"coordY": -268,
+	"st": "2014/01/06 07:42:00",
+	"et": "2014/01/06 07:53:00",
+	"aiafov": [1024,2048],
+	"flareclass": "",
+	"typeII": false,
+	"loop": false,
+	"filament": true,
+	"comment": "Filament driven eruption with clear CBF, passes out of FOV quickly, but very fast"
+	"web": true,
+	"rstn_lookup": "",
+	"callisto_lookup": "",
+	"nrh_lookup": ""
+}
+
+{
+	"label": "140217_01",
+	"coordX": 1007,
+	"coordY": 53,
+	"st": "2014/02/17 04:49:00",
+	"et": "2014/01/06 05:07:00",
+	"aiafov": [1024,2048],
+	"flareclass": "",
+	"typeII": false,
+	"loop": false,
+	"filament": true,
+	"comment": "Filament driven eruption with clear CBF, passes out of FOV quickly, but very fast"
+	"web": true,
+	"rstn_lookup": "",
+	"callisto_lookup": "",
+	"nrh_lookup": ""
+}
