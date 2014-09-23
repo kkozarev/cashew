@@ -14,10 +14,10 @@ pro aia_aschdem_plot_em_ratios,event
   for ff=0,nfiles-1 do begin
      res=strsplit(fileset[ff],'_',/extract)
      if n_elements(res) eq 6 then dateobs=res[3] else dateobs=res[4]
-     stop
+     
      infname=path+fileset[ff] ;'aschdem_'+event.date+'_'+event.label+'_'+dateobs+'_teem_map.sav'
      outfname=path+'aschdem_'+event.date+'_'+event.label+'_'+dateobs+'_teem_em_ratios.png'
-     basefname=path+fileset[0]
+     basefname=path+fileset[0:4]
      aia_aschdem_plot_em_ratios_main,infname,outfname,basefname,dateobs
   endfor
 
@@ -53,9 +53,20 @@ pro aia_aschdem_plot_em_ratios_main,infname,outfname,basefname,dateobs
 ;________________________DISPLAY EM BASE RATIOS________________________
 set_plot,'z'
 
-restore,basefname
-basemap=10^emlog
-te_range=minmax(10^telog)       ;   ([K], valid temperature range for DEM solutions)
+nbase=n_elements(basefname)
+for bb=0,nbase-1 do begin
+   restore,basefname[bb]
+   bmap=10^emlog
+   if bb eq 0 then begin
+      te_range=minmax(10^telog) ;   ([K], valid temperature range for DEM solutions)
+      basemap=bmap
+   endif else begin
+      basemap+=bmap
+   endelse
+endfor
+basemap/=(1.0D*nbase)
+
+
 restore,infname
 ind	=where(emlog ne 0)
 ;statistic,te_map(ind),te_avg,te_sig
@@ -81,7 +92,7 @@ inmap=10^emlog
 ; em_map =rebin(em_map,nx,ny)
 ; te_map =rebin(te_map,nx,ny)
 ;endif
- 
+
 ;temperature scale
 ;i3	=long(nx*0.95)
 ;for j=0,ny-1 do te_map(i3:nx-1,j)=te1+(te2-te1)*float(j)/float(ny-1)
@@ -101,10 +112,10 @@ loadct,0,/silent
 !p.background=255
 plot,[0,0],[0,0],xticks=1,yticks=1,xminor=1,yminor=1
 ct=13
-rmin= 0.8;min(inmap/(basemap*1.0))
-rmax= 1.6;max(inmap/(basemap*1.0))
+rmin= 0.9;min(inmap/(basemap*1.0))
+rmax= 1.4;max(inmap/(basemap*1.0))
 loadct,ct,/silent
-tv,bytscl(inmap/(basemap*1.0),min=rmin,max=rmax),0,0
+tv,bytscl(sqrt(inmap/(1.*basemap)),min=rmin,max=rmax);,0,0  ;
 ;loadct,5
 ;tv,bytscl(te_map,min=te1,max=te2),nx,0
 ;t1str	=string(te1,'(f3.1)')
@@ -118,7 +129,7 @@ tv,bytscl(inmap/(basemap*1.0),min=rmin,max=rmax),0,0
 ;loadct,0,/silent
 ;xyouts,0.85,0.98,'EM BASE RATIO',charsize=1.2,color=255,charthick=1,/norm
 ;xyouts,0.85,0.96,dateobs,charsize=1.2,color=255,charthick=1,/norm
-loadct,ct,/silent
+;loadct,ct,/silent
 fcolorbar, MIN=rmin,MAX=rmax,Divisions=8, $
            Color=0,VERTICAL=1,RIGHT=1, TITLE='EM BASE RATIO  '+dateobs,$
            CHARSIZE=2,charthick=2,format='(f4.2)',Position=[0.905, 0.03, 0.94, 0.97]

@@ -252,9 +252,11 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires
      ;open_percent=(linekinds[*,rr,0]/(1.*totranglin))*100.
      if cols[rr] eq 0 then bckcol=255 else bckcol=0
      LOADCT,0,/SILENT
-     oplot,tm,smooth(linekinds[*,rr,0],2,/edge_trunc),thick=10,color=bckcol
+     ;oplot,tm,smooth(linekinds[*,rr,0],2,/edge_trunc),thick=10,color=bckcol
+     oplot,tm,linekinds[*,rr,0],thick=10,color=bckcol
      LOADCT,13,/SILENT
-     oplot,tm,smooth(linekinds[*,rr,0],2,/edge_trunc),thick=8,color=cols[rr]
+     ;oplot,tm,smooth(linekinds[*,rr,0],2,/edge_trunc),thick=8,color=cols[rr]
+     oplot,tm,linekinds[*,rr,0],thick=8,color=cols[rr]
   endfor
 
   ;tvlct,rr,gg,bb,/get
@@ -288,7 +290,7 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires
          /encaps,/color,/helvetica
   loadct,0,/silent
   PLOT, tm, allcrosses, PSYM = 10, $ 
-        TITLE = 'Crossing heights by '+thlet+'!DBN!N Range', $
+        TITLE = 'Open-line crossings by '+thlet+'!DBN!N Range', $
         XTITLE =xtit, $
         YTITLE = ytit, $
         XTICKUNITS = ['Time'],XTICKFORMAT='LABEL_DATE',$

@@ -32,10 +32,10 @@ pro test_pfss_shock_run_csgs
 ; A small procedure to run several instances of the coronal shock
 ; model.
   
-  event=load_events_info(label='130423_01')
-  pfss_shock_run_csgs,event,/lores,/newtimes
+  event=load_events_info(label='paper')
+  ;pfss_shock_run_csgs,event,/lores,/newtimes
   pfss_shock_run_csgs,event,/hires,/newtimes;,/plot;,/png
-
+  
 end
 ;---------------------------------------------------------------------
 
@@ -166,7 +166,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
   minAU=1.49598e11 ;m in AU
   mpix=rsun_m/sunrad ;conversion between pixels and m.
   
-  shockthick=3.0                ;shock thickness, in pixels
+  shockthick=3.5                ;shock thickness, in pixels
   
 ;Calculate the number of steps and their size.
   dt= time[1]-time[0]           ;The cadence (maxshockrad-minshockrad)*mpix/(nsteps*1.0)/vshock ;timestep in seconds
@@ -374,6 +374,66 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
            crossPoints[sstep,cross].open=pfsslines[crossPoints[sstep,cross].linid].open
            ;if ff mod 100 eq 0 then print,'CSGS section, cross #'+strtrim(string(cross),2)
         endfor
+        
+;DEBUG!!!
+        ;Check for open field lines that crossed in the previous time step,
+        ;but were skipped in this one.
+        if sstep gt 0 then begin
+           tmp=where(crossPoints[sstep-1,*].open eq 1)
+           if tmp[0] ne -1 then begin
+              for ll=0,n_elements(tmp)-1 do begin
+                 ;The pfss index of the crossing line
+                 lind=crossPoints[sstep-1,tmp[ll]].linid
+                 ;Here check if this line has been covered in this time step - if not, continue to the next one
+                 res=where(crossPoints[sstep,*].linid eq lind)
+                 if res[0] ne -1 then continue
+                 
+                 dr2=(reform(pfss_cartpos[lind,0,*])-sc[0])^2 + $
+                     (reform(pfss_cartpos[lind,1,*])-sc[1])^2 + $
+                     (reform(pfss_cartpos[lind,2,*])-sc[2])^2
+                 pfssrad=sqrt(dr2)
+                 ;ptind=where(dr2 le (shockrad+shockthick)^2 and dr2 ge shockrad^2)
+                 minnn=min(abs(shockrad+shockthick-pfssrad),ptind)
+                 
+                 if ptind gt -1 then begin
+                    cross_point=reform(pfss_cartpos[lind,*,ptind])
+                    crosspt=crosspoint ;crosspoint struct already exists, just copy it over.
+                    crosspt.px=cross_point[0]
+                    crosspt.py=cross_point[1]
+                    crosspt.pz=cross_point[2]
+                    pt=(reform(cross_point)-suncenter)/sunrad
+                    crosspt.rpx=pt[0] ;X-, Y-, and Z- positions of the point in Rsun
+                    crosspt.rpy=pt[1]
+                    crosspt.rpz=pt[2]
+                    sphpt=cart2sph([cross_point[0]-xcenter,cross_point[1]-ycenter,cross_point[2]-zcenter]/sunrad)
+                    crosspt.bmag=bfield_pfss(sphpt,sph_data)
+                    crosspt.linid=lind
+                    crosspt.open=pfsslines[crosspt.linid].open
+                    if ncrosses eq nmaxcrosses then begin
+                       ;Concatenate the crossPoints structure of arrays with the new point info
+                       newCrossPoints=replicate(crossPoint,nsteps,nmaxcrosses+1)
+                       newCrossPoints[*,0:ncrosses-1]=crossPoints
+                       newCrossPoints[sstep,ncrosses]=crosspt
+                       crossPoints=newCrossPoints
+                    endif else begin
+                       crossPoints[sstep,ncrosses]=crosspt
+                    endelse
+                    ;Concatenate the cross_points array with the new point location
+                    new_cross_points=fltarr(3,ncrosses+1)
+                    new_cross_points[*,0:ncrosses-1]=cross_points
+                    new_cross_points[*,ncrosses]=cross_point
+                    cross_points=new_cross_points
+                    ;Concatenate the pind variable
+                    new_pind=lonarr(2,ncrosses+1)
+                    new_pind[*,0:ncrosses-1]=pind
+                    new_pind[*,ncrosses]=[lind,ptind]
+                    pind=new_pind
+                    ncrosses++
+                 endif
+              endfor
+           endif
+        endif
+;DEBUG!!!        
         
 ;        allcrossPoints[sstep,*,0:ncrosses-1]=cross_points*1.0D
 ;        allcrossBmag[sstep,0:ncrosses-1]=cross_bmag*1.0D

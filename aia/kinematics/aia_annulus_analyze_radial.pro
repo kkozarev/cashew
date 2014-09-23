@@ -381,7 +381,7 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
 ;END DEBUG
   endfor
 
-loadct, 0, /silent
+  loadct, 0, /silent
 
 
 ;--------------------------------------------------
@@ -394,6 +394,33 @@ loadct, 0, /silent
      print, "Not enough data to smooth, exiting..."
      return
   endif
+  ;stop
+  order=0
+  sgfpix=4
+;  sgfil1=savgol(sgfpix,sgfpix,order,2)
+  sgfil=savgol(sgfpix,sgfpix,order,4)
+  plot,time_good,dist,/ynozero,psym=2
+  ;oplot,time_good,convol(dist,sgfil1,/edge_truncate)
+  oplot,time_good,convol(dist,sgfil,/edge_truncate),linestyle=2
+ 
+  order=1
+ ; sgfil_v1 = SAVGOL(sgfpix, sgfpix, order, 2)*(FACTORIAL(order)/ $
+ ;                                  (dt^order))
+  sgfil_v = SAVGOL(sgfpix, sgfpix, order, 4)*(FACTORIAL(order)/ $
+                                   (dt^order))
+  plot,time_good,deriv(time_good,dist),/ynozero,psym=2
+; oplot,time_good,convol(dist,sgfil_v1,/edge_truncate)
+  oplot,time_good,convol(dist,sgfil_v,/edge_truncate),linestyle=2
+  
+  order=2
+  sgfil_a = SAVGOL(sgfpix, sgfpix, order, 4)*(FACTORIAL(order)/ $
+                                            (dt^order))
+  plot,time_good,deriv(time_good,deriv(time_good,dist)),/ynozero,psym=2
+; oplot,time_good,convol(dist,sgfil_v1,/edge_truncate)
+  oplot,time_good,convol(dist,sgfil_a,/edge_truncate),linestyle=2
+
+  
+
   dist=smooth(dist,4,/edge_truncate)
   bootstrap_sdo,dist,time_good,fit_line, p1, p2, p3, s1, s2, s3,parinfo=parinfo
   print,''
@@ -406,7 +433,7 @@ loadct, 0, /silent
   datastruct.fitsigma[mind,0].front=s1[0]
   datastruct.fitsigma[mind,1].front=s2[0]
   datastruct.fitsigma[mind,2].front=s3[0]
-
+  
 ;  wave_rads=rad_data.fitparams[0,0].front+rad_data.fitparams[0,1].front*wave_times+0.5*(rad_data.fitparams[0,2].front)^2
 ;--------------------------------------------------
   oplot,time[sp:ep].jd-dt[sp:ep],wave_fits,thick=3

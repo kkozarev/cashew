@@ -702,7 +702,7 @@ pro aia_annulus_analyze_radial_savgol,event,datapath=datapath,savepath=savepath,
   tmp=subprojdata[*,arxcentind-2:arxcentind+2,*]
   tmp=total(tmp,2)
   tmp[*,yradlimind:*]=-1000.
-  
+   
   rad_data={$
            type:'radial',$
            wav:wav,$

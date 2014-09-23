@@ -685,10 +685,10 @@
 
 {
 	"label": "120517_01",
-	"coordX": 88,
-	"coordY": 7,
-	"st": "2012/05/17 01:31:00",
-	"et": "2012/05/17 01:44:19",
+	"coordX": 950,
+	"coordY": 192,
+	"st": "2012/05/17 01:24:00",
+	"et": "2012/05/17 01:54:19",
 	"aiafov": [1024,2048],
 	"flareclass": "M5.1",
 	"typeII": false,
@@ -721,8 +721,8 @@
 
 {
 	"label": "130621_01",
-	"coordX": -883.2,
-	"coordY": -268.8,
+	"coordX": -967,
+	"coordY": -315,
 	"st": "2013/06/21 02:34:00",
 	"et": "2013/06/21 02:59:00",
 	"aiafov": [1024,2048],
@@ -759,14 +759,14 @@
 	"label": "140217_01",
 	"coordX": 1007,
 	"coordY": 53,
-	"st": "2014/02/17 04:49:00",
-	"et": "2014/01/06 05:07:00",
+	"st": "2014/02/17 04:48:00",
+	"et": "2014/02/24 05:05:00",
 	"aiafov": [1024,2048],
 	"flareclass": "",
-	"typeII": false,
+	"typeII": true,
 	"loop": false,
 	"filament": true,
-	"comment": "Filament driven eruption with clear CBF, passes out of FOV quickly, but very fast"
+	"comment": "Large filament eruption beyond the western limb"
 	"web": true,
 	"rstn_lookup": "",
 	"callisto_lookup": "",

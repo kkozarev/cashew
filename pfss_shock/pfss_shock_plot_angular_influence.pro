@@ -64,7 +64,7 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
   ;Load the CSGS model results
   print ,'Loading CSGS File '+csgsfile
   restore,csgsfile
-
+  
   ;Restore just the subindex from the AIA data
   aiafile=file_search(event.savepath+'normalized_'+eventname+'_subdata.sav')
   print,'Loading AIA File '+aiafile
@@ -113,6 +113,9 @@ if keyword_set(newtimes) then begin
   
   radius=radiusfitlines*sunrad*event.geomcorfactor
   nsteps=n_elements(time)
+
+  
+
   set_plot,'z'
   
 ;-==============================================================================
