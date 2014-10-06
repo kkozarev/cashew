@@ -129,7 +129,7 @@ pro aia_make_images, event, wave, savepath=savepath,force=force,raw=raw,base=bas
   
   ;Load the data
   ;restore,event.savepath+'normalized_AIA_20110511_37_193_subdata.sav'
-  aia_load_data,event,wav,index=index,data=data,coords=coords,subdata=subdata,subindex=subindex,/remove_aec,/subroi
+  aia_load_data,event,wav,index,data,coords=coords,subdata=subdata,subindex=subindex,/remove_aec,/subroi
   nsteps=n_elements(subindex)
   
   ;Set up base image
