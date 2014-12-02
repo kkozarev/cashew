@@ -94,13 +94,39 @@ pro yaftawave_track_gprep,event,features,all_masks,min_size=min_size,savepath=sa
   
   if not keyword_set(wav) then wav='193'
   ;LOADING THE AIA DATA - ORIGINAL VERSION
-;aia_load_data,event.st,event.et,wav,subindex=subindex,subdata=subdata,event=event,/subroi
+  ;aia_load_data,event.st,event.et,wav,subindex=subindex,subdata=subdata,event=event,/subroi
   ;GPREP VERSION: LOAD THE GPREPPED DATA
   date='20110511'
   wav='193'
-  version='v2'
-  restore,date+'_'+wav+'_'+version+'.sav'
-
+  ;version='v2'
+  ;restore,date+'_'+wav+'_'+version+'.sav'
+		
+;========================================================
+; LOAD THE AIA DATA
+  basepath='/Users/kkozarev/Desktop/YAFTA/'
+  aia_folder='20110511_193'
+  ;event=load_events_info(label='20110511')
+  version='v1'
+  path=basepath+aia_folder+'_'+version+'/'
+  
+  files=file_search(path+'*')
+  nfiles=n_elements(files)
+  
+  
+;get the times
+  for f=0,nfiles-1 do begin
+     res=strsplit(file_basename(files[f]),'_',/extract)
+     if f eq 0 then time=res[3] else time=[time,res[3]]
+  endfor
+  print,time
+  
+  
+  read_sdo,files,subindex,subdata,/uncomp_delete
+  ;GET RID OF THE NANs!!!
+  tmp=where(finite(subdata,/nan))
+  if tmp[0] ne -1 then subdata[tmp]=0.0
+;========================================================		
+	;stop
   
   nt=n_elements(subdata[0,0,*])
 
@@ -185,7 +211,7 @@ pro yaftawave_track_gprep,event,features,all_masks,min_size=min_size,savepath=sa
      meanv=mom[0]
      stdv=sqrt(mom[1])
      
-     stop
+     
      
      if not keyword_set(threshold) then begin
         if keyword_set(level) then thresh=stdv*level else thresh=stdv*0.2
@@ -227,7 +253,7 @@ print,stdv,thresh
     
     ; defines structures for current data array
     ;============================================
-    create_features,img2, mask2, features2, min_size=min_size, /unipolar, $
+    create_features,img2, mask2, features2, min_size=min_size, $ ;/unipolar
                     vx=vx, vy=vy, peakthreshold=peakthreshold, dx=dx
     
     ;error management - if no features are

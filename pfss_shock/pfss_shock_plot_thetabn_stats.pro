@@ -4,6 +4,40 @@ event=load_events_info(label='paper')
 pfss_shock_plot_thetabn_stats,event,/hires
 end
 
+pro load_typeII,tIItime,tIIdens,lanes,lsi
+;load and plot the Learmonth radio backbone positions
+  close,/all
+  line=''
+  t2str={time:0.0,freq:0.0,factor:0.0}
+  openr,lun,'vasili_out.txt',/get_lun
+  lanes=''
+  lsi=0
+  cc=0.
+  while not eof(lun) do begin
+     readf,lun,line
+     if strpos(line,'%%') gt -1 then begin
+        if lanes[0] eq '' then lanes=line else lanes=[lanes,line]
+        if cc gt 0 then lsi=[lsi,cc]
+        continue
+     endif else begin
+        res=strsplit(line,'  ',/extract)
+        if cc eq 0 then data=float([res[0],res[1],res[2]]) $
+        else data=[[data],[res[0],res[1],res[2]]]
+        cc++
+     endelse
+     
+  endwhile
+  close,/all
+  nl=n_elements(lanes)
+  for i=0,nl-1 do begin
+     res=strsplit(lanes[i],'%%',/extract)
+     lanes[i]=strtrim(res[0],2)
+  endfor
+  tIItime=reform(data[0,*]) ;time since the start of day
+  tIIdens=reform((8800*data[1,*]/data[2,*])^2) ;density in 1/cm^3
+
+end
+
 pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires
 ;PURPOSE:
 ; This procedure will plot a time series of different ranges of
@@ -111,7 +145,7 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires
            tmp=minmax(points_radpos)
            radstats[tt,rr].max=tmp[1]
            radstats[tt,rr].min=tmp[0]
-        
+           
  ;Find the number of open and closed field lines for every angle range
            
  ;tmpind=crosspoints[tt,res].linid
@@ -269,8 +303,12 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires
 ;-======================================================================
 
 
-
+  
 ;+======================================================================
+
+  ;load the Learmonth radio data
+  ;load_typeII,tIItime,tIIdens,lanes,lsi
+
   cthick=6
   chsize=2.2
   dummy = LABEL_DATE(DATE_FORMAT=['%H:%I'])
@@ -278,7 +316,6 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires
   thlet='!9'+String("161B)+'!X'
   ytit='Radial Distance, R!Dsun!N'
   ;thlet='!4' + String("150B) + '!X'
-  
   
   !P.position=[0.18,0.14,0.92,0.92]
   !P.charthick=4
