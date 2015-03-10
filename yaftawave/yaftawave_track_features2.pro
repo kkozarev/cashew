@@ -94,7 +94,7 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
   
   if not keyword_set(wav) then wav='193'
   aia_load_data,event.st,event.et,wav,subindex=subindex,subdata=subdata,event=event,/subroi
-  stop
+ 
   nt=n_elements(subdata[0,0,*])
 
   if keyword_set(rebin) then begin
@@ -131,8 +131,15 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
   baseim=fltarr(nx,ny)
   for i=0,baseavgnsteps-1 do baseim += subdata[*,*,i]
   baseim /=(1.0*baseavgnsteps)
+  tmpdata2=fltarr(rebin[0],rebin[1],nt)
+  for tt=0,nt-1 do tmpdata2[*,*,tt]=subdata[*,*,tt]-baseim
   
-  
+  wdef,0,512,1024
+  tv,bytscl(tmpdata2[*,*,30],min=-50,max=50)
+  wdef,1,512,1024
+  tv,bytscl(sqrt(subdata[*,*,30]),min=1,max=40)
+  stop
+
 ; set some parameters of tracking run
 ;====================================
   dx=subindex[0].IMSCL_MP*subindex[0].RSUN_REF/(1000.0*subindex[0].RSUN_OBS) ; AIA Full Disk pixel size in km
@@ -168,8 +175,7 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
         origim=img2
      endelse
      img2=smooth(img2,2,/edge_truncate)
-     ;img2[where(img2 lt 0.0)]=0.0
-     
+     ;img2[where(img2 lt 0.0)]=0.0   
      ;img2=img2^2
      
      
@@ -185,7 +191,7 @@ pro yaftawave_track_features2,event,features,all_masks,min_size=min_size,savepat
         thresh=threshold
      endelse
 print,stdv,thresh
-;stop
+
 ;Here, enhance the brighter features some more:
 ;===========================================
   ;  eqim=adapt_hist_equal(img2)
@@ -219,8 +225,8 @@ print,stdv,thresh
     
     ; defines structures for current data array
     ;============================================
-    create_features,img2, mask2, features2, min_size=min_size, /unipolar, $
-                    vx=vx, vy=vy, peakthreshold=peakthreshold, dx=dx
+    create_features,img2, mask2, features2, min_size=min_size, $
+                    vx=vx, vy=vy, peakthreshold=peakthreshold, dx=dx;, /unipolar
     
     ;error management - if no features are
     ;detected, move on to the next image

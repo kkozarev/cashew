@@ -38,8 +38,14 @@ if not(keyword_set(max_col)) then max_col=255
 if not(keyword_set(size)) then size=2
 if not(keyword_set(thick)) then thick=2
 
+for nn=0,n_elements(features)-1 do begin
+   xoffset=30
+   if features[nn].label ge 10 then xoffset+=20
+   if features[nn].label ge 100 then xoffset+=20
+   polyfill,[features[nn].x-xoffset,features[nn].x+10,features[nn].x+10,features[nn].x-xoffset],$
+            [features[nn].y-10,features[nn].y-10,features[nn].y+30,features[nn].y+30],color=0
+endfor
 loadct,ct ,/silent
-
 xyouts, features.x-.2, features.y-.8, string(features.label),align = 1., $
   color=(dcolor*features.label)mod(max_col-min_col) + min_col, $
   chars=size,charthick=thick 
