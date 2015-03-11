@@ -3,7 +3,7 @@ pro test_aia_nrh_map_overlay
   ;Run for a single or a few events, like this:
   one=1
   if one eq 1 then begin
-     label=['140824_01']
+     label=['130517_01']
      events=load_events_info(label=label)
      for ev=0,n_elements(events)-1 do $
         aia_nrh_map_overlay,events[ev],/base ;/run,/subroi
