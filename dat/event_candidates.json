@@ -1,0 +1,1260 @@
+{
+"label": "100612_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2010/06/12 00:53:00",
+"et": "2010/06/12 01:19:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "100612_02",
+"coordX": 0,
+"coordY": 0,
+"st": "2010/06/12 09:13:00",
+"et": "2010/06/12 09:37:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "100727_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2010/07/27 08:47:00",
+"et": "2010/07/27 09:10:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "100801_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2010/08/01 07:35:00",
+"et": "2010/08/01 08:30:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "100814_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2010/08/14 09:30:00",
+"et": "2010/08/14 10:08:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "100818_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2010/08/18 05:12:00",
+"et": "2010/08/18 05:50:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "100908_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2010/09/08 22:49:00",
+"et": "2010/09/08 23:46:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "101103_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2010/11/03 05:57:00",
+"et": "2010/11/03 06:19:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "101103_02",
+"coordX": 0,
+"coordY": 0,
+"st": "2010/11/03 12:09:00",
+"et": "2010/11/03 12:39:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "101130_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2010/11/30 18:20:00",
+"et": "2010/11/30 19:05:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "101215_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2010/12/15 14:30:00",
+"et": "2010/12/15 14:55:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "101231_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2010/12/31 04:20:00",
+"et": "2010/12/31 04:56:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110113_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/01/13 08:47:00",
+"et": "2011/01/13 09:35:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110127_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/01/27 08:39:00",
+"et": "2011/01/27 09:14:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110127_02",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/01/27 11:54:00",
+"et": "2011/01/27 12:25:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110307_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/03/07 14:15:00",
+"et": "2011/03/07 14:40:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110307_02",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/03/07 19:38:00",
+"et": "2011/03/07 20:08:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110327_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/03/27 05:02:00",
+"et": "2011/03/27 05:27:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110509_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/05/09 20:24:00",
+"et": "2011/05/09 21:02:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110515_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/05/15 23:27:00",
+"et": "2011/05/15 23:47:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110529_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/05/29 21:00:00",
+"et": "2011/05/29 21:25:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110530_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/05/30 10:48:00",
+"et": "2011/05/30 11:18:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110810_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/08/10 15:50:00",
+"et": "2011/08/10 16:15:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110811_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/08/11 09:56:00",
+"et": "2011/08/11 10:26:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110904_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/09/04 04:34:00",
+"et": "2011/09/04 04:54:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110909_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/09/09 06:03:00",
+"et": "2011/09/09 06:23:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110922_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/09/22 10:23:00",
+"et": "2011/09/22 11:00:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110924_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/09/24 09:33:00",
+"et": "2011/09/24 09:55:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110924_02",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/09/24 12:10:00",
+"et": "2011/09/24 12:55:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110925_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/09/25 02:27:00",
+"et": "2011/09/25 02:55:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110925_02",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/09/25 04:36:00",
+"et": "2011/09/25 05:10:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "111001_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/10/01 20:00:00",
+"et": "2011/10/01 20:45:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "111021_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/10/21 12:53:00",
+"et": "2011/10/21 13:23:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "111114_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/11/14 09:18:00",
+"et": "2011/11/14 09:40:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "111125_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/11/25 21:49:00",
+"et": "2011/11/25 22:07:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "111226_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/12/26 02:22:00",
+"et": "2011/12/26 02:40:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "120127_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2012/01/27 18:00:00",
+"et": "2012/01/27 18:30:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "120302_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2012/03/02 17:33:00",
+"et": "2012/03/02 17:59:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "120313_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2012/03/13 17:12:00",
+"et": "2012/03/13 17:40:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "120326_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2012/03/26 22:35:00",
+"et": "2012/03/26 23:03:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "120601_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2012/06/01 22:13:00",
+"et": "2012/06/01 22:50:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "120816_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2012/08/16 12:42:00",
+"et": "2012/08/16 13:13:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "120916_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2012/09/16 22:05:00",
+"et": "2012/09/16 22:30:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "120927_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2012/09/27 23:32:00",
+"et": "2012/09/27 23:52:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "130106_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/01/06 06:20:00",
+"et": "2013/01/06 06:40:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "130112_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/01/12 06:04:00",
+"et": "2013/01/12 06:13:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "130312_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/03/12 23:20:00",
+"et": "2013/03/12 23:45:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "130418_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/04/18 17:50:00",
+"et": "2013/04/18 18:15:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "130421_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/04/21 19:46:00",
+"et": "2013/04/21 20:30:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "130428_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/04/28 20:11:00",
+"et": "2013/04/28 20:30:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "130429_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/04/29 19:26:00",
+"et": "2013/04/29 19:46:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "130503_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/05/03 17:24:00",
+"et": "2013/05/03 17:42:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "130513_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/05/13 01:56:00",
+"et": "2013/05/13 02:20:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "130513_02",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/05/13 15:47:00",
+"et": "2013/05/13 16:05:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "130514_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/05/14 00:55:00",
+"et": "2013/05/14 01:10:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "130515_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/05/15 01:03:00",
+"et": "2013/05/15 01:42:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "130605_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/06/05 08:25:00",
+"et": "2013/06/05 08:50:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "130607_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/06/07 22:33:00",
+"et": "2013/06/07 23:01:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "130830_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/08/30 01:50:00",
+"et": "2013/08/30 02:25:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "131011_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/10/11 07:03:00",
+"et": "2013/10/11 07:30:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "131025_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/10/25 07:56:00",
+"et": "2013/10/25 08:20:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "131025_02",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/10/25 14:51:00",
+"et": "2013/10/25 15:15:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "131106_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/11/06 23:33:00",
+"et": "2013/11/06 23:48:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "131121_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2013/11/21 10:57:00",
+"et": "2013/11/21 11:20:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "140106_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2014/01/06 07:40:00",
+"et": "2014/01/06 07:52:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "140218_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2014/02/18 00:40:00",
+"et": "2014/02/18 01:15:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "140220_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2014/02/20 07:26:00",
+"et": "2014/02/20 07:59:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "140225_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2014/02/25 00:40:00",
+"et": "2014/02/25 00:55:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110924_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2011/09/24 23:44:00",
+"et": "2011/09/25 00:19:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "121205_01",
+"coordX": 0,
+"coordY": 0,
+"st": "2012/12/05 23:55:00",
+"et": "2012/12/06 00:20:00",
+"aiafov": [1024,1024],
+"flareclass": "",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "",
+"web": false,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
