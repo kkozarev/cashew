@@ -509,7 +509,8 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII
 
   ;Plot binned crossing radii
   for tt=0,ntimes-1 do begin
-     tmp=reform(allpoints_radpos[tt,0:nclosed[tt]-1])
+    if nclosed[tt] gt 0 then begin 
+    tmp=reform(allpoints_radpos[tt,0:nclosed[tt]-1])
      nbins=40.
      binsize=(max(tmp)-min(tmp))/nbins
      crosshist=histogram(tmp,nbins=nbins)
@@ -519,8 +520,9 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII
         plots,tm[tt],tmprad[bb],color=255,psym=sym(1),$
               symsize=1.7*crosshist[bb]/(max(crosshist)*1.0)
         plots,tm[tt],tmprad[bb],color=0,psym=sym(1),$
-              symsize=1.6*crosshist[bb]/(max(crosshist)*1.0)
-     endfor
+              symsize=1.6*crosshist[bb]/(max(crosshist)*1.0)     
+endfor
+endif
   endfor
   
   for rr=0,nranges-1 do begin
