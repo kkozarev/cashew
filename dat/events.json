@@ -1145,7 +1145,7 @@
 "typeII": false,
 "loop": false,
 "filament": false,
-"comment": "",
+"comment": "No significant EUV wave detected",
 "web": false,
 "rstn_lookup": "",
 "callisto_lookup": "",
@@ -1164,7 +1164,7 @@
 "loop": false,
 "filament": false,
 "comment": "",
-"web": false,
+"web": true,
 "rstn_lookup": "",
 "callisto_lookup": "",
 "nrh_lookup": ""
@@ -1182,7 +1182,7 @@
 "loop": false,
 "filament": false,
 "comment": "",
-"web": false,
+"web": true,
 "rstn_lookup": "",
 "callisto_lookup": "",
 "nrh_lookup": ""
@@ -1190,8 +1190,8 @@
 
 {
 "label": "110904_01",
-"coordX": 0,
-"coordY": 0,
+"coordX": 893,
+"coordY": -323,
 "st": "2011/09/04 04:34:00",
 "et": "2011/09/04 04:54:00",
 "aiafov": [1024,1024],
@@ -1200,7 +1200,7 @@
 "loop": false,
 "filament": false,
 "comment": "",
-"web": false,
+"web": true,
 "rstn_lookup": "",
 "callisto_lookup": "",
 "nrh_lookup": ""
@@ -1226,8 +1226,8 @@
 
 {
 "label": "110922_01",
-"coordX": 0,
-"coordY": 0,
+"coordX": -924,
+"coordY": 179,
 "st": "2011/09/22 10:23:00",
 "et": "2011/09/22 11:00:00",
 "aiafov": [1024,1024],
@@ -1235,26 +1235,8 @@
 "typeII": false,
 "loop": false,
 "filament": false,
-"comment": "",
-"web": false,
-"rstn_lookup": "",
-"callisto_lookup": "",
-"nrh_lookup": ""
-}
-
-{
-"label": "110924_01",
-"coordX": 0,
-"coordY": 0,
-"st": "2011/09/24 09:33:00",
-"et": "2011/09/24 09:55:00",
-"aiafov": [1024,1024],
-"flareclass": "",
-"typeII": false,
-"loop": false,
-"filament": false,
-"comment": "",
-"web": false,
+"comment": "Large EUV wave present, but many loops, should run tangential scripts",
+"web": true,
 "rstn_lookup": "",
 "callisto_lookup": "",
 "nrh_lookup": ""
@@ -1262,17 +1244,35 @@
 
 {
 "label": "110924_02",
-"coordX": 0,
-"coordY": 0,
-"st": "2011/09/24 12:10:00",
-"et": "2011/09/24 12:55:00",
+"coordX": -718,
+"coordY": -93,
+"st": "2011/09/24 09:33:00",
+"et": "2011/09/24 09:55:00",
 "aiafov": [1024,1024],
-"flareclass": "",
+"flareclass": "X1.9",
 "typeII": false,
 "loop": false,
 "filament": false,
-"comment": "",
-"web": false,
+"comment": "Promising event, kinematics code not working well",
+"web": true,
+"rstn_lookup": "",
+"callisto_lookup": "",
+"nrh_lookup": ""
+}
+
+{
+"label": "110924_03",
+"coordX": -599,
+"coordY": -153,
+"st": "2011/09/24 12:10:00",
+"et": "2011/09/24 12:55:00",
+"aiafov": [1024,1024],
+"flareclass": "M7.1",
+"typeII": false,
+"loop": false,
+"filament": false,
+"comment": "EUV wave not really present here",
+"web": true,
 "rstn_lookup": "",
 "callisto_lookup": "",
 "nrh_lookup": ""
@@ -1280,8 +1280,8 @@
 
 {
 "label": "110925_01",
-"coordX": 0,
-"coordY": 0,
+"coordX": 784,
+"coordY": -485,
 "st": "2011/09/25 02:27:00",
 "et": "2011/09/25 02:55:00",
 "aiafov": [1024,1024],
@@ -1289,8 +1289,8 @@
 "typeII": false,
 "loop": false,
 "filament": false,
-"comment": "",
-"web": false,
+"comment": "M4.4",
+"web": true,
 "rstn_lookup": "",
 "callisto_lookup": "",
 "nrh_lookup": ""
@@ -1298,17 +1298,17 @@
 
 {
 "label": "110925_02",
-"coordX": 0,
-"coordY": 0,
+"coordX": -622,
+"coordY": -248,
 "st": "2011/09/25 04:36:00",
 "et": "2011/09/25 05:10:00",
 "aiafov": [1024,1024],
-"flareclass": "",
+"flareclass": "M7.4",
 "typeII": false,
 "loop": false,
 "filament": false,
-"comment": "",
-"web": false,
+"comment": "Slight EUV wave detected",
+"web": true,
 "rstn_lookup": "",
 "callisto_lookup": "",
 "nrh_lookup": ""
@@ -1316,8 +1316,8 @@
 
 {
 "label": "111001_01",
-"coordX": 0,
-"coordY": 0,
+"coordX": -875,
+"coordY": 387,
 "st": "2011/10/01 20:00:00",
 "et": "2011/10/01 20:45:00",
 "aiafov": [1024,1024],
@@ -1325,8 +1325,8 @@
 "typeII": false,
 "loop": false,
 "filament": false,
-"comment": "",
-"web": false,
+"comment": "EUV wave behind disk, not measured well",
+"web": true,
 "rstn_lookup": "",
 "callisto_lookup": "",
 "nrh_lookup": ""
@@ -1334,8 +1334,8 @@
 
 {
 "label": "111021_01",
-"coordX": 0,
-"coordY": 0,
+"coordX": 944,
+"coordY": 85,
 "st": "2011/10/21 12:53:00",
 "et": "2011/10/21 13:23:00",
 "aiafov": [1024,1024],
@@ -1343,8 +1343,8 @@
 "typeII": false,
 "loop": false,
 "filament": false,
-"comment": "",
-"web": false,
+"comment": "Alignment seems to be off",
+"web": true,
 "rstn_lookup": "",
 "callisto_lookup": "",
 "nrh_lookup": ""
@@ -1352,8 +1352,8 @@
 
 {
 "label": "111114_01",
-"coordX": 0,
-"coordY": 0,
+"coordX": 802,
+"coordY": 342,
 "st": "2011/11/14 09:18:00",
 "et": "2011/11/14 09:40:00",
 "aiafov": [1024,1024],
