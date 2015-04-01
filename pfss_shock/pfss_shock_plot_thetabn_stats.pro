@@ -134,6 +134,7 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII
   valranges=lonarr(ntimes,nranges,2)
   linekinds=intarr(ntimes,nranges,2)
   radstats=replicate({mean:0.D,max:0.D,min:0.D},ntimes,nranges)
+
   for tt=0,ntimes-1 do begin
      ;First take care of the first range
      res=where(crossPoints[tt,*].thbn gt 0.0 and crossPoints[tt,*].thbn le rangevals[0])
@@ -428,7 +429,7 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII
         valarr[tt,0]=n_elements(res)
         valranges[tt,0,0]=0
         valranges[tt,0,1]=valarr[tt,0]
-
+        
 ;Find the number of open and closed field lines for every angle range
         closedinds=reform(crosspoints[tt,res].open)
         tmp=where(closedinds eq 0)
