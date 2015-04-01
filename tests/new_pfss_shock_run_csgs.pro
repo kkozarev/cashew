@@ -31,11 +31,21 @@ end
 pro test_new_pfss_shock_run_csgs
 ; A small procedure to run several instances of the coronal shock
 ; model.
-  
-  event=load_events_info(label='paper')
-  new_pfss_shock_run_csgs,event,/lores,/newtimes
-  new_pfss_shock_run_csgs,event,/hires,/newtimes;,/plot;,/png
-
+  labels=['140708_01','131212_01','130517_01','130423_01','120915_01','120526_01',$
+	  '120424_01','110607_01','110211_01','110125_01']
+  labels=['140708_01']
+  for ev=0,n_elements(labels)-1 do begin
+      label=labels[ev]
+      event=load_events_info(label=label)
+      new_pfss_shock_run_csgs,event,/lores,/newtimes
+pfss_shock_plot_all,event,lores=lores     
+; pfss_shock_plot_csgs,event,/png,/newtimes
+;      pfss_shock_plot_crossing_angles,event,/oplot
+;      pfss_shock_plot_thetabn_stats,event,/lores
+;      pfss_shock_plot_angular_influence,event
+;      pfss_shock_plot_angular_influence,event,/topview
+;new_pfss_shock_run_csgs,event,/hires,/newtimes;,/plot;,/png
+  endfor
 end
 ;---------------------------------------------------------------------
 
@@ -435,7 +445,7 @@ pro new_pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newt
                     ;Concatenate the pind variable
                     
                     ncrosses++
-                    stop
+                    ;stop
                  endif
               endfor
            endif
