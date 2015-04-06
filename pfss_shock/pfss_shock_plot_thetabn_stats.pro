@@ -67,7 +67,7 @@ pro load_typeII,event,filename,tIItime,tIIdens,tIIrad,lanes,lsi
 end
 
 
-pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII
+pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII,force=force
 ;PURPOSE:
 ; This procedure will plot a time series of different ranges of
 ; thetaBN for various shock-field angle points.
@@ -221,39 +221,46 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII
   set_plot,'ps'
   resolution='lores'
   if keyword_set(hires) then resolution='hires'
-  fname=savepath+'thetabn_stats_'+event.date+'_'+event.label+'_'+resolution+'_time'
-  device,file=fname+'.eps',/inches,xsize=10.0,ysize=8.0,$
-         /encaps,/color,/helvetica
-  loadct,0,/silent
-  PLOT, tm, allcrosses, PSYM = 10, $ 
-        TITLE = thlet+'!DBN!N Evolution', $
-        XTITLE =xtit, $
-        YTITLE = ytit, $
-        XTICKUNITS = ['Time'],XTICKFORMAT='LABEL_DATE',$
-        xticklen=-0.01,yminor=1,xminor=1,$
-        xrange=xrng,yrange=yrng,xticks=4, $
-        xstyle=1,ystyle=1,color=0,background=255,$
-        xthick=4,ythick=4,thick=4,charsize=chsize,charthick=chthick,/nodata
-
-  loadct,13,/silent
-  cols=findgen(nranges)*255./(nranges*1.0)
-  rvst=strtrim(string(rangevals,format='(i3)'),2)
-  for rr=0,nranges-1 do begin
-     bar_plot,valranges[*,rr,1],background=255,colors=fltarr(ntimes)+cols[rr],$
-              baselines=valranges[*,rr,0],/overplot
-     if rr eq 0 then sttr=' 0!Uo!N<'+thlet+'!DBN!N<'+rvst[0]+'!Uo!N' $
-     else sttr=rvst[rr-1]+'!Uo!N'+'<'+thlet+'!DBN!N<'+rvst[rr]+'!Uo!N'
-     xyouts,!p.position[0]+0.02,!p.position[3]-0.05-0.05*rr,sttr,charsize=chsize,$
-            charthick=chthick,color=cols[rr],/norm
-  endfor
-  
-  ;tvlct,rr,gg,bb,/get
-  ;image=tvrd(true=1)
-  device,/close
-  exec='convert -flatten '+fname+'.eps '+fname+'.png ; rm -rf '+fname+'.eps '
-  spawn,exec
-  ;write_png,fname,image,rr,gg,bb
-  set_plot,'x'
+  savnam='thetabn_stats_'+event.date+'_'+event.label+'_'+resolution+'_time'
+  fname=savepath+savnam
+  if file_test(fname) and not keyword_set(force) then begin
+     print,'File '+savnam
+     print,'already exists. To overwrite, rerun with /force.'
+     print,'----'
+  endif else begin
+     device,file=fname+'.eps',/inches,xsize=10.0,ysize=8.0,$
+            /encaps,/color,/helvetica
+     loadct,0,/silent
+     PLOT, tm, allcrosses, PSYM = 10, $ 
+           TITLE = thlet+'!DBN!N Evolution', $
+           XTITLE =xtit, $
+           YTITLE = ytit, $
+           XTICKUNITS = ['Time'],XTICKFORMAT='LABEL_DATE',$
+           xticklen=-0.01,yminor=1,xminor=1,$
+           xrange=xrng,yrange=yrng,xticks=4, $
+           xstyle=1,ystyle=1,color=0,background=255,$
+           xthick=4,ythick=4,thick=4,charsize=chsize,charthick=chthick,/nodata
+     
+     loadct,13,/silent
+     cols=findgen(nranges)*255./(nranges*1.0)
+     rvst=strtrim(string(rangevals,format='(i3)'),2)
+     for rr=0,nranges-1 do begin
+        bar_plot,valranges[*,rr,1],background=255,colors=fltarr(ntimes)+cols[rr],$
+                 baselines=valranges[*,rr,0],/overplot
+        if rr eq 0 then sttr=' 0!Uo!N<'+thlet+'!DBN!N<'+rvst[0]+'!Uo!N' $
+        else sttr=rvst[rr-1]+'!Uo!N'+'<'+thlet+'!DBN!N<'+rvst[rr]+'!Uo!N'
+        xyouts,!p.position[0]+0.02,!p.position[3]-0.05-0.05*rr,sttr,charsize=chsize,$
+               charthick=chthick,color=cols[rr],/norm
+     endfor
+     
+                                ;tvlct,rr,gg,bb,/get
+                                ;image=tvrd(true=1)
+     device,/close
+     exec='convert -flatten '+fname+'.eps '+fname+'.png ; rm -rf '+fname+'.eps '
+     spawn,exec
+                                ;write_png,fname,image,rr,gg,bb
+     set_plot,'x'
+  endelse
 ;-======================================================================
  
 
@@ -273,32 +280,38 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII
   !P.font=0
   ;wdef,0,1000,800
   set_plot,'ps'
-  fname=savepath+'thetabn_stats_'+event.date+'_'+event.label+'_'+resolution+'_time_crossings'
-  device,file=fname+'.eps',/inches,xsize=10.0,ysize=8.0,$
-         /encaps,/color,/helvetica
-  loadct,0,/silent
-  PLOT, tm, allcrosses, PSYM = 10, $ 
-        TITLE = thlet+'!DBN!N Evolution', $
-        XTITLE =xtit, $
-        YTITLE = ytit, $
-        XTICKUNITS = ['Time'],XTICKFORMAT='LABEL_DATE',$
-        xticklen=-0.01,xminor=1,yminor=1,$
-        xrange=xrng,yrange=yrng,xticks=4,$
-        xstyle=1,ystyle=1,color=0,background=255,$
-        xthick=4,ythick=4,thick=4,charsize=chsize,charthick=chthick,/nodata
-  
-  loadct,13,/silent
-  cols=findgen(nranges)*255./(nranges*1.0)
-  rvst=strtrim(string(rangevals,format='(i3)'),2)
-  for rr=0,nranges-1 do begin
-     bar_plot,valranges[*,rr,1],background=255,colors=fltarr(ntimes)+cols[rr],$
-              baselines=valranges[*,rr,0],/overplot
-     if rr eq 0 then sttr=' 0!Uo!N<'+thlet+'!DBN!N<'+rvst[0]+'!Uo!N' $
-     else sttr=rvst[rr-1]+'!Uo!N'+'<'+thlet+'!DBN!N<'+rvst[rr]+'!Uo!N'
-     xyouts,!p.position[0]+0.02,!p.position[3]-0.05-0.05*rr,sttr,charsize=chsize,$
-            charthick=chthick,color=cols[rr],/norm
-  endfor
-
+  savnam='thetabn_stats_'+event.date+'_'+event.label+'_'+resolution+'_time_crossings'
+  fname=savepath+savnam
+  if file_test(fname) and not keyword_set(force) then begin
+     print,'File '+savnam
+     print,'already exists. To overwrite, rerun with /force.'
+     print,'----'
+  endif else begin
+     device,file=fname+'.eps',/inches,xsize=10.0,ysize=8.0,$
+            /encaps,/color,/helvetica
+     loadct,0,/silent
+     PLOT, tm, allcrosses, PSYM = 10, $ 
+           TITLE = thlet+'!DBN!N Evolution', $
+           XTITLE =xtit, $
+           YTITLE = ytit, $
+           XTICKUNITS = ['Time'],XTICKFORMAT='LABEL_DATE',$
+           xticklen=-0.01,xminor=1,yminor=1,$
+           xrange=xrng,yrange=yrng,xticks=4,$
+           xstyle=1,ystyle=1,color=0,background=255,$
+           xthick=4,ythick=4,thick=4,charsize=chsize,charthick=chthick,/nodata
+     
+     loadct,13,/silent
+     cols=findgen(nranges)*255./(nranges*1.0)
+     rvst=strtrim(string(rangevals,format='(i3)'),2)
+     for rr=0,nranges-1 do begin
+        bar_plot,valranges[*,rr,1],background=255,colors=fltarr(ntimes)+cols[rr],$
+                 baselines=valranges[*,rr,0],/overplot
+        if rr eq 0 then sttr=' 0!Uo!N<'+thlet+'!DBN!N<'+rvst[0]+'!Uo!N' $
+        else sttr=rvst[rr-1]+'!Uo!N'+'<'+thlet+'!DBN!N<'+rvst[rr]+'!Uo!N'
+        xyouts,!p.position[0]+0.02,!p.position[3]-0.05-0.05*rr,sttr,charsize=chsize,$
+               charthick=chthick,color=cols[rr],/norm
+     endfor
+     
 ;Plot the percentage of open field lines for the last two angle intervals
 ;DEBUG
 ;  axis,xstyle=1,xaxis=0,xthick=4,xrange=xrng,$
@@ -310,31 +323,32 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII
 ;  axis,ystyle=1,yaxis=0,ythick=4,yrange=yrng,$
 ;       ytitle=ytit,charsize=chsize,charthick=chthick,color=0
   
-  maxopenlines=max(linekinds[*,*,0])
-  if maxopenlines lt 5 then maxopenlines=5
-  axis,ystyle=1,yaxis=1,ythick=4,yrange=[0,maxopenlines],/save,$
-       ytitle='# Open Crossing Lines in Range',charsize=chsize,$
-       charthick=chthick,color=0,yticks=5,ytickformat='(i5)'
-  
-  for rr=0,nranges-1 do begin
-     ;totranglin=linekinds[*,rr,0]+linekinds[*,rr,1]
-     ;open_percent=(linekinds[*,rr,0]/(1.*totranglin))*100.
-     if cols[rr] eq 0 then bckcol=255 else bckcol=0
-     LOADCT,0,/SILENT
-     ;oplot,tm,smooth(linekinds[*,rr,0],2,/edge_trunc),thick=10,color=bckcol
-     oplot,tm,linekinds[*,rr,0],thick=10,color=bckcol
-     LOADCT,13,/SILENT
-     ;oplot,tm,smooth(linekinds[*,rr,0],2,/edge_trunc),thick=8,color=cols[rr]
-     oplot,tm,linekinds[*,rr,0],thick=8,color=cols[rr]
-  endfor
-
-  ;tvlct,rr,gg,bb,/get
-  ;image=tvrd(true=1)
-  device,/close
-  exec='convert -flatten '+fname+'.eps '+fname+'.png ; rm -rf '+fname+'.eps '
-  spawn,exec
-  ;write_png,fname,image,rr,gg,bb
-  set_plot,'x'
+     maxopenlines=max(linekinds[*,*,0])
+     if maxopenlines lt 5 then maxopenlines=5
+     axis,ystyle=1,yaxis=1,ythick=4,yrange=[0,maxopenlines],/save,$
+          ytitle='# Open Crossing Lines in Range',charsize=chsize,$
+          charthick=chthick,color=0,yticks=5,ytickformat='(i5)'
+     
+     for rr=0,nranges-1 do begin
+                                ;totranglin=linekinds[*,rr,0]+linekinds[*,rr,1]
+                                ;open_percent=(linekinds[*,rr,0]/(1.*totranglin))*100.
+        if cols[rr] eq 0 then bckcol=255 else bckcol=0
+        LOADCT,0,/SILENT
+                                ;oplot,tm,smooth(linekinds[*,rr,0],2,/edge_trunc),thick=10,color=bckcol
+        oplot,tm,linekinds[*,rr,0],thick=10,color=bckcol
+        LOADCT,13,/SILENT
+                                ;oplot,tm,smooth(linekinds[*,rr,0],2,/edge_trunc),thick=8,color=cols[rr]
+        oplot,tm,linekinds[*,rr,0],thick=8,color=cols[rr]
+     endfor
+     
+                                ;tvlct,rr,gg,bb,/get
+                                ;image=tvrd(true=1)
+     device,/close
+     exec='convert -flatten '+fname+'.eps '+fname+'.png ; rm -rf '+fname+'.eps '
+     spawn,exec
+                                ;write_png,fname,image,rr,gg,bb
+     set_plot,'x'
+  endelse
 ;-======================================================================
 
 
@@ -408,13 +422,13 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII
 
   
 ;+======================================================================
-
-
 ;- - - - - - - - - - - - - - - - - - - - - -
 ; Here, calculate the binned crossings (binned by radial position)
 ;- - - - - - - - - - - - - - - - - - - - - -
-  rangevals=[70]
-  nranges=n_elements(rangevals)
+
+
+  rangevals=[50.,90.]
+  nranges=n_elements(rangevals-1)
   valarr=lonarr(ntimes,nranges)
   valranges=lonarr(ntimes,nranges,2)
   linekinds=intarr(ntimes,nranges,2)
@@ -424,7 +438,7 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII
   radstats=replicate({mean:0.D,max:0.D,min:0.D},ntimes,nranges)
   for tt=0,ntimes-1 do begin
      ;First take care of the first range
-     res=where(crossPoints[tt,*].thbn gt rangevals[0] and crossPoints[tt,*].thbn le 90.)
+     res=where(crossPoints[tt,*].thbn gt rangevals[0] and crossPoints[tt,*].thbn le rangevals[1])
      if res[0] gt -1 then begin
         valarr[tt,0]=n_elements(res)
         valranges[tt,0,0]=0
@@ -486,13 +500,14 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII
          /encaps,/color,/helvetica
   loadct,0,/silent
   xrng=[min(tm),max(tm)]
+  if keyword_set(typeII) then yrnge=[1.0,1.8] else yrnge=[1.0,max(shocknosepos)*1.1]
   PLOT, tm, allcrosses, PSYM = 10, $ 
         TITLE = 'tII lanes and 70!Uo!N<'+thlet+'!DBN!N<90!Uo!N Crossings', $
         XTITLE =xtit, $
         YTITLE = ytit, $
         XTICKUNITS = ['Time'],XTICKFORMAT='LABEL_DATE',$
         xticklen=-0.01,xminor=1,yminor=1,$
-        xrange=xrng,yrange=[1.1,1.8],xticks=4,$
+        xrange=xrng,yrange=yrnge,xticks=4,$
         xstyle=1,ystyle=1,color=0,background=255,$
         xthick=4,ythick=4,thick=4,charsize=chsize,charthick=chthick,/nodata
   

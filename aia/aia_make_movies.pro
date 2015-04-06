@@ -7,7 +7,7 @@ pro test_aia_make_movies
      event=load_events_info(label=label)
      wavelengths=['193']
      movie_types=['araw','abase','arun','raw','base','run']
-     movie_types=['pfss_shock','thetabn','thetabn_cumulative','pfss_spread']
+     movie_types=['pfss_shock','thetabn','thetabn_oplot','pfss_spread']
      movie_types=['run']
      movie_types=['ywave']
      movie_types=['run','base','raw']
@@ -307,7 +307,7 @@ tmpdir=movie_path+"tmpdir_"+strtrim(string(fix(floor(randomn(2)*100000))),2)+'/'
 res=file_test(tmpdir,/directory)
 if res then spawn,'rm '+tmpdir+'*' $
 
-;else spawn,'mkdir -m 775 '+tmpdir+'&> /dev/anull'
+;else spawn,'mkdir -m 775 '+tmpdir+'&> /dev/null'
 else spawn,'mkdir -m 775 '+tmpdir
 
 for ii=0,n_elements(imgs)-1 do begin

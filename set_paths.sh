@@ -2,13 +2,13 @@
 # sets up environmentals and paths
 
 #set CORWAV to the directory where analyzed events will be stored
-CORWAV="/data/george/corwav/"
+CORWAV="${HOME}/corwav/"
 #set CORWAV_DATA to the directory where the local copy of data will live
-CORWAV_DATA="/data/george/corwav/"
+CORWAV_DATA="${HOME}/AIA_data/"
 #set CORWAV_TRUNK to the directory of the CorWav code (or local copy of the repository)
 CORWAV_TRUNK="${HOME}/git/corwav/"
 #set CORWAV_WEB to the directory where the web database page is.
-CORWAV_WEB="/Volumes/Scratch/Users/kendrick/web/"
+CORWAV_WEB="${HOME}/"
 
 
 

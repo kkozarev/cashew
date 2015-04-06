@@ -154,7 +154,8 @@ function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=
 ;do the searching for the files
   for h=0,n_elements(hmins[0,*])-1 do begin
      locpath=basepath+'H'+hmins[0,h]+'00/'
-     ;print,'Looking for file '+locpath+'*_'+hmins[0,h]+hmins[1,h]+'*_'+wave+'.fits',h, n_elements(hmins[0,*])-1
+     print,'Looking for file '+locpath+'*_'+hmins[0,h]+hmins[1,h]+'*_'+wave+'.fits',h, n_elements(hmins[0,*])-1
+     
      if keyword_set(jsoc) then file=file_search(locpath+'*'+strmid(wave,1,3)+'A*'+hmins[0,h]+'_'+hmins[1,h]+'*.fits') $
      else file=file_search(locpath+'*_'+hmins[0,h]+hmins[1,h]+'*_'+wave+'.fits')
      
