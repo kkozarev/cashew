@@ -2,7 +2,7 @@ pro test_aia_load_data
 ;Run for one or a few events like this:
   one=1
   if one eq 1 then begin
-     labels=['paper']
+     labels=['120424_01']
      for ev=0,n_elements(labels)-1 do begin
         label=labels[ev]
         event=load_events_info(label=label)

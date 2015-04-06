@@ -31,11 +31,28 @@ end
 pro test_pfss_shock_run_csgs
 ; A small procedure to run several instances of the coronal shock
 ; model.
-  
-  event=load_events_info(label='paper')
-  ;pfss_shock_run_csgs,event,/lores,/newtimes
-  pfss_shock_run_csgs,event,/hires,/newtimes;,/plot;,/png
-  
+  labels=['140708_01','131212_01','130517_01','130423_01','120915_01','120526_01',$
+	  '120424_01','110607_01','110211_01','110125_01']
+  labels=['130423_01','140708_01','120915_01']
+  labels=['paper','110511_01','130423_01','140708_01']
+  labels=['131212_01','130517_01','120915_01','120526_01','120424_01','110607_01','110211_01','110125_01']
+  labels=['110125_01','110211_02']
+  labels=['120424_01']
+    for ev=0,n_elements(labels)-1 do begin
+      label=labels[ev]
+      event=load_events_info(label=label)
+      pfss_shock_run_csgs,event,/hires,/newtimes
+      ;pfss_shock_plot_all,event,/hires     
+      pfss_shock_run_csgs,event,/lores,/newtimes
+      ;pfss_shock_plot_all,event,/lores
+
+; pfss_shock_plot_csgs,event,/png,/newtimes
+;      pfss_shock_plot_crossing_angles,event,/oplot
+;      pfss_shock_plot_thetabn_stats,event,/lores
+;      pfss_shock_plot_angular_influence,event
+;      pfss_shock_plot_angular_influence,event,/topview
+;new_pfss_shock_run_csgs,event,/hires,/newtimes;,/plot;,/png
+  endfor
 end
 ;---------------------------------------------------------------------
 
@@ -166,7 +183,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
   minAU=1.49598e11 ;m in AU
   mpix=rsun_m/sunrad ;conversion between pixels and m.
   
-  shockthick=3.5                ;shock thickness, in pixels
+  shockthick=4.0                ;shock thickness, in pixels
   
 ;Calculate the number of steps and their size.
   dt= time[1]-time[0]           ;The cadence (maxshockrad-minshockrad)*mpix/(nsteps*1.0)/vshock ;timestep in seconds
@@ -335,19 +352,23 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
         dr2=(reform(pfss_cartpos[*,0,*])-sc[0])^2 + $
             (reform(pfss_cartpos[*,1,*])-sc[1])^2 + $
             (reform(pfss_cartpos[*,2,*])-sc[2])^2
+        pfssrad=sqrt(dr2)
+        ;minnn=min(abs(shockrad+shockthick-pfssrad),ptind)
         ptind=where(dr2 le (shockrad+shockthick)^2 and dr2 ge shockrad^2)
         
         if ptind[0] gt -1 then begin
            ;pind[0,*] are the crossing line indices
            ;pind[1,*] are the crossing point indices
            pind=array_indices(reform(pfss_cartpos[*,0,*]),ptind)
-           
+           ;stop
+              
            ;Leave only the unique crossing lines.
            srt=sort(pind[0,*])
            pind=pind[*,srt]
            tmp=reform(pind[0,*])
            unique_lines=pind[*,uniq(tmp)]
            pind=unique_lines
+           ;stop
            ncrosses=n_elements(pind[0,*])*1.0D
         endif else begin
            print,'No field/shock crossings. Continuing...'
@@ -392,10 +413,17 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
                      (reform(pfss_cartpos[lind,1,*])-sc[1])^2 + $
                      (reform(pfss_cartpos[lind,2,*])-sc[2])^2
                  pfssrad=sqrt(dr2)
-                 ;ptind=where(dr2 le (shockrad+shockthick)^2 and dr2 ge shockrad^2)
-                 minnn=min(abs(shockrad+shockthick-pfssrad),ptind)
+                 ptind=where(dr2 le (shockrad+shockthick)^2 and dr2 ge shockrad^2)
+                 ;minnn=min(abs(shockrad+shockthick-pfssrad),ptind)
                  
                  if ptind gt -1 then begin
+                    ;pind=array_indices(reform(pfss_cartpos[lind,0,*]),ptind)
+                    ;srt=sort(pind[0,*])
+                    ;pind=pind[*,srt]
+                    ;tst=reform(pind[0,*])
+                    ;unique_lines=pind[*,uniq(tst)]
+                    ;pind=unique_lines
+                    
                     cross_point=reform(pfss_cartpos[lind,*,ptind])
                     crosspt=crosspoint ;crosspoint struct already exists, just copy it over.
                     crosspt.px=cross_point[0]
@@ -424,11 +452,9 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
                     new_cross_points[*,ncrosses]=cross_point
                     cross_points=new_cross_points
                     ;Concatenate the pind variable
-                    new_pind=lonarr(2,ncrosses+1)
-                    new_pind[*,0:ncrosses-1]=pind
-                    new_pind[*,ncrosses]=[lind,ptind]
-                    pind=new_pind
+                    
                     ncrosses++
+                    ;stop
                  endif
               endfor
            endif

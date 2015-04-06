@@ -1,7 +1,11 @@
 pro test_pfss_shock_plot_thetabn_stats
 ;Testing the shock crossing angles plotting procedure
-event=load_events_info(label='paper')
-pfss_shock_plot_thetabn_stats,event,/hires
+  labels=['paper','130423_01','140708_01']
+  for ev=0,n_elements(labels)-1 do begin
+      label=labels[ev]
+      event=load_events_info(label=label)
+      pfss_shock_plot_thetabn_stats,event,/hires
+  endfor
 end
 
 pro load_typeII,event,filename,tIItime,tIIdens,tIIrad,lanes,lsi
@@ -412,8 +416,8 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII
 ;- - - - - - - - - - - - - - - - - - - - - -
 ; Here, calculate the binned crossings (binned by radial position)
 ;- - - - - - - - - - - - - - - - - - - - - -
-  rangevals=[70]
-  nranges=n_elements(rangevals)
+  rangevals=[50,90]
+  nranges=n_elements(rangevals-1)
   valarr=lonarr(ntimes,nranges)
   valranges=lonarr(ntimes,nranges,2)
   linekinds=intarr(ntimes,nranges,2)
@@ -423,7 +427,7 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII
   radstats=replicate({mean:0.D,max:0.D,min:0.D},ntimes,nranges)
   for tt=0,ntimes-1 do begin
      ;First take care of the first range
-     res=where(crossPoints[tt,*].thbn gt rangevals[0] and crossPoints[tt,*].thbn le 90.)
+     res=where(crossPoints[tt,*].thbn gt rangevals[0] and crossPoints[tt,*].thbn le rangevals[1])
      if res[0] gt -1 then begin
         valarr[tt,0]=n_elements(res)
         valranges[tt,0,0]=0
@@ -485,13 +489,14 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII
          /encaps,/color,/helvetica
   loadct,0,/silent
   xrng=[min(tm),max(tm)]
+  if keyword_set(typeII) then yrnge=[1.0,1.8] else yrnge=[1.0,max(shocknosepos)*1.1]
   PLOT, tm, allcrosses, PSYM = 10, $ 
-        TITLE = 'tII lanes and 70!Uo!N<'+thlet+'!DBN!N<90!Uo!N Crossings', $
+        TITLE = 'tII lanes and 50!Uo!N<'+thlet+'!DBN!N<90!Uo!N Crossings', $
         XTITLE =xtit, $
         YTITLE = ytit, $
         XTICKUNITS = ['Time'],XTICKFORMAT='LABEL_DATE',$
         xticklen=-0.01,xminor=1,yminor=1,$
-        xrange=xrng,yrange=[1.1,1.8],xticks=4,$
+        xrange=xrng,yrange=yrnge,xticks=4,$
         xstyle=1,ystyle=1,color=0,background=255,$
         xthick=4,ythick=4,thick=4,charsize=chsize,charthick=chthick,/nodata
   
