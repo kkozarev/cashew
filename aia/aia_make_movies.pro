@@ -1,22 +1,27 @@
 pro test_aia_make_movies
+;Test the execution of aia_make_movies
 
-  ;You can run this for a single event, like so
+  ;You can run this for a few events, like so
   one=1
   if one eq 1 then begin
-     label='140331_01'
-     event=load_events_info(label=label)
-     wavelengths=['193']
-     movie_types=['araw','abase','arun','raw','base','run']
-     movie_types=['pfss_shock','thetabn','thetabn_oplot','pfss_spread']
-     movie_types=['run']
-     movie_types=['ywave']
-     movie_types=['run','base','raw']
-     wavelengths=['171','131']
-     for w=0,n_elements(wavelengths)-1 do begin
-        wavelength=wavelengths[w]
-        for mt=0,n_elements(movie_types)-1 do begin
-           movie_type=movie_types[mt]
-           aia_make_movies, event, movie_type=movie_type, wav=wavelength,/force
+     labels=['140708_01','131212_01','130517_01','130423_01','120915_01','120526_01',$
+	  '120424_01','110607_01','110211_02','110125_01','130423_01','140708_01']
+     for ev=0,n_elements(labels)-1 do begin
+        label=labels[ev]
+        event=load_events_info(label=label)
+        wavelengths=['193']
+        movie_types=['araw','abase','arun','raw','base','run']
+        movie_types=['pfss_shock_hires','thetabn_oplot_hires','pfss_spread_hires','pfss_spread_topview_hires']
+     ;movie_types=['run']
+     ;movie_types=['ywave']
+     ;movie_types=['run','base','raw']
+     ;wavelengths=['171','131']    
+        for w=0,n_elements(wavelengths)-1 do begin
+           wavelength=wavelengths[w]
+           for mt=0,n_elements(movie_types)-1 do begin
+              movie_type=movie_types[mt]
+              aia_make_movies, event, movie_type=movie_type, wav=wavelength,/force
+           endfor
         endfor
      endfor
   endif
@@ -217,8 +222,8 @@ if movie_type eq 'thetabn_oplot' then begin
    movie_path=event.moviepath
    pngfname='thetabn_'+date+'_'+label+'_lores'
    ;The png image files
-   imgfnames = savepath + pngfname + '_%03d_oplot.png'
-   imgsearch = savepath + pngfname + '_???_oplot.png'
+   imgfnames = savepath + pngfname + '_oplot_%03d.png'
+   imgsearch = savepath + pngfname + '_oplot_???.png'
    moviefname = movie_path + pngfname + '_oplot.mp4'
 endif
 
@@ -227,8 +232,8 @@ if movie_type eq 'thetabn_oplot_hires' then begin
    movie_path=event.moviepath
    pngfname='thetabn_'+date+'_'+label+'_hires'
    ;The png image files
-   imgfnames = savepath + pngfname + '_%03d_oplot.png'
-   imgsearch = savepath + pngfname + '_???_oplot.png'
+   imgfnames = savepath + pngfname + '_oplot_%03d.png'
+   imgsearch = savepath + pngfname + '_oplot_???.png'
    moviefname = movie_path + pngfname + '_oplot.mp4'
 endif
 

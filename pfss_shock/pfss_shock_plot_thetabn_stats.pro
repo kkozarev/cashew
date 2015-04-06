@@ -1,7 +1,11 @@
 pro test_pfss_shock_plot_thetabn_stats
 ;Testing the shock crossing angles plotting procedure
-event=load_events_info(label='paper')
-pfss_shock_plot_thetabn_stats,event,/hires
+  labels=['paper','130423_01','140708_01']
+  for ev=0,n_elements(labels)-1 do begin
+      label=labels[ev]
+      event=load_events_info(label=label)
+      pfss_shock_plot_thetabn_stats,event,/hires
+  endfor
 end
 
 pro load_typeII,event,filename,tIItime,tIIdens,tIIrad,lanes,lsi
@@ -425,8 +429,6 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII,fo
 ;- - - - - - - - - - - - - - - - - - - - - -
 ; Here, calculate the binned crossings (binned by radial position)
 ;- - - - - - - - - - - - - - - - - - - - - -
-
-
   rangevals=[50.,90.]
   nranges=n_elements(rangevals-1)
   valarr=lonarr(ntimes,nranges)
@@ -502,7 +504,7 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII,fo
   xrng=[min(tm),max(tm)]
   if keyword_set(typeII) then yrnge=[1.0,1.8] else yrnge=[1.0,max(shocknosepos)*1.1]
   PLOT, tm, allcrosses, PSYM = 10, $ 
-        TITLE = 'tII lanes and 70!Uo!N<'+thlet+'!DBN!N<90!Uo!N Crossings', $
+        TITLE = 'tII lanes and 50!Uo!N<'+thlet+'!DBN!N<90!Uo!N Crossings', $
         XTITLE =xtit, $
         YTITLE = ytit, $
         XTICKUNITS = ['Time'],XTICKFORMAT='LABEL_DATE',$

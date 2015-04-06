@@ -4,7 +4,10 @@ pro test_pfss_return_field
 ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
-     event=load_events_info(label='110511_01')
+     labels=['paper','110511_01','130423_01','140708_01']
+     for ev=0,n_elements(labels)-1 do begin
+       label=labels[ev]
+       event=load_events_info(label=label)
      aia_carrington_latlon,event,lat,lon
      aclon=lon+event.arlon
      aclat=lat+event.arlat
@@ -14,6 +17,8 @@ pro test_pfss_return_field
                                 ;pfss_return_field,date,invdens=0.5,/save,event=event;,box=box
                                 ;pfss_return_field,date,invdens=8,/save,path=event.pfsspath,event=event;,box=box
      pfss_return_field,event,box=box,/hires,/save
+     pfss_return_field,event,box=box,/lores,/save
+     endfor
   endif
   
   
