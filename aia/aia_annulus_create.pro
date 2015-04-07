@@ -409,7 +409,18 @@ end
 
 
 
-pro aia_annulus_create,event,run=run,base=base,raw=raw,remove_aec=remove_aec,_extra=_extra;
+pro aia_annulus_create,event,wav=wav,run=run,base=base,raw=raw,remove_aec=remove_aec,_extra=_extra;
+  savepath=event.savepath+'annulusplot/'
+
+  folders = ['arun/', 'araw/', 'abase/']
+
+  for i = 0, n_elements(folders)-1 do begin
+     finsavpath=savepath+folders[i]+wav+'/'
+     if not dir_exist(finsavpath) then begin
+        spawn,'mkdir -m 775 '+finsavpath
+     endif
+  endfor
+
   if keyword_set(raw) then aia_annulus_create_main, event, /raw, /remove_aec, _extra=_extra
   if keyword_set(base) then aia_annulus_create_main, event, /base, /remove_aec, _extra=_extra
   if keyword_set(run) then aia_annulus_create_main, event, /run, /remove_aec, _extra=_extra
