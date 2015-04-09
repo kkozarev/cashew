@@ -399,25 +399,25 @@ pro annulus_fit_maxima_radial,event,indata,datastruct,time,yarr,lateral=lateral,
   sgfpix=4
 ;  sgfil1=savgol(sgfpix,sgfpix,order,2)
   sgfil=savgol(sgfpix,sgfpix,order,4)
-  plot,time_good,dist,/ynozero,psym=2
+;  plot,time_good,dist,/ynozero,psym=2
   ;oplot,time_good,convol(dist,sgfil1,/edge_truncate)
-  oplot,time_good,convol(dist,sgfil,/edge_truncate),linestyle=2
+;  oplot,time_good,convol(dist,sgfil,/edge_truncate),linestyle=2
  
   order=1
  ; sgfil_v1 = SAVGOL(sgfpix, sgfpix, order, 2)*(FACTORIAL(order)/ $
  ;                                  (dt^order))
   sgfil_v = SAVGOL(sgfpix, sgfpix, order, 4)*(FACTORIAL(order)/ $
                                    (dt^order))
-  plot,time_good,deriv(time_good,dist),/ynozero,psym=2
+;  plot,time_good,deriv(time_good,dist),/ynozero,psym=2
 ; oplot,time_good,convol(dist,sgfil_v1,/edge_truncate)
-  oplot,time_good,convol(dist,sgfil_v,/edge_truncate),linestyle=2
+;  oplot,time_good,convol(dist,sgfil_v,/edge_truncate),linestyle=2
   
   order=2
   sgfil_a = SAVGOL(sgfpix, sgfpix, order, 4)*(FACTORIAL(order)/ $
                                             (dt^order))
-  plot,time_good,deriv(time_good,deriv(time_good,dist)),/ynozero,psym=2
+;  plot,time_good,deriv(time_good,deriv(time_good,dist)),/ynozero,psym=2
 ; oplot,time_good,convol(dist,sgfil_v1,/edge_truncate)
-  oplot,time_good,convol(dist,sgfil_a,/edge_truncate),linestyle=2
+;  oplot,time_good,convol(dist,sgfil_a,/edge_truncate),linestyle=2
 
   
 
