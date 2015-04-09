@@ -6,6 +6,7 @@ pro test_aia_make_movies
   if one eq 1 then begin
      labels=['140708_01','131212_01','130517_01','130423_01','120915_01','120526_01',$
 	  '120424_01','110607_01','110211_02','110125_01','130423_01','140708_01']
+     labels=['paper']
      for ev=0,n_elements(labels)-1 do begin
         label=labels[ev]
         event=load_events_info(label=label)

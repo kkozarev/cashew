@@ -5,7 +5,7 @@ pfss_shock_plot_csgs,event,/hires,/png;/newtimes,
 end
 
 
-pro pfss_shock_plot_csgs,event,png=png,hires=hires,lores=lores,pfssLines=pfssLines,newtimes=newtimes
+pro pfss_shock_plot_csgs,event,png=png,hires=hires,lores=lores,pfssLines=pfssLines,newtimes=newtimes,force=force
 ;PURPOSE:
 ;Plot the time-dependent Coronal Shock Geometrical Surface model,
 ;overlaying AIA images, PFSS model, and CSGS model with crossing points.
@@ -26,6 +26,7 @@ pro pfss_shock_plot_csgs,event,png=png,hires=hires,lores=lores,pfssLines=pfssLin
 ;
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 02/21/2014
+;04/06/2015, Kamen Kozarev - added the /force keyword.
 ;
   resolve_routine,'sym',/either,/compile_full_file
   wav='193'
@@ -38,7 +39,8 @@ pro pfss_shock_plot_csgs,event,png=png,hires=hires,lores=lores,pfssLines=pfssLin
   savepath=event.savepath
   datapath=savepath
   pfsspath=event.pfsspath
-  
+  resolution='lores'
+  if keyword_set(hires) then resolution='hires'
   
   ;Find a file to load with the latest results of applying the CSGS model
   ;csgsfile=find_latest_file(event.pfsspath+'csgs_results_*')
@@ -117,6 +119,18 @@ if csgsfile eq '' then begin
 ;--------------------------------------------------------------
   for sstep=0,nsteps-1 do begin             
      print,'Step #'+string(sstep)
+     stp=strtrim(string(sstep),2)
+     if stp lt 100 then stp='0'+stp
+     if stp lt 10 then stp='0'+stp
+     
+     savefname=pfsspath+'aia_pfss_shock_'+event.date+'_'+event.label+'_'+resolution+'_'+stp+'.png'
+     if file_test(savefname) and not keyword_set(force) then begin
+        print,'Files '+'aia_pfss_shock_'+event.date+'_'+event.label+'_'+resolution+'_*.png'
+        print,'already exist. To overwrite, rerun with /force.'
+        print,'----'
+        break
+     endif else begin
+
      shockrad=radius[sstep]     ;Get this from the measurements
 
 ;+==============================================================================
@@ -283,13 +297,8 @@ if csgsfile eq '' then begin
      ;Save the plot in a png file
      tvlct,rr,gg,bb,/get
      image=tvrd(true=1)
-     stp=strtrim(string(sstep),2)
-     if stp lt 100 then stp='0'+stp
-     if stp lt 10 then stp='0'+stp
-     resolution='lores'
-     if keyword_set(hires) then resolution='hires'
-     write_png,pfsspath+'aia_pfss_shock_'+event.date+'_'+event.label+'_'+resolution+'_'+stp+'.png',image,rr,gg,bb
-     
+     write_png,savefname,image,rr,gg,bb
+  endelse
      
   endfor ;END TIMESTEP LOOP
   set_plot,'x'

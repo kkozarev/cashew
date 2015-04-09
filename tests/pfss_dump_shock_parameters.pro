@@ -1,6 +1,11 @@
 pro test_pfss_dump_shock_parameters
-  event=load_events_info(label='test')
-  dump_shock_parameters,event
+  labels=['140708_01','131212_01','130517_01','130423_01','120915_01','120526_01',$
+          '120424_01','110607_01','110211_02','110125_01']
+  for ev=0,n_elements(labels)-1 do begin
+     label=labels[ev]
+     event=load_events_info(label=label)
+     pfss_dump_shock_parameters,event
+  endfora
 end
 
 pro pfss_dump_shock_parameters,event
@@ -25,7 +30,8 @@ close,/all
 ;Load the data files
 
   ;Load the annulusplot analysis file
-  wavefile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed.sav'
+  wavefile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed_radial.sav'
+  print, wavefile
   if not file_exist(wavefile) then begin
      print,'The annplot file is not properly set or does not exist. Quitting.'
      return
@@ -50,13 +56,21 @@ close,/all
   restore,csgsfile
   
   ;Load regions 6,3,7,8 of the DEM results, get the density compression
-  regions=[6,3,7,8]
-  regions=strtrim(string(regions),2)
-  nregions=n_elements(regions)
-  denscomp=fltarr(4)
+  ;regions=[6,3,7,8]
+  ;regions=strtrim(string(regions),2)
+  regfiles=file_basename(find_files('aschdem_'+event.date+'_'+event.label+'_'+'teem_normalized_series_r*.sav',event.aschdempath))
+  if regfiles[0] eq '' then begin
+     print,'No DEM files of type '+'aschdem_'+event.date+'_'+event.label+'_'+'teem_normalized_series_r*.sav are present. Quitting...'
+     return
+  endif
+  nregions=n_elements(regfiles)
+  regions=strarr(nregions)
+  for rr=0,nregions-1 do $
+     regions[rr]=strmid(regfiles[rr],strpos(regfiles[rr],'.')-2,2)
+  denscomp=fltarr(nregions)
+  
   for rr=0,nregions-1 do begin
      reg=regions[rr]
-     if reg lt 10 then reg='0'+reg
      restore,event.aschdempath+'aschdem_'+event.date+'_'+event.label+'_'+'teem_normalized_series_r'+reg+'.sav'
      denscomp[rr]=denscompress
   endfor

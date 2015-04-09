@@ -4,11 +4,17 @@ pro test_aia_cfa_teem_run
  ;You can run for one or several events, like this.
   one=1
   if one eq 1 then begin
-     events=load_events_info(label=['110607_01'])
+    labels=['140708_01','131212_01','130517_01','130423_01','120915_01']
+    labels=['120526_01','120424_01','110607_01','110211_02','110125_01']
+    labels=['110211_02','110125_01']
+    for ev=0,n_elements(labels)-1 do begin 
+       label=labels[ev]
+       event=load_events_info(label=label)
 ;    To do (1): '131107_01','131029_01','131119_01','131207_01'
 ;    To do (2): '110804_01','110809_01','110211_02','110128_01','110125_01','120728_01','121007_01'
 ;    Currently being calculated (remove when done): '131105_01', '130517_01', '130501_01'
-     for ev=0,n_elements(events)-1 do aia_cfa_teem_run,events[ev],/remove_aec,/force
+       aia_cfa_teem_run,event,/remove_aec
+     endfor
   endif
   
   

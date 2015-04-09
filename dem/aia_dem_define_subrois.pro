@@ -1,9 +1,14 @@
 pro test_aia_dem_define_subrois
- ;You can run for one event, like this.
+;You can run for one event, like this.
   one=1
   if one eq 1 then begin
-     event=load_events_info(label='test')
-     aia_dem_define_subrois,event,/force
+     labels=['140708_01','131212_01','130517_01','130423_01','120915_01','120526_01',$
+	  '120424_01','110607_01','110211_02','110125_01']
+     for ev=0,n_elements(labels)-1 do begin
+         label=labels[ev]
+         event=load_events_info(label=label)
+         aia_dem_define_subrois,event,/force
+     endfor
   endif
   
 ;Alternatively, run for all events
