@@ -2,13 +2,19 @@ pro test_aia_load_data
 ;Run for one or a few events like this:
   one=1
   if one eq 1 then begin
-     labels=['120424_01']
-     for ev=0,n_elements(labels)-1 do begin
+     labels=['140708_01','131212_01','130517_01','130423_01','120915_01','120526_01',$
+	  '120424_01','110607_01','110211_02','110125_01']
+     labels=['110211_02','110125_01'] 
+    for ev=0,n_elements(labels)-1 do begin
         label=labels[ev]
         event=load_events_info(label=label)
-        wav='193'
+        ;wav='193'
+	wavelengths=['94','131','171','211','335']
+        for w=0,n_elements(wavelengths)-1 do begin
+           wav=wavelengths[w]
         ;aia_load_data,event.st,event.et,wav,event=event,/nodata
-        aia_load_data,event.st,event.et,wav,event=event,/force,/subroi
+        aia_load_data,event.st,event.et,wav,event=event,/subroi
+        endfor
      endfor
   endif
   

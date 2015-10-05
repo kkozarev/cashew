@@ -27,7 +27,7 @@ pro test_fastball
   !P.color=0
   wdef,0,xsize,ysize
   for i=0,npts-1 do plots,pts[i].x,pts[i].y,/device,psym=sym(1),symsize=1.5
-  
+
   ;Run the fastball algorithm
   ball=fastball(pts)
   circle=circle(ball.center.x, ball.center.y, ball.radius)

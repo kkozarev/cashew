@@ -1,6 +1,6 @@
 pro test_pfss_shock_plot_all
 event=load_events_info(label='paper')
-pfss_shock_plot_all,event,/hires,/force
+pfss_shock_plot_all,event,/hires
 pfss_shock_plot_all,event,/lores
 end
 
