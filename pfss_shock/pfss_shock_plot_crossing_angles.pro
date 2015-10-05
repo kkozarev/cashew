@@ -49,7 +49,8 @@ pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,
   ;if not keyword_set(infile) then infile=find_latest_file(event.pfsspath+'csgs_results_*')
   infile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_lores.sav')
   if keyword_set(hires) then infile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_hires.sav')
-  
+  resolution='lores'
+  if keyword_set(hires) then resolution='hires'
   if infile[0] eq '' then begin
      print,'The file to load is not properly set or does not exist. Quitting.'
      return
@@ -123,6 +124,18 @@ pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,
 
 ;THE TIMESTEP LOOP!
   for sstep=0,nsteps-1 do begin
+     
+     in=strtrim(string(sstep),2)
+     if sstep lt 100 then in='0'+in
+     if sstep lt 10 then in='0'+in
+     savefname=datapath+'thetabn_'+event.date+'_'+event.label+'_'+resolution+'_'+in+'.png'
+     if keyword_set(oplot) then savefname=datapath+'thetabn_'+event.date+'_'+event.label+'_'+resolution+'_oplot_'+in+'.png'
+      if file_test(savefname) and not keyword_set(force) then begin
+        print,'Files '+'thetabn_'+event.date+'_'+event.label+'_'+resolution+'_*.png'
+        print,'already exist. To overwrite, rerun with /force.'
+        print,'----'
+        break
+     endif else begin
 
      shockrad=radiusfitlines[sstep]/kmpx
      shscale=maxshockrad/shockrad
@@ -226,22 +239,13 @@ pro pfss_shock_plot_crossing_angles,event,infile=infile,oplot=oplot,hires=hires,
      
      !X=saveX
      !Y=saveY
-
+     
      if sstep lt nsteps then begin
         image=tvrd(true=1)
-        in=strtrim(string(sstep),2)
-        if sstep lt 100 then in='0'+in
-        if sstep lt 10 then in='0'+in
-        resolution='lores'
-        if keyword_set(hires) then resolution='hires'
-        fname=datapath+'thetabn_'+event.date+'_'+event.label+'_'+resolution+'_'+in
-        if keyword_set(oplot) then fname=datapath+'thetabn_'+event.date+'_'+event.label+'_'+resolution+'_oplot_'+in
-        fname+='.png'
-        write_png,fname,image,rr,gg,bb
+        write_png,savefname,image,rr,gg,bb
      endif
-     
      print,'Saving image '+in
-
+     endelse
   endfor
 ;---------------------------------------------------------------------------------------
 end

@@ -2,7 +2,7 @@ pro test_aia_dem_define_subrois
  ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
-     event=load_events_info(label='test')
+     event=load_events_info(label='140708_01')
      aia_dem_define_subrois,event,/force
   endif
   
@@ -113,22 +113,27 @@ pro aia_dem_define_subrois,event,savepath=savepath,force=force
 ;Plot stuff
   ;wdef,0,1024
   loadct,0,/silent
-  wdef,0,event.aiafov[0],event.aiafov[1]
+  scaling=0.5
+  wdef,0,event.aiafov[0]*scaling,event.aiafov[1]*scaling
   ;im=reform(sqrt(subdata[*,*,20]))
   baseim=subdata[*,*,0]
   im=bytscl(subdata[*,*,floor(sp+rr)]-baseim,-50,50)
+  if scaling ne 1.0 then im = congrid(im,n_elements(im[*,0])*scaling,n_elements(im[0,*])*scaling)
+  
   tvscl,im
   ;Calculate the positions of the 
-  shock_x=newrad*cos(rad_angle)+suncenter[0]
-  shock_y=newrad*sin(rad_angle)+suncenter[1]
-  xx=findgen(2500)*cos(rad_angle)+suncenter[0]
-  yy=findgen(2500)*sin(rad_angle)+suncenter[1]
+  shock_x=(newrad*cos(rad_angle)+suncenter[0])*scaling
+  shock_y=(newrad*sin(rad_angle)+suncenter[1])*scaling
+  xx=(findgen(2500)*cos(rad_angle)+suncenter[0])*scaling
+  yy=(findgen(2500)*sin(rad_angle)+suncenter[1])*scaling
+  
   plots,shock_x,shock_y,psym=2,/device
   plots,xx,yy,/device
-  res=aia_circle(ar[0],ar[1],radius[rr],/plot)
+  res=aia_circle(ar[0]*scaling,ar[1]*scaling,radius[rr]*scaling,/plot)
+ 
   
 ;Calculate the region rectangle prototype
-  ROISIZE=[100,20]
+  ROISIZE=[100,20]*scaling
   regx=[0-roisize[0]/2.,0+roisize[0]/2.]
   regy=[0-roisize[1]/2.,0+roisize[1]/2.]
   regz=[0,0]
@@ -154,15 +159,16 @@ pro aia_dem_define_subrois,event,savepath=savepath,force=force
      roiname='R'+strtrim(string(roi+1),2)
      angle=(rad_angle+!PI/2.*roi/(NUMROI-4))-!PI/4.
 ;Transform the region to its place.
+     
      reg = transform_volume(regvolume,rotation=[0,0,-(90-angle*180./!PI)],$
-                             translate=[ar[0]+radius[rr]*cos(angle),ar[1]+radius[rr]*sin(angle),0])
+                             translate=[(ar[0]+radius[rr]*cos(angle))*scaling,(ar[1]+radius[rr]*sin(angle))*scaling,0])
     
 ;Here, check if the points are within the image. If not, set them to
 ;the image limits. NOTE: THIS IS A HACK! There should be a better way
 ;to determine if a region is entirely outside the AIA FOV
-     ind=where(reg[0,*] ge event.aiafov[0])
+     ind=where(reg[0,*] ge event.aiafov[0]*scaling)
      if ind[0] ne -1 then reg[0,ind]=n_elements(im[*,0])-n_elements(ind)+ind
-     ind=where(reg[1,*] ge event.aiafov[1])
+     ind=where(reg[1,*] ge event.aiafov[1]*scaling)
      if ind[0] ne -1 then reg[1,ind]=n_elements(im[0,*])-n_elements(ind)+ind
     
      
@@ -173,7 +179,7 @@ pro aia_dem_define_subrois,event,savepath=savepath,force=force
      roiEnd_y[roi]=reg[1,3]
      xrange=[roiStart_x[roi],roiEnd_x[roi]]
      yrange=[roiStart_y[roi],roiEnd_y[roi]]
-     roi_radheight[roi]=sqrt((avg(reg[0,*])-xcenter)^2+(avg(reg[1,*])-ycenter)^2)/sunrad
+     roi_radheight[roi]=sqrt((avg(reg[0,*])-xcenter*scaling)^2+(avg(reg[1,*])-ycenter*scaling)^2)/(sunrad*scaling)
      
 ;Obtain the polygon of positions inside the rectangle.
      reg_poly_ind=polyfillv(reform(reg[0,*]),reform(reg[1,*]),n_elements(im[*,0]),n_elements(im[0,*]))
@@ -187,6 +193,7 @@ pro aia_dem_define_subrois,event,savepath=savepath,force=force
      polyfill,reform(reg[0,*]),reform(reg[1,*]),/device
      xyouts,xrange[0]+roisize[0]/6.0,yrange[0]+roisize[1]/4.0,roiname,/device,$
             charsize=3,charthick=4,color=255
+     stop
   endfor
 ;------------------------------------------------------------------------------
 

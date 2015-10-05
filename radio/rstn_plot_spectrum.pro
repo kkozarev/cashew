@@ -1,17 +1,18 @@
 pro test_rstn_plot_spectrum
 
-one=0
+one=1
 if one eq 1 then begin
 ;fname='./LM110511.SRS'
-   event=load_events_info(label='110607_01')
-   frange=[30,150]
-   datarange=[40,120]
+   event=load_events_info(label='120526_01')
+   frange=[27,150]
+   datarange=[40,130]
+   trange=['2012/05/26 20:40:00','2012/05/26 20:56:00']
 ;rstn_plot_spectrum,event,frange=frange,trange=['2011/05/11 02:25:00','2011/05/11 02:43:00'],datarange=datarange,/repair
-   rstn_plot_spectrum,event     ;,datarange=datarange;,/full
+   rstn_plot_spectrum,event,datarange=datarange,frange=frange,trange=trange;,/full
 endif
 
 
-all=1
+all=0
 if all eq 1 then begin
    events=load_events_info()
    for ev=0,n_elements(events)-1 do rstn_plot_spectrum,events[ev]

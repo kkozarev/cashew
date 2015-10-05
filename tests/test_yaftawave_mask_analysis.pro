@@ -8,7 +8,7 @@ pro run_test_yaftawave_mask_analysis
 ;=======================================
   
   
-;Find the folder we're interested in and extract the version,
+;Find the folder we're interested in and extract the version, 
 ;smoothing, and threshold information
   version=''
   folders=file_basename(file_search(path+'gprep_v*'))
@@ -96,7 +96,7 @@ for ff=0,nfeatures-1 do begin
    if ufeat[0].sign eq -1 then nn++
    if ufeat[0].sign eq 1 and mean(ufeat.size) gt pixthreshold then begin   ;and n_elements(ufeat) gt 2 
       pp++
-
+      
       res=strsplit(ufeat[0].mask_str,"\t \r",/extract)
 ;tmp[0,*] are the X-indices, tmp[1,*] are the Y-indices
       tmp=array_indices(radarray,res*1L)
@@ -184,6 +184,7 @@ endfor
   featlabel=strarr(pp)
   featstartendsteps=intarr(pp,2)
 ;1. Reorganize the features information
+  define_check = 0
   for ff=0,nfeatures-1 do begin
 ;First, check if the label index exists
      ind=where(features.label eq ff+1)
@@ -204,8 +205,8 @@ endfor
         numfeatsteps=n_elements(ufeat)
         print,string(ufeat[0].label) + ' -> ' + string(ufeat[numfeatsteps-1].trm)
         
-        for n=0,numfeatsteps-1 do begin           
-           res=strsplit(ufeat[n].mask_str,"\t \r",/extract)
+        for nfs=0,numfeatsteps-1 do begin           
+           res=strsplit(ufeat[nfs].mask_str,"\t \r",/extract)
 ;tmp[0,*] are the X-indices, tmp[1,*] are the Y-indices
            tmp=array_indices(radarray,res*1L)
 ;Find the Sun-radial distance of each pixel in the feature
@@ -219,37 +220,54 @@ endfor
               tmp4=tmp[*,tmp3]
 ;Continue this, extracting the information for the feature and
 ;determining whether this is the right feature to fit a circle to.
-              
+             
 ;Try ordering the pixels by R, and fitting a circle to the farthest 50
 ;pixels. See what the goodness of fit is for every feature.
               above_limb_px=reform(radarray[tmp4[0,*],tmp4[1,*]].r)
               avgabovepx=average(above_limb_px)
               maxabovepx=max(above_limb_px)
-              all_abovepx[cc,n].avg=avgabovepx
-              all_abovepx[cc,n].max=maxabovepx
-              featlabel[cc]=ufeat[n].label
+              all_abovepx[cc,nfs].avg=avgabovepx
+              all_abovepx[cc,nfs].max=maxabovepx
+              featlabel[cc]=ufeat[nfs].label
               featstartendsteps[cc,0]=ufeat[0].step-1
               featstartendsteps[cc,1]=ufeat[numfeatsteps-1].step-1
              ; print,ff,n,avgabovepx,maxabovepx,255.*cc/(pp-1)
 ;Get all the X- and Y- pixel distances from the center of the Sun.
             ; alx=reform(radarray[tmp4[0,*],tmp4[1,*]].x)
             ; aly=reform(radarray[tmp4[0,*],tmp4[1,*]].y)
-              
+             
             ;indices of the pixels ordered by radial distance
               un=uniq(above_limb_px,sort(above_limb_px))
-            ;Fit a circle to the outer edge points of the feature with aia_autofit_circle.pro.
-            ;Alternatively, explore the feature boxing with the test_fastball.pro procedure, which
-            ;needs some further development.
-              
-              
+            ;Fit a circle to the feature with the fastball procedure
+            ;from the test_fastball.pro file.
+              pt={x:0.,y:0.}
+              npts=n_elements(tmp4[0,*])
+              pts=replicate(pt,npts)
+              for i=0.,n_elements(pts)-1 do begin
+                 pts[i].x=tmp4[0,i]
+                 pts[i].y=tmp4[1,i]
+              endfor
+              ball=fastball(pts)
+              print,nfs
+              plot_scale_factor=4
+              if define_check eq 0 then begin
+                 wdef,0,n_elements(all_masks[*,0,0])/plot_scale_factor,n_elements(all_masks[0,*,0]/plot_scale_factor)
+                 feature_circle_fits=replicate(ball,nfeatures,n_elements(tm))
+                 define_check = 1
+              endif
+              feature_circle_fits[ff,nfs]=ball
+              circle=circle(ball.center.x/plot_scale_factor, ball.center.y/plot_scale_factor, ball.radius/plot_scale_factor)
+              plots,circle,/device,color=120
            endif else begin
               continue
            endelse
         endfor  
         cc++
-     endif 
+     endif
+        if define_check eq 1 then $
+        wdef,0,n_elements(all_masks[*,0,0])/plot_scale_factor,n_elements(all_masks[0,*,0])/plot_scale_factor
   endfor
-  save,filename="abovepx.sav",nfeatures,nt,tm,features,all_abovepx,pixthreshold,pp,featlabel,featstartendsteps
+  save,filename="abovepx.sav",nfeatures,nt,tm,features,all_abovepx,feature_circle_fits,pixthreshold,pp,featlabel,featstartendsteps
 jump1:
 
 restore,'abovepx.sav'
@@ -333,9 +351,8 @@ restore,'abovepx.sav'
   exec='convert -flatten '+fname+'.eps '+fname+'.png ; rm -rf '+fname+'.eps '
   spawn,exec
   set_plot,'x'
-
-
-
+  
+  
  loadct,0,/silent
  !P.multi=0
  !p.position=[0.12,0.12,0.93,0.93]
@@ -355,7 +372,9 @@ restore,'abovepx.sav'
      sstep=featstartendsteps[ff,0]
      estep=featstartendsteps[ff,1] 
      in=where(all_abovepx[ff,*].avg gt -1.)
-     if in[0] gt -1 and n_elements(in) gt 2 then begin ; 
+     stop
+     if in[0] gt -1 and n_elements(in) gt 2 then begin
+        stop
         ;print,ff,255.*cc/(pp-1)
         avgpix=deriv((tm[sstep:estep]-tm[sstep])*1440,reform(all_abovepx[ff,in].max))
         oplot,avgpix,tm[sstep:estep],color=30+225.*cc/(pp-1),thick=1.5

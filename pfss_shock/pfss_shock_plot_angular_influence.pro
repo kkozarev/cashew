@@ -5,7 +5,7 @@ pfss_shock_plot_angular_influence,event,/lores,/newtimes
 ;pfss_shock_plot_angular_influence,event,/hires,/newtimes,/topview
 end
 
-pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lores,pfssLines=pfssLines,newtimes=newtimes
+pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lores,pfssLines=pfssLines,newtimes=newtimes,force=force
 ;PURPOSE:
 ;Visualize the time-dependent CSGS model with interacting field lines.
 ;
@@ -26,8 +26,9 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
 ;
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 02/22/2014
-;04/02/2014, Kamen Kozarev - added the top view functionality
-;
+;04/02/2014, Kamen Kozarev - added the top view functionality.
+;04/06/2015, Kamen Kozarev - added the /force keyword.
+
   set_plot,'x'
   resolve_routine,'sym',/either,/compile_full_file
   wav='193'
@@ -40,7 +41,8 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
   savepath=event.savepath
   datapath=savepath
   pfsspath=event.pfsspath
-  
+  resolution='lores'
+  if keyword_set(hires) then resolution='hires'
   wavefile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed_radial.sav'
   
   ;Find a file to load with the latest results of applying the CSGS model
@@ -125,9 +127,22 @@ if keyword_set(newtimes) then begin
 ;;THIS IS THE TIMESTEPS LOOP!
 ;--------------------------------------------------------------
   for sstep=0,nsteps-1 do begin
-     print,'Step #'+string(sstep)
+    
+     stp=strtrim(string(sstep),2)
+     if stp lt 100 then stp='0'+stp
+     if stp lt 10 then stp='0'+stp
+     print,'Step #'+stp
+     savefname=pfsspath+'aia_pfss_shock_angular_influence_'+event.date+'_'+event.label+'_'+resolution+'_'+stp+'.png'
+     if keyword_set(topview) then savefname=pfsspath+'aia_pfss_shock_angular_influence_'+$
+                                        event.date+'_'+event.label+'_topview_'+resolution+'_'+stp+'.png'
+     if file_test(savefname) and not keyword_set(force) then begin
+        print,'Files '+'aia_pfss_shock_angular_influence_'+event.date+'_'+event.label+'_'+resolution+'_*.png'
+        print,'already exist. To overwrite, rerun with /force.'
+        print,'----'
+        break
+     endif else begin
      shockrad=radius[sstep]     ;Get this from the measurements
-
+     
      if sstep eq 0 then begin
         sunrot=[-lon,-lat]
 ;Rotation angles for the entire plot
@@ -337,15 +352,8 @@ stride=1
 
      tvlct,rr,gg,bb,/get
      image=tvrd(true=1)
-     stp=strtrim(string(sstep),2)
-     if stp lt 100 then stp='0'+stp
-     if stp lt 10 then stp='0'+stp
-     resolution='lores'
-     if keyword_set(hires) then resolution='hires'
-     fname='aia_pfss_shock_angular_influence_'+event.date+'_'+event.label+'_'+resolution+'_'+stp+'.png'
-     if keyword_set(topview) then fname='aia_pfss_shock_angular_influence_'+$
-                                        event.date+'_'+event.label+'_topview_'+resolution+'_'+stp+'.png'
-     write_png,pfsspath+fname,image,rr,gg,bb
+     write_png,savfname,image,rr,gg,bb
+     endelse
   endfor                        ;END TIMESTEP LOOP
   set_plot,'x'
   loadct,0,/silent

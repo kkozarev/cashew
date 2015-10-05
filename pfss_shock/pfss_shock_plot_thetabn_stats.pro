@@ -96,6 +96,7 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII,fo
 ;Modified by KAK, 12/04/2014 - Added advanced statistical information
 ;                              plotting capability
 ;
+
   set_plot,'x'
   close,/all
   savepath=event.pfsspath
@@ -372,7 +373,13 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII,fo
   !P.font=0
   ;wdef,0,1000,800
   set_plot,'ps'
-  fname=savepath+'thetabn_stats_'+event.date+'_'+event.label+'_'+resolution+'_time_radpos'
+  savnam='thetabn_stats_'+event.date+'_'+event.label+'_'+resolution+'_time_radpos'
+  fname=savepath+savnam
+  if file_test(fname) and not keyword_set(force) then begin
+     print,'File '+savnam
+     print,'already exists. To overwrite, rerun with /force.'
+     print,'----'
+  endif else begin
   device,file=fname+'.eps',/inches,xsize=8.0,ysize=8.0,$
          /encaps,/color,/helvetica
   loadct,0,/silent
@@ -419,6 +426,7 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII,fo
   spawn,exec
   ;write_png,fname,image,rr,gg,bb
   set_plot,'x'
+endelse
 ;-======================================================================
 
   ;Calculate the position of the shock nose
@@ -497,7 +505,13 @@ pro pfss_shock_plot_thetabn_stats,event,lores=lores,hires=hires,typeII=typeII,fo
   !P.font=0
   ;wdef,0,1000,800
   set_plot,'ps'
-  fname=savepath+'thetabn_stats_'+event.date+'_'+event.label+'_'+resolution+'_time_radpos_binned'
+  savnam='thetabn_stats_'+event.date+'_'+event.label+'_'+resolution+'_time_radpos_binned'
+  fname=savepath+savnam
+  if file_test(fname) and not keyword_set(force) then begin
+     print,'File '+savnam
+     print,'already exists. To overwrite, rerun with /force.'
+     print,'----'
+  endif else begin
   device,file=fname+'.eps',/inches,xsize=8.0,ysize=8.0,$
          /encaps,/color,/helvetica
   loadct,0,/silent
@@ -578,6 +592,7 @@ endif
   exec='convert -flatten '+fname+'.eps '+fname+'.png ; rm -rf '+fname+'.eps '
   spawn,exec
   set_plot,'x'
+endelse
 ;-======================================================================
 
 
@@ -588,7 +603,13 @@ endif
   xrng=[min(rad),max(rad)]
   ;wdef,0,1000,800
   set_plot,'ps'
-  fname=savepath+'thetabn_stats_'+event.date+'_'+event.label+'_'+resolution+'_distance'
+  savnam='thetabn_stats_'+event.date+'_'+event.label+'_'+resolution+'_distance'
+  fname=savepath+savnam
+  if file_test(fname) and not keyword_set(force) then begin
+     print,'File '+savnam
+     print,'already exists. To overwrite, rerun with /force.'
+     print,'----'
+  endif else begin
   device,file=fname+'.eps',/inches,xsize=10.0,ysize=8.0,$
          /encaps,/color,/helvetica
   loadct,0,/silent
@@ -622,6 +643,7 @@ endif
   spawn,exec
   ;write_png,fname,image,rr,gg,bb
   set_plot,'x'
+endelse
 ;-======================================================================
 
 
