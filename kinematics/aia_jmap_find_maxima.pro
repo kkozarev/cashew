@@ -13,72 +13,6 @@ end
 
 
 ;+================================================================================
-function get_local_maxima, column,dist,yind=yind,gaussfit=gaussfit
-;This function finds the local maxima and orders them by size
-
-;set the distance range
-  if keyword_set(yind) then yindrange=yind else yindrange=[0,n_elements(dist)-1]
-  
-;First find the local minima.
-  minind=lclxtrem(column-smooth(column,20,/edge_truncate),10)
-  
-;Record the maxima in each of the intervals set by the minima
-;locations. 
-  maxima=replicate({val:0.0D,ind:0L,rad:0.0D,gfit:dblarr(5),nmax:0},100)
-  cc=0
-  
-;Find the local maximum in every interval
-  for ii=0,n_elements(minind)-1 do begin
-     if ii lt n_elements(minind)-1 then begin
-;This is a filter that lets through only the biggest maxima.
-        if (minind[ii+1]-minind[ii] le 2) then continue
-        
-        locarr=column[minind[ii]:minind[ii+1]]
-        locy=dist[minind[ii]+yindrange[0]:minind[ii+1]+yindrange[0]]
-        maxima[cc].val=max(locarr)
-        maxima[cc].ind=minind[ii]+!C+yindrange[0]
-        maxima[cc].rad=dist[maxima[cc].ind]
-       
-;Optionally, do a gaussian fit to all maxima to find the max position           
-        if keyword_set(gaussfit) then begin
-;6-term fit
-
-; For some strange reason I am receiving a compile time error when I
-; include the nterms=6 argument to gaussfit. Looking at documenation
-; it looks like it defaults to nterms=6 anyways so I'm removing
-; this for now
-;           res=gaussfit(locy,locarr,aa,nterms=6)
-           res=gaussfit(locy,locarr,aa)
-;Follow up with a Levenberg-Marquardt fitting algorigthm
-           res=lmfit(locy,locarr,aa,/double,function_name='gaussianfit',sigma=sigma)
-;           if cc eq 0 then print,aa[1],dist[lmaxind]
-           maxima[cc].gfit[0]=aa[1]                        ;X-location (radial) of the peak
-           maxima[cc].gfit[1]=max(res)                     ;Y-location (intensity) of the peak
-           maxima[cc].gfit[2]=2*sqrt(2*alog(2)*aa[2]^2)    ;The FWHM of the gaussian fit
-           if maxima[cc].gfit[2] eq 'Inf' or maxima[cc].gfit[2] eq 'NaN' then maxima[cc].gfit[2]=1.0e-10
-           maxima[cc].gfit[3]=sigma[1]    ;The error in radial position of the maximum
-           maxima[cc].gfit[4]=sigma[0]    ;The error in the fitted peak value
-           zz=(locy-aa[1])/aa[2]
-        endif
-        cc++
-     endif
-  endfor
-  
-  if cc gt 0 then begin
-;Order the local maxima by size
-     maxima=maxima[0:cc-1]
-     maxima.nmax=cc
-  endif
-  
-  sort=reverse(sort(maxima.val))
-  ordmaxima=maxima[sort]
-  
-  return,ordmaxima
-  
-end
-;-================================================================================
-
-;+================================================================================
 function get_local_maxima_weighted, column,dist,yind=yind,gaussfit=gaussfit
 ;This function finds the local maxima and orders them by size
 
@@ -149,7 +83,7 @@ end
 
 
 ;+================================================================================
-pro aia_jmap_find_maxima,data,time,dist,xrange=xrange,yrange=yrange,gaussfit=gaussfit,allgfits=allgfits,allmaxima=allmaxima,mymaxima=mymaxima,nmax=nmax,flipyaxes=flipyaxes,numplotmax=numplotmax
+pro aia_jmap_find_maxima,rad_data,xrange=xrange,yrange=yrange,gaussfit=gaussfit,allgfits=allgfits,allmaxima=allmaxima,nmax=nmax,flipyaxes=flipyaxes,numplotmax=numplotmax
 ;PURPOSE:
 ;procedure to find maxima in a time-distance image.
 ;this is used in fitting EUV wave positions.
@@ -173,9 +107,13 @@ pro aia_jmap_find_maxima,data,time,dist,xrange=xrange,yrange=yrange,gaussfit=gau
 
 ;------------------------------------------------------------
 ;DEFINITIONS AND CONSTANTS
+  data=rad_data.data
+  time=rad_data.time.relsec
+  dist=rad_data.y_rsun_array
+  
   ntime=n_elements(time)
   ndist=n_elements(dist)
-  if not keyword_set(numplotmax) then numplotmax=1
+  if not keyword_set(numplotmax) then numplotmax=3
 ;Select the X-Y ranges, apply keywords
   if keyword_set(xrange) then xrang=xrange else $
      xrang=[time[0],time[ntime-1]]
@@ -218,13 +156,21 @@ pro aia_jmap_find_maxima,data,time,dist,xrange=xrange,yrange=yrange,gaussfit=gau
   endfor     
 ;------------------------------------------------------------
 
-
 ;Save to the overall maximum catalog
   for xx=xind[0],xind[1] do begin
      ncolmax=allnmax[xx-xind[0]]
      mymaxima[*,xx-xind[0]]= allmaxima[0:numplotmax-1,xx-xind[0]]
   endfor
 
+  ;Save the maxima positions in the rad_data structure
+  rad_data.maxinds[0,*]=reform(mymaxima[0,*].ind)
+  
+  if not tag_exist(rad_data,'mymaxima') then begin
+     myStruct = Replicate( Create_Struct(rad_data[0], 'mymaxima', mymaxima), N_Elements(rad_data) )
+     struct_assign,rad_data,myStruct
+     rad_data=myStruct
+  endif
+  rad_data.mymaxima=mymaxima
 end
 ;-================================================================================
 

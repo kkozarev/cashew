@@ -1,10 +1,34 @@
 pro test_pfss_shock_plot_csgs
 ;Testing the CSGS model plotting procedure
-event=load_events_info(label='paper')
-pfss_shock_plot_csgs,event,/hires,/png;/newtimes,
+
+
+;You can run for one event, like this.
+  one=1
+  if one eq 1 then begin
+     labels=['151104_01','151104_02','151104_03']
+     labels=[]
+     for ev=0,n_elements(labels)-1 do begin
+        label=labels[ev]
+        event=load_events_info(label=label)
+        pfss_shock_plot_csgs,event,/lores
+     endfor
+  endif
+  
+;Alternatively, run for all events
+  all=0 
+  if all eq 1 then begin
+     events=load_events_info()
+     for ev=0,n_elements(events)-1 do begin
+        event=events[ev]
+        pfss_shock_plot_csgs,event,/lores
+     endfor
+  endif
+
 end
+;-============================================================================
 
 
+;+============================================================================
 pro pfss_shock_plot_csgs,event,png=png,hires=hires,lores=lores,pfssLines=pfssLines,newtimes=newtimes,force=force
 ;PURPOSE:
 ;Plot the time-dependent Coronal Shock Geometrical Surface model,
@@ -47,15 +71,15 @@ pro pfss_shock_plot_csgs,event,png=png,hires=hires,lores=lores,pfssLines=pfssLin
   csgsfile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_lores.sav')
   if keyword_set(hires) then csgsfile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_hires.sav')
   if csgsfile[0] eq '' then begin
-     print,'The file to load is not properly set or does not exist. Quitting.'
+     print,'pfss_shock_plot_csgs: The file to load is not properly set or does not exist. Quitting.'
      return
   endif  
 if csgsfile eq '' then begin
-   print,'The CSGS file is not properly set or does not exist. Quitting.'
+   print,'pfss_shock_plot_csgs: The CSGS file is not properly set or does not exist. Quitting.'
      return
   endif
 
-;+==============================================================================
+;+=============
 ;LOAD THE DATA
   print,''
   print,'Loading data...'
@@ -64,31 +88,32 @@ if csgsfile eq '' then begin
   restore,csgsfile
   
   ;Load the AIA observations
-  aiafile=file_search(event.savepath+'normalized_'+eventname+'_subdata.sav')
+  ;aiafile=file_search(event.savepath+'normalized_'+eventname+'_subdata.sav')
+  aiafile=file_search(event.savepath+replace_string(event.aia_subdata_savename,'WAV',wav))
   print,'Loading AIA File '+aiafile
   if aiafile[0] ne '' then begin
      restore,aiafile[0]
      aiatime=anytim(subindex.date_obs)
      aiatime=aiatime-aiatime[0]
   endif else begin
-     print,'No AIA data present. Quitting...'
+     print,'pfss_shock_plot_csgs: No AIA data present. Quitting...'
      return
   endelse
-
      
   ;Load the Annulusplot analysis results
-  wavefile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed_radial.sav'
+  wavefile=event.annuluspath+replace_string(event.annplot.analyzed.radial.avg_savename,'WAV',wav) ;'annplot_'+date+'_'+label+'_'+wav+'_analyzed_radial.sav'
   print, 'Loading shock info file '+wavefile
   restore,wavefile
 
-;-==============================================================================
+;-==============
 
 
-;+==============================================================================
+
+;+========================
 ;Constants and definitions
-  sp=rad_data.xfitrange[0]
-  ep=rad_data.xfitrange[1]
-  time=(rad_data.time[sp:ep]-rad_data.time[sp])
+  sp=rad_data.timefitrange[0]
+  ep=rad_data.timefitrange[1]
+  time=(rad_data.time[sp:ep].relsec-rad_data.time[sp].relsec)
   RSUN=ind_arr[0].rsun_ref/1000. ;Solar radius in km.  
   KMPX=ind_arr[0].IMSCL_MP*ind_arr[0].RSUN_REF/(1000.0*ind_arr[0].RSUN_OBS)
    if keyword_set(newtimes) then begin
@@ -111,12 +136,12 @@ if csgsfile eq '' then begin
   zcenter=suncenter[2]
   sunrad=subindex[0].r_sun+10;For some reason the R_SUN variable is 10 px short...
   set_plot,'z'
-;-==============================================================================
+;-======================
 
 
-;--------------------------------------------------------------
+;---------------------------------
 ;;THIS IS THE TIMESTEPS LOOP!
-;--------------------------------------------------------------
+;---------------------------------
   for sstep=0,nsteps-1 do begin             
      print,'Step #'+string(sstep)
      stp=strtrim(string(sstep),2)
@@ -133,7 +158,7 @@ if csgsfile eq '' then begin
 
      shockrad=radius[sstep]     ;Get this from the measurements
 
-;+==============================================================================
+;+====================
 ;PLOT THE AIA IMAGE
      aia_lct,rr,gg,bb,wavelnth=subindex[sstep].wavelnth,/load     
      ;if sstep eq 0 then wdef,0,winsize
@@ -144,11 +169,11 @@ if csgsfile eq '' then begin
      
 ;Overplot the limb location
      circ=aia_circle(xcenter,ycenter,sunrad,/plot)
-;-============================================================================== 
+;-====================
 
 
 
-;+==============================================================================
+;+====================
 ; Plot the field lines on disk center.
      if sstep eq 0 then begin
         ;Get the field line info from the PFSS model results
@@ -185,8 +210,8 @@ if csgsfile eq '' then begin
            ;TRANSFORM THE POINTS APPROPRIATELY
            pos = transform_volume(pos,scale=[sunrad,sunrad,sunrad])
            pos = transform_volume(pos,translate=suncenter)
-           pfss_cartpos[ff,*,0:npt-1]=pos        
-           ;Plot the field line 
+           pfss_cartpos[ff,*,0:npt-1]=pos
+           ;Plot the field line
            ;plots,pos,color=250,/device,psym=3
         endfor
         pos=0
@@ -200,11 +225,11 @@ if csgsfile eq '' then begin
            plots,reform(pfss_cartpos[ff,*,0:npt-1]),/device,color=255,thick=1
      endfor
 
-;-==============================================================================
+;-=====================
      
      
 
-;+==============================================================================
+;+=====================
 ;Plot the field lines that pass through the shock surface
      ncrosses=allcrosses[sstep]
      cpsx=crossPoints[sstep,0:ncrosses-1].px
@@ -247,11 +272,11 @@ if csgsfile eq '' then begin
         plots,[cpsx[ff],cpsy[ff],cpsz[ff]],color=190,psym=sym(1),symsize=0.6,/device
      endfor
 
-;-==============================================================================
+;-===================
      
 
 
-;+==============================================================================
+;+====================
 ; CALCULATE AND PLOT THE CSGS MODEL
        
 ;Create the shock surface
@@ -271,10 +296,10 @@ if csgsfile eq '' then begin
      plots,sc[0],sc[1],psym=2,color=0,symsize=2,/device
      plots,vertex_list,color=0,thick=0.05,/device
      plots,vertex_list,color=0,thick=0.1,symsize=0.2,psym=sym(1),/device
-;-==============================================================================
+;-====================
      
      
-;+==============================================================================
+;+====================
 ;Plot the field lines that pass through the shock surface
      ncrosses=allcrosses[sstep]
      cpsx=crossPoints[sstep,0:ncrosses-1].px
@@ -291,7 +316,7 @@ if csgsfile eq '' then begin
         plots,[cpsx[ff],cpsy[ff],cpsz[ff]],color=190,psym=sym(1),symsize=0.6,/device
      endfor
 
-;-==============================================================================
+;-===================
      
      
      ;Save the plot in a png file

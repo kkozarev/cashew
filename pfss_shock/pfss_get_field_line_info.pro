@@ -1,6 +1,6 @@
 pro pfss_get_field_line_info,event,pfssLines=pfssLines,lores=lores,hires=hires,pfssfile=pfssfile,sph_data=sph_data
 ;PURPOSE:
-;This procedure returns a structure with info/cordinates for all pfss
+;This procedure returns a structure with info/coordinates for all pfss
 ;field lines
 ;
 ;CATEGORY:
@@ -28,8 +28,10 @@ pro pfss_get_field_line_info,event,pfssLines=pfssLines,lores=lores,hires=hires,p
   pfsspath=event.pfsspath
   date=event.date
   label=event.label
-  pfssfname=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_lores.sav')
-  if keyword_set(hires) then pfssfname=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav')
+ ; pfssfname=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_lores.sav')
+ ; if keyword_set(hires) then pfssfname=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav')
+  pfssfname=file_search(pfsspath+event.pfss.loresmap_savename)
+  if keyword_set(hires) then pfssfname=file_search(pfsspath+event.pfss.hiresmap_savename)
   if keyword_set(pfssfile) then pfssfname=pfssfile
   
   ;Load the PFSS model results

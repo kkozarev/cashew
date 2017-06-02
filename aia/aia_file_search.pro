@@ -53,9 +53,10 @@ function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=
 ;                  exposure frames - keyword remove_aec
 ;11/30/2013, KAK - integrated with the event structure, 
 ;
+  
   starttime=sts
   endtime=ets
-  default_path='/Data/SDO/AIA/level1/'
+  default_path='/data/SDO/AIA/level1/'
   
 ;Format the wavelength string properly
   wave=wav
@@ -65,7 +66,7 @@ function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=
      if keyword_set(event) then path=event.aia_datapath $
      else path=default_path
   
-
+  
   if n_elements(starttime) eq 1 then begin
      st=strsplit(starttime,' /:,.-T',/extract)
      if n_elements(st) eq 4 then st=[st,'00']
@@ -81,6 +82,20 @@ function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=
   endif else begin
      et=endtime
   endelse
+  
+ 
+;Run this recursively in the case that the starting and ending times 
+;are on different days
+  if et[2] ne st[2] then begin
+     
+     day1_files=aia_file_search(sts, st[0]+"/"+st[1]+"/"+st[2]+" 23:59:59", wav,$
+                                event=event,path=path,loud=loud,missing=missing,$
+                                cfa=cfa,jsoc=jsoc,remove_aec=remove_aec,check171=check171,first=first)
+     day2_files=aia_file_search(et[0]+"/"+et[1]+"/"+et[2]+" 00:00:00", ets, wav,$
+                                event=event,path=path,loud=loud,missing=missing,$
+                                cfa=cfa,jsoc=jsoc,remove_aec=remove_aec,check171=check171,first=first)
+     return,[day1_files,day2_files]
+  endif
   
   if keyword_set(check171) then begin
      tmpst=aia_augment_timestring(sts,-6)
@@ -154,7 +169,7 @@ function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=
 ;do the searching for the files
   for h=0,n_elements(hmins[0,*])-1 do begin
      locpath=basepath+'H'+hmins[0,h]+'00/'
-     print,'Looking for file '+locpath+'*_'+hmins[0,h]+hmins[1,h]+'*_'+wave+'.fits',h, n_elements(hmins[0,*])-1
+     ;print,'Looking for file '+locpath+'*_'+hmins[0,h]+hmins[1,h]+'*_'+wave+'.fits',h, n_elements(hmins[0,*])-1
      
      if keyword_set(jsoc) then file=file_search(locpath+'*'+strmid(wave,1,3)+'A*'+hmins[0,h]+'_'+hmins[1,h]+'*.fits') $
      else file=file_search(locpath+'*_'+hmins[0,h]+hmins[1,h]+'*_'+wave+'.fits')
@@ -235,13 +250,13 @@ function aia_file_search, sts, ets, wav,event=event,path=path,loud=loud,missing=
   
   
   if keyword_set(remove_aec) and files[0] ne '' then begin
-     read_sdo,files,ind,dat,/nodata
+     
+     read_sdo,files,ind,/nodata
      mask=where(ind.aectype eq 0)
      if mask[0] ne -1 then begin
         files=files[mask]
         nfiles=n_elements(files)
         ind=0
-        dat=0
         if keyword_set(loud) then begin
            print,''
            print,'Checking for images with Automatic Exposure Control (AEC) - where index.AECTYPE != 0'

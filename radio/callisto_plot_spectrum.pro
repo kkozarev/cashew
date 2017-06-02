@@ -10,10 +10,10 @@ freqrange=[20,390]
   ;You can run this for a single or few events, like so
   one=1
   if one eq 1 then begin
-     label='test'
+     label='131119_01'
      events=load_events_info(label=label)
      for ev=0,n_elements(events)-1 do $
-        callisto_plot_spectrum,events[ev],freqrange=freqrange ;timerange=timerange,
+        callisto_plot_spectrum,events[ev];,freqrange=freqrange ;timerange=timerange,
   endif
   
   ;Alternatively, run for all events, like this
@@ -152,7 +152,9 @@ PRO callisto_plot_spectrum,event,timerange=timerange,station=station,freqrange=f
   if keyword_set(freqrange) then freqrng=freqrange else $
      freqrng = [y[n_elements(y)-1],y[0]]   
   frng=[min(where(freqrng[1]-y gt 0.0)),min(where(freqrng[0]-y gt 0.0))]
-  
+  if frng[0] eq -1 then frng[0]=0
+  if frng[1] eq -1 then frng[1]=n_elements(y)-1
+
 ;Select the time ranges
   if keyword_set(timerange) then $
      timrng=[max(where(anytim(timerange[0])-x gt 0.0)),max(where(anytim(timerange[1])-x gt 0.0))] $
@@ -160,7 +162,7 @@ PRO callisto_plot_spectrum,event,timerange=timerange,station=station,freqrange=f
      timrng=[0,n_elements(x)-1]
   pzb=zb
   pzb[where(zb lt 0.0)]=0.0
-
+  
   window,0,xsize=1200,ysize=800  ; for XWIN only!
 ;  device, set_resolution=[1200,800], SET_PIXEL_DEPTH=24, DECOMPOSED=0  ;For the Z-buffer
 
@@ -172,11 +174,11 @@ PRO callisto_plot_spectrum,event,timerange=timerange,station=station,freqrange=f
   write_png,event.callistopath+'callisto_'+event.date+'_'+event.label+'_spectrum.png',image
   
   
+  
 ;======================================
 ;Part 2. Find and fit the spectrum maxima
   if keyword_set(fit) then begin
-     wdef,1,900,500
-     
+     print,'Running an automated fit for the radio emission positions...'
      allgfits=fltarr(100,5,timrng[1]-timrng[0]+1)
      allmaxima=fltarr(100,timrng[1]-timrng[0]+1)
      allmaximind=fltarr(100,timrng[1]-timrng[0]+1)
@@ -188,9 +190,10 @@ PRO callisto_plot_spectrum,event,timerange=timerange,station=station,freqrange=f
         
 ;arr=smooth(reform(zb[timind,frng[0]:frng[1]]),4,/edge_truncate)
         arr=reform(zb[timind,frng[0]:frng[1]])
-        plot,y[frng[0]:frng[1]],arr,xrange=[freqrng[0],freqrng[1]],$
-             yrange=[min(arr),max(arr)],/xs,$
-             charsize=2,charthick=3,xtitle = 'Frequency [MHz]' ;,thick=2
+        ;plot,y[frng[0]:frng[1]],arr,xrange=[freqrng[0],freqrng[1]],$
+        ;     yrange=[min(arr),max(arr)],/xs,$
+        ;     charsize=2,charthick=3,xtitle = 'Frequency [MHz]' ;,thick=2
+
 ;Plot the mean value
 ;oplot,[freqrng[0],freqrng[1]],[mean(arr),mean(arr)],thick=2
         
@@ -204,7 +207,7 @@ PRO callisto_plot_spectrum,event,timerange=timerange,station=station,freqrange=f
         indmaxima=intarr(100)
         gfit=fltarr(100,5)
         cc=0
-        
+       
         for ii=0,n_elements(ind)-1 do begin
                                 ;plot the ranges of the local maximum intervals
            oplot,[y[ind[ii]+frng[0]],y[ind[ii]+frng[0]]],[min(zb),max(zb)]
@@ -251,7 +254,7 @@ PRO callisto_plot_spectrum,event,timerange=timerange,station=station,freqrange=f
               cc++
            endif
         endfor
-        nmax[timind]=cc
+        nmax[timind-timrng[0]]=cc
         maxima=maxima[0:cc-1]
         
         indmaxima=indmaxima[0:cc-1]
@@ -279,7 +282,8 @@ PRO callisto_plot_spectrum,event,timerange=timerange,station=station,freqrange=f
         
      endfor
      
-     ;wdef,2,900,500
+     wdef,1,1000,800
+     !p.position=[0.14,0.16,0.9,0.9]
      spectro_plot, pzb, x,y ,/xs, /ys, $
                    xrange = timerange, $
                    yrange = [freqrng[0],freqrng[1]], ytitle = 'Frequency [MHz]', $

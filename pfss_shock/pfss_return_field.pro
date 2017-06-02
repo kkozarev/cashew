@@ -4,20 +4,18 @@ pro test_pfss_return_field
 ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
-     labels=['130423_01','140708_01']
+     labels=['151104_01','151104_02','151104_03']
+     labels=['120307_01','120405_01']
+     labels=['120307_01']
      for ev=0,n_elements(labels)-1 do begin
        label=labels[ev]
        event=load_events_info(label=label)
-     aia_carrington_latlon,event,lat,lon
-     aclon=lon+event.arlon
-     aclat=lat+event.arlat
-     box=[aclon-90.,aclat-90.,aclon+90.,aclat+90.]
      ;box=[aclon-45.,aclat-45.,aclon+45.,aclat+45.]
      ;pfss_return_field,event,invdens=0.5,/save;,box=box
                                 ;pfss_return_field,date,invdens=0.5,/save,event=event;,box=box
                                 ;pfss_return_field,date,invdens=8,/save,path=event.pfsspath,event=event;,box=box
-     ;pfss_return_field,event,box=box,/hires,/save
-     pfss_return_field,event,box=box,/lores,/save
+     ;pfss_return_field,event,/hires,/save
+     pfss_return_field,event,/lores,/save,/force
      endfor
   endif
   
@@ -35,7 +33,7 @@ pro test_pfss_return_field
 end
 
 
-pro pfss_return_field_main,date,event=event,rstart=rstart,invdens=invdens,$
+pro pfss_return_field_main,date,event=event,rstart=rstart,invdens=invdens,force=force,$
                            save=save,path=path,box=box,lores=lores,hires=hires,_extra=_extra
 ;PURPOSE:
 ; Return the PFSS field model
@@ -45,8 +43,12 @@ pro pfss_return_field_main,date,event=event,rstart=rstart,invdens=invdens,$
 ;INPUTS:
 ;
 ;KEYWORDS:
-;        BOX - 
-;        SAVE -
+;        BOX - An array of [xmin,ymin,xmax,ymax] coordinates for the
+;              region, for which to compute starting PFSS
+;              points. Default is +/-90 degrees lon and lat around the
+;              event source.
+;              
+;        SAVE - whether to save the output to a save file.
 ;        
 ;
 ;OUTPUTS:
@@ -65,19 +67,17 @@ pro pfss_return_field_main,date,event=event,rstart=rstart,invdens=invdens,$
 
 ;Set up the common block variables
 @pfss_data_block
-
+  
 ;spherical_to_pfss,pfssData
   if n_elements(date) eq 0 then begin
      print,'You need to supply a date string, like "2011-01-25"'
      return
   endif
-;Restore B-field model
-  pfss_restore,pfss_time2file(date,/ssw_cat,/url)
-
+  
 ;Set the save path
-if not keyword_set(path) then begin
-   if keyword_set(event) then path=event.pfsspath else path='./'
-endif
+  if not keyword_set(path) then begin
+     if keyword_set(event) then path=event.pfsspath else path='./'
+  endif
 ;  starting points to be on a regular grid covering the full disk,
 ;  with a starting radius of r=1.05 Rsun
   if not keyword_set (rstart) then rstart=1.05
@@ -88,21 +88,34 @@ endif
      if keyword_set(lores) then invdens=4
   endif
   
+  stringres='lores'
+  if keyword_set(hires) then stringres='hires'
+  if not keyword_set(event) then begin
+     dattee=date
+     res=strsplit(dattee,'/ ',/extract)
+     dat=strtrim(res[0]+res[1]+res[2],2)
+     fname='pfss_results_'+dat+'_'+strtrim(string(rstart,format='(f4.2)'),2)+'Rs_dens_'+strtrim(string(invdens,format='(f3.1)'),2)+'.sav'
+  endif else begin
+     dat=event.date
+     fname='pfss_results_'+dat+'_'+event.label+'_'+stringres+'.sav'
+  endelse
+
+  if not keyword_set(force) and file_exist(path+fname) then begin
+     print,''
+     print,'File ' + fname + ' already exists. To overwrite, rerun with /force.'
+     print,''
+     return
+  endif
+
+;Restore B-field model
+  pfss_restore,pfss_time2file(date,/ssw_cat,/url)
   
-  ;if not keyword_set(box) then begin
-  ;   aia_carrington_latlon,event,lat,lon
-  ;   aclon=lon+event.arlon
-  ;   aclat=lat+event.arlat
-  ;   box=[aclon-90.,aclat-90.,aclon+90.,aclat+90.]
-  ;endif
-  ;   pfss_field_start_coord,5,invdens,radstart=rstart,bbox=box
   
- if keyword_set(box) then $
+  if keyword_set(box) then $
      pfss_field_start_coord,5,invdens,radstart=rstart,bbox=box $
- else $
+  else $
      pfss_field_start_coord,5,invdens,radstart=rstart
-
-
+  
 ;  trace the field lines passing through the starting point arrays
   pfss_trace_field, kind
   ind=where(ptph lt 0.0)
@@ -141,30 +154,25 @@ endif
 ;pfss_get_chfootprint,openfield,/quiet,/usecurrent,spacing=invdens;,/close
 
 ;Save the structure and Carrington coordinates of SDO to a sav file:
-stringres='lores'
-if keyword_set(hires) then stringres='hires'
-
   if keyword_set(save) then begin
-     if not keyword_set(event) then begin
-        res=strsplit(date,'/ ',/extract)
-        dat=strtrim(res[0]+res[1]+res[2],2)
-        fname='pfss_results_'+dat+'_'+strtrim(string(rstart,format='(f4.2)'),2)+'Rs_dens_'+strtrim(string(invdens,format='(f3.1)'),2)+'.sav'
-     endif else begin
-        dat=event.date        
-        ;fname='pfss_results_'+dat+'_'+event.label+'_'+strtrim(string(rstart,format='(f4.2)'),2)+'Rs_dens_'+strtrim(string(invdens,format='(f3.1)'),2)+'.sav'
-        fname='pfss_results_'+dat+'_'+event.label+'_'+stringres+'.sav'
-     endelse
-     
      save,filename=path+fname,/variables
      ;save,filename=path+fname,kind,sph_data,nstep,ptph,ptr,ptth,rix,fname,nlat,nlon,/comm
   endif
 end
 
 
-pro pfss_return_field,event,lores=lores,hires=hires,_extra=_extra
+pro pfss_return_field,event,lores=lores,hires=hires,box=box,_extra=_extra
   date=event.st
   all=0
+
+  if not keyword_set(box) then begin
+     aia_carrington_latlon,event,lat,lon
+     aclon=lon+event.arlon
+     aclat=lat+event.arlat
+     box=[aclon-90.,aclat-90.,aclon+90.,aclat+90.]
+  endif
+
   if (not keyword_set(hires)) and (not keyword_set(lores)) then all=1
-  if (keyword_set(lores)) or (all eq 1) then pfss_return_field_main,date,event=event,/lores,_extra=_extra
-  if (keyword_set(hires)) or (all eq 1) then pfss_return_field_main,date,event=event,/hires,_extra=_extra
+  if (keyword_set(lores)) or (all eq 1) then pfss_return_field_main,date,event=event,/lores,box=box,_extra=_extra
+  if (keyword_set(hires)) or (all eq 1) then pfss_return_field_main,date,event=event,/hires,box=box,_extra=_extra
 end

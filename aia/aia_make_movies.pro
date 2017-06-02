@@ -6,24 +6,24 @@ pro test_aia_make_movies
   if one eq 1 then begin
      labels=['140708_01','131212_01','130517_01','130423_01','120915_01','120526_01',$
 	  '120424_01','110607_01','110211_02','110125_01','130423_01','140708_01']
-     labels=['paper']
-     for ev=0,n_elements(labels)-1 do begin
+     labels=['151104_01','151104_02','151104_03']
+     labels=['151104_01','110607_01']
+     for ev=0,n_elements(labels)-1 do begin 
         label=labels[ev]
         event=load_events_info(label=label)
         wavelengths=['193']
         movie_types=['araw','abase','arun','raw','base','run']
         movie_types=['pfss_shock_hires','thetabn_oplot_hires','pfss_spread_hires','pfss_spread_topview_hires']
-     ;movie_types=['run']
-     ;movie_types=['ywave']
-     ;movie_types=['run','base','raw']
-     ;wavelengths=['171','131']    
+        movie_types=['araw','abase']
+        movie_types=['density_ratios','temperature_differences'];'teem_ratios',
+        wavelengths=['193']
         for w=0,n_elements(wavelengths)-1 do begin
            wavelength=wavelengths[w]
-           for mt=0,n_elements(movie_types)-1 do begin
+           for mt=0,n_elements(movie_types)-1 do begin 
               movie_type=movie_types[mt]
-              aia_make_movies, event, movie_type=movie_type, wav=wavelength,/force
+              aia_make_movies, event, movie_type=movie_type,/force ;, wav=wavelength
            endfor
-        endfor
+        endfor 
      endfor
   endif
   
@@ -70,8 +70,22 @@ pro aia_make_movies, event, wav=wav, FRAMES_PER_SECOND = frames_per_second, PATH
 ;            'araw', 'abase', 'arun' - raw or base/running difference from
 ;                                the deprojected data
 ;            'teem' - The Aschwanden DEM maps.
-;            'em_baseratio' - Plot a base ratio of the Aschwanden
+;            'teem_density' - Plot the average density,
+;                               based on the Aschwanden model EM.
+;            'teem_temperature' - Plot the average temperature,
+;                               based on the Aschwanden model EM.
+;            'em_ratios' - Plot a base ratio of the Aschwanden
 ;                             model EM.
+;            'em_differences' - Plot a normalized base difference of the Aschwanden
+;                             model EM.
+;            'density_ratios' - Plot a base ratio of average density,
+;                               based on the Aschwanden model EM.
+;            'density_differences' - Plot a normalized base difference of average temperature,
+;                               based on the Aschwanden model EM.
+;            'temperature_ratios' - Plot a base ratio of average density,
+;                               based on the Aschwanden model EM.
+;            'temperature_differences' - Plot a normalized base difference of average temperature,
+;                               based on the Aschwanden model EM.
 ;            'pfss_shock' - the PFSS/Shock model images
 ;            'pfss_shock_hires' - same as 'pfss_shock', but with high PFSS resolution
 ;            'thetabn' - the plots of ThetaBN angle as a
@@ -111,7 +125,7 @@ pro aia_make_movies, event, wav=wav, FRAMES_PER_SECOND = frames_per_second, PATH
 ;Written by Michael Hammer - 07/2013
 ;Kamen Kozarev, 11/20/2013 - Integrated into the framework, added
 ;                            event structure
-;Kamen Kzoarev, 07/09/2014 - Added EM base ratio movie making.
+;Kamen Kozarev, 07/09/2014 - Added EM base ratio movie making.
 
 
 ; Determine Frames Per Second
@@ -128,17 +142,22 @@ movie_path=path
 date=event.date
 label=event.label
 
-process = '/usr/local/bin/ffmpeg -y -f image2 -r '
+process = 'ffmpeg -y -f image2 -r '
 path_call = ' -i '
 full_path = path
 filetype = movie_type + '_'
 
+;NEW VERSION
 ffmpeg_params1 = ' -an -pix_fmt "yuv420p" -vcodec "libx264" -level 41 -crf 18.0 -b "28311k" -r '
-ffmpeg_params2 = ' -bufsize "28311k" -maxrate "28311k" -g "100" -coder 1 -profile main -preset faster -qdiff 4 -qcomp 0.7 -directpred 3 -flags +loop+mv4 -cmp +chroma -partitions +parti4x4+partp8x8+partb8x8 -subq 7 -me_range 16 -keyint_min 1 -sc_threshold 40 -i_qfactor 0.71 -rc_eq ''blurCplx^(1-qComp)'' -b_strategy 1 -bidir_refine 1 -refs 6 -deblockalpha 0 -deblockbeta 0 -trellis 1 -x264opts keyint=10:min-keyint=1:bframes=1 -threads 2 '
+ffmpeg_params2 = ' -bufsize "28311k" -maxrate "28311k" -g "100" -coder 1 -profile main -preset faster -qdiff 4 -qcomp 0.7 -direct-pred 3 -flags +loop+mv4 -cmp +chroma -partitions +parti4x4+partp8x8+partb8x8 -subq 7 -me_range 16 -keyint_min 1 -sc_threshold 40 -i_qfactor 0.71 -rc_eq ''blurCplx^(1-qComp)'' -b_strategy 1 -bidir_refine 1 -refs 6 -deblock 0:0 -trellis 1 -x264opts keyint=10:min-keyint=1:bframes=1 -threads 2 '
+
+;OLD VERSION
+;ffmpeg_params1 = ' -an -pix_fmt "yuv420p" -vcodec "libx264" -level 41 -crf 18.0 -b "28311k" -r '
+;ffmpeg_params2 = ' -bufsize "28311k" -maxrate "28311k" -g "100" -coder 1 -profile main -preset faster -qdiff 4 -qcomp 0.7 -directpred 3 -flags +loop+mv4 -cmp +chroma -partitions +parti4x4+partp8x8+partb8x8 -subq 7 -me_range 16 -keyint_min 1 -sc_threshold 40 -i_qfactor 0.71 -rc_eq ''blurCplx^(1-qComp)'' -b_strategy 1 -bidir_refine 1 -refs 6 -deblockalpha 0 -deblockbeta 0 -trellis 1 -x264opts keyint=10:min-keyint=1:bframes=1 -threads 2 '
 
 
 savepath=path+'png/'
-movie_path=path+'movies/'
+movie_path=event.moviepath
 pngfname='normalized_AIA_'+date + '_' + event.label + '_' + wavelength + "_subdata_" + movie_type
 ;The png image files
 imgfnames = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_%03d.png'
@@ -156,7 +175,7 @@ if movie_type eq 'araw' or movie_type eq 'arun' or movie_type eq 'abase' then be
    imgsearch = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_*.png'
    moviefname = movie_path + movie_type + '_' + wavelength + '_' + label + '.mp4'
 endif
-
+ 
 
 if movie_type eq 'teem' then begin
    savepath=event.aschdempath
@@ -168,7 +187,27 @@ if movie_type eq 'teem' then begin
    moviefname = movie_path + pngfname + '_teem_map.mp4'
 endif
 
-if movie_type eq 'em_baseratio' then begin
+if movie_type eq 'teem_density' then begin
+   savepath=event.aschdempath
+   movie_path=event.moviepath
+   pngfname='aschdem_'+date+'_'+label
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%06d_teem_density.png'
+   imgsearch = savepath + pngfname + '_*_teem_density.png'
+   moviefname = movie_path + pngfname + '_teem_density.mp4'
+endif
+
+if movie_type eq 'teem_temperature' then begin
+   savepath=event.aschdempath
+   movie_path=event.moviepath
+   pngfname='aschdem_'+date+'_'+label
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%06d_teem_temperature.png'
+   imgsearch = savepath + pngfname + '_*_teem_temperature.png'
+   moviefname = movie_path + pngfname + '_teem_temperature.mp4'
+endif
+
+if movie_type eq 'em_ratios' then begin
    savepath=event.aschdempath
    movie_path=event.moviepath
    pngfname='aschdem_'+date+'_'+label
@@ -176,6 +215,56 @@ if movie_type eq 'em_baseratio' then begin
    imgfnames = savepath + pngfname + '_%06d_teem_em_ratios.png'
    imgsearch = savepath + pngfname + '_*_teem_em_ratios.png'
    moviefname = movie_path + pngfname + '_teem_em_ratios.mp4'
+endif
+
+if movie_type eq 'em_differences' then begin
+   savepath=event.aschdempath
+   movie_path=event.moviepath
+   pngfname='aschdem_'+date+'_'+label
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%06d_teem_em_differences.png'
+   imgsearch = savepath + pngfname + '_*_teem_em_differences.png'
+   moviefname = movie_path + pngfname + '_teem_em_differences.mp4'
+endif
+
+if movie_type eq 'density_ratios' then begin
+   savepath=event.aschdempath
+   movie_path=event.moviepath
+   pngfname='aschdem_'+date+'_'+label
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%06d_teem_density_ratios.png'
+   imgsearch = savepath + pngfname + '_*_teem_density_ratios.png'
+   moviefname = movie_path + pngfname + '_teem_density_ratios.mp4'
+endif
+
+if movie_type eq 'density_differences' then begin
+   savepath=event.aschdempath
+   movie_path=event.moviepath
+   pngfname='aschdem_'+date+'_'+label
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%06d_teem_density_differences.png'
+   imgsearch = savepath + pngfname + '_*_teem_density_differences.png'
+   moviefname = movie_path + pngfname + '_teem_density_differences.mp4'
+endif
+
+if movie_type eq 'temperature_ratios' then begin
+   savepath=event.aschdempath
+   movie_path=event.moviepath
+   pngfname='aschdem_'+date+'_'+label
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%06d_teem_temperature_ratios.png'
+   imgsearch = savepath + pngfname + '_*_teem_temperature_ratios.png'
+   moviefname = movie_path + pngfname + '_teem_temperature_ratios.mp4'
+endif
+
+if movie_type eq 'temperature_differences' then begin
+   savepath=event.aschdempath
+   movie_path=event.moviepath
+   pngfname='aschdem_'+date+'_'+label
+   ;The png image files
+   imgfnames = savepath + pngfname + '_%06d_teem_temperature_differences.png'
+   imgsearch = savepath + pngfname + '_*_teem_temperature_differences.png'
+   moviefname = movie_path + pngfname + '_teem_temperature_differences.mp4'
 endif
 
 if movie_type eq 'pfss_shock_hires' then begin

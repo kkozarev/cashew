@@ -12,7 +12,8 @@ function aia_coronal_density, rad, sg99=sg99, ma08=ma08
 ;      SG99 - density model from Sittler and Guhathakurta (1999)
 ;      MA08 - density model from Mancuso and Avetta (2008)
 ;OUTPUTS:
-;
+;      Default output is density as a function of radial distance from
+;      the Newkirk model.
 ; 
 ;DEPENDENCIES:
 ;

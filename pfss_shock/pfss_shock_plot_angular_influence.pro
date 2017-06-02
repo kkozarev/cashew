@@ -43,12 +43,12 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
   pfsspath=event.pfsspath
   resolution='lores'
   if keyword_set(hires) then resolution='hires'
-  wavefile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed_radial.sav'
+  wavefile=event.annuluspath+replace_string(event.annplot.analyzed.radial.avg_savename,'WAV',wav)
   
   ;Find a file to load with the latest results of applying the CSGS model
   ;csgsfile=find_latest_file(event.pfsspath+'csgs_results_*')
-  csgsfile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_lores.sav')
-  if keyword_set(hires) then csgsfile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_hires.sav')
+  csgsfile=file_search(event.pfsspath+event.csgs.lores.map_savename)
+  if keyword_set(hires) then csgsfile=file_search(event.pfsspath+event.csgs.hires.map_savename)
   if csgsfile eq '' then begin
      print,'The CSGS file is not properly set or does not exist. Quitting.'
      return
@@ -68,7 +68,7 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
   restore,csgsfile
   
   ;Restore just the subindex from the AIA data
-  aiafile=file_search(event.savepath+'normalized_'+eventname+'_subdata.sav')
+  aiafile=file_search(event.savepath+replace_string(event.aia_subdata_savename,'WAV',wav))
   print,'Loading AIA File '+aiafile
   if aiafile[0] ne '' then begin
      restore,aiafile[0]
@@ -97,9 +97,9 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
   maxnumlines=5000         ;maximum number of PFSS field lines to plot for the context coronal image
   RSUN=subindex[0].rsun_ref/1000. ;Solar radius in km.  
   KMPX=ind_arr[0].IMSCL_MP*ind_arr[0].RSUN_REF/(1000.0*ind_arr[0].RSUN_OBS)
-  sp=rad_data.xfitrange[0]
-  ep=rad_data.xfitrange[1]
-  time=(rad_data.time[sp:ep]- rad_data.time[sp])
+  sp=rad_data.timefitrange[0]
+  ep=rad_data.timefitrange[1]
+  time=(rad_data.time[sp:ep].relsec - rad_data.time[sp].relsec)
   plot_times=ind_arr[sp:ep].date_obs
   
 if keyword_set(newtimes) then begin
@@ -127,14 +127,17 @@ if keyword_set(newtimes) then begin
 ;;THIS IS THE TIMESTEPS LOOP!
 ;--------------------------------------------------------------
   for sstep=0,nsteps-1 do begin
-    
+     
      stp=strtrim(string(sstep),2)
      if stp lt 100 then stp='0'+stp
      if stp lt 10 then stp='0'+stp
      print,'Step #'+stp
-     savefname=pfsspath+'aia_pfss_shock_angular_influence_'+event.date+'_'+event.label+'_'+resolution+'_'+stp+'.png'
-     if keyword_set(topview) then savefname=pfsspath+'aia_pfss_shock_angular_influence_'+$
-                                        event.date+'_'+event.label+'_topview_'+resolution+'_'+stp+'.png'
+     savefname=pfsspath+replace_string(event.csgs.lores.anginfluence.plot_savename,'NNN',stp)
+     if keyword_set(topview) then savefname=pfsspath+replace_string(event.csgs.lores.anginfluence.topview_plot_savename,'NNN',stp)
+     if keyword_set(hires) then begin
+        savefname=pfsspath+replace_string(event.csgs.hires.anginfluence.plot_savename,'NNN',stp)
+        if keyword_set(topview) then savefname=pfsspath+replace_string(event.csgs.hires.anginfluence.topview_plot_savename,'NNN',stp)
+     endif
      if file_test(savefname) and not keyword_set(force) then begin
         print,'Files '+'aia_pfss_shock_angular_influence_'+event.date+'_'+event.label+'_'+resolution+'_*.png'
         print,'already exist. To overwrite, rerun with /force.'
@@ -352,7 +355,7 @@ stride=1
 
      tvlct,rr,gg,bb,/get
      image=tvrd(true=1)
-     write_png,savfname,image,rr,gg,bb
+     write_png,savefname,image,rr,gg,bb
      endelse
   endfor                        ;END TIMESTEP LOOP
   set_plot,'x'

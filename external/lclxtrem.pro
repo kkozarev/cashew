@@ -44,7 +44,9 @@ FUNCTION lclxtrem,vec,in_width,MAXIMA=maxima
    n=n_elements(vec)
 
    width=fix(in_width/2)*2+1
+   if width gt in_width then width=in_width-1
    wa=lindgen(width)
+   if n-width+1 eq 0 then stop
    idx=lonarr(n-width+1)
    FOR i=0,n_elements(idx)-1 DO BEGIN
       IF maxima THEN BEGIN

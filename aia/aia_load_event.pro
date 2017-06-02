@@ -1,23 +1,19 @@
 pro test_aia_load_event
-;Test the loading of data
-
-;Load the information about events
-events=load_events_info(label='130411_01')
-st=events[0].st
-;Create a short interval - add 4 mins to the start time of the event
-;et=aia_augment_timestring(events[0].st,240)
-et=events[0].et
-wav='193'
-coords=[events[0].coordX,events[0].coordY]
-;run aia_load_event - remove AEC images, return the subdata array and index
-;aia_load_event,events[0],wav,index,data,coords=coords,subdata=subdata,subindex=subindex,/remove_aec,/subroi
-aia_load_event,events[0],wav,index=index,data=data,/nodata
+;Test the loading of aia data for events
+  
+  labels=['151104_01','151104_01']
+  for ev=0,n_elements(labels)-1 do begin
+     label=labels[ev]
+     event=load_events_info(label=label)
+        aia_load_event,event
+  endfor
+  
 end
 
 
-pro aia_load_event,event,wav,index=index,data=data,coords=coords,map=map,subdata=subdata,$
+pro aia_load_event,event,index=index,data=data,coords=coords,map=map,subdata=subdata,$
                    subindex=subindex,submap=submap,remove_aec=remove_aec, subroi=subroi,$
-                   nodata=nodata,first=first,local=local,nosave=nosave,force=force,_extra=_extra
+                   first=first,local=local,force=force,_extra=_extra
 ;PURPOSE:
 ;This procedure will load full AIA data for a wavelength and time interval,
 ;then allow the user to select a subregion, and create sub-arrays and submaps
@@ -54,20 +50,25 @@ pro aia_load_event,event,wav,index=index,data=data,coords=coords,map=map,subdata
 ;Added a nodata keyword, streamlined to work with event structure - KAK 11/14/2013
 ;Turned into a proper wrapper - KAK 05/27/2013
 
-  wave=wav[0]
-  map=1
-  aiafov=event.aiafov
-  ;if keyword_set(subroi) then subroi=1
-  savefile=event.savepath+event.aia_savename+wav
-  if keyword_set(nosave) then savefile=''
-;1. Load the data, prep it. Use aia_data_load
-;   if keyword_set(map) then begin
-      aia_load_data,event.st,event.et,wave,index,data,savefile=savefile,map=map,remove_aec=remove_aec,$
-                    event=event,nodata=nodata,first=first,local=local,subdata=subdata,subindex=subindex,$
-                    coords=coords,subroi=subroi,force=force,_extra=_extra
-;   endif else begin
-;      aia_load_data,event.st,event.et,wave,index,data,savefile=savefile,remove_aec=remove_aec,event=event,$
-;                    nodata=nodata,first=first,local=local,subdata=subdata,subindex=subindex,coords=coords,subroi=subroi
-;   endelse
-
+if keyword_set(subindex) then help,subindex
+  waves=['94','131','171','193','211','335']
+  if keyword_set(force) then force=1
+;1. Load the subroi data for all EUV wavelengths. Use aia_load_data
+  for w=0,n_elements(waves)-1 do begin
+     wav=waves[w]
+     aia_load_data,event.st,event.et,wav,savefile=savefile,map=map,remove_aec=remove_aec,$
+                   event=event,nodata=nodata,first=first,local=local,$
+                   coords=coords,force=force,_extra=_extra,subroi=subroi,subdata=subdata,subindex=subindex
+  endfor
+  
+;2. Load the full data for the 193 and 211 bands.
+;  waves=['193','211']
+;  for w=0,n_elements(waves)-1 do begin
+;     wav=waves[w]
+;    aia_load_data,event.st,event.et,wav,savefile=savefile,map=map,remove_aec=remove_aec,$
+;                   event=event,nodata=nodata,first=first,local=local,subdata=subdata,subindex=subindex,$
+;                   coords=coords,force=force,_extra=_extra
+;  endfor
+  
+  
 end

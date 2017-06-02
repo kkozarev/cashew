@@ -1,32 +1,3 @@
-function bfield_pfss,ptc,sph_data
-;Use interpolation on the PFSS model
-  r2d=180./!PI
-  d2r=!PI/180.
-  irc=get_interpolation_index(*sph_data.rix,ptc[0])
-  ithc=get_interpolation_index(*sph_data.lat,90-ptc[1]*r2d)
-  iphc=get_interpolation_index(*sph_data.lon,(ptc[2]*r2d+360) mod 360)
-  brc=interpolate(*sph_data.br,iphc,ithc,irc)
-  bthc=interpolate(*sph_data.bth,iphc,ithc,irc)/ptc[0]
-  bphc=interpolate(*sph_data.bph,iphc,ithc,irc)/(ptc[0]*sin(ptc[1]))
-  bmag=sqrt(brc^2+bthc^2+bphc^2)
-  return,bmag
-end
-
-
-;function fieldline_isopenfieldline_isopen,ptc,sph_data
-;  ;Find out if the field line is open or not.
-;  r2d=180./!PI
-;  d2r=!PI/180.
-;  isopen=0
-;  irc=get_interpolation_index(*sph_data.rix,ptc[0])
-;  ithc=get_interpolation_index(*sph_data.lat,90-ptc[1]*r2d)
-;  iphc=get_interpolation_index(*sph_data.lon,(ptc[2]*r2d+360) mod 360)
-;  brc=interpolate(*sph_data.br,iphc,ithc,irc)
-;  if brc gt 0 then isopen=1 else isopen=-1
-;  return,isopen
-;end
-
-
 ;+--------------------------------------------------------------------
 pro test_pfss_shock_run_csgs
 ; A small procedure to run several instances of the coronal shock
@@ -37,23 +8,31 @@ pro test_pfss_shock_run_csgs
   labels=['paper','110511_01','130423_01','140708_01']
   labels=['131212_01','130517_01','120915_01','120526_01','120424_01','110607_01','110211_01','110125_01']
   labels=['110125_01','110211_02']
-  labels=['110125_01']
+  labels=['151104_01','151104_02','151104_03']
+  labels=['151104_01']
     for ev=0,n_elements(labels)-1 do begin
       label=labels[ev]
       event=load_events_info(label=label)
-      pfss_shock_run_csgs,event,/hires,/newtimes
-      pfss_shock_plot_all,event,/hires,/force     
+      pfss_shock_run_csgs,event,/lores
+      ;pfss_shock_plot_all,event,/lores,/force
       ;pfss_shock_run_csgs,event,/lores,/newtimes
       ;pfss_shock_plot_all,event,/lores
-
+      
 ; pfss_shock_plot_csgs,event,/png,/newtimes
 ;      pfss_shock_plot_crossing_angles,event,/oplot
 ;      pfss_shock_plot_thetabn_stats,event,/lores
 ;      pfss_shock_plot_angular_influence,event
 ;      pfss_shock_plot_angular_influence,event,/topview
 ;new_pfss_shock_run_csgs,event,/hires,/newtimes;,/plot;,/png
-  endfor
-end
+
+   endfor
+    ;labels=['151104_01','151104_02','151104_03']
+    ;for ev=0,n_elements(labels)-1 do begin
+    ;   label=labels[ev]
+    ;   event=load_events_info(label=label)
+    ;   pfss_shock_plot_all,event,/hires,/force
+    ;endfor
+ end
 ;---------------------------------------------------------------------
 
 
@@ -101,7 +80,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
   std=event.et
   date=event.date
   eventname='AIA_'+date+'_'+label+'_'+wav
-
+  
 ;Figure out the name of the local machine.
   pcname=hostname()
   
@@ -109,13 +88,12 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
   datapath=savepath
   pfsspath=event.pfsspath
   
-
-  pfssfile=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_lores.sav')
-  ;if keyword_set(lores) then pfssfile=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_lores.sav')
-  if keyword_set(hires) then pfssfile=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav')
   
-  aiafile=file_search(datapath+'normalized_'+eventname+'_subdata.sav')
-  shockfile=file_search(event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed_radial.sav')
+  pfssfile=file_search(pfsspath+event.pfss.loresmap_savename)
+  if keyword_set(hires) then pfssfile=file_search(pfsspath+event.pfss.hiresmap_savename)
+  
+  aiafile=file_search(datapath+replace_string(event.aia_subdata_savename,'WAV',wav))
+  shockfile=file_search(event.annuluspath+replace_string(event.annplot.analyzed.radial.avg_savename,'WAV',wav))
   
   
   ;Load the measured shock wave radius.
@@ -140,7 +118,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
      print,'No AIA data present. Quitting...'
      return
   endelse
-
+  
 ;--------------------------------------------------------------
 
 
@@ -148,9 +126,9 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
 ;--------------------------------------------------------------
 ;Constants and definitions
   loadct,8,/silent
-  sp=rad_data.xfitrange[0]
-  ep=rad_data.xfitrange[1]
-  time=(rad_data.time[sp:ep]-rad_data.time[sp])                              
+  sp=rad_data.timefitrange[0]
+  ep=rad_data.timefitrange[1]
+  time=(rad_data.time[sp:ep].relsec-rad_data.time[sp].relsec)                              
   RSUN=ind_arr[0].rsun_ref/1000. ;Solar radius in km.  
   KMPX=ind_arr[0].IMSCL_MP*ind_arr[0].RSUN_REF/(1000.0*ind_arr[0].RSUN_OBS)
   if keyword_set(newtimes) then begin
@@ -173,11 +151,13 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
   ycenter=subindex[0].y0_mp
   zcenter=0.0
   suncenter=[xcenter,ycenter,zcenter]
-  
-  sunrad=subindex[0].r_sun+10;For some reason the R_SUN variable is 10 px short...
+  sunrad=subindex[0].r_sun+10   ;For some reason the R_SUN variable is 10 px short...
   minshockrad=radius[0]/kmpx
   maxshockrad=radius[nsteps-1]/kmpx
-  subindex=subindex[sp:ep]
+  
+  ;Get the proper indices for the AIA subindex array based on rad_data times
+  match2,rad_data.time[sp:ep].date_obs,subindex.date_obs,suba,tmp
+  subindex=subindex[suba]
   
   rsun_m=subindex[0].rsun_ref ;Solar radius in m.
   minAU=1.49598e11 ;m in AU
@@ -186,7 +166,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
   shockthick=4.0                ;shock thickness, in pixels
   
 ;Calculate the number of steps and their size.
-  dt= time[1]-time[0]           ;The cadence (maxshockrad-minshockrad)*mpix/(nsteps*1.0)/vshock ;timestep in seconds
+  dt = time[1]-time[0]           ;The cadence (maxshockrad-minshockrad)*mpix/(nsteps*1.0)/vshock ;timestep in seconds
   
 ;Variables for the crossing points information
   nmaxcrosses=5.0e4
@@ -196,8 +176,10 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
  ; allcrossLineIndices=fltarr(nsteps,nmaxcrosses)
   allcrosses=fltarr(nsteps)
   
+  
 ;A structure array that will hold the information about the field-shock crossings
-  crossPoint={rpx:0.0D,rpy:0.0D,rpz:0.0D,px:0.0D,py:0.0D,pz:0.0D,thbn:0.0D,linid:0L,bmag:0.0D,open:0}
+  crossPoint={rpx:0.0D,rpy:0.0D,rpz:0.0D,px:0.0D,py:0.0D,pz:0.0D,thbn:0.0D,linid:0L,$
+              bmag:0.0D,density:0.0D,temperature:0.0D,open:0,shockjump:0.0}
   crossPoints=replicate(crossPoint,nsteps,nmaxcrosses)
            
 ;--------------------------------------------------------------
@@ -208,7 +190,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
 
 ;THIS IS THE STEPS LOOP!
      for sstep=0,nsteps-1 do begin             
-        print,'Step #'+string(sstep)
+        print,'Step #'+strtrim(string(sstep,format='(i3)'),2)
         shockrad=radius[sstep] ;Get this from the measurements
         
 ;Rotation angles for the entire plot
@@ -336,7 +318,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
         nverts=n_elements(vertex_list[0,*])
         index=subindex[sstep]
         if keyword_set(plot) or keyword_set(png) then begin
-                                ;aia_plot_hemisphere,index,shockrad,vertex_list=vertex_list
+           ;aia_plot_hemisphere,index,shockrad,vertex_list=vertex_list
            loadct,9,/silent
            plots,sc[0],sc[1],psym=2,color=0,symsize=2,/device
            plots,vertex_list,color=0,thick=0.05,/device
@@ -465,6 +447,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
 ;        allcrossBmag[sstep,0:ncrosses-1]=cross_bmag*1.0D
 ;        allcrossLineIndices[sstep,0:ncrosses-1]=reform(pind[0,*])
         allcrosses[sstep]=ncrosses
+        
 
 ;Plot the field lines that pass through the shock surface
         if keyword_set(plot) or keyword_set(png) then begin
@@ -543,7 +526,7 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
         
      endfor;--------------- END TIMESTEP LOOP! ---------------
      nmaxcrosses=max(allcrosses)
-     crossPoints=crossPoints[*,0:nmaxcrosses]
+     crossPoints=crossPoints[*,0:nmaxcrosses-1]
 
      
 ;CREATE A STRUCTURE TO HOLD THE CROSS-POINT RESULTS FOR EASY PROCESSING LATER
@@ -602,9 +585,9 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
 ;endfor
 
 ;Save the results to a file
-     resstr='_hires'
-     if keyword_set(lores) then resstr='_lores'
-     fname='csgs_results_'+event.date+'_'+event.label+resstr+'.sav'
+     event=load_events_info(label=event.label)
+     fname=event.csgs.hires.map_savename
+     if keyword_set(lores) then fname=event.csgs.lores.map_savename
      print,'Saving file '+pfsspath+fname
      save,filename=pfsspath+fname,$
           allcrosses,dt,radius,time,rotationAngles,crossPoints,carrlon,carrlat,$
@@ -612,3 +595,32 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
           vertex_list,vert_rotmat,vert_transmat
 ;-==============================================================================     
 end ; END PFSS_SHOCK_RUN_CSGS
+
+
+function bfield_pfss,ptc,sph_data
+;Use interpolation on the PFSS model
+  r2d=180./!PI
+  d2r=!PI/180.
+  irc=get_interpolation_index(*sph_data.rix,ptc[0])
+  ithc=get_interpolation_index(*sph_data.lat,90-ptc[1]*r2d)
+  iphc=get_interpolation_index(*sph_data.lon,(ptc[2]*r2d+360) mod 360)
+  brc=interpolate(*sph_data.br,iphc,ithc,irc)
+  bthc=interpolate(*sph_data.bth,iphc,ithc,irc)/ptc[0]
+  bphc=interpolate(*sph_data.bph,iphc,ithc,irc)/(ptc[0]*sin(ptc[1]))
+  bmag=sqrt(brc^2+bthc^2+bphc^2)
+  return,bmag
+end
+
+
+;function fieldline_isopenfieldline_isopen,ptc,sph_data
+;  ;Find out if the field line is open or not.
+;  r2d=180./!PI
+;  d2r=!PI/180.
+;  isopen=0
+;  irc=get_interpolation_index(*sph_data.rix,ptc[0])
+;  ithc=get_interpolation_index(*sph_data.lat,90-ptc[1]*r2d)
+;  iphc=get_interpolation_index(*sph_data.lon,(ptc[2]*r2d+360) mod 360)
+;  brc=interpolate(*sph_data.br,iphc,ithc,irc)
+;  if brc gt 0 then isopen=1 else isopen=-1
+;  return,isopen
+;end

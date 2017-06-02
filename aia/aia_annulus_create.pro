@@ -3,11 +3,16 @@ pro test_aia_annulus_create
 ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
-     event=load_events_info(label='140108_01')
-     ;aia_annulus_create,event,/force
-     ;aia_annulus_create,event,/force
-     rrange=[1.0,1.3]
-     aia_annulus_create,event,/force
+    labels=['120307_01','120405_01','151104_01','151104_02','151104_03']
+    labels=['120806_01','140220_02']
+    labels=['151104_01','151104_02','151104_03']
+    labels=['120526_01']
+    for ev=0,n_elements(labels)-1 do begin
+       label=labels[ev]
+       event=load_events_info(label=label)
+       ;rrange=[0.9,1.5]
+       aia_annulus_create,event,wav='193',/base,/force
+    endfor
   endif
   
   
@@ -16,13 +21,14 @@ pro test_aia_annulus_create
   if all eq 1 then begin
      events=load_events_info()
      wavelengths=['193','211']
+     wavelengths=['193']
 ;n_elements(events)-1
      for ev=0,n_elements(events)-1 do begin
         event=events[ev]
         for w=0,n_elements(wavelengths)-1 do begin
            wavelength=wavelengths[w]
            ;aia_annulus_create,event,wav=wavelength,/force
-           aia_annulus_create,event,/raw,/run,/base,wav=wavelength
+           aia_annulus_create,event,/raw,/base,wav=wavelength
         endfor
      endfor
   endif
@@ -62,21 +68,22 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
 ;   2013/11/13, Kamen Kozarev - Integrated the event structure
 
   date=event.date
-  if not keyword_set(wav) then passband = '193' else passband = wav
-  if not keyword_set(savepath) then savepath=event.savepath+'annulusplot/'
+  if not keyword_set(wav) then wav = '193'
+  if not keyword_set(savepath) then savepath=event.annuluspath
   if not keyword_set(centerlat) then begin
      if event.arlon lt 0.0 then arlat=270.0+event.arlat $
      else arlat=90.0-event.arlat
   endif else arlat=centerlat
   
-  maxrad=1350. ;maximum radial distance 
+  
+  maxrad=1350. ;maximum radial distance
   img_size = [1200., 800.]
   ang_step = 0.2                ; Angle step size (degree)
   res = 0.5                     ; Height step size (arcsec)
   
-
+  
   tot_ang = 360.                ; Looking at 360 degrees in steps of ang_step
-  if not keyword_set(thrange) then thrang=[arlat-60.,arlat+60.] else thrang=thrange
+  if not keyword_set(thrange) then thrang=[arlat-90.,arlat+90.] else thrang=thrange
   if keyword_set(full) then thrang=[0.,360.]
   
   if thrang[0] lt 0. then thrang[0]=0.
@@ -88,11 +95,12 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
   lwr_img = 0
   if keyword_set(run) or keyword_set(base) then lwr_img = 3
   
+  
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;CHECK FOR EXISTING SAVE FILE, ELSE LOAD DATA FROM FITS FILES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  infile=event.annplot.savename+passband+'.sav'
+  infile=replace_string(event.annplot.savename,'WAV',wav)
   restored=0
   
   if (file_exist(savepath+infile)) and (not keyword_set(force)) then begin
@@ -110,8 +118,12 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
      ; Define x and y zero points for plotting
      x_pos = thrang[0]*180./!PI
      y_pos = r_in-1.
-
+     
      if keyword_set(base) then begin
+        if lwr_img gt n_elements(subprojdata[*,0,0]) then begin
+           print,'Not enough images to make base difference annulus data. Quitting...'
+           return
+        endif
         for img_no = 0, lwr_img - 1 do begin
            dat_tmp=subprojdata[img_no,*,*]
            if img_no eq 0 then dat_init = dat_tmp else dat_init = dat_init+dat_tmp
@@ -120,12 +132,16 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
      endif
      
   endif else begin
-     fls=aia_file_search(event.st,event.et,passband,missing=locmissing,remove_aec=remove_aec,event=event)
+     if keyword_set(remove_aec) then $
+        fls=aia_file_search(event.st,event.et,wav,missing=locmissing,event=event,/remove_aec) $
+     else $
+        fls=aia_file_search(event.st,event.et,wav,missing=locmissing,event=event)
+     
      nsteps=size(fls,/n_elements)
      
      read_sdo, fls, ind_arr, /nodata
      
-      ;aia_load_event,event,wav,index=ind_arr,data=data,/remove_aec,/nodata
+     ;aia_load_event,event,wav,index=ind_arr,data=data,/remove_aec,/nodata
      
 ; Width of ring (effectively distance from limb to edge of aperture in arcsec)
      if not keyword_set(ring_width) then ring_width = 400.;(maxrad-ind_arr[0].rsun_obs)
@@ -140,16 +156,22 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
      r_in = ind_arr[0].rsun_obs+rrang[0] ; Inner radius
      r_out = ind_arr[0].rsun_obs + rrang[1] ; Outer radius
      if r_out gt maxrad then r_out=maxrad
-
+     
      ; Define x and y zero points for plotting
      x_pos = thrang[0]*180./!PI
      y_pos = r_in-1.
      
+
+;DEBUG - use the already downloaded data!
+
 ; Get image coordinates
      aia_prep, fls[0], -1, ind, dat
      wcs = fitshead2wcs(ind)
      crd = wcs_get_coord(wcs)
      sz = size(dat)
+
+     
+;DEBUG - use the already downloaded data!
      
      if keyword_set(datascale) then datascale=[ang_step, res/ind.cdelt1]
      
@@ -167,7 +189,7 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
      maxbin = round(max(h[arc_out])-min(h[arc_out]))
 ; No bins we want
      dist_bins = (r_out-r_in)/res
-     
+   
 ; Histogram the pixels that we're interested in
      hgt = h[arc_out]
      hts = (min(hgt)+findgen(maxbin)*(max(hgt)-min(hgt))/(maxbin-1.))/ind.cdelt1
@@ -184,6 +206,10 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
           
 ;Create the base difference image here
      if keyword_set(base) then begin
+        if lwr_img gt n_elements(fls) then begin
+           print,'Not enough images to make base difference annulus data. Quitting...'
+           return
+        endif
         for img_no = 0, lwr_img - 1 do begin
            aia_prep, fls[img_no], -1, i_tmp, dat_tmp
            tmp=dat_tmp/i_tmp.exptime
@@ -192,7 +218,6 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
         dat_init=dat_init/(1.0*lwr_img)
      endif
   endelse
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -281,18 +306,18 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
     
 ; Define image title      
      if keyword_set(run) then begin
-        img_tit = '!5RDIFF image AIA/'+passband+'A, t = '+event.date+' '+num2str(anytim(ind_arr[img_no].date_d$obs, /yohkoh, /time_only, /sec, /trun))
+        img_tit = '!5RDIFF image AIA/'+wav+'A, t = '+event.date+' '+num2str(anytim(ind_arr[img_no].date_d$obs, /yohkoh, /time_only, /sec, /trun))
      endif else begin
         if keyword_set(base) then begin
-           img_tit = '!5BDIFF image AIA/'+passband+'A, t = '+event.date+' '+num2str(anytim(ind_arr[img_no].date_d$obs, /yohkoh, /time_only, /sec, /trun))
+           img_tit = '!5BDIFF image AIA/'+wav+'A, t = '+event.date+' '+num2str(anytim(ind_arr[img_no].date_d$obs, /yohkoh, /time_only, /sec, /trun))
         endif else begin
-           img_tit = '!5RAW image AIA/'+passband+'A, t = '+event.date+' '+num2str(anytim(ind_arr[img_no].date_d$obs, /yohkoh, /time_only, /sec, /trun))
+           img_tit = '!5RAW image AIA/'+wav+'A, t = '+event.date+' '+num2str(anytim(ind_arr[img_no].date_d$obs, /yohkoh, /time_only, /sec, /trun))
         endelse
      endelse
   
 ; Sort out image scaling
      if keyword_set(run) or keyword_set(base) then begin
-        case passband of
+        case wav of
            '94': int_range = [-5., 5]
            '304': int_range = [-5., 5]
            '335': int_range = [-5., 5]
@@ -349,9 +374,9 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
            folder='arun/'
            prefix='annplot_'
            postfix='run'
-           savefolder=savepath + folder + passband +'/'
-           savefname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_'+img_strind+'.png'
-           searchfname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_*.png'
+           savefolder=savepath + folder + wav +'/'
+           savefname=prefix + date + '_' + event.label+'_'+wav+'_'+postfix+'_'+img_strind+'.png'
+           searchfname=prefix + date + '_' + event.label+'_'+wav+'_'+postfix+'_*.png'
            if keyword_set(force) and img_no eq lwr_img then begin
               res=file_search(savefolder+searchfname)
               if res[0] ne '' then spawn,'rm -rf '+savefolder+searchfname
@@ -361,9 +386,9 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
               folder='abase/'
               prefix='annplot_'
               postfix='base'
-              savefolder=savepath + folder + passband +'/'
-              savefname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_'+img_strind+'.png'
-              searchfname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_*.png'
+              savefolder=savepath + folder + wav +'/'
+              savefname=prefix + date + '_' + event.label+'_'+wav+'_'+postfix+'_'+img_strind+'.png'
+              searchfname=prefix + date + '_' + event.label+'_'+wav+'_'+postfix+'_*.png'
               if keyword_set(force) and img_no eq lwr_img then begin
                  res=file_search(savefolder+searchfname)
                  if res[0] ne '' then spawn,'rm -rf '+savefolder+searchfname
@@ -372,16 +397,16 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
               folder='araw/'
               prefix='annplot_'
               postfix='raw'
-              savefolder=savepath + folder + passband +'/'
-              savefname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_'+img_strind+'.png'
-              searchfname=prefix + date + '_' + event.label+'_'+passband+'_'+postfix+'_*.png'
+              savefolder=savepath + folder + wav +'/'
+              savefname=prefix + date + '_' + event.label+'_'+wav+'_'+postfix+'_'+img_strind+'.png'
+              searchfname=prefix + date + '_' + event.label+'_'+wav+'_'+postfix+'_*.png'
               if keyword_set(force) and img_no eq lwr_img then begin
                  res=file_search(savefolder+searchfname)
                  if res[0] ne '' then spawn,'rm -rf '+savefolder+searchfname
               endif
            endelse
         endelse
-        if not dir_exist(savepath+folder+passband+'/') then spawn,'mkdir -m 775 '+savepath+folder+passband+'/'
+        if not dir_exist(savepath+folder+wav+'/') then spawn,'mkdir -m 775 '+savepath+folder+wav+'/'
         write_png, savefolder+savefname, TVRD(/true),r,g,b
      endif                      ;END PLOTTING
     
@@ -389,21 +414,20 @@ pro aia_annulus_create_main, event, wav=wav, run=run, base=base, raw=raw, center
   
   set_plot, 'x'
   
-  
   ;SAVE THE DATA!
   if (not keyword_set(run)) and (not keyword_set(base)) then begin
-     if not keyword_set(savename) then savname=savepath+event.annplot.savename+passband+'.sav' $
+     if not keyword_set(savename) then savname=savepath+replace_string(event.annplot.savename,'WAV',wav) $
      else savname=savepath+savename
      
      if file_exist(savname) then begin 
         if keyword_set(force) then save,filename=savname,projdata,subprojdata,ring_width,thrang,$
-                                        passband,ang_step,res,ind_arr,new_theta,rrang,r_in,r_out
+                                        wav,ang_step,res,ind_arr,new_theta,rrang,r_in,r_out
      endif else begin
-        save,filename=savname,projdata,subprojdata,ring_width,thrang,passband,ang_step,res,ind_arr,$
+        save,filename=savname,projdata,subprojdata,ring_width,thrang,wav,ang_step,res,ind_arr,$
              new_theta,rrang,r_in,r_out
      endelse
   endif
-
+  
   if keyword_set(annulus_data) then annulus_data=projdata
 end
 
@@ -420,7 +444,7 @@ pro aia_annulus_create,event,wav=wav,run=run,base=base,raw=raw,remove_aec=remove
         spawn,'mkdir -m 775 '+finsavpath
      endif
   endfor
-
+  
   if keyword_set(raw) then aia_annulus_create_main, event, /raw, /remove_aec, _extra=_extra
   if keyword_set(base) then aia_annulus_create_main, event, /base, /remove_aec, _extra=_extra
   if keyword_set(run) then aia_annulus_create_main, event, /run, /remove_aec, _extra=_extra

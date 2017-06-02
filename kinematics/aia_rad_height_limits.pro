@@ -1,4 +1,4 @@
-function aia_rad_height_limits,angle=angle,degarray=degarray
+function aia_rad_height_limits,index,angle=angle,degarray=degarray,rsun=rsun
 ;PURPOSE:
 ;Calculate the limits to which the radial heights are physical in the
 ;images. This is useful when creating j-maps
@@ -32,9 +32,18 @@ function aia_rad_height_limits,angle=angle,degarray=degarray
   htarr=fltarr(ndeg)
   
 ;Pick some radius of the circle and the size of the square
-  n=1170.                       ;n is half the side of the square, in arcsec
-  r=1370.                       ;r is the radius of the outer circle of good data
-  
+  n=1.295*index[0].rsun_obs                       ;n is half the side of the square, in arcsec 1170 1220
+  n=1.267*index[0].rsun_obs
+  r=1.195*n                       ;r is the radius of the outer circle of good data 1370 1468
+  ;r=1.01*n
+
+  n=1229.
+  r=1468.
+
+  ;print,'rsun_obs: '+string(index[0].rsun_obs)
+  ;print,'n: '+string(n)
+  ;print,'r: '+string(r)
+
 ;calculate special degrees
   degs=fltarr(8)
   anr=acos(n/r)
@@ -46,7 +55,7 @@ function aia_rad_height_limits,angle=angle,degarray=degarray
   degs[5]=(3./2.)*!pi-anr
   degs[6]=(3./2.)*!pi+anr
   degs[7]=(2.)*!pi-anr
-
+  
 ;Find their corresponding indices in the angle array
   dginds=intarr(8)
   for i=0,7 do dginds[i]=min(where(degarr ge degs[i]))
@@ -69,17 +78,18 @@ function aia_rad_height_limits,angle=angle,degarray=degarray
      ang=ang*!pi/180.     
      angind=min(where(degarr ge ang))
      tmp=htarr[angind]
-     
-     return, tmp[0]
+     htarr=tmp[0]
   endif
+
   
   if keyword_set(degarray) then begin
      numinds=n_elements(degarray)
      beg=min(where(degarr ge degarray[0]*!pi/180.))
      fin=min(where(degarr ge degarray[numinds-1]*!pi/180.))
-     newhts=congrid(htarr[beg:fin],numinds)
-     return,newhts
+     htarr=congrid(htarr[beg:fin],numinds)
   endif
   
+  if keyword_set(rsun) then htarr/=index[0].rsun_obs
   return, htarr
+  
 end

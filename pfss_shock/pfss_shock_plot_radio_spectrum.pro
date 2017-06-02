@@ -1,7 +1,16 @@
 pro test_pfss_shock_plot_radio_spectrum
 ;Test procedure pfss_shock_radio_spectrum
-event=load_events_info(label='paper')
-pfss_shock_plot_radio_spectrum, event,/hires
+one=1
+  if one eq 1 then begin
+     labels=['110511_01','131212_01','130517_01','130423_01','120915_01','120526_01',$
+             '120424_01','110607_01','110211_02','110125_01']
+     labels=['110125_01']
+     for ev=0,n_elements(labels)-1 do begin
+        label=labels[ev]
+        event=load_events_info(label=label)
+        pfss_shock_plot_radio_spectrum, event,/hires
+     endfor
+  endif
 end
 
 
@@ -80,12 +89,27 @@ if csgsfile eq '' then begin
   thlet='!4' + String("110B) + '!X'
   ;thlet='!9'+String("161B)+'!X'
   tit='1/cos('+thlet+'!DBN!N)!U2!N'
-  ;
+
+   ;work out the plotting min/max of the frequency axis:
+  minfreq=100000.
+  maxfreq=-100000.
+  for sstep=0,nsteps-2 do begin
+     ncrosses=allcrosses[sstep]
+     rmag=reform(sqrt(crossPoints[sstep,0:ncrosses-1].rpx^2+$
+                      crossPoints[sstep,0:ncrosses-1].rpy^2+$
+                      crossPoints[sstep,0:ncrosses-1].rpz^2))*event.geomcorfactor
+     dens=cordens(rmag)
+     freq=8898.0*sqrt(dens)/1.0e6 ;Frequency in MHz
+     if min(freq) lt minfreq then minfreq=min(freq)
+     if max(freq) gt maxfreq then maxfreq=max(freq)
+  endfor
+  
+
   dummy = LABEL_DATE(DATE_FORMAT=['%H:%I'])
-  plot,tm,angles,yrange=[40,180],xrange=xrng,$
+  plot,tm,angles,yrange=[minfreq-1,maxfreq+1],xrange=xrng,$
        xstyle=1,ystyle=1,background=255,XTICKUNITS = ['Time'],XTICKFORMAT='LABEL_DATE',$
        color=0,/nodata,charsize=3,charthick=2,xticks=6,$
-       title=tit,xtitle='Time [sec]',ytitle='Frequency [MHz]'
+       title=tit,xtitle='Time of '+event.date,ytitle='Frequency [MHz]'
 ;'sin('+thlet+'!DBN!N)'
   loadct,13,/silent
   
@@ -107,14 +131,16 @@ if csgsfile eq '' then begin
                       crossPoints[sstep,0:ncrosses-1].rpz^2))*event.geomcorfactor
      dens=cordens(rmag)
      freq=8898.0*sqrt(dens)/1.0e6 ;Frequency in MHz
+     sorted_freq=freq[sort(freq)]
+     
      ;vshock=radiusmoments[sstep,1]
      ;shockInt=(vshock/100.0)^16*exp((100.0-vshock)/100.0)^2.2
      ;stop
      xmin=tm[sstep]
      xmax=tm[sstep+1]
      for i=0,ncrosses-2 do begin
-        ymin=freq[i]
-        ymax=freq[i]+1.0 ;Bin in 1 MHz frequency bins
+        ymin=sorted_freq[i]
+        ymax=sorted_freq[i+1];+1.0 ;Bin in 1 MHz frequency bins
         polyfill,[xmin,xmax,xmax,xmin],$
                  [ymin,ymin,ymax,ymax],$
                  color=254.0*((invcosthb[i]-minf)/(maxf-minf)),/data
@@ -138,7 +164,7 @@ if csgsfile eq '' then begin
 
   tvlct,rr,gg,bb,/get
   im=tvrd(true=1)
-  write_png,datapath+'pfss_shock_spectrogram.png',im,rr,gg,bb
+  write_png,datapath+event.date+'_'+event.label+'_pfss_shock_spectrogram.png',im,rr,gg,bb
   
   ;stop
 ;3 Get the radial distance of the crossing points for every time step

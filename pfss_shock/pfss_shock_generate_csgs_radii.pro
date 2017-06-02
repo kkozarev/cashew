@@ -23,11 +23,11 @@ pro pfss_shock_generate_csgs_radii,ind_arr,rad_data,radius,newtime=newtime,tindr
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 07/30/2014
 ;
-  sp=rad_data.xfitrange[0]
-  ep=rad_data.xfitrange[1]
-  begtime=rad_data.time[sp]
-  endtime=rad_data.time[ep]
-  time=(rad_data.time[sp:ep]-rad_data.time[sp])
+  sp=rad_data.timefitrange[0]
+  ep=rad_data.timefitrange[1]
+  begtime=rad_data.time[sp].relsec
+  endtime=rad_data.time[ep].relsec
+  time=(rad_data.time[sp:ep].relsec-rad_data.time[sp].relsec)
   if keyword_set(newtime) then begin
      tmp=min(where(newtime ge fix(begtime)))
      if tmp[0] ne -1 then begin
@@ -48,7 +48,7 @@ pro pfss_shock_generate_csgs_radii,ind_arr,rad_data,radius,newtime=newtime,tindr
   nsteps=n_elements(time)
   RSUN=ind_arr[0].rsun_ref/1000. ;Solar radius in km.  
   KMPX=ind_arr[0].IMSCL_MP*ind_arr[0].RSUN_REF/(1000.0*ind_arr[0].RSUN_OBS)
-  fit=reform(rad_data.fitparams[0,*].front)
+  fit=reform(rad_data.fitparams.front)
   radius=(fit[0]+fit[1]*time+0.5*fit[2]*time^2)/RSUN
   radius-=1.
 end

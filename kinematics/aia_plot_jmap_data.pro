@@ -1,16 +1,18 @@
-pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,max=max,fitrange=fitrange,title=title,_extra=extra,startInd=startInd,endInd=endInd, auto=auto
-!P.position=[0.15,0.15,0.94,0.9]
+pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,max=max,fitrange=fitrange,title=title,_extra=extra,startInd=startInd,endInd=endInd, auto=auto,position=position,charsize=charsize
+if not keyword_set(position) then !P.position=[0.15,0.15,0.94,0.9] else !p.position=position
 ;This procedure will plot the jmap-extracted profiles with x- and y-axes
   if keyword_set(ct) then loadct,ct,/silent
   nt=n_elements(times)
   nr=n_elements(rad)
   yrange=[min(rad),max(rad)]
-
+  
   date_label=label_date(DATE_FORMAT='%H:%I')
   if not keyword_set(title) then title=''
   if not keyword_set(xtitle) then xtitle=''
   if not keyword_set(ytitle) then ytitle=''
-  
+  if not keyword_set(min) then min=min(data)
+  if not keyword_set(max) then max=max(data)
+  if not keyword_set(charsize) then charsize=2
   xrange=[times[0],times[nt-1]]
   plot,times,rad,$
        xrange=xrange,$
@@ -20,8 +22,15 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
        xtickunit='Time',xtitle='',ytitle='',$
        /nodata,_extra=extra,$
        xstyle=1,ystyle=1,$
-       charsize=3,charthick=2,$
+       charsize=charsize,charthick=2,$
        xticks=6,yticks=6,color=255
+
+  ;Plot a dark background to hide the seams
+  x0=!p.position[0]
+  x1=!p.position[2]
+  y0=!p.position[1]
+  y1=!p.position[3]
+  polyfill,[x0,x1,x1,x0],[y0,y0,y1,y1],color=110,/normal
   
   for t=0,nt-2 do begin
      xmin=times[t]
@@ -38,10 +47,12 @@ pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,
      endfor
   endfor
   
-  xyouts,!P.position[0]+0.15,!P.position[3]+0.02, title,color=0,charsize=3,/norm
-  AXIS, YAXIS=0,YRANGE=yrange, /SAVE, color=0,ythick=3,yticks=6,charsize=3,_extra=extra,ystyle=1,ytickformat='(f6.2)'
+  xyouts,!P.position[0]+0.08,!P.position[3]+0.02, title,color=0,charsize=charsize,/norm
+  AXIS, YAXIS=0,YRANGE=yrange, /SAVE, color=0,ythick=3,yticks=6,charsize=charsize,_extra=extra,ystyle=1,$
+        ytickformat='(f6.2)'
   AXIS, YAXIS=1,YRANGE=yrange, /SAVE, color=0,ythick=3,yticks=6,ytickformat='(A1)',ystyle=1
-  AXIS, XAXIS=0,XRANGE=xrange, /SAVE, color=0,xthick=3,xticks=6,xtickformat='LABEL_DATE',xtickunit='Time',charsize=3,_extra=extra,xstyle=1
+  AXIS, XAXIS=0,XRANGE=xrange, /SAVE, color=0,xthick=3,xticks=6,xtickformat='LABEL_DATE',xtickunit='Time',$
+        charsize=charsize,_extra=extra,xstyle=1
   AXIS, XAXIS=1,XRANGE=xrange, /SAVE, color=0,xthick=3,xticks=6,xtickformat='(A1)',xstyle=1
  
   if keyword_set(fitrange) then begin

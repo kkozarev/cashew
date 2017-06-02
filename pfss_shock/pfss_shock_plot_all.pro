@@ -26,12 +26,17 @@ pro pfss_shock_plot_all,event,_extra=_extra;lores=lores,hires=hires,
 ;
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 07/30/2014
-  
+  event=load_events_info(label=event.label)
   pfss_get_field_line_info,event,pfssLines=pfssLines,_extra=_extra
-  pfss_shock_plot_csgs,event,/png,pfssLines=pfssLines,/newtimes,_extra=_extra
-  pfss_shock_plot_angular_influence,event,pfssLines=pfssLines,/newtimes,_extra=_extra
-  pfss_shock_plot_angular_influence,event,/topview,pfssLines=pfssLines,/newtimes,_extra=_extra
+  event=load_events_info(label=event.label)
+  pfss_shock_plot_csgs,event,/png,pfssLines=pfssLines,_extra=_extra;,/newtimes
+  event=load_events_info(label=event.label)
+  pfss_shock_plot_angular_influence,event,pfssLines=pfssLines,_extra=_extra ;,/newtimes
+  event=load_events_info(label=event.label)
+  pfss_shock_plot_angular_influence,event,/topview,pfssLines=pfssLines,_extra=_extra;,/newtimes
+  event=load_events_info(label=event.label)
   pfss_shock_plot_thetabn_stats,event,_extra=_extra
+  event=load_events_info(label=event.label)
   pfss_shock_plot_crossing_angles,event,/oplot,pfssLines=pfssLines,_extra=_extra
 
 end
