@@ -5,7 +5,6 @@ pro run_aschdem_models
   for ev=0,n_elements(events)-1 do begin
      event=events[ev]
      date=event.st
-     if ev eq 8 then continue
      aia_cfa_teem_run,event,/remove_aec
   endfor  
 end
