@@ -11,8 +11,8 @@ pro pfss_shock_update_crosspoints_tags
   events=load_events_info()
   for ev=0,n_elements(events)-1 do begin
      event=events[ev]
-     if file_exist(event.pfsspath+event.csgs.lores.map_savename) then begin
-        restore,event.pfsspath+event.csgs.lores.map_savename
+     if file_exist(event.mfhcpath+event.csgs.lores.map_savename) then begin
+        restore,event.mfhcpath+event.csgs.lores.map_savename
         nmaxcrosses=max(allcrosses)
         
         newcrossPts=replicate(newcrossPt,nsteps,nmaxcrosses)
@@ -34,15 +34,15 @@ pro pfss_shock_update_crosspoints_tags
         endfor
         crosspoints=newcrosspts
         
-        save,filename=event.pfsspath+event.csgs.lores.map_savename,$
+        save,filename=event.mfhcpath+event.csgs.lores.map_savename,$
              ALLCROSSES,CARRLAT,CARRLON,CROSSPOINTS,DT,NSTEPS,NMAXCROSSES,$
              RADIUS,RADIUSFITLINES,ROTATIONANGLES,SC,SUBINDEX,SUNCENTER,$
              TIME,VERTEX_LIST,VERT_ROTMAT,VERT_TRANSMAT
      endif
      
      ;The same for the high resolution data
-     if file_exist(event.pfsspath+event.csgs.hires.map_savename) then begin
-        restore,event.pfsspath+event.csgs.hires.map_savename
+     if file_exist(event.mfhcpath+event.csgs.hires.map_savename) then begin
+        restore,event.mfhcpath+event.csgs.hires.map_savename
         nmaxcrosses=max(allcrosses)
         
         newcrossPts=replicate(newcrossPt,nsteps,nmaxcrosses)
@@ -64,7 +64,7 @@ pro pfss_shock_update_crosspoints_tags
         endfor
         crosspoints=newcrosspts
         
-        save,filename=event.pfsspath+event.csgs.hires.map_savename,$
+        save,filename=event.mfhcpath+event.csgs.hires.map_savename,$
              ALLCROSSES,CARRLAT,CARRLON,CROSSPOINTS,DT,NSTEPS,NMAXCROSSES,$
              RADIUS,RADIUSFITLINES,ROTATIONANGLES,SC,SUBINDEX,SUNCENTER,$
              TIME,VERTEX_LIST,VERT_ROTMAT,VERT_TRANSMAT

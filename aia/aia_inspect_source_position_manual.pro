@@ -1,6 +1,6 @@
 pro test_aia_update_source_position_manual
   ;Test the procedure select_arlat
-  event=load_events_info(label='151104_01',/localjson)
+  event=load_events_info(label='151104_01')
   aia_inspect_source_position_manual, event
 end
 

@@ -13,7 +13,7 @@ pro test_pfss_return_field
      ;box=[aclon-45.,aclat-45.,aclon+45.,aclat+45.]
      ;pfss_return_field,event,invdens=0.5,/save;,box=box
                                 ;pfss_return_field,date,invdens=0.5,/save,event=event;,box=box
-                                ;pfss_return_field,date,invdens=8,/save,path=event.pfsspath,event=event;,box=box
+                                ;pfss_return_field,date,invdens=8,/save,path=event.mfhcpath,event=event;,box=box
      ;pfss_return_field,event,/hires,/save
      pfss_return_field,event,/lores,/save,/force
      endfor
@@ -76,7 +76,7 @@ pro pfss_return_field_main,date,event=event,rstart=rstart,invdens=invdens,force=
   
 ;Set the save path
   if not keyword_set(path) then begin
-     if keyword_set(event) then path=event.pfsspath else path='./'
+     if keyword_set(event) then path=event.mfhcpath else path='./'
   endif
 ;  starting points to be on a regular grid covering the full disk,
 ;  with a starting radius of r=1.05 Rsun

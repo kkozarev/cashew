@@ -13,7 +13,7 @@ pro test_tan_boxes
   eventname='AIA_'+date+'_'+evnum+'_'+wav
   aiafile=event.savepath+'normalized_'+eventname+'_subdata.sav'
   ;Find a file to load with the latest results of applying the CSGS model
-  csgsfile=find_latest_file(event.pfsspath+'csgs_results_*') 
+  csgsfile=find_latest_file(event.mfhcpath+'csgs_results_*') 
   if csgsfile eq '' then begin
      print,'The CSGS file is not properly set or does not exist. Quitting.'
      return

@@ -9,7 +9,7 @@ pro test_cashew_annulus_analyze_lateral_manual
      labels=['110511_01']
      labels=['120806_01','140220_02']
      labels=['120307_01','120405_01','151104_01','151104_02','151104_03']
-     labels=['151104_01']
+     labels=['110607_01']
      for ev=0,n_elements(labels)-1 do begin
         label=labels[ev]
         event=load_events_info(label=label)

@@ -46,7 +46,7 @@ if not keyword_set(event) then begin
      endelse
   endelse
 endif else begin
-path=event.pfsspath
+path=event.mfhcpath
 dat=event.date        
         fname='pfss_results_'+dat+'_'+event.label+'_hires.sav'
 endelse

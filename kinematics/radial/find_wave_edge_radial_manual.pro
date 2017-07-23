@@ -158,7 +158,7 @@ pro find_wave_edge_radial_manual, event, rad_data, plotinfo, exit_status
   savgol_filter=SAVGOL(sghw, sghw, order, degree)
 
   started_measurements = 0
-  for ii=sp, ep do begin
+  for ii=sp,ep do begin
      alt=0
      newtime = time.jd
      caldat, newtime[ii], m, d, y, h, m, s 
@@ -244,11 +244,10 @@ pro find_wave_edge_radial_manual, event, rad_data, plotinfo, exit_status
         overview_y=!y
      endif
 ;------------------- END OVERVIEW PLOT ----------------------
-
-
      
      print,''
      uinput='y'
+     
      ;valid=0
      ;while valid eq 0 do begin
      ;   read,uinput,prompt='Can you identify the wave easily? Press "y" for yes, "n" for no, "q" to quit: '
@@ -270,7 +269,7 @@ pro find_wave_edge_radial_manual, event, rad_data, plotinfo, exit_status
               endwhile
               if uinput eq 'y' then begin
                  
-                                ;Save the extent of the wave, to use by default for future measurements.
+                 ;Save the extent of the wave, to use by default for future measurements.
                  openw,lun,last_saved_start_end,/get_lun
                  printf,lun,strtrim(string(rad_data.timefitrange[0]),2)
                  printf,lun,strtrim(string(rad_data.timefitrange[1]),2)
@@ -321,7 +320,10 @@ pro find_wave_edge_radial_manual, event, rad_data, plotinfo, exit_status
      print,'Please click on the FRONT EDGE position of the wave (the edge farthest from the Sun):'
      cursor,x,y,/data,/down
      tmp=min(where(rad gt x))
-     if tmp[0] eq -1 then tmp = n_elements(rad)-1
+     if tmp[0] eq -1 then begin
+        tmp = n_elements(rad)-1
+        reached_front_edge=1
+     endif
      frontEdge=rad[tmp]
      wave_frontedge[ii].rad = frontEdge    ;the radial position
      wave_frontedge[ii].yind = tmp         ;the radial position index
@@ -433,12 +435,25 @@ pro find_wave_edge_radial_manual, event, rad_data, plotinfo, exit_status
         
         goto,measurementredo
      endif else begin
+        ;DEBUG (05/26/2017)
+        if reached_front_edge eq 1 then begin
+           ep=ii
+           rad_data.timefitrange[1]=ep
+           ;Record the start and end indices
+           openw,lun,last_saved_start_end,/get_lun
+           printf,lun,strtrim(string(sp),2)
+           printf,lun,strtrim(string(ep),2)
+           close,lun
+           goto, donewithmeasurements
+        endif
+        ;END DEBUG (05/26/2017)
         print,'Great, let us move on!'
         lastbackedge=backedge
         lastpeakrad=peakrad
         lastfrontedge=frontedge
         if started_measurements eq 0 then started_measurements = 1
      endelse
+     
      wait,0.5
   endfor
   

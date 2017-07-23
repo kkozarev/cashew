@@ -1,40 +1,42 @@
 pro test_aia_make_movies
 ;Test the execution of aia_make_movies
 
-  ;You can run this for a few events, like so
+                                ;You can run this for a few events, like so
   one=1
   if one eq 1 then begin
      labels=['140708_01','131212_01','130517_01','130423_01','120915_01','120526_01',$
-	  '120424_01','110607_01','110211_02','110125_01','130423_01','140708_01']
+             '120424_01','110607_01','110211_02','110125_01','130423_01','140708_01']
      labels=['151104_01','151104_02','151104_03']
-     labels=['151104_01','110607_01']
+     labels=['131212_01'];110607_01
      for ev=0,n_elements(labels)-1 do begin 
         label=labels[ev]
         event=load_events_info(label=label)
+        
         wavelengths=['193']
         movie_types=['araw','abase','arun','raw','base','run']
-        movie_types=['pfss_shock_hires','thetabn_oplot_hires','pfss_spread_hires','pfss_spread_topview_hires']
-        movie_types=['araw','abase']
-        movie_types=['density_ratios','temperature_differences'];'teem_ratios',
+        movie_types=['pfss_shock','thetabn_oplot_hires','pfss_spread_hires','pfss_spread_topview_hires']
+        ;movie_types=['pfss_shock']
+                                ;movie_types=['abase']
+                                ;movie_types=['density_ratios','temperature_differences'];'teem_ratios',
         wavelengths=['193']
         for w=0,n_elements(wavelengths)-1 do begin
            wavelength=wavelengths[w]
-           for mt=0,n_elements(movie_types)-1 do begin 
-              movie_type=movie_types[mt]
-              aia_make_movies, event, movie_type=movie_type,/force ;, wav=wavelength
-           endfor
+                                ;for mt=0,n_elements(movie_types)-1 do begin 
+                                ;   movie_type=movie_types[mt]
+           aia_make_movies, event, movie_type=movie_types,/force ;, wav=wavelength
+                                ; endfor
         endfor 
      endfor
   endif
   
-  ;Alternatively, run it for all/multiple events
+                                ;Alternatively, run it for all/multiple events
   all=0
   if all eq 1 then begin
      events=load_events_info()
      wavelengths=['193','211']
      wavelengths='193'
      movie_types=['raw','base','run']
-     ;movie_types=['araw','abase','arun','raw','base','run']
+                                ;movie_types=['araw','abase','arun','raw','base','run']
      movie_types=['teem']
      nevents=n_elements(events)
      for ev=0,nevents-1 do begin
@@ -129,308 +131,314 @@ pro aia_make_movies, event, wav=wav, FRAMES_PER_SECOND = frames_per_second, PATH
 
 
 ; Determine Frames Per Second
-if not keyword_set(FRAMES_PER_SECOND) then fps = '10' else fps=frames_per_second
-if not keyword_set(wav) then wavelength = '193' else wavelength=wav
-if not keyword_set(movie_type) then movie_type = 'raw'
+  if not keyword_set(FRAMES_PER_SECOND) then fps = '10' else fps=frames_per_second
+  if not keyword_set(wav) then wavelength = '193' else wavelength=wav
+  if not keyword_set(movie_type) then movie_types = 'raw' else movie_types=movie_type
+  event=load_events_info(label=event.label)
+
+  nmovtype=n_elements(movie_types)
 
 ; Determine Path
-if not keyword_set(path) then path=event.savepath
-movie_path=path
+  if not keyword_set(path) then path=event.savepath
+  movie_path=path
 
 
 ;Prepare the date string
-date=event.date
-label=event.label
+  date=event.date
+  label=event.label
 
-process = 'ffmpeg -y -f image2 -r '
-path_call = ' -i '
-full_path = path
-filetype = movie_type + '_'
+  for mt=0,nmovtype-1 do begin
+     movie_type=movie_types[mt]
+
+     process = 'ffmpeg -y -f image2 -r '
+     path_call = ' -i '
+     full_path = path
+     filetype = movie_type + '_'
 
 ;NEW VERSION
-ffmpeg_params1 = ' -an -pix_fmt "yuv420p" -vcodec "libx264" -level 41 -crf 18.0 -b "28311k" -r '
-ffmpeg_params2 = ' -bufsize "28311k" -maxrate "28311k" -g "100" -coder 1 -profile main -preset faster -qdiff 4 -qcomp 0.7 -direct-pred 3 -flags +loop+mv4 -cmp +chroma -partitions +parti4x4+partp8x8+partb8x8 -subq 7 -me_range 16 -keyint_min 1 -sc_threshold 40 -i_qfactor 0.71 -rc_eq ''blurCplx^(1-qComp)'' -b_strategy 1 -bidir_refine 1 -refs 6 -deblock 0:0 -trellis 1 -x264opts keyint=10:min-keyint=1:bframes=1 -threads 2 '
+     ffmpeg_params1 = ' -an -pix_fmt "yuv420p" -vcodec "libx264" -level 41 -crf 18.0 -b "28311k" -r '
+     ffmpeg_params2 = ' -bufsize "28311k" -maxrate "28311k" -g "100" -coder 1 -profile main -preset faster -qdiff 4 -qcomp 0.7 -direct-pred 3 -flags +loop+mv4 -cmp +chroma -partitions +parti4x4+partp8x8+partb8x8 -subq 7 -me_range 16 -keyint_min 1 -sc_threshold 40 -i_qfactor 0.71 -rc_eq ''blurCplx^(1-qComp)'' -b_strategy 1 -bidir_refine 1 -refs 6 -deblock 0:0 -trellis 1 -x264opts keyint=10:min-keyint=1:bframes=1 -threads 2 '
 
 ;OLD VERSION
 ;ffmpeg_params1 = ' -an -pix_fmt "yuv420p" -vcodec "libx264" -level 41 -crf 18.0 -b "28311k" -r '
 ;ffmpeg_params2 = ' -bufsize "28311k" -maxrate "28311k" -g "100" -coder 1 -profile main -preset faster -qdiff 4 -qcomp 0.7 -directpred 3 -flags +loop+mv4 -cmp +chroma -partitions +parti4x4+partp8x8+partb8x8 -subq 7 -me_range 16 -keyint_min 1 -sc_threshold 40 -i_qfactor 0.71 -rc_eq ''blurCplx^(1-qComp)'' -b_strategy 1 -bidir_refine 1 -refs 6 -deblockalpha 0 -deblockbeta 0 -trellis 1 -x264opts keyint=10:min-keyint=1:bframes=1 -threads 2 '
 
 
-savepath=path+'png/'
-movie_path=event.moviepath
-pngfname='normalized_AIA_'+date + '_' + event.label + '_' + wavelength + "_subdata_" + movie_type
+     savepath=path+'png/'
+     movie_path=event.moviepath
+     pngfname='normalized_AIA_'+date + '_' + event.label + '_' + wavelength + "_subdata_" + movie_type
 ;The png image files
-imgfnames = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_%03d.png'
-imgsearch = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_*.png'
-moviefname = movie_path + movie_type + '_' + wavelength + '_' + label + '.mp4'
+     imgfnames = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_%03d.png'
+     imgsearch = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_*.png'
+     moviefname = movie_path + movie_type + '_' + wavelength + '_' + label + '.mp4'
 
 
-if movie_type eq 'araw' or movie_type eq 'arun' or movie_type eq 'abase' then begin
-   savepath=path+'annulusplot/'
-   movie_path=path+'movies/'
-   tp=strmid(movie_type,1)
-   pngfname='annplot_'+date+'_'+event.label+'_'+wavelength+'_'+tp
+     if movie_type eq 'araw' or movie_type eq 'arun' or movie_type eq 'abase' then begin
+        savepath=path+'annulusplot/'
+        movie_path=path+'movies/'
+        tp=strmid(movie_type,1)
+        pngfname='annplot_'+date+'_'+event.label+'_'+wavelength+'_'+tp
 ;The png image files
-   imgfnames = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_%03d.png'
-   imgsearch = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_*.png'
-   moviefname = movie_path + movie_type + '_' + wavelength + '_' + label + '.mp4'
-endif
- 
+        imgfnames = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_%03d.png'
+        imgsearch = savepath + movie_type + '/' + wavelength + '/' + pngfname + '_*.png'
+        moviefname = movie_path + movie_type + '_' + wavelength + '_' + label + '.mp4'
+     endif
+     
 
-if movie_type eq 'teem' then begin
-   savepath=event.aschdempath
-   movie_path=event.moviepath
-   pngfname='aschdem_'+date+'_'+label
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%06d_teem_map.png'
-   imgsearch = savepath + pngfname + '_*_teem_map.png'
-   moviefname = movie_path + pngfname + '_teem_map.mp4'
-endif
+     if movie_type eq 'teem' then begin
+        savepath=event.aschdempath
+        movie_path=event.moviepath
+        pngfname='aschdem_'+date+'_'+label
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%06d_teem_map.png'
+        imgsearch = savepath + pngfname + '_*_teem_map.png'
+        moviefname = movie_path + pngfname + '_teem_map.mp4'
+     endif
 
-if movie_type eq 'teem_density' then begin
-   savepath=event.aschdempath
-   movie_path=event.moviepath
-   pngfname='aschdem_'+date+'_'+label
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%06d_teem_density.png'
-   imgsearch = savepath + pngfname + '_*_teem_density.png'
-   moviefname = movie_path + pngfname + '_teem_density.mp4'
-endif
+     if movie_type eq 'teem_density' then begin
+        savepath=event.aschdempath
+        movie_path=event.moviepath
+        pngfname='aschdem_'+date+'_'+label
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%06d_teem_density.png'
+        imgsearch = savepath + pngfname + '_*_teem_density.png'
+        moviefname = movie_path + pngfname + '_teem_density.mp4'
+     endif
 
-if movie_type eq 'teem_temperature' then begin
-   savepath=event.aschdempath
-   movie_path=event.moviepath
-   pngfname='aschdem_'+date+'_'+label
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%06d_teem_temperature.png'
-   imgsearch = savepath + pngfname + '_*_teem_temperature.png'
-   moviefname = movie_path + pngfname + '_teem_temperature.mp4'
-endif
+     if movie_type eq 'teem_temperature' then begin
+        savepath=event.aschdempath
+        movie_path=event.moviepath
+        pngfname='aschdem_'+date+'_'+label
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%06d_teem_temperature.png'
+        imgsearch = savepath + pngfname + '_*_teem_temperature.png'
+        moviefname = movie_path + pngfname + '_teem_temperature.mp4'
+     endif
 
-if movie_type eq 'em_ratios' then begin
-   savepath=event.aschdempath
-   movie_path=event.moviepath
-   pngfname='aschdem_'+date+'_'+label
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%06d_teem_em_ratios.png'
-   imgsearch = savepath + pngfname + '_*_teem_em_ratios.png'
-   moviefname = movie_path + pngfname + '_teem_em_ratios.mp4'
-endif
+     if movie_type eq 'em_ratios' then begin
+        savepath=event.aschdempath
+        movie_path=event.moviepath
+        pngfname='aschdem_'+date+'_'+label
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%06d_teem_em_ratios.png'
+        imgsearch = savepath + pngfname + '_*_teem_em_ratios.png'
+        moviefname = movie_path + pngfname + '_teem_em_ratios.mp4'
+     endif
 
-if movie_type eq 'em_differences' then begin
-   savepath=event.aschdempath
-   movie_path=event.moviepath
-   pngfname='aschdem_'+date+'_'+label
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%06d_teem_em_differences.png'
-   imgsearch = savepath + pngfname + '_*_teem_em_differences.png'
-   moviefname = movie_path + pngfname + '_teem_em_differences.mp4'
-endif
+     if movie_type eq 'em_differences' then begin
+        savepath=event.aschdempath
+        movie_path=event.moviepath
+        pngfname='aschdem_'+date+'_'+label
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%06d_teem_em_differences.png'
+        imgsearch = savepath + pngfname + '_*_teem_em_differences.png'
+        moviefname = movie_path + pngfname + '_teem_em_differences.mp4'
+     endif
 
-if movie_type eq 'density_ratios' then begin
-   savepath=event.aschdempath
-   movie_path=event.moviepath
-   pngfname='aschdem_'+date+'_'+label
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%06d_teem_density_ratios.png'
-   imgsearch = savepath + pngfname + '_*_teem_density_ratios.png'
-   moviefname = movie_path + pngfname + '_teem_density_ratios.mp4'
-endif
+     if movie_type eq 'density_ratios' then begin
+        savepath=event.aschdempath
+        movie_path=event.moviepath
+        pngfname='aschdem_'+date+'_'+label
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%06d_teem_density_ratios.png'
+        imgsearch = savepath + pngfname + '_*_teem_density_ratios.png'
+        moviefname = movie_path + pngfname + '_teem_density_ratios.mp4'
+     endif
 
-if movie_type eq 'density_differences' then begin
-   savepath=event.aschdempath
-   movie_path=event.moviepath
-   pngfname='aschdem_'+date+'_'+label
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%06d_teem_density_differences.png'
-   imgsearch = savepath + pngfname + '_*_teem_density_differences.png'
-   moviefname = movie_path + pngfname + '_teem_density_differences.mp4'
-endif
+     if movie_type eq 'density_differences' then begin
+        savepath=event.aschdempath
+        movie_path=event.moviepath
+        pngfname='aschdem_'+date+'_'+label
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%06d_teem_density_differences.png'
+        imgsearch = savepath + pngfname + '_*_teem_density_differences.png'
+        moviefname = movie_path + pngfname + '_teem_density_differences.mp4'
+     endif
 
-if movie_type eq 'temperature_ratios' then begin
-   savepath=event.aschdempath
-   movie_path=event.moviepath
-   pngfname='aschdem_'+date+'_'+label
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%06d_teem_temperature_ratios.png'
-   imgsearch = savepath + pngfname + '_*_teem_temperature_ratios.png'
-   moviefname = movie_path + pngfname + '_teem_temperature_ratios.mp4'
-endif
+     if movie_type eq 'temperature_ratios' then begin
+        savepath=event.aschdempath
+        movie_path=event.moviepath
+        pngfname='aschdem_'+date+'_'+label
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%06d_teem_temperature_ratios.png'
+        imgsearch = savepath + pngfname + '_*_teem_temperature_ratios.png'
+        moviefname = movie_path + pngfname + '_teem_temperature_ratios.mp4'
+     endif
 
-if movie_type eq 'temperature_differences' then begin
-   savepath=event.aschdempath
-   movie_path=event.moviepath
-   pngfname='aschdem_'+date+'_'+label
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%06d_teem_temperature_differences.png'
-   imgsearch = savepath + pngfname + '_*_teem_temperature_differences.png'
-   moviefname = movie_path + pngfname + '_teem_temperature_differences.mp4'
-endif
+     if movie_type eq 'temperature_differences' then begin
+        savepath=event.aschdempath
+        movie_path=event.moviepath
+        pngfname='aschdem_'+date+'_'+label
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%06d_teem_temperature_differences.png'
+        imgsearch = savepath + pngfname + '_*_teem_temperature_differences.png'
+        moviefname = movie_path + pngfname + '_teem_temperature_differences.mp4'
+     endif
 
-if movie_type eq 'pfss_shock_hires' then begin
-   savepath=event.pfsspath
-   movie_path=event.moviepath
-   pngfname='aia_pfss_shock_'+date+'_'+label+'_hires'
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%03d.png'
-   imgsearch = savepath + pngfname + '_???.png'
-   moviefname = movie_path + pngfname + '.mp4'
-endif
+     if movie_type eq 'pfss_shock_hires' then begin
+        savepath=event.mfhcpath
+        movie_path=event.moviepath
+        pngfname='aia_pfss_shock_'+date+'_'+label+'_hires'
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%03d.png'
+        imgsearch = savepath + pngfname + '_*.png'
+        moviefname = movie_path + pngfname + '.mp4'
+     endif
 
-if movie_type eq 'pfss_shock' then begin
-   savepath=event.pfsspath
-   movie_path=event.moviepath
-   pngfname='aia_pfss_shock_'+date+'_'+label+'_lores'
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%03d.png'
-   imgsearch = savepath + pngfname + '_???.png'
-   moviefname = movie_path + pngfname + '.mp4'
-endif
+     if movie_type eq 'pfss_shock' then begin
+        savepath=event.mfhcpath
+        movie_path=event.moviepath
+        pngfname='aia_pfss_shock_'+date+'_'+label+'_lores'
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%03d.png'
+        imgsearch = savepath + pngfname + '_*.png'
+        moviefname = movie_path + pngfname + '.mp4'
+     endif
 
-if movie_type eq 'thetabn' then begin
-   savepath=event.pfsspath
-   movie_path=event.moviepath
-   pngfname='thetabn_'+date+'_'+label+'_lores'
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%03d.png'
-   imgsearch = savepath + pngfname + '_???.png'
-   moviefname = movie_path + pngfname + '.mp4'
-endif
+     if movie_type eq 'thetabn' then begin
+        savepath=event.mfhcpath
+        movie_path=event.moviepath
+        pngfname='thetabn_'+date+'_'+label+'_lores'
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%03d.png'
+        imgsearch = savepath + pngfname + '_*.png'
+        moviefname = movie_path + pngfname + '.mp4'
+     endif
 
-if movie_type eq 'thetabn_hires' then begin
-   savepath=event.pfsspath
-   movie_path=event.moviepath
-   pngfname='thetabn_'+date+'_'+label+'_hires'
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%03d.png'
-   imgsearch = savepath + pngfname + '_???.png'
-   moviefname = movie_path + pngfname + '.mp4'
-endif
+     if movie_type eq 'thetabn_hires' then begin
+        savepath=event.mfhcpath
+        movie_path=event.moviepath
+        pngfname='thetabn_'+date+'_'+label+'_hires'
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%03d.png'
+        imgsearch = savepath + pngfname + '_*.png'
+        moviefname = movie_path + pngfname + '.mp4'
+     endif
 
-if movie_type eq 'thetabn_oplot' then begin
-   savepath=event.pfsspath
-   movie_path=event.moviepath
-   pngfname='thetabn_'+date+'_'+label+'_lores'
-   ;The png image files
-   imgfnames = savepath + pngfname + '_oplot_%03d.png'
-   imgsearch = savepath + pngfname + '_oplot_???.png'
-   moviefname = movie_path + pngfname + '_oplot.mp4'
-endif
+     if movie_type eq 'thetabn_oplot' then begin
+        savepath=event.mfhcpath
+        movie_path=event.moviepath
+        pngfname='thetabn_'+date+'_'+label+'_lores'
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_oplot_%03d.png'
+        imgsearch = savepath + pngfname + '_oplot_*.png'
+        moviefname = movie_path + pngfname + '_oplot.mp4'
+     endif
 
-if movie_type eq 'thetabn_oplot_hires' then begin
-   savepath=event.pfsspath
-   movie_path=event.moviepath
-   pngfname='thetabn_'+date+'_'+label+'_hires'
-   ;The png image files
-   imgfnames = savepath + pngfname + '_oplot_%03d.png'
-   imgsearch = savepath + pngfname + '_oplot_???.png'
-   moviefname = movie_path + pngfname + '_oplot.mp4'
-endif
+     if movie_type eq 'thetabn_oplot_hires' then begin
+        savepath=event.mfhcpath
+        movie_path=event.moviepath
+        pngfname='thetabn_'+date+'_'+label+'_hires'
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_oplot_%03d.png'
+        imgsearch = savepath + pngfname + '_oplot_*.png'
+        moviefname = movie_path + pngfname + '_oplot.mp4'
+     endif
 
-if movie_type eq 'pfss_spread' then begin
-   savepath=event.pfsspath
-   movie_path=event.moviepath
-   pngfname='aia_pfss_shock_angular_influence_'+date+'_'+label+'_lores'
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%03d.png'
-   imgsearch = savepath + pngfname + '_???.png'
-   moviefname = movie_path + pngfname + '.mp4'
-endif
+     if movie_type eq 'pfss_spread' then begin
+        savepath=event.mfhcpath
+        movie_path=event.moviepath
+        pngfname='aia_pfss_shock_angular_influence_'+date+'_'+label+'_lores'
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%03d.png'
+        imgsearch = savepath + pngfname + '_*.png'
+        moviefname = movie_path + pngfname + '.mp4'
+     endif
 
-if movie_type eq 'pfss_spread_hires' then begin
-   savepath=event.pfsspath
-   movie_path=event.moviepath
-   pngfname='aia_pfss_shock_angular_influence_'+date+'_'+label+'_hires'
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%03d.png'
-   imgsearch = savepath + pngfname + '_???.png'
-   moviefname = movie_path + pngfname + '.mp4'
-endif
+     if movie_type eq 'pfss_spread_hires' then begin
+        savepath=event.mfhcpath
+        movie_path=event.moviepath
+        pngfname='aia_pfss_shock_angular_influence_'+date+'_'+label+'_hires'
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%03d.png'
+        imgsearch = savepath + pngfname + '_*.png'
+        moviefname = movie_path + pngfname + '.mp4'
+     endif
 
-if movie_type eq 'pfss_spread_topview' then begin
-   savepath=event.pfsspath
-   movie_path=event.moviepath
-   pngfname='aia_pfss_shock_angular_influence_'+date+'_'+label+'_topview_lores'
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%03d.png'
-   imgsearch = savepath + pngfname + '_???.png'
-   moviefname = movie_path + pngfname + '.mp4'
-endif
+     if movie_type eq 'pfss_spread_topview' then begin
+        savepath=event.mfhcpath
+        movie_path=event.moviepath
+        pngfname='aia_pfss_shock_angular_influence_'+date+'_'+label+'_topview_lores'
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%03d.png'
+        imgsearch = savepath + pngfname + '_*.png'
+        moviefname = movie_path + pngfname + '.mp4'
+     endif
 
-if movie_type eq 'pfss_spread_topview_hires' then begin
-   savepath=event.pfsspath
-   movie_path=event.moviepath
-   pngfname='aia_pfss_shock_angular_influence_'+date+'_'+label+'_topview_hires'
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%03d.png'
-   imgsearch = savepath + pngfname + '_???.png'
-   moviefname = movie_path + pngfname + '.mp4'
-endif
+     if movie_type eq 'pfss_spread_topview_hires' then begin
+        savepath=event.mfhcpath
+        movie_path=event.moviepath
+        pngfname='aia_pfss_shock_angular_influence_'+date+'_'+label+'_topview_hires'
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%03d.png'
+        imgsearch = savepath + pngfname + '_*.png'
+        moviefname = movie_path + pngfname + '.mp4'
+     endif
 
-if movie_type eq 'ywave' then begin
-   savepath=event.yaftawavepath
-   movie_path=event.moviepath
-   pngfname='yaftawave_'+date+'_'+label+'_'+wavelength
-   ;The png image files
-   imgfnames = savepath + pngfname + '_%06d.png'
-   imgsearch = savepath + pngfname + '_??????.png'
-   moviefname = movie_path + pngfname + '.mp4'
-endif
+     if movie_type eq 'ywave' then begin
+        savepath=event.yaftawavepath
+        movie_path=event.moviepath
+        pngfname='yaftawave_'+date+'_'+label+'_'+wavelength
+                                ;The png image files
+        imgfnames = savepath + pngfname + '_%06d.png'
+        imgsearch = savepath + pngfname + '_*.png'
+        moviefname = movie_path + pngfname + '.mp4'
+     endif
 
-print,''
-print,'----'
-print,'Creating movie ' + moviefname
-print,''
+     print,''
+     print,'----'
+     print,'Creating movie ' + moviefname
+     print,''
 
-if not file_test(imgsearch) then begin
-   print,'Required PNG files do not exist: '+imgsearch
-   print,'Quitting...'
-   print,'----'
-   return
-endif
+     if not file_test(imgsearch) then begin
+        print,'Required PNG files do not exist: '+imgsearch
+        print,'Continuing...'
+        print,'----'
+        continue
+     endif
 
 ;Create symbolic links in which the files are ordered starting from 1. 
 ;This is necessary because of issues with different versions of ffmpeg
-imgs=file_search(imgsearch)
-if n_elements(imgs) lt 6 then begin
-   print,'Not enough frames to make movie '+moviefname
-   return
-endif
+     imgs=file_search(imgsearch)
+     if n_elements(imgs) lt 6 then begin
+        print,'Not enough frames to make movie '+moviefname
+        continue
+     endif
 
 ;Create a temporary folder to order the images properly.
-tmpdir=movie_path+"tmpdir_"+strtrim(string(fix(floor(randomn(2)*100000))),2)+'/'
-res=file_test(tmpdir,/directory)
-if res then spawn,'rm '+tmpdir+'*' $
+     tmpdir=movie_path+"tmpdir_"+strtrim(string(fix(floor(randomn(2)*100000))),2)+'/'
+     res=file_test(tmpdir,/directory)
+     if res then spawn,'rm '+tmpdir+'*' $
 
 ;else spawn,'mkdir -m 775 '+tmpdir+'&> /dev/null'
-else spawn,'mkdir -m 775 '+tmpdir
+     else spawn,'mkdir -m 775 '+tmpdir
 
-for ii=0,n_elements(imgs)-1 do begin
-   img_strind=strtrim(string(ii+1),2)
-   if img_strind lt 100 then img_strind='0'+img_strind
-   if img_strind lt 10 then img_strind='0'+img_strind
-   command='ln -s '+imgs[ii]+' '+tmpdir+'tmpim_'+img_strind+'.png'
-   spawn,command
-endfor
-imgfnames=tmpdir+'tmpim_%03d.png'
+     for ii=0,n_elements(imgs)-1 do begin
+        img_strind=strtrim(string(ii+1),2)
+        if img_strind lt 100 then img_strind='0'+img_strind
+        if img_strind lt 10 then img_strind='0'+img_strind
+        command='ln -s '+imgs[ii]+' '+tmpdir+'tmpim_'+img_strind+'.png'
+        spawn,command
+     endfor
+     imgfnames=tmpdir+'tmpim_%03d.png'
 
 
-if file_test(moviefname) and not keyword_set(force) then begin
-   print,'This movie file exists. To overwrite, rerun with /force. Quitting...'
-   print,'----'
-   return
-endif
+     if file_test(moviefname) and not keyword_set(force) then begin
+        print,'This movie file exists. To overwrite, rerun with /force. Continuing...'
+        print,'----'
+        continue
+     endif
 
-command = process + fps + path_call + imgfnames + ffmpeg_params1 + fps + ffmpeg_params2 + moviefname
-spawn, command
+     command = process + fps + path_call + imgfnames + ffmpeg_params1 + fps + ffmpeg_params2 + moviefname
+     spawn, command
 
-print,''
-print,'Success!'
-print,'----'
+     print,''
+     print,'Success!'
+     print,'----'
 
 ;Remove the temporary folder
-spawn,'rm -rf '+tmpdir
-
+     spawn,'rm -rf '+tmpdir
+  endfor
 end                             ; EOF
 
 

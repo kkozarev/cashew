@@ -79,11 +79,11 @@ pro pfss_shock_run_csgs_lateral,event,plot=plot,png=png,hires=hires,lores=lores,
   
   savepath=event.savepath
   datapath=savepath
-  pfsspath=event.pfsspath
+  mfhcpath=event.mfhcpath
   
   
-  pfssfile=file_search(pfsspath+event.pfss.loresmap_savename)
-  if keyword_set(hires) then pfssfile=file_search(pfsspath+event.pfss.hiresmap_savename)
+  pfssfile=file_search(mfhcpath+event.pfss.loresmap_savename)
+  if keyword_set(hires) then pfssfile=file_search(mfhcpath+event.pfss.hiresmap_savename)
   
   aiafile=file_search(datapath+replace_string(event.aia_subdata_savename,'WAV',wav))
   shockfile=file_search(event.annuluspath+replace_string(event.annplot.analyzed.radial.avg_savename,'WAV',wav))
@@ -119,21 +119,21 @@ pro pfss_shock_run_csgs_lateral,event,plot=plot,png=png,hires=hires,lores=lores,
 ;--------------------------------------------------------------
 ;Constants and definitions
   loadct,8,/silent
-  sp=rad_data.timefitrange[0]
-  ep=rad_data.timefitrange[1]
-  time=(rad_data.time[sp:ep].relsec-rad_data.time[sp].relsec)                              
+  sp=lat_data.timefitrange[0]
+  ep=lat_data.timefitrange[1]
+  time=(lat_data.time[sp:ep].relsec-lat_data.time[sp].relsec)                              
   RSUN=ind_arr[0].rsun_ref/1000. ;Solar radius in km.  
   KMPX=ind_arr[0].IMSCL_MP*ind_arr[0].RSUN_REF/(1000.0*ind_arr[0].RSUN_OBS)
   if keyword_set(newtimes) then begin
      newtime=aiatime
-     pfss_shock_generate_csgs_radii,ind_arr,rad_data,radiusfitlines,newtime=newtime,tindrange=tindrange
+     pfss_shock_generate_csgs_radii,ind_arr,lat_data,radiusfitlines,newtime=newtime,tindrange=tindrange
      time=newtime
      sp=tindrange[0]
      ep=tindrange[1]
   endif else begin
-     pfss_shock_generate_csgs_radii,ind_arr,rad_data,radiusfitlines
+     pfss_shock_generate_csgs_radii,ind_arr,lat_data,radiusfitlines
   endelse
-  radiusfitlines*=RSUN ;*event.geomcorfactor
+  radiusfitlines=RSUN ;*event.geomcorfactor
   radius=radiusfitlines/kmpx
   nsteps=n_elements(time)
   lon=event.arlon
@@ -149,7 +149,7 @@ pro pfss_shock_run_csgs_lateral,event,plot=plot,png=png,hires=hires,lores=lores,
   minshockrad=radius[0]/kmpx
   maxshockrad=radius[nsteps-1]/kmpx
 
-  ;Get the proper indices for the AIA subindex array based on rad_data times
+  ;Get the proper indices for the AIA subindex array based on lat_data times
   match2,lat_data.time[sp:ep].date_obs,subindex.date_obs,suba,tmp
   subindex=subindex[suba]
   
@@ -515,7 +515,7 @@ pro pfss_shock_run_csgs_lateral,event,plot=plot,png=png,hires=hires,lores=lores,
            stp=strtrim(string(sstep),2)
            if stp lt 100 then stp='0'+stp
            if stp lt 10 then stp='0'+stp
-           write_png,pfsspath+'aia_pfss_shock_'+event.date+'_'+event.label+'_'+stp+'.png',image,rr,gg,bb
+           write_png,mfhcpath+'aia_pfss_shock_'+event.date+'_'+event.label+'_'+stp+'.png',image,rr,gg,bb
         endif
         
      endfor;--------------- END TIMESTEP LOOP! ---------------
@@ -582,8 +582,8 @@ pro pfss_shock_run_csgs_lateral,event,plot=plot,png=png,hires=hires,lores=lores,
      event=load_events_info(label=event.label)
      fname=event.csgs.hires.map_savename
      if keyword_set(lores) then fname=event.csgs.lores.map_savename
-     print,'Saving file '+pfsspath+fname
-     save,filename=pfsspath+fname,$
+     print,'Saving file '+mfhcpath+fname
+     save,filename=mfhcpath+fname,$
           allcrosses,dt,radius,time,rotationAngles,crossPoints,carrlon,carrlat,$
           suncenter,nsteps,sc,radiusfitlines,subindex,$
           vertex_list,vert_rotmat,vert_transmat

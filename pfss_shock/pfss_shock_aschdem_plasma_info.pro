@@ -1,5 +1,4 @@
-pro test_pfss_shock_aschdem_plasma_info
-;A program to test pfss_shock_aschdem_plasma_info
+pro test_pfss_shock_aschdem_plasma_info ;A program to test pfss_shock_aschdem_plasma_info
   
  ;You can run for one event, like this.
   one=1
@@ -56,7 +55,7 @@ pro pfss_shock_aschdem_plasma_info,event,hires=hires,lores=lores,force=force
   ;restore the crossing points
   savename=event.csgs.lores.map_savename
   if keyword_set(hires) then savename=event.csgs.hires.map_savename
-  savepath=event.pfsspath
+  savepath=event.mfhcpath
   if file_exist(savepath+savename) then begin
      restore,savepath+savename
      if not keyword_set(force) then begin

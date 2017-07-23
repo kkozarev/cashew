@@ -25,13 +25,13 @@ pro pfss_get_field_line_info,event,pfssLines=pfssLines,lores=lores,hires=hires,p
 @pfss_data_block
   
   ;Load the PFSS results, and use the information to create the structure
-  pfsspath=event.pfsspath
+  mfhcpath=event.mfhcpath
   date=event.date
   label=event.label
- ; pfssfname=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_lores.sav')
- ; if keyword_set(hires) then pfssfname=file_search(pfsspath+'pfss_results_'+date+'_'+label+'_hires.sav')
-  pfssfname=file_search(pfsspath+event.pfss.loresmap_savename)
-  if keyword_set(hires) then pfssfname=file_search(pfsspath+event.pfss.hiresmap_savename)
+ ; pfssfname=file_search(mfhcpath+'pfss_results_'+date+'_'+label+'_lores.sav')
+ ; if keyword_set(hires) then pfssfname=file_search(mfhcpath+'pfss_results_'+date+'_'+label+'_hires.sav')
+  pfssfname=file_search(mfhcpath+event.pfss.loresmap_savename)
+  if keyword_set(hires) then pfssfname=file_search(mfhcpath+event.pfss.hiresmap_savename)
   if keyword_set(pfssfile) then pfssfname=pfssfile
   
   ;Load the PFSS model results
@@ -72,4 +72,5 @@ pro pfss_get_field_line_info,event,pfssLines=pfssLines,lores=lores,hires=hires,p
 ;      theta and phi are respectively the colatitude and
 ;      longitude in radians.
      pfss_to_spherical,sph_data
+     event=load_events_info(label=event.label)
 end

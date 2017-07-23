@@ -37,13 +37,13 @@ pro pfss_shock_plot_csgs,event,png=png
   eventname='AIA_'+date+'_'+evnum+'_'+wav
   savepath=event.savepath
   datapath=savepath
-  pfsspath=event.pfsspath
+  mfhcpath=event.mfhcpath
   
   wavefile=event.annuluspath+'annplot_'+date+'_'+label+'_'+wav+'_analyzed.sav'
   aiafile=event.savepath+'normalized_'+eventname+'_subdata.sav'
   
   ;Find a file to load with the latest results of applying the CSGS model
-  csgsfile=find_latest_file(event.pfsspath+'csgs_results_*') 
+  csgsfile=find_latest_file(event.mfhcpath+'csgs_results_*') 
   if csgsfile eq '' then begin
      print,'The CSGS file is not properly set or does not exist. Quitting.'
      return
@@ -191,7 +191,7 @@ pro pfss_shock_plot_csgs,event,png=png
         stp=strtrim(string(sstep),2)
         if stp lt 100 then stp='0'+stp
         if stp lt 10 then stp='0'+stp
-        write_png,pfsspath+'aia_pfss_shock_'+event.date+'_'+event.label+'_'+stp+'.png',image,rr,gg,bb
+        write_png,mfhcpath+'aia_pfss_shock_'+event.date+'_'+event.label+'_'+stp+'.png',image,rr,gg,bb
      endif
      
   endfor ;END TIMESTEP LOOP

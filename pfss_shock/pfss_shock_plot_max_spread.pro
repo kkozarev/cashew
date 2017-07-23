@@ -21,7 +21,7 @@ pro pfss_shock_plot_max_spread,event
 ;
 return
  ;Find a file to load with the latest results of the CSGS model
-  csgsfile=find_latest_file(event.pfsspath+'csgs_results_*') 
+  csgsfile=find_latest_file(event.mfhcpath+'csgs_results_*') 
   if csgsfile eq '' then begin
      print,'The CSGS file is not properly set or does not exist. Quitting.'
      return

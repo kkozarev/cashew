@@ -28,7 +28,7 @@ pro fit_wave_kinematics_radial,rad_data,ind_arr,front=front,peak=peak,back=back
   
   if keyword_set(front) then begin
      print,''
-     print,'Fitting  a Savitzky-Golay filter to the wave front edge positions...' 
+     print,'Fitting  a second-order polynomial and a Savitzky-Golay filter to the wave front edge positions...' 
      ;Do the fitting of the front edge positions
      dist=reform(rad_data.wave_frontedge[sp:ep].rad)
   endif

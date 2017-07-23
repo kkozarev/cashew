@@ -4,7 +4,7 @@ one=1
   if one eq 1 then begin
      labels=['110511_01','131212_01','130517_01','130423_01','120915_01','120526_01',$
              '120424_01','110607_01','110211_02','110125_01']
-     labels=['110125_01']
+     labels=['131212_01']
      for ev=0,n_elements(labels)-1 do begin
         label=labels[ev]
         event=load_events_info(label=label)
@@ -49,13 +49,14 @@ pro pfss_shock_plot_radio_spectrum, event,lores=lores,hires=hires
   close,/all
   evnum=event.label
   datapath=event.savepath
-  pfsspath=event.pfsspath
+  mfhcpath=event.mfhcpath
 
 ;1. Load the results from the shock modeling
   ;Find a file to load with the latest results of applying the CSGS model
-  ;csgsfile=find_latest_file(event.pfsspath+'csgs_results_*')
-  csgsfile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_lores.sav')
-  if keyword_set(hires) then csgsfile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_hires.sav')
+  ;csgsfile=find_latest_file(event.mfhcpath+'csgs_results_*')
+  csgsfile=file_search(event.mfhcpath+'csgs_results_'+event.date+'_'+event.label+'_lores.sav')
+  if keyword_set(hires) then csgsfile=file_search(event.mfhcpath+'csgs_results_'+event.date+'_'+event.label+'_hires.sav')
+  
   if csgsfile[0] eq '' then begin
      print,'The file to load is not properly set or does not exist. Quitting.'
      return
@@ -69,7 +70,7 @@ if csgsfile eq '' then begin
   ;Load the CSGS model results
   print ,'Loading CSGS File '+csgsfile
   restore,csgsfile
-  
+   
   dt=time[1:nsteps-1]-time[0:nsteps-2]
   strtime=subindex[*].date_obs
   tm=anytim2jd(strtime)
@@ -116,15 +117,15 @@ if csgsfile eq '' then begin
  
 ;  maxf=0.0
 ;  minf=1.0e20
-  minf=1.0
-  maxf=45.
+  minf=10.0
+  maxf=100.
   
   for sstep=0,nsteps-2 do begin
      ncrosses=allcrosses[sstep]
      thb=crossPoints[sstep,0:ncrosses-1].thbn
      invcosthb=(1./(cos(!PI/180.*thb))^2)
-     minf=1.0
-     maxf=45.
+     minf=10.0
+     maxf=100.
      ;stop
      rmag=reform(sqrt(crossPoints[sstep,0:ncrosses-1].rpx^2+$
                       crossPoints[sstep,0:ncrosses-1].rpy^2+$
@@ -132,7 +133,7 @@ if csgsfile eq '' then begin
      dens=cordens(rmag)
      freq=8898.0*sqrt(dens)/1.0e6 ;Frequency in MHz
      sorted_freq=freq[sort(freq)]
-     
+     sorted_invcosthb=invcosthb[sort(freq)]
      ;vshock=radiusmoments[sstep,1]
      ;shockInt=(vshock/100.0)^16*exp((100.0-vshock)/100.0)^2.2
      ;stop
@@ -143,7 +144,7 @@ if csgsfile eq '' then begin
         ymax=sorted_freq[i+1];+1.0 ;Bin in 1 MHz frequency bins
         polyfill,[xmin,xmax,xmax,xmin],$
                  [ymin,ymin,ymax,ymax],$
-                 color=254.0*((invcosthb[i]-minf)/(maxf-minf)),/data
+                 color=254.0*((sorted_invcosthb[i]-minf)/(maxf-minf)),/data
 ;                 color=254.0*((thb[i]-min(thb))/(90.0-min(thb))),/data
 
 

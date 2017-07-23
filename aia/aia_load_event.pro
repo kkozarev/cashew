@@ -1,11 +1,11 @@
 pro test_aia_load_event
 ;Test the loading of aia data for events
   
-  labels=['151104_01','151104_01']
+  labels=['131212_01']
   for ev=0,n_elements(labels)-1 do begin
      label=labels[ev]
      event=load_events_info(label=label)
-        aia_load_event,event
+     aia_load_event,event
   endfor
   
 end
@@ -50,7 +50,7 @@ pro aia_load_event,event,index=index,data=data,coords=coords,map=map,subdata=sub
 ;Added a nodata keyword, streamlined to work with event structure - KAK 11/14/2013
 ;Turned into a proper wrapper - KAK 05/27/2013
 
-if keyword_set(subindex) then help,subindex
+  if keyword_set(subindex) then help,subindex
   waves=['94','131','171','193','211','335']
   if keyword_set(force) then force=1
 ;1. Load the subroi data for all EUV wavelengths. Use aia_load_data

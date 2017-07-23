@@ -37,7 +37,7 @@ pro pfss_plot_field_lines,event,hires=hires,lores=lores,pfssLines=pfssLines
   eventname='AIA_'+date+'_'+evnum+'_'+wav
   savepath=event.savepath
   datapath=savepath
-  pfsspath=event.pfsspath
+  mfhcpath=event.mfhcpath
 
 
 ;+==============================================================================
@@ -58,9 +58,9 @@ pro pfss_plot_field_lines,event,hires=hires,lores=lores,pfssLines=pfssLines
   endelse
   
   ;Find a file to load with the latest results of applying the CSGS model
-  ;csgsfile=find_latest_file(event.pfsspath+'csgs_results_*')
-  csgsfile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_lores.sav')
-  if keyword_set(hires) then csgsfile=file_search(event.pfsspath+'csgs_results_'+event.date+'_'+event.label+'_hires.sav')
+  ;csgsfile=find_latest_file(event.mfhcpath+'csgs_results_*')
+  csgsfile=file_search(event.mfhcpath+'csgs_results_'+event.date+'_'+event.label+'_lores.sav')
+  if keyword_set(hires) then csgsfile=file_search(event.mfhcpath+'csgs_results_'+event.date+'_'+event.label+'_hires.sav')
   if csgsfile eq '' then begin
      print,'The CSGS file is not properly set or does not exist. Quitting.'
      return
@@ -160,7 +160,7 @@ pro pfss_plot_field_lines,event,hires=hires,lores=lores,pfssLines=pfssLines
   image=tvrd(true=1)
   resolution='lores'
   if keyword_set(hires) then resolution='hires'
-  write_png,pfsspath+'aia_pfss_'+event.date+'_'+event.label+'_field_lines_'+resolution+'.png',image,rr,gg,bb
+  write_png,mfhcpath+'aia_pfss_'+event.date+'_'+event.label+'_field_lines_'+resolution+'.png',image,rr,gg,bb
   set_plot,'x'
 ;+==============================================================================
 

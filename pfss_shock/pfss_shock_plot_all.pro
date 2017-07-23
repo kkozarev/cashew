@@ -1,7 +1,7 @@
 pro test_pfss_shock_plot_all
-event=load_events_info(label='paper')
-pfss_shock_plot_all,event,/hires
-pfss_shock_plot_all,event,/lores
+event=load_events_info(label='110607_01')
+;pfss_shock_plot_all,event,/hires,/force
+pfss_shock_plot_all,event,/lores,/force
 end
 
 pro pfss_shock_plot_all,event,_extra=_extra;lores=lores,hires=hires,

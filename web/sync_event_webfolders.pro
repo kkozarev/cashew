@@ -71,7 +71,7 @@ pro sync_event_webfolders,event,force=force, local=local
      if folder eq 'pfss' then begin
         files = file_search(path+folder+'/*.png')
         if files[0] eq '' or keyword_set(force) then $
-           spawn,'cp '+event.pfsspath+'*.png '+path+folder
+           spawn,'cp '+event.mfhcpath+'*.png '+path+folder
      endif
      
      if folder eq 'swap' then begin

@@ -307,13 +307,13 @@ function cashew_create_catalog_report_main,event
 
   ;PFSS hires map
   result+='"pfss_hires_map":'
-  if file_exist(event.pfsspath+event.pfss.hiresmap_savename) then $
+  if file_exist(event.mfhcpath+event.pfss.hiresmap_savename) then $
      result+=YES else result+=NO
   result+=','
   
   ;PFSS lores map
     result+='"pfss_lores_map":'
-  if file_exist(event.pfsspath+event.pfss.loresmap_savename) then $
+  if file_exist(event.mfhcpath+event.pfss.loresmap_savename) then $
      result+=YES else result+=NO
   result+=','
 
@@ -322,61 +322,61 @@ function cashew_create_catalog_report_main,event
   result+='"csgs_hires":{'
   ;map
   result+='"map":'
-  if file_exist(event.pfsspath+event.csgs.hires.map_savename) then $
+  if file_exist(event.mfhcpath+event.csgs.hires.map_savename) then $
      result+=YES else result+=NO
   result+=','
   
   ;Thetabn plotfile
   result+='"thetabn_plot_savename":'
-  if file_exist(event.pfsspath+replace_string(event.csgs.hires.thetabn.plot_savename,'NNN','???')) then $
+  if file_exist(event.mfhcpath+replace_string(event.csgs.hires.thetabn.plot_savename,'NNN','???')) then $
      result+=YES else result+=NO
   result+=','
   
   ;Thetabn overplotfile
   result+='"thetabn_overplot_savename":'
-  if file_exist(event.pfsspath+replace_string(event.csgs.hires.thetabn.overplot_savename,'NNN','???')) then $
+  if file_exist(event.mfhcpath+replace_string(event.csgs.hires.thetabn.overplot_savename,'NNN','???')) then $
      result+=YES else result+=NO
   result+=','
   
   ;Thetabn overplotfile
   result+='"anginfluence_plot_savename":'
-  if file_exist(event.pfsspath+replace_string(event.csgs.hires.anginfluence.plot_savename,'NNN','???')) then $
+  if file_exist(event.mfhcpath+replace_string(event.csgs.hires.anginfluence.plot_savename,'NNN','???')) then $
      result+=YES else result+=NO
   result+=','
   
   ;Thetabn overplotfile
   result+='"anginfluence_topview_plot_savename":'
-  if file_exist(event.pfsspath+replace_string(event.csgs.hires.anginfluence.topview_plot_savename,'NNN','???')) then $
+  if file_exist(event.mfhcpath+replace_string(event.csgs.hires.anginfluence.topview_plot_savename,'NNN','???')) then $
      result+=YES else result+=NO
   result+=','
   
   ;Thetabn stats timeplot
   result+='"thetabn_stats_timeplot":'
-  if file_exist(event.pfsspath+event.csgs.hires.thetabn.stats.timeplot_savename) then $
+  if file_exist(event.mfhcpath+event.csgs.hires.thetabn.stats.timeplot_savename) then $
      result+=YES else result+=NO
   result+=','
   
   ;Thetabn stats crossings
   result+='"thetabn_stats_crossings":'
-  if file_exist(event.pfsspath+event.csgs.hires.thetabn.stats.crossings_savename) then $
+  if file_exist(event.mfhcpath+event.csgs.hires.thetabn.stats.crossings_savename) then $
      result+=YES else result+=NO
   result+=','
   
     ;Thetabn stats crossings
   result+='"thetabn_stats_timeradpos":'
-  if file_exist(event.pfsspath+event.csgs.hires.thetabn.stats.timeradpos_savename) then $
+  if file_exist(event.mfhcpath+event.csgs.hires.thetabn.stats.timeradpos_savename) then $
      result+=YES else result+=NO
   result+=','
 
     ;Thetabn stats crossings
   result+='"thetabn_stats_timeradposbinned":'
-  if file_exist(event.pfsspath+event.csgs.hires.thetabn.stats.timeradposbinned_savename) then $
+  if file_exist(event.mfhcpath+event.csgs.hires.thetabn.stats.timeradposbinned_savename) then $
      result+=YES else result+=NO
   result+=','
 
     ;Thetabn stats crossings
   result+='"thetabn_stats_distance":'
-  if file_exist(event.pfsspath+event.csgs.hires.thetabn.stats.distance_savename) then $
+  if file_exist(event.mfhcpath+event.csgs.hires.thetabn.stats.distance_savename) then $
      result+=YES else result+=NO
   result+='},'
   
@@ -385,62 +385,62 @@ function cashew_create_catalog_report_main,event
   result+='"csgs_lores":{'
   ;map
   result+='"map":'
-  if file_exist(event.pfsspath+event.csgs.lores.map_savename) then $
+  if file_exist(event.mfhcpath+event.csgs.lores.map_savename) then $
      result+=YES else result+=NO
   result+=','
   
   ;Thetabn plotfile
   result+='"thetabn_plot_savename":'
-  ;print,event.pfsspath+replace_string(event.csgs.lores.thetabn.plot_savename,'NNN','???')
-  if file_exist(event.pfsspath+replace_string(event.csgs.lores.thetabn.plot_savename,'NNN','???')) then $
+  ;print,event.mfhcpath+replace_string(event.csgs.lores.thetabn.plot_savename,'NNN','???')
+  if file_exist(event.mfhcpath+replace_string(event.csgs.lores.thetabn.plot_savename,'NNN','???')) then $
      result+=YES else result+=NO
   result+=','
   
   ;Thetabn overplotfile
   result+='"thetabn_overplot_savename":'
-  if file_exist(event.pfsspath+replace_string(event.csgs.lores.thetabn.overplot_savename,'NNN','???')) then $
+  if file_exist(event.mfhcpath+replace_string(event.csgs.lores.thetabn.overplot_savename,'NNN','???')) then $
      result+=YES else result+=NO
   result+=','
   
   ;Thetabn overplotfile
   result+='"anginfluence_plot_savename":'
-  if file_exist(event.pfsspath+replace_string(event.csgs.lores.anginfluence.plot_savename,'NNN','???')) then $
+  if file_exist(event.mfhcpath+replace_string(event.csgs.lores.anginfluence.plot_savename,'NNN','???')) then $
      result+=YES else result+=NO
   result+=','
   
   ;Thetabn overplotfile
   result+='"anginfluence_topview_plot_savename":'
-  if file_exist(event.pfsspath+replace_string(event.csgs.lores.anginfluence.topview_plot_savename,'NNN','???')) then $
+  if file_exist(event.mfhcpath+replace_string(event.csgs.lores.anginfluence.topview_plot_savename,'NNN','???')) then $
      result+=YES else result+=NO
   result+=','
   
   ;Thetabn stats timeplot
   result+='"thetabn_stats_timeplot":'
-  if file_exist(event.pfsspath+event.csgs.lores.thetabn.stats.timeplot_savename) then $
+  if file_exist(event.mfhcpath+event.csgs.lores.thetabn.stats.timeplot_savename) then $
      result+=YES else result+=NO
   result+=','
   
   ;Thetabn stats crossings
   result+='"thetabn_stats_crossings":'
-  if file_exist(event.pfsspath+event.csgs.lores.thetabn.stats.crossings_savename) then $
+  if file_exist(event.mfhcpath+event.csgs.lores.thetabn.stats.crossings_savename) then $
      result+=YES else result+=NO
   result+=','
   
     ;Thetabn stats crossings
   result+='"thetabn_stats_timeradpos":'
-  if file_exist(event.pfsspath+event.csgs.lores.thetabn.stats.timeradpos_savename) then $
+  if file_exist(event.mfhcpath+event.csgs.lores.thetabn.stats.timeradpos_savename) then $
      result+=YES else result+=NO
   result+=','
 
     ;Thetabn stats crossings
   result+='"thetabn_stats_timeradposbinned":'
-  if file_exist(event.pfsspath+event.csgs.lores.thetabn.stats.timeradposbinned_savename) then $
+  if file_exist(event.mfhcpath+event.csgs.lores.thetabn.stats.timeradposbinned_savename) then $
      result+=YES else result+=NO
   result+=','
 
     ;Thetabn stats crossings
   result+='"thetabn_stats_distance":'
-  if file_exist(event.pfsspath+event.csgs.lores.thetabn.stats.distance_savename) then $
+  if file_exist(event.mfhcpath+event.csgs.lores.thetabn.stats.distance_savename) then $
      result+=YES else result+=NO
   result+='},'
 

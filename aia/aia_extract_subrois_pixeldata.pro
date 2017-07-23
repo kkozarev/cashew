@@ -50,7 +50,7 @@ pro aia_extract_subrois_pixeldata,event, path=path, wav=wav
   if not keyword_set(path) then path=event.savepath
   label=event.label
   date=event.date
-  dempath=event.aschdempath
+  dtcpath=event.aschdempath
   ionizpath=event.ionizationpath
   subroisfile=ionizpath+'rois_'+date+'_'+label+'.sav'
   if find_file(subroisfile) eq '' then begin
@@ -80,7 +80,7 @@ pro aia_extract_subrois_pixeldata,event, path=path, wav=wav
 
 ;Find all of the files from the Aschwanden DEM run.
 ;demfile='aschdem_'+date+'_'+label+'*_teem_map.sav'
-;demfiles=file_search(dempath,demfile)
+;demfiles=file_search(dtcpath,demfile)
 ;totdemfile='aschdem_'+date+'_'+label+'*_teem_tot.sav'
 
 ;Load the AIA data and extract the pixel regions
@@ -100,7 +100,7 @@ pro aia_extract_subrois_pixeldata,event, path=path, wav=wav
      endfor
   endfor
   
-;totdemfiles=file_search(dempath,totdemfile)
+;totdemfiles=file_search(dtcpath,totdemfile)
 ;if demfiles[0] eq '' then begin
 ;   print,''
 ;   print,'Files '+demfile+' do not exist. Quitting...'
@@ -152,7 +152,7 @@ pro aia_extract_subrois_pixeldata,event, path=path, wav=wav
   endfor
 
 
-  save,filename=dempath+'aschdem_'+date+'_'+label+'_teem_map_subrois.sav',chidata,emdata,sigdata,tedata,times,waves,npix,roi_positions,roi_subindex,roi_radheight
+  save,filename=dtcpath+'aschdem_'+date+'_'+label+'_teem_map_subrois.sav',chidata,emdata,sigdata,tedata,times,waves,npix,roi_positions,roi_subindex,roi_radheight
 
 
 end

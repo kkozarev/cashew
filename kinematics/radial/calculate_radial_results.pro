@@ -3,6 +3,7 @@ pro test_calculate_radial_results
   events=['100613_01','101103_02','101231_01','110125_01','110211_02','110327_01','110515_01','110607_01','110904_01','120307_01','120424_01','120526_01','120728_01','120915_01','121007_01','130423_01','130501_01','130517_01','131107_01','131207_01','131212_01','140217_01','140708_01','140901_01','141105_02','141205_01','150303_01','150421_01','150920_01','151109_01']
   events=['100613_01','101103_02']
   events=['151104_01']
+  events=['110607_01','131212_01']
   nevents=n_elements(events)
   for ev=0,nevents-1 do begin
      event_label=events[ev]
@@ -75,13 +76,43 @@ pro calculate_radial_results,event,ps=ps
 ;Then you load the data for each measurement, and so you loop over measurements:
   for mm=0,nmeas-1 do begin
      restore, fnames[mm]
+     if mm eq 0 then begin
+          rad_data_average={type:'radial',$
+                     label:rad_data.label,$
+                     wav:rad_data.wav,$
+                     time:rad_data.time,$
+                     y_rsun_array:rad_data.y_rsun_array,$
+                     y_arcsec_array:rad_data.y_arcsec_array,$
+                     x_deg_array:rad_data.x_deg_array,$
+                     data:rad_data.data,$
+                     origdata:rad_data.data,$
+                     diffdata:rad_data.data,$
+                     radfitrange:rad_data.radfitrange,$
+                     timefitrange:rad_data.timefitrange,$
+                     fitparams:rad_data.fitparams,$
+                     fitsigma:rad_data.fitsigma,$
+                     kinfittimerange:rad_data.kinfittimerange,$
+                     savgolfits:rad_data.savgolfits,$                   
+                     maxinds:rad_data.maxinds,$
+                     wave_frontedge:replicate({rad:0.0D, stdv:0.0D, val:0.0D, yind:0L, xind:0L},ntimes),$
+                     wave_backedge:replicate({rad:0.0D, stdv:0.0D, val:0.0D, yind:0L, xind:0L},ntimes),$
+                     wave_peak:replicate({rad:0.0D, stdv:0.0D, val:0.0D, yind:0L, xind:0L},ntimes),$
+                     wavethick:fltarr(ntimes),$
+                     avgIntense:fltarr(ntimes)}
+     endif
+     if mean(rad_data.savgolfits.back.speed) eq 0. or $
+        mean(rad_data.savgolfits.front.speed) eq 0. or $
+        mean(rad_data.savgolfits.peak.speed) eq 0. then begin
+        fit_wave_kinematics_radial,rad_data,ind_arr,/front
+        fit_wave_kinematics_radial,rad_data,ind_arr,/peak
+        fit_wave_kinematics_radial,rad_data,ind_arr,/back
+        save,filename=fnames[mm],rad_data,ind_arr,annulus_info
+     endif
      allrad_data[mm]=rad_data
   endfor
   
   
-  
 ;Finds the mean and stddev of all the events
-  rad_data_average=rad_data
   stdintensity=fltarr(ntimes)
   wav_thick_std=fltarr(ntimes)
   stdbackaccel=fltarr(ntimes)
@@ -117,14 +148,21 @@ pro calculate_radial_results,event,ps=ps
      rad_data_average.savgolfits.front[tt].speed=mean(allrad_data.savgolfits.front[tt].speed)
      stdfrontspeed[tt]=stddev(allrad_data.savgolfits.front[tt].speed)
   endfor
-  
+
+  ;Also record the second-order polynomial fits
+  for iii=0,2 do rad_data_average.fitparams[iii].front=mean(allrad_data.fitparams[iii].front)
+  for iii=0,2 do rad_data_average.fitparams[iii].peak=mean(allrad_data.fitparams[iii].peak)
+  for iii=0,2 do rad_data_average.fitparams[iii].back=mean(allrad_data.fitparams[iii].back)
+
   wav='193'
   sp=rad_data_average.timefitrange[0]
   ep=rad_data_average.timefitrange[1]
   timesec = rad_data_average.time.relsec
+  
+  timejd=rad_data_average.time.jd
   avgintensity=rad_data_average.avgIntense
   wav_thick = rad_data_average.wavethick
-
+  
   ;SAVE THE AVERAGED MEASUREMENTS TO A SEPARATE FILE
   event=load_events_info(label=event.label)
   shockfile=event.annuluspath+replace_string(event.annplot.analyzed.radial.avg_savename,'WAV',wav)
@@ -177,7 +215,7 @@ pro calculate_radial_results,event,ps=ps
 
 ;----------Creating the x range--------------
 ;This may need updating in the future
-  xrnge = [rad_data.time[sp].relsec, rad_data.time[ep].relsec]
+  xrnge = [rad_data.time[sp].jd, rad_data.time[ep].jd]
   
   
   
@@ -186,7 +224,7 @@ pro calculate_radial_results,event,ps=ps
   
   
   
-  
+  dummy = LABEL_DATE(DATE_FORMAT=['%H:%I'])
 ;=====================================================================================
 ;           PLOT THE AVERAGED RADIAL POSITIONS GRAPH
 ;=====================================================================================
@@ -230,7 +268,7 @@ pro calculate_radial_results,event,ps=ps
   stdv_b=rad_data_average.wave_backedge.stdv
   
   aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],smoothdata[*,yrng[0]:yrng[1]],min=-10,max=20,$
-                     title='AIA/193 Mean Radial positions',$
+                     title='',charsize=4,$
                      xtitle='Time of ' + strtrim(event.date, 2) ,ytitle='R!DS!N'
   event=load_events_info(label=event.label)
   oplot,[time[xrng[0]].jd,time[xrng[0]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=3
@@ -321,92 +359,106 @@ pro calculate_radial_results,event,ps=ps
   
 ;----------------------PLOT THE AVERAGE WAVE INTENSITY---------------------------
   !p.position = [x0,y1-1*panelysize,x0+panelxsize,y1-0*panelysize]
-  plot, timesec[sp:ep], avgintensity[sp:ep],/xstyle, thick = linethick, $
-        title= "Radial Wave Information, "+strtrim(event.label,2),$
+  plot, timejd[sp:ep], avgintensity[sp:ep],/xstyle, thick = linethick, $
+        title= "Radial Kinematics, "+strtrim(event.label,2),$
         charsize =3, color = 0, background = 255, ytitle ="Wave Mean Intensity",$
-        xrange = xrnge, /ynozero,/ystyle, xthick=linethick,ythick=linethick, XTICKFORMAT="(A1)"
-  oplot,timesec[sp:ep], avgintensity[sp:ep],psym=sym(1),symsize=0.8,color=0
-  oploterr, timesec[sp:ep], avgintensity[sp:ep], stdintensity[sp:ep], errcolor = 0, errthick = 4, /noconnect
+        xrange = xrnge, /ynozero,/ystyle, xthick=linethick,ythick=linethick, XTICKFORMAT="(A1)", XTICKUNITS = ['Time']
+  oplot,timejd[sp:ep], avgintensity[sp:ep],psym=sym(1),symsize=0.8,color=0
+  oploterr, timejd[sp:ep], avgintensity[sp:ep], stdintensity[sp:ep], errcolor = 0, errthick = 4, /noconnect
  
 ;----------------------PLOT THE WAVE THICKNESS---------------------------
   !p.position = [0.11,0.61,0.94,0.79]
   !p.position = [x0,y1-2*panelysize,x0+panelxsize,y1-1*panelysize]
-  plot, timesec[sp:ep], wav_thick[sp:ep],/xstyle, thick = linethick, color = 0, $
+  plot, timejd[sp:ep], wav_thick[sp:ep],/xstyle, thick = linethick, color = 0, $
         background = 255, ytitle ="Wave Thickness [R!Ds!N]",$
         charsize =3, xrange = xrnge, /ynozero,/ystyle, xthick=linethick,ythick=linethick,$
-        XTICKFORMAT="(A1)"
-  oplot,timesec[sp:ep], wav_thick[sp:ep], psym=sym(1),symsize=0.8,color=0
-  oploterr, timesec[sp:ep], wav_thick[sp:ep], wav_thick_std[sp:ep], errcolor = 0, errthick = 4, /noconnect
+        XTICKFORMAT="(A1)", XTICKUNITS = ['Time']
+  oplot,timejd[sp:ep], wav_thick[sp:ep], psym=sym(1),symsize=0.8,color=0
+  oploterr, timejd[sp:ep], wav_thick[sp:ep], wav_thick_std[sp:ep], errcolor = 0, errthick = 4, /noconnect
   
 ;----------------------PLOT THE WAVE ACCELERATION---------------------------
   !p.position = [0.11,0.41,0.94,0.59]
   !p.position = [x0,y1-3*panelysize,x0+panelxsize,y1-2*panelysize]
-  plot, timesec[sp:ep], rad_data_average.savgolfits.front[sp:ep].accel, thick=linethick, $
+  plot, timejd[sp:ep], rad_data_average.savgolfits.front[sp:ep].accel, thick=linethick, $
         /xstyle, color = 0, background = 255, xthick=linethick,ythick=linethick,$
         ytitle ="Acceleration [m/s]", charsize = 3 ,/ystyle,$
-        xrange = xrnge, /ynozero, /nodata, yrange = yrnge_accel, XTICKFORMAT="(A1)"
+        xrange = xrnge, /ynozero, /nodata, yrange = yrnge_accel, XTICKFORMAT="(A1)", XTICKUNITS = ['Time']
   loadct, 13, /silent
   xyouts, !p.position[0]+0.012, !p.position[3]-1*strdy, 'Front', color = cfront, /normal, charsize = 1.3, charthick = 1.5
   xyouts, !p.position[0]+0.012, !p.position[3]-2*strdy, 'Peak', color = cpeak, /normal, charsize = 1.3, charthick = 1.5
   xyouts, !p.position[0]+0.012, !p.position[3]-3*strdy, 'Back', color = cback, /normal, charsize = 1.3, charthick = 1.5
-  oplot, timesec[sp:ep], rad_data_average.savgolfits.back[sp:ep].accel, thick=linethick, color = cback
-  oplot, timesec[sp:ep], rad_data_average.savgolfits.back[sp:ep].accel,psym=sym(1),symsize=0.8,color=cback
-  oploterr, timesec[sp:ep], rad_data_average.savgolfits.back[sp:ep].accel, stdbackaccel[sp:ep], errcolor = cback, errthick = 4, /noconnect
-  oplot, timesec[sp:ep], rad_data_average.savgolfits.front[sp:ep].accel, thick=linethick, color = cfront
-  oplot, timesec[sp:ep], rad_data_average.savgolfits.front[sp:ep].accel,psym=sym(1),symsize=0.8,color=cfront
-  oploterr, timesec[sp:ep], rad_data_average.savgolfits.front[sp:ep].accel, stdfrontaccel[sp:ep], errcolor = cfront, errthick = 4, /noconnect
-  oplot, timesec[sp:ep], rad_data_average.savgolfits.peak[sp:ep].accel, thick=linethick, color = cpeak
-  oplot, timesec[sp:ep], rad_data_average.savgolfits.peak[sp:ep].accel,psym=sym(1),symsize=0.8,color=cpeak
-  oploterr, timesec[sp:ep], rad_data_average.savgolfits.peak[sp:ep].accel, stdpeakaccel[sp:ep], errcolor = cpeak, errthick = 4, /noconnect
+
+  oplot, timejd[sp:ep], rad_data_average.savgolfits.front[sp:ep].accel, thick=linethick, color = cfront,linestyle=0
+  oplot, timejd[sp:ep], rad_data_average.savgolfits.front[sp:ep].accel,psym=sym(1),symsize=0.8,color=cfront
+  oploterr, timejd[sp:ep], rad_data_average.savgolfits.front[sp:ep].accel, stdfrontaccel[sp:ep], errcolor = cfront, errthick = 4, /noconnect
+  oplot,timejd[sp:ep],fltarr(ep-sp+1)+mean(rad_data_average.savgolfits.front[sp:ep].accel), thick=linethick, color = cfront,linestyle=0
+
+  oplot, timejd[sp:ep], rad_data_average.savgolfits.peak[sp:ep].accel, thick=linethick, color = cpeak,linestyle=2
+  oplot, timejd[sp:ep], rad_data_average.savgolfits.peak[sp:ep].accel,psym=sym(1),symsize=0.8,color=cpeak
+  oploterr, timejd[sp:ep], rad_data_average.savgolfits.peak[sp:ep].accel, stdpeakaccel[sp:ep], errcolor = cpeak, errthick = 4, /noconnect
+  oplot,timejd[sp:ep],fltarr(ep-sp+1)+mean(rad_data_average.savgolfits.peak[sp:ep].accel), thick=linethick, color = cpeak,linestyle=2
+  
+  oplot, timejd[sp:ep], rad_data_average.savgolfits.back[sp:ep].accel, thick=linethick, color = cback,linestyle=3
+  oplot, timejd[sp:ep], rad_data_average.savgolfits.back[sp:ep].accel,psym=sym(1),symsize=0.8,color=cback
+  oploterr, timejd[sp:ep], rad_data_average.savgolfits.back[sp:ep].accel, stdbackaccel[sp:ep], errcolor = cback, errthick = 4, /noconnect
+  oplot,timejd[sp:ep],fltarr(ep-sp+1)+mean(rad_data_average.savgolfits.back[sp:ep].accel), thick=linethick, color = cback,linestyle=3
+  
   loadct, 0, /silent
 
 ;----------------------PLOT THE WAVE SPEEDS---------------------------
   !p.position = [0.11,0.21,0.94,0.39]
   !p.position = [x0,y1-4*panelysize,x0+panelxsize,y1-3*panelysize]
-  plot, timesec[sp:ep], rad_data_average.savgolfits.back[sp:ep].speed, thick=linethick, /xstyle, color = 0, background = 255,$
+  plot, timejd[sp:ep], rad_data_average.savgolfits.back[sp:ep].speed, thick=linethick, /xstyle, color = 0, background = 255,$
         ytitle ="Speed [km/s]", charsize =3, xrange = xrnge, /ynozero, /nodata,/ystyle,$
-        yrange = yrnge_speed, XTICKFORMAT="(A1)", xthick=linethick,ythick=linethick
+        yrange = yrnge_speed, XTICKFORMAT="(A1)", xthick=linethick,ythick=linethick, XTICKUNITS = ['Time']
   loadct, 13, /silent
   xyouts, !p.position[0]+0.012, !p.position[3]-1*strdy, 'Front', color = cfront, /normal, charsize = 1.3, charthick = 1.5
   xyouts, !p.position[0]+0.012, !p.position[3]-2*strdy, 'Peak', color = cpeak, /normal, charsize = 1.3, charthick = 1.5
   xyouts, !p.position[0]+0.012, !p.position[3]-3*strdy, 'Back', color = cback, /normal, charsize = 1.3, charthick = 1.5
-  oplot, timesec[sp:ep], rad_data_average.savgolfits.back[sp:ep].speed, thick=linethick, color = cback
-  oplot, timesec[sp:ep], rad_data_average.savgolfits.back[sp:ep].speed,psym=sym(1),symsize=0.8,color=cback
-  oploterr, timesec[sp:ep], rad_data_average.savgolfits.back[sp:ep].speed, stdbackspeed[sp:ep], errcolor = cback, errthick = 4, /noconnect
-  oplot, timesec[sp:ep], rad_data_average.savgolfits.front[sp:ep].speed, thick=linethick, color = cfront
-  oplot, timesec[sp:ep], rad_data_average.savgolfits.front[sp:ep].speed,psym=sym(1),symsize=0.8,color=cfront
-  oploterr, timesec[sp:ep], rad_data_average.savgolfits.front[sp:ep].speed, stdfrontspeed[sp:ep], errcolor = cfront, errthick = 4, /noconnect
-  oplot, timesec[sp:ep], rad_data_average.savgolfits.peak[sp:ep].speed, thick=linethick, color = cpeak
-  oplot, timesec[sp:ep], rad_data_average.savgolfits.peak[sp:ep].speed,psym=sym(1),symsize=0.8,color=cpeak
-  oploterr, timesec[sp:ep], rad_data_average.savgolfits.peak[sp:ep].speed, stdpeakspeed[sp:ep], errcolor = cpeak, errthick = 4, /noconnect
+
+  oplot, timejd[sp:ep], rad_data_average.savgolfits.front[sp:ep].speed, thick=linethick, color = cfront,linestyle=0
+  oplot, timejd[sp:ep], rad_data_average.savgolfits.front[sp:ep].speed,psym=sym(1),symsize=0.8,color=cfront
+  oploterr, timejd[sp:ep], rad_data_average.savgolfits.front[sp:ep].speed, stdfrontspeed[sp:ep], errcolor = cfront, errthick = 4, /noconnect
+  oplot,timejd[sp:ep],fltarr(ep-sp+1)+mean(rad_data_average.savgolfits.front[sp:ep].speed), thick=linethick, color = cfront,linestyle=0
+
+  oplot, timejd[sp:ep], rad_data_average.savgolfits.peak[sp:ep].speed, thick=linethick, color = cpeak,linestyle=2
+  oplot, timejd[sp:ep], rad_data_average.savgolfits.peak[sp:ep].speed,psym=sym(1),symsize=0.8,color=cpeak
+  oploterr, timejd[sp:ep], rad_data_average.savgolfits.peak[sp:ep].speed, stdpeakspeed[sp:ep], errcolor = cpeak, errthick = 4, /noconnect
+  oplot,timejd[sp:ep],fltarr(ep-sp+1)+mean(rad_data_average.savgolfits.peak[sp:ep].speed), thick=linethick, color = cpeak,linestyle=2
+  
+  oplot, timejd[sp:ep], rad_data_average.savgolfits.back[sp:ep].speed, thick=linethick, color = cback,linestyle=3
+  oplot, timejd[sp:ep], rad_data_average.savgolfits.back[sp:ep].speed,psym=sym(1),symsize=0.8,color=cback
+  oploterr, timejd[sp:ep], rad_data_average.savgolfits.back[sp:ep].speed, stdbackspeed[sp:ep], errcolor = cback, errthick = 4, /noconnect
+  oplot,timejd[sp:ep],fltarr(ep-sp+1)+mean(rad_data_average.savgolfits.back[sp:ep].speed), thick=linethick, color = cback,linestyle=3
+  
   loadct, 0, /silent
 
   
 ;----------------------PLOT THE WAVE POSITIONS---------------------------
   !p.position = [0.11,0.035,0.94,0.19]
   !p.position = [x0,y1-5*panelysize,x0+panelxsize,y1-4*panelysize]
-  plot, timesec[sp:ep], rad_data_average.wave_peak[sp:ep].rad,/xstyle, thick = linethick, color = 0, background = 255,$
-        ytitle="Radial position [R!Ds!N]", xtitle = "Time, seconds", charsize = 3,/ystyle, xthick=linethick,ythick=linethick,$
-        xrange = xrnge, /nodata, yrange = yrnge_rad ;, position = plot_pos
+  plot, timejd[sp:ep], rad_data_average.wave_peak[sp:ep].rad,/xstyle, thick = linethick, color = 0, background = 255,$
+        ytitle="Radial position [R!Ds!N]", xtitle = "Time of "+event.date, charsize = 3,/ystyle, xthick=linethick,ythick=linethick,$
+        xrange = xrnge, /nodata, yrange = yrnge_rad, XTICKUNITS = ['Time'],XTICKFORMAT='LABEL_DATE'
   loadct, 13, /silent
   xyouts, !p.position[0]+0.012, !p.position[3]-1*strdy, 'Front', color = cfront, /normal, charsize = 1.3, charthick = 1.5
   xyouts, !p.position[0]+0.012, !p.position[3]-2*strdy, 'Peak', color = cpeak, /normal, charsize = 1.3, charthick = 1.5
   xyouts, !p.position[0]+0.012, !p.position[3]-3*strdy, 'Back', color = cback, /normal, charsize = 1.3, charthick = 1.5
-  
-  oplot, timesec[sp:ep], rad_data_average.wave_backedge[sp:ep].rad, thick=linethick, color = cback
-  oplot, timesec[sp:ep], rad_data_average.wave_backedge[sp:ep].rad,psym=sym(1),symsize=0.8,color=cback
-  oploterr, timesec[sp:ep], rad_data_average.wave_backedge[sp:ep].rad, rad_data_average.wave_backedge[sp:ep].stdv, $
-            errcolor = cback, errthick = 4, /noconnect
-  
-  oplot, timesec[sp:ep], rad_data_average.wave_frontedge[sp:ep].rad, thick=linethick,color = cfront
-  oplot, timesec[sp:ep], rad_data_average.wave_frontedge[sp:ep].rad,psym=sym(1),symsize=0.8,color=cfront
-  oploterr, timesec[sp:ep], rad_data_average.wave_frontedge[sp:ep].rad, rad_data_average.wave_frontedge[sp:ep].stdv, $
+
+  oplot, timejd[sp:ep], rad_data_average.wave_frontedge[sp:ep].rad, thick=linethick,color = cfront
+  oplot, timejd[sp:ep], rad_data_average.wave_frontedge[sp:ep].rad,psym=sym(1),symsize=0.8,color=cfront
+  oploterr, timejd[sp:ep], rad_data_average.wave_frontedge[sp:ep].rad, rad_data_average.wave_frontedge[sp:ep].stdv, $
             errcolor = cfront, errthick = 4, /noconnect
-  
-  oplot, timesec[sp:ep],  rad_data_average.wave_peak[sp:ep].rad, thick=linethick,color = cpeak ;rad_data_average.wave_peak[sp:ep].rad
-  oplot, timesec[sp:ep], rad_data_average.wave_peak[sp:ep].rad,psym=sym(1),symsize=0.8,color=cpeak ;rad_data_average.wave_peak[sp:ep].rad
-  oploterr, timesec[sp:ep], rad_data_average.wave_peak[sp:ep].rad, rad_data_average.wave_peak[sp:ep].stdv, $
+
+  oplot, timejd[sp:ep],  rad_data_average.wave_peak[sp:ep].rad, thick=linethick,color = cpeak,linestyle=2
+  oplot, timejd[sp:ep], rad_data_average.wave_peak[sp:ep].rad,psym=sym(1),symsize=0.8,color=cpeak
+  oploterr, timejd[sp:ep], rad_data_average.wave_peak[sp:ep].rad, rad_data_average.wave_peak[sp:ep].stdv, $
             errcolor = cpeak, errthick = 4, /noconnect
+  
+  oplot, timejd[sp:ep], rad_data_average.wave_backedge[sp:ep].rad, thick=linethick, color = cback,linestyle=3
+  oplot, timejd[sp:ep], rad_data_average.wave_backedge[sp:ep].rad,psym=sym(1),symsize=0.8,color=cback
+  oploterr, timejd[sp:ep], rad_data_average.wave_backedge[sp:ep].rad, rad_data_average.wave_backedge[sp:ep].stdv, $
+            errcolor = cback, errthick = 4, /noconnect
   
   loadct, 0, /silent
 
@@ -414,7 +466,7 @@ pro calculate_radial_results,event,ps=ps
 if keyword_set(ps) then begin
    device,/close
    ;here do conversions to PNG files.
-     exec='convert -flatten '+ploteps+' '+plotpng
+     exec='convert -flatten '+ploteps+' '+plotpng + '; rm -rf '+ploteps
      spawn,exec
      set_plot,'x'
   endif else begin

@@ -1,7 +1,7 @@
 pro test_pfss_shock_plot_angular_influence
 ;Testing the CSGS angular influence plotting procedure
-event=load_events_info(label='paper')
-pfss_shock_plot_angular_influence,event,/lores,/newtimes
+event=load_events_info(label='110607_01');110607_01 ;131212_01
+pfss_shock_plot_angular_influence,event,/lores,/force,/topview;,/newtimes
 ;pfss_shock_plot_angular_influence,event,/hires,/newtimes,/topview
 end
 
@@ -28,7 +28,7 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
 ;Written by Kamen Kozarev, 02/22/2014
 ;04/02/2014, Kamen Kozarev - added the top view functionality.
 ;04/06/2015, Kamen Kozarev - added the /force keyword.
-
+  
   set_plot,'x'
   resolve_routine,'sym',/either,/compile_full_file
   wav='193'
@@ -40,15 +40,15 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
   eventname='AIA_'+date+'_'+evnum+'_'+wav
   savepath=event.savepath
   datapath=savepath
-  pfsspath=event.pfsspath
+  mfhcpath=event.mfhcpath
   resolution='lores'
   if keyword_set(hires) then resolution='hires'
   wavefile=event.annuluspath+replace_string(event.annplot.analyzed.radial.avg_savename,'WAV',wav)
   
   ;Find a file to load with the latest results of applying the CSGS model
-  ;csgsfile=find_latest_file(event.pfsspath+'csgs_results_*')
-  csgsfile=file_search(event.pfsspath+event.csgs.lores.map_savename)
-  if keyword_set(hires) then csgsfile=file_search(event.pfsspath+event.csgs.hires.map_savename)
+  ;csgsfile=find_latest_file(event.mfhcpath+'csgs_results_*')
+  csgsfile=file_search(event.mfhcpath+event.csgs.lores.map_savename)
+  if keyword_set(hires) then csgsfile=file_search(event.mfhcpath+event.csgs.hires.map_savename)
   if csgsfile eq '' then begin
      print,'The CSGS file is not properly set or does not exist. Quitting.'
      return
@@ -68,17 +68,17 @@ pro pfss_shock_plot_angular_influence,event,topview=topview,hires=hires,lores=lo
   restore,csgsfile
   
   ;Restore just the subindex from the AIA data
-  aiafile=file_search(event.savepath+replace_string(event.aia_subdata_savename,'WAV',wav))
-  print,'Loading AIA File '+aiafile
-  if aiafile[0] ne '' then begin
-     restore,aiafile[0]
-     subdata=0
-     aiatime=anytim(subindex.date_obs)
-     aiatime=aiatime-aiatime[0]
-  endif else begin
-     print,'No AIA data present. Quitting...'
-     return
-  endelse
+  ;aiafile=file_search(event.savepath+replace_string(event.aia_subdata_savename,'WAV',wav))
+  ;print,'Loading AIA File '+aiafile
+  ;if aiafile[0] ne '' then begin
+  ;   restore,aiafile[0]
+  ;   subdata=0
+  ;   aiatime=anytim(subindex.date_obs)
+  ;   aiatime=aiatime-aiatime[0]
+  ;endif else begin
+  ;   print,'No AIA data present. Quitting...'
+  ;   return
+  ;endelse
 ;-==============================================================================
 
 
@@ -115,8 +115,10 @@ if keyword_set(newtimes) then begin
   
   radius=radiusfitlines*sunrad*event.geomcorfactor
   nsteps=n_elements(time)
-
   
+  ;Get the proper indices for the AIA subindex array based on actual times
+  match2,rad_data.time[sp:ep].date_obs,subindex.date_obs,suba,tmp
+  subindex=subindex[suba]
 
   set_plot,'z'
   
@@ -132,11 +134,12 @@ if keyword_set(newtimes) then begin
      if stp lt 100 then stp='0'+stp
      if stp lt 10 then stp='0'+stp
      print,'Step #'+stp
-     savefname=pfsspath+replace_string(event.csgs.lores.anginfluence.plot_savename,'NNN',stp)
-     if keyword_set(topview) then savefname=pfsspath+replace_string(event.csgs.lores.anginfluence.topview_plot_savename,'NNN',stp)
+     timstring=strjoin(strsplit(strmid(subindex[sstep].date_obs,11,8),':',/extract))
+     savefname=mfhcpath+replace_string(event.csgs.lores.anginfluence.plot_savename,'HHMMSS',timstring)
+     if keyword_set(topview) then savefname=mfhcpath+replace_string(event.csgs.lores.anginfluence.topview_plot_savename,'HHMMSS',timstring)
      if keyword_set(hires) then begin
-        savefname=pfsspath+replace_string(event.csgs.hires.anginfluence.plot_savename,'NNN',stp)
-        if keyword_set(topview) then savefname=pfsspath+replace_string(event.csgs.hires.anginfluence.topview_plot_savename,'NNN',stp)
+        savefname=mfhcpath+replace_string(event.csgs.hires.anginfluence.plot_savename,'HHMMSS',timstring)
+        if keyword_set(topview) then savefname=mfhcpath+replace_string(event.csgs.hires.anginfluence.topview_plot_savename,'HHMMSS',timstring)
      endif
      if file_test(savefname) and not keyword_set(force) then begin
         print,'Files '+'aia_pfss_shock_angular_influence_'+event.date+'_'+event.label+'_'+resolution+'_*.png'
@@ -178,13 +181,11 @@ if keyword_set(newtimes) then begin
      !P.color=255
      tv,findgen(100,100);,/nodata,xstyle=
      erase
-     ;wdef,0,winsize
-
      
      ;Plot the limb location
      circ=aia_circle(xcenter,ycenter,sunrad,/plot,color=0)
      ;Print the time of this step.
-     xyouts,0.5*winsize,0.965*winsize,plot_times[sstep],/device,charsize=2.4,charthick=3
+     xyouts,0.51*winsize,0.965*winsize,plot_times[sstep],/device,charsize=2.6,charthick=3
      
 ;+==============================================================================
 ;1. Plot the field lines on disk center.
@@ -303,11 +304,15 @@ if keyword_set(newtimes) then begin
 ;           crossPlotLinesIndex[cc]=ll
 ;           cc++
 ;        endfor     
-;     endif
-stride=1 
-
+;     endif 
+     stride=1
+     maxextent=[1000.,-1000.]
      for ff=0.D,ncrosses-1,stride do begin
         lind=pind[ff]
+        linextent=minmax(pfssLines[lind].ptph)
+        
+        if linextent[0] lt maxextent[0] then maxextent[0]=linextent[0]
+        if linextent[1] gt maxextent[1] then maxextent[1]=linextent[1]
         npt=pfssLines[lind].npts
         if pfssLines[lind].open eq 1 then color=110 else color=230
         if pfss_cartpos[ff,2,0] gt 0.0 and pfss_cartpos[ff,2,npt-1] gt 0.0 then begin
@@ -322,7 +327,13 @@ stride=1
 ;plot the points of crossing in red.
     ; plots,[cpsx,cpsy,cpsz],color=240,psym=sym(1),symsize=1.4,/device
      endfor
+                                ;Print the angular spread extent
+     print,maxextent
      loadct,0,/silent
+     xyouts,0.03*winsize,0.965*winsize,'Influence: '+strtrim(string((maxextent[1]-maxextent[0])*180./!Pi,$
+                                                                    format='(f6.2)'),2)+ ' deg',/device,$
+            charsize=2.6,charthick=3
+     
 ;-==============================================================================
      
      
@@ -349,7 +360,9 @@ stride=1
         phi0-=!PI/2.
 ;Plot the position of the connection point to Earth
         plots,xcenter+2.57*sunrad*cos(phi0),ycenter+2.57*sunrad*sin(phi0),psym=sym(1),symsize=2,color=255,/device
-        plots,xcenter+2.57*sunrad*cos(phi0),ycenter+2.57*sunrad*sin(phi0),psym=sym(1),symsize=1,color=0,/device
+        loadct,13,/silent
+        plots,xcenter+2.57*sunrad*cos(phi0),ycenter+2.57*sunrad*sin(phi0),psym=sym(1),symsize=1,color=255,/device
+        loadct,0,/silent
      endif
 ;-==============================================================================
 

@@ -26,9 +26,9 @@ close,/all
   std=event.et
   date=event.date
   eventname='AIA_'+date+'_'+evnum+'_'+wav
-  savepath=event.pfsspath
+  savepath=event.mfhcpath
   datapath=savepath
-  pfsspath=event.pfsspath
+  mfhcpath=event.mfhcpath
 
 
 
@@ -43,8 +43,8 @@ close,/all
   endif
                                 ;Find a file to load with the latest
                                 ;results of applying the CSGS model
-  if keyword_set(hires) then csgsfile=event.pfsspath+event.csgs.hires.map_savename $
-  else csgsfile=event.pfsspath+event.csgs.lores.map_savename
+  if keyword_set(hires) then csgsfile=event.mfhcpath+event.csgs.hires.map_savename $
+  else csgsfile=event.mfhcpath+event.csgs.lores.map_savename
   if csgsfile eq '' then begin
      print,'The CSGS file is not properly set or does not exist. Quitting.'
      return

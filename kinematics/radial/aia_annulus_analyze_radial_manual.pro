@@ -12,11 +12,10 @@ pro test_aia_annulus_analyze_radial_manual
      ;GOOD NEW EVENTS:
      labels=['151109_01','151029_01','150920_01','150601_01','150509_01','150421_01','150303_01','141205_01','141105_02','141105_01','140901_01']
      
-     labels=['151104_01']
+     labels=['110607_01']
      for ev=0,n_elements(labels)-1 do begin
         label=labels[ev]
         event=load_events_info(label=label)
-        ;rrange=[1.1,1.34]
         aia_annulus_analyze_radial_manual,event,wave=wav,/fitdata ;,rrange=rrange ;,/interactive
      endfor
   endif
@@ -57,7 +56,7 @@ pro annulus_get_radial_edges, event, rad_data, annulus_info, plotinfo, exit_stat
   CONTINUE_STATUS=1
   QUIT_STATUS=2
   exit_status=NORMAL_STATUS
-
+  
   
 ;Find the starting and ending time indices for which we believe we have a wave to fit.
   find_start_end_radial_manual, event, rad_data, plotinfo, exit_status
@@ -415,7 +414,7 @@ endif
 
      
      pa=get_polar_angle(event)
-     strpa=strtrim(string(pa,format='(f5.2)'),2)
+     strpa=strtrim(string(pa,format='(f6.2)'),2)
      save_fname=replace_string(event.annplot.analyzed.radial.savename,'SSSSS','_pa'+strpa+'_m'+analysis_run_id)
      ;save_fname=replace_string(event.annplot.analyzed.radial.savename,'SSSSS','_m'+analysis_run_id)
      save_fname=replace_string(save_fname,'WAV',wav)

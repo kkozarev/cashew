@@ -22,10 +22,10 @@ pro plot_aia_pfss,event,saved=saved,png=png,wav=wav,diff=diff,sta=sta,stb=stb
         aiamaps_latlon[i].crln=tmpwcs.position.crln_obs
         aiamaps_latlon[i].crlt=tmpwcs.position.crlt_obs
      endfor
-     save,filename=event.pfsspath+event.date+'_'+event.label+'_'+wav+'_aia_maps.sav',$
+     save,filename=event.mfhcpath+event.date+'_'+event.label+'_'+wav+'_aia_maps.sav',$
           aiamaps,aiamaps_latlon,naiamaps,wav,event
   endif else begin
-     restore,event.pfsspath+event.date+'_'+event.label+'_'+wav+'_aia_maps.sav'
+     restore,event.mfhcpath+event.date+'_'+event.label+'_'+wav+'_aia_maps.sav'
   endelse
 
   
@@ -44,7 +44,7 @@ pro plot_aia_pfss,event,saved=saved,png=png,wav=wav,diff=diff,sta=sta,stb=stb
 ;===-------------------------------------------===
   realevent=event
      if not keyword_set(saved) then begin
-        pfssfile=event.pfsspath+'pfss_results_'+event.date+'_'+event.label+'_lores.sav'
+        pfssfile=event.mfhcpath+'pfss_results_'+event.date+'_'+event.label+'_lores.sav'
         restore,pfssfile
         event=realevent
 ;CREATE/LOAD MODEL FOR AIA
@@ -64,11 +64,11 @@ pro plot_aia_pfss,event,saved=saved,png=png,wav=wav,diff=diff,sta=sta,stb=stb
                      id:'PFSS field line map', $
                      roll_angle:0.0, $
                      roll_center:[0.0,0.0]}
-        save,filename=event.pfsspath+event.date+'_'+event.label+'_pfss_map_aia.sav',pfssim_aia,pfssmap_aia
+        save,filename=event.mfhcpath+event.date+'_'+event.label+'_pfss_map_aia.sav',pfssim_aia,pfssmap_aia
         
   ;===-------------------------------------------===
      endif else begin
-        restore,event.pfsspath+event.date+'_'+event.label+'_pfss_map_aia.sav'
+        restore,event.mfhcpath+event.date+'_'+event.label+'_pfss_map_aia.sav'
      endelse
      
      
@@ -89,7 +89,7 @@ pro plot_aia_pfss,event,saved=saved,png=png,wav=wav,diff=diff,sta=sta,stb=stb
      plot_map,pfssmap_aia,/over,/rotate,cthick=0.5
      loadct,0,/silent
      fname=event.label+'_'+event.date+'_'+timstring+'_'+wav+'_AIA_PFSS_overlay_full.png'
-     write_png,event.pfsspath+fname,tvrd(/true),rr,gg,bb
+     write_png,event.mfhcpath+fname,tvrd(/true),rr,gg,bb
      
      
 ;Make the submaps
@@ -106,6 +106,6 @@ pro plot_aia_pfss,event,saved=saved,png=png,wav=wav,diff=diff,sta=sta,stb=stb
      plot_map,spfssmap_aia,/over,/rotate,cthick=0.5
      loadct,0,/silent
      fname=event.label+'_'+event.date+'_'+timstring+'_'+wav+'_AIA_PFSS_overlay_partial.png'
-     write_png,event.pfsspath+fname,tvrd(/true),rr,gg,bb
+     write_png,event.mfhcpath+fname,tvrd(/true),rr,gg,bb
   
 end

@@ -2,7 +2,7 @@ pro test_calculate_lateral_results
 ;A little program to test the calculate_radial_results procedure
   events=['100613_01','101103_02','101231_01','110125_01','110211_02','110327_01','110515_01','110607_01','110904_01','120307_01','120424_01','120526_01','120728_01','120915_01','121007_01','130423_01','130501_01','130517_01','131107_01','131207_01','131212_01','140217_01','140708_01','140901_01','141105_02','141205_01','150303_01','150421_01','150920_01','151109_01']
   events=['100613_01','101103_02']
-  events=['151104_01']
+  events=['110607_01']
   nevents=n_elements(events)
   for ev=0,nevents-1 do begin
      event_label=events[ev]
@@ -83,9 +83,13 @@ pro calculate_lateral_results,event,ps=ps
            if dir eq RIGHTDIR then lat_data=total_lat_data[rr].right
            alllat_data[mm,rr,dir]=lat_data
            if lat_data.status eq -1 then continue
-           fit_wave_kinematics_lateral,lat_data,ind_arr,/front
-           fit_wave_kinematics_lateral,lat_data,ind_arr,/peak
-           fit_wave_kinematics_lateral,lat_data,ind_arr,/back
+           if mean(lat_data.savgolfits.back.speed) eq 0. or $
+              mean(lat_data.savgolfits.front.speed) eq 0. or $
+              mean(lat_data.savgolfits.peak.speed) eq 0. then begin
+              fit_wave_kinematics_lateral,lat_data,ind_arr,/front
+              fit_wave_kinematics_lateral,lat_data,ind_arr,/peak
+              fit_wave_kinematics_lateral,lat_data,ind_arr,/back
+           endif
            alllat_data[mm,rr,dir]=lat_data
         endfor
      endfor
@@ -451,7 +455,7 @@ pro calculate_lateral_results,event,ps=ps
         if keyword_set(ps) then begin
            device,/close
                                 ;here do conversions to PNG files.
-           exec='convert -flatten '+ploteps+' '+plotpng
+           exec='convert -flatten '+ploteps+' '+plotpng + '; rm -rf '+ploteps
            spawn,exec
            set_plot,'x'
         endif else begin

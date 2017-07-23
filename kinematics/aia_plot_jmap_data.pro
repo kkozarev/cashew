@@ -1,5 +1,5 @@
 pro aia_plot_jmap_data,times,rad,data,xrange=xrange,yrange=yrange,ct=ct,min=min,max=max,fitrange=fitrange,title=title,_extra=extra,startInd=startInd,endInd=endInd, auto=auto,position=position,charsize=charsize
-if not keyword_set(position) then !P.position=[0.15,0.15,0.94,0.9] else !p.position=position
+if not keyword_set(position) then !P.position=[0.12,0.12,0.94,0.9] else !p.position=position
 ;This procedure will plot the jmap-extracted profiles with x- and y-axes
   if keyword_set(ct) then loadct,ct,/silent
   nt=n_elements(times)

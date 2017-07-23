@@ -4,14 +4,14 @@ pro test_aia_make_images
   ;You can run this for a single or few events, like so
   one=1
   if one eq 1 then begin
-     wavelengths=['193','211']
-     labels=['130621_01']
+     wavelengths=['193']
+     labels=['131212_01']
      for ev=0,n_elements(labels)-1 do begin
        label=labels[ev]
        event=load_events_info(label=label)
        for w=0,n_elements(wavelengths)-1 do begin
           wavelength=wavelengths[w]
-          aia_make_images,event,wavelength,/base
+          aia_make_images,event,wavelength,/base,/subroi
        endfor
     endfor
   endif
@@ -33,7 +33,7 @@ end
 
 
 
-pro aia_make_images, event, wav, savepath=savepath,force=force,raw=raw,base=base,run=run
+pro aia_make_images, event, wav, savepath=savepath,force=force,raw=raw,base=base,run=run,_extra=_extra
 ;PURPOSE:
 ;This procedure will make png image files for movies of wave events
 ;
@@ -70,6 +70,7 @@ pro aia_make_images, event, wav, savepath=savepath,force=force,raw=raw,base=base
   sts=event.st
   ets=event.et
   date=event.date
+  aiafov=event.aiafov
   
   ;The default type is 'raw'
   image_type=''
@@ -114,11 +115,15 @@ pro aia_make_images, event, wav, savepath=savepath,force=force,raw=raw,base=base
   endif
   image_type=image_type[1:*]
   
-
   
   ;Load the data
-  aia_load_data,event.st,event.et,wav,coords=coords,subdata=subdata,subindex=subindex,/remove_aec
+  aia_load_data,event.st,event.et,wav,coords=coords,event=event,subdata=subdata,subindex=subindex,/remove_aec,_extra=_extra
   nsteps=n_elements(subindex)
+  ;Make sure the plotting FOV corresponds to the data dimensions.
+  if n_elements(reform(subdata[*,0,0])) ne event.aiafov[0] then $
+     aiafov[0]=n_elements(reform(subdata[*,0,0]))
+  if n_elements(reform(subdata[0,*,0])) ne event.aiafov[1] then $
+     aiafov[1]=n_elements(reform(subdata[0,*,0]))
   
   ;Set up base image
   base = subdata[*,*,0]
@@ -131,9 +136,9 @@ pro aia_make_images, event, wav, savepath=savepath,force=force,raw=raw,base=base
   
   
   set_plot,'z'
-  device, set_resolution=event.aiafov, SET_PIXEL_DEPTH=24, DECOMPOSED=0
+  device, set_resolution=aiafov, SET_PIXEL_DEPTH=24, DECOMPOSED=0
   !P.font=0
-  text_scaling=avg(event.aiafov)/1024.0
+  text_scaling=avg(aiafov)/1024.0
   chsize=1.2*text_scaling
   chthick=1.0*text_scaling
   
@@ -160,9 +165,11 @@ pro aia_make_images, event, wav, savepath=savepath,force=force,raw=raw,base=base
         endif
         
         if imgtype eq 'base' then begin
+           
            loadct,0,/silent     ; set color table
            tvlct,rr,gg,bb,/get
            scimage = (bytscl((subdata[*,*,i])-base, max=30, min=-50)+0)
+           ;stop
            tvscl,scimage
            polyfill,[0.0,0.315*text_scaling,0.315*text_scaling,0.0],[0.98,0.98,1.0,1.0],color=0,/norm
            polyfill,[0.968-(1.0-0.968)/text_scaling,1.0,1.0,0.968-(1-0.968)/text_scaling],[0.98,0.98,1.0,1.0],color=0,/norm
@@ -189,7 +196,9 @@ pro aia_make_images, event, wav, savepath=savepath,force=force,raw=raw,base=base
         if not dir_exist(finsavpath) then begin
            spawn,'mkdir '+finsavpath
         endif
-        infname='normalized_AIA_'+date+'_'+event.label+'_'+wav+'_subdata_'+imgtype+'_'+ind+'.png'
+        
+        timstring=strjoin(strsplit(strmid(subindex[i].date_obs,11,8),':',/extract))
+        infname='normalized_AIA_'+date+'_'+event.label+'_'+wav+'_subdata_'+imgtype+'_'+timstring+'.png'
         write_png,finsavpath+infname,image,rr,gg,bb
        ;stop
      endfor
