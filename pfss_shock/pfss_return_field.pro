@@ -6,7 +6,7 @@ pro test_pfss_return_field
   if one eq 1 then begin
      labels=['151104_01','151104_02','151104_03']
      labels=['120307_01','120405_01']
-     labels=['120307_01']
+     labels=['151104_01']
      for ev=0,n_elements(labels)-1 do begin
        label=labels[ev]
        event=load_events_info(label=label)
@@ -15,7 +15,7 @@ pro test_pfss_return_field
                                 ;pfss_return_field,date,invdens=0.5,/save,event=event;,box=box
                                 ;pfss_return_field,date,invdens=8,/save,path=event.mfhcpath,event=event;,box=box
      ;pfss_return_field,event,/hires,/save
-     pfss_return_field,event,/lores,/save,/force
+     pfss_return_field,event,/hires,/force;,/save
      endfor
   endif
   
@@ -97,7 +97,7 @@ pro pfss_return_field_main,date,event=event,rstart=rstart,invdens=invdens,force=
      fname='pfss_results_'+dat+'_'+strtrim(string(rstart,format='(f4.2)'),2)+'Rs_dens_'+strtrim(string(invdens,format='(f3.1)'),2)+'.sav'
   endif else begin
      dat=event.date
-     fname='pfss_results_'+dat+'_'+event.label+'_'+stringres+'.sav'
+     fname='pfss_results_'+event.date+'_'+event.label+'_'+stringres+'.sav'
   endelse
 
   if not keyword_set(force) and file_exist(path+fname) then begin
@@ -108,14 +108,15 @@ pro pfss_return_field_main,date,event=event,rstart=rstart,invdens=invdens,force=
   endif
 
 ;Restore B-field model
-  pfss_restore,pfss_time2file(date,/ssw_cat,/url)
-  
+  pfss_h5file=pfss_time2file(date,/ssw_cat,/url,/before)
+  print,'Restoring PFSS model ' + pfss_h5file
+  pfss_restore,pfss_h5file
   
   if keyword_set(box) then $
      pfss_field_start_coord,5,invdens,radstart=rstart,bbox=box $
   else $
      pfss_field_start_coord,5,invdens,radstart=rstart
-  
+
 ;  trace the field lines passing through the starting point arrays
   pfss_trace_field, kind
   ind=where(ptph lt 0.0)
@@ -171,8 +172,8 @@ pro pfss_return_field,event,lores=lores,hires=hires,box=box,_extra=_extra
      aclat=lat+event.arlat
      box=[aclon-90.,aclat-90.,aclon+90.,aclat+90.]
   endif
-
+  
   if (not keyword_set(hires)) and (not keyword_set(lores)) then all=1
-  if (keyword_set(lores)) or (all eq 1) then pfss_return_field_main,date,event=event,/lores,box=box,_extra=_extra
-  if (keyword_set(hires)) or (all eq 1) then pfss_return_field_main,date,event=event,/hires,box=box,_extra=_extra
+  if (keyword_set(lores)) or (all eq 1) then pfss_return_field_main,event.st,event=event,/lores,box=box,_extra=_extra
+  if (keyword_set(hires)) or (all eq 1) then pfss_return_field_main,event.st,event=event,/hires,box=box,_extra=_extra
 end

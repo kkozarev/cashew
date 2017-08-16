@@ -22,7 +22,7 @@ pro test_aia_load_data
      endfor
   endif
   
-                                ;Alternatively, run for all the events:
+  ;Alternatively, run for all the events:
   all=0
   if all eq 1 then begin
      events=load_events_info()
@@ -162,18 +162,17 @@ pro aia_load_data,stt,ett,wav,index,data,savefile=savefile,nodata=nodata,map=map
      subfname=path+'normalized_AIA_'+date+'_'+label+'_'+wav+'_subdata.sav'
   endelse
 
-
   if keyword_set(event) then begin
      datfname=path+replace_string(event.aia_fulldata_savename,'WAV',wav)
      subfname=path+replace_string(event.aia_subdata_savename,'WAV',wav)
   endif
-
 
   if not keyword_set(force) and keyword_set(subroi) and file_exist(subfname) then begin
      restore,subfname
      if keyword_set(submap) then index2map,subindex,subdata,submap
      return
   endif
+
   
 
   if not keyword_set(force) and file_exist(datfname) then begin

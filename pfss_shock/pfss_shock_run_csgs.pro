@@ -8,18 +8,18 @@ pro test_pfss_shock_run_csgs
   labels=['131212_01','130517_01','120915_01','120526_01','120424_01','110607_01','110211_01','110125_01']
 
   labels=['100613_01','101103_02','101231_01','110125_01','110211_02','110327_01','110515_01','110607_01','110904_01','120307_01', '120424_01', '120526_01', '120728_01', '120915_01', '121007_01', '130423_01', '130501_01', '130517_01', '131107_01', '131207_01', '131212_01', '140217_01', '140708_01', '140901_01', '141105_02', '141205_01', '150303_01', '150421_01', '150920_01','151109_01']
-  labels=['110607_01'];
 
-
+  
+  labels=['151104_01']
   
     for ev=0,n_elements(labels)-1 do begin
       label=labels[ev]
       event=load_events_info(label=label)
-      pfss_shock_run_csgs,event,/lores,/force
+      pfss_shock_run_csgs,event,/lores ;,/force
       
-      pfss_shock_plot_all,event,/lores,/force
-      pfss_shock_run_csgs,event,/hires,/force
-      pfss_shock_plot_all,event,/hires,/force
+      ;pfss_shock_plot_all,event,/lores,/force
+      ;pfss_shock_run_csgs,event,/hires,/force
+      ;pfss_shock_plot_all,event,/hires,/force
       ;aia_make_movies,event,movie_type='pfss_shock',/force
       ;pfss_shock_run_csgs,event,/lores,/newtimes
       ;pfss_shock_plot_all,event,/hires,/force
@@ -85,9 +85,11 @@ end
 pro get_crossing_points,sstep,nsteps,pfss_cartpos,csgs_init_coords,shockrad,shockthick,suncenter,sunrad,sph_data,pfsslines,ncrosses,crossPoints,cross_points,pind,exitstatus
   nmaxcrosses=5.0e4
   exitstatus=1
-;A structure array that will hold the information about the field-shock crossings
-  crossPoint={rpx:0.0D,rpy:0.0D,rpz:0.0D,px:0.0D,py:0.0D,pz:0.0D,thbn:0.0D,linid:0L,$
-              bmag:0.0D,density:0.0D,temperature:0.0D,open:0,shockjump:0.0}
+;A structure array that will hold the information about the
+;field-shock crossings
+  cashewtime=generate_struct('cashewtime')
+  crossPoint={time:cashewtime,rpx:0.0D,rpy:0.0D,rpz:0.0D,px:0.0D,py:0.0D,pz:0.0D,thbn:0.0,linid:0L,$
+              bmag:0.0D,density:0.0D,temperature:0.0,open:0,shockjump:0.0,vshock:0.0}
   crossPoints=replicate(crossPoint,nsteps,nmaxcrosses)
   
   dr2=(reform(pfss_cartpos[*,0,*])-csgs_init_coords[0])^2 + $
@@ -317,8 +319,9 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
   
 ;Variables for the crossing points information
   nmaxcrosses=5.0e4
-  crossPoint={rpx:0.0D,rpy:0.0D,rpz:0.0D,px:0.0D,py:0.0D,pz:0.0D,thbn:0.0D,linid:0L,$
-              bmag:0.0D,density:0.0D,temperature:0.0D,open:0,shockjump:0.0}
+  crossPoint={time:rad_data.time[sp],rpx:0.0D,rpy:0.0D,rpz:0.0D,px:0.0D,py:0.0D,pz:0.0D,thbn:0.0,linid:0L,$
+              bmag:0.0D,density:0.0D,temperature:0.0,open:0,shockjump:0.0,vshock:0.0}
+  ;crossPoint=generate_struct('crosspoint')
   crossPoints=replicate(crossPoint,nsteps,nmaxcrosses)
   allcrossAngles=fltarr(nsteps,nmaxcrosses)
   allcrosses=fltarr(nsteps)
@@ -407,7 +410,6 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
                  plots,pos,color=250,/device,psym=3
               endfor
            endif
-
            
 ;+==============================================================================
 ;3. Calculate and plot the spherical surface:
@@ -502,6 +504,8 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
            crossPoints[sstep,cross].bmag=bfield_pfss(sphpt,sph_data)
            crossPoints[sstep,cross].linid=reform(pind[0,cross])
            crossPoints[sstep,cross].open=pfsslines[crossPoints[sstep,cross].linid].open
+           crossPoints[sstep,cross].time=rad_data.time[sstep+sp]
+           crossPoints[sstep,cross].vshock=rad_data.savgolfits.front[sstep+sp].speed
                                 ;if debug gt 0 and ff mod 100 eq 0 then print,'CSGS section, cross #'+strtrim(string(cross),2)
         endfor
         
@@ -535,6 +539,8 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
                     
                     cross_point=reform(pfss_cartpos[lind,*,ptind])
                     crosspt=crosspoint ;crosspoint struct already exists, just copy it over.
+                    crosspt.time=rad_data.time[sstep+sp]
+                    crosspt.vshock=rad_data.savgolfits.front[sstep+sp].speed
                     crosspt.px=cross_point[0]
                     crosspt.py=cross_point[1]
                     crosspt.pz=cross_point[2]
@@ -657,11 +663,10 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
      nmaxcrosses=max(allcrosses)
      crossPoints=crossPoints[*,0:nmaxcrosses-1]
 
-
 ;Save the results to a file
      event=load_events_info(label=event.label)
-     fname=event.csgs.hires.map_savename
-     if keyword_set(lores) then fname=event.csgs.lores.map_savename
+     fname=event.csgs.lores.map_savename
+     if keyword_set(hires) then fname=event.csgs.hires.map_savename
      print,'Saving file '+event.mfhcpath+fname
 
      
@@ -669,6 +674,10 @@ pro pfss_shock_run_csgs,event,plot=plot,png=png,hires=hires,lores=lores,newtimes
           allcrosses,dt,csgsradius,time,rotationAngles,crossPoints,carrlon,carrlat,$
           suncenter,nsteps,csgs_center_coords,radiusfitlines,subindex,$
           vertex_list,vert_rotmat,vert_transmat
+
+     if keyword_set(hires) then pfss_shock_aschdem_plasma_info,event,/hires $
+        else pfss_shock_aschdem_plasma_info,event,/lores
+     
 ;-==============================================================================     
 end ; END PFSS_SHOCK_RUN_CSGS
 

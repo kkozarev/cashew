@@ -3,7 +3,7 @@ pro test_calculate_radial_results
   events=['100613_01','101103_02','101231_01','110125_01','110211_02','110327_01','110515_01','110607_01','110904_01','120307_01','120424_01','120526_01','120728_01','120915_01','121007_01','130423_01','130501_01','130517_01','131107_01','131207_01','131212_01','140217_01','140708_01','140901_01','141105_02','141205_01','150303_01','150421_01','150920_01','151109_01']
   events=['100613_01','101103_02']
   events=['151104_01']
-  events=['110607_01','131212_01']
+  events=['131212_01']
   nevents=n_elements(events)
   for ev=0,nevents-1 do begin
      event_label=events[ev]
@@ -15,7 +15,7 @@ end
 
 
 
-pro calculate_radial_results,event,ps=ps
+pro calculate_radial_results,event,ps=ps,force=force
 
 ;PURPOSE:
 ;Analyze data from the 10 manually created runs for annulus data,
@@ -38,10 +38,13 @@ pro calculate_radial_results,event,ps=ps
 ; 
 ;MODIFICATION HISTORY:
 ;Written by Celeste Keith, 07/18/2016
+;Modified by Kamen Kozarev, 03/13/2017
 
-  
-  
-  
+
+  wav='193'
+  ;Check if the averaged kinematics file already exists. If not, do the fitting.
+  avgkinfile=event.annuluspath+replace_string(event.annplot.analyzed.radial.avg_savename,'WAV',wav)
+  if not file_exist(avgkinfile) or keyword_set(force) then begin
 
 ;---------------Loads part of the event---------------------------------
   savepath=event.annuluspath
@@ -148,13 +151,12 @@ pro calculate_radial_results,event,ps=ps
      rad_data_average.savgolfits.front[tt].speed=mean(allrad_data.savgolfits.front[tt].speed)
      stdfrontspeed[tt]=stddev(allrad_data.savgolfits.front[tt].speed)
   endfor
-
+  
   ;Also record the second-order polynomial fits
   for iii=0,2 do rad_data_average.fitparams[iii].front=mean(allrad_data.fitparams[iii].front)
   for iii=0,2 do rad_data_average.fitparams[iii].peak=mean(allrad_data.fitparams[iii].peak)
   for iii=0,2 do rad_data_average.fitparams[iii].back=mean(allrad_data.fitparams[iii].back)
-
-  wav='193'
+  
   sp=rad_data_average.timefitrange[0]
   ep=rad_data_average.timefitrange[1]
   timesec = rad_data_average.time.relsec
@@ -167,10 +169,27 @@ pro calculate_radial_results,event,ps=ps
   event=load_events_info(label=event.label)
   shockfile=event.annuluspath+replace_string(event.annplot.analyzed.radial.avg_savename,'WAV',wav)
   rad_data=rad_data_average
-  save,filename=shockfile,rad_data,ind_arr,annulus_info,event
+  save,filename=shockfile,rad_data,ind_arr,annulus_info,stdbackaccel,stdpeakaccel,$
+       stdfrontaccel,stdbackspeed,stdpeakspeed,stdfrontspeed,stdintensity,wav_thick_std
   
-  
-  
+endif else begin
+   ;JUST DO THE PLOTTING
+   shockfile=event.annuluspath+replace_string(event.annplot.analyzed.radial.avg_savename,'WAV',wav)
+   restore,shockfile
+   rad_data_average=rad_data
+   sp=rad_data.timefitrange[0]
+   ep=rad_data.timefitrange[1]
+   yrng=rad_data.radfitrange
+   time=rad_data.time
+   xrng=rad_data.timefitrange
+   yarray=rad_data.y_rsun_array
+   dt2=(rad_data.time[1].jd-rad_data.time[0].jd)/2.
+   ntimes=n_elements(rad_data.data[*,0])
+   timejd=rad_data.time.jd
+   avgintensity=rad_data.avgIntense
+   wav_thick = rad_data.wavethick
+endelse
+
 ;----------Finding plotting range for acceleration--------------------
   accel_array_front=rad_data_average.savgolfits.front[sp:ep].accel
   accel_array_front_max = max(accel_array_front+stdfrontaccel[sp:ep])
@@ -218,12 +237,6 @@ pro calculate_radial_results,event,ps=ps
   xrnge = [rad_data.time[sp].jd, rad_data.time[ep].jd]
   
   
-  
-  
-  
-  
-  
-  
   dummy = LABEL_DATE(DATE_FORMAT=['%H:%I'])
 ;=====================================================================================
 ;           PLOT THE AVERAGED RADIAL POSITIONS GRAPH
@@ -259,7 +272,8 @@ pro calculate_radial_results,event,ps=ps
      sm=smooth(diff,[14,1],/edge_truncate)
      smoothdata=diff-sm
   endelse
-
+  
+  
   avg_f=rad_data_average.wave_frontedge.rad
   stdv_f=rad_data_average.wave_frontedge.stdv
   avg_m=rad_data_average.wave_peak.rad
@@ -271,22 +285,22 @@ pro calculate_radial_results,event,ps=ps
                      title='',charsize=4,$
                      xtitle='Time of ' + strtrim(event.date, 2) ,ytitle='R!DS!N'
   event=load_events_info(label=event.label)
-  oplot,[time[xrng[0]].jd,time[xrng[0]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=3
-  oplot,[time[xrng[0]].jd,time[xrng[0]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=3,color=255,linestyle=2
-  oplot,[time[xrng[1]].jd,time[xrng[1]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=3
-  oplot,[time[xrng[1]].jd,time[xrng[1]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=3,color=255,linestyle=2
+  oplot,[time[xrng[0]].jd,time[xrng[0]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=4
+  oplot,[time[xrng[0]].jd,time[xrng[0]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=4,color=255,linestyle=2
+  oplot,[time[xrng[1]].jd,time[xrng[1]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=4
+  oplot,[time[xrng[1]].jd,time[xrng[1]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=4,color=255,linestyle=2
   loadct,39,/silent
-  oplot,time[sp:ep].jd+dt2,avg_f[sp:ep],psym=sym(3),symsize=2,color=130
-  oplot,time[sp:ep].jd+dt2,avg_f[sp:ep],psym=sym(8),symsize=2,color=0,thick=3
-  oplot,time[sp:ep].jd+dt2,avg_m[sp:ep],psym=sym(1),symsize=2,color=130
-  oplot,time[sp:ep].jd+dt2,avg_m[sp:ep],psym=sym(6),symsize=2,color=0,thick=3
-  oplot,time[sp:ep].jd+dt2,avg_b[sp:ep],psym=sym(2),symsize=2,color=130
-  oplot,time[sp:ep].jd+dt2,avg_b[sp:ep],psym=sym(7),symsize=2,color=0,thick=3
+  oplot,time[sp:ep].jd+dt2,avg_f[sp:ep],psym=sym(3),symsize=3,color=50
+  oplot,time[sp:ep].jd+dt2,avg_f[sp:ep],psym=sym(8),symsize=3,color=0,thick=3
+  oplot,time[sp:ep].jd+dt2,avg_m[sp:ep],psym=sym(1),symsize=3,color=150
+  oplot,time[sp:ep].jd+dt2,avg_m[sp:ep],psym=sym(6),symsize=3,color=0,thick=3
+  oplot,time[sp:ep].jd+dt2,avg_b[sp:ep],psym=sym(2),symsize=3,color=200
+  oplot,time[sp:ep].jd+dt2,avg_b[sp:ep],psym=sym(7),symsize=3,color=0,thick=3
 
 ;------------------Error on Graph----------------------------------
-  oploterr, time[sp:ep].jd+dt2, avg_f[sp:ep], stdv_f[sp:ep], errcolor = 250, errthick = 4, /noconnect
-  oploterr, time[sp:ep].jd+dt2, avg_b[sp:ep], stdv_b[sp:ep], errcolor = 250, errthick = 4, /noconnect
-  oploterr, time[sp:ep].jd+dt2, avg_m[sp:ep], stdv_m[sp:ep], errcolor = 250, errthick = 4, /noconnect
+  oploterr, time[sp:ep].jd+dt2, avg_f[sp:ep], stdv_f[sp:ep], errcolor = 250, errthick = 10, /noconnect
+  oploterr, time[sp:ep].jd+dt2, avg_b[sp:ep], stdv_b[sp:ep], errcolor = 250, errthick = 10, /noconnect
+  oploterr, time[sp:ep].jd+dt2, avg_m[sp:ep], stdv_m[sp:ep], errcolor = 250, errthick = 10, /noconnect
   
   
 ;Elements defined to fill the structure

@@ -5,7 +5,8 @@ pro test_aia_make_images
   one=1
   if one eq 1 then begin
      wavelengths=['193']
-     labels=['131212_01']
+     labels=['140708_01','130517_01','130423_01','120915_01','120526_01',$
+             '120424_01','110607_01','110211_02','110125_01','110511_01']
      for ev=0,n_elements(labels)-1 do begin
        label=labels[ev]
        event=load_events_info(label=label)
@@ -117,7 +118,13 @@ pro aia_make_images, event, wav, savepath=savepath,force=force,raw=raw,base=base
   
   
   ;Load the data
-  aia_load_data,event.st,event.et,wav,coords=coords,event=event,subdata=subdata,subindex=subindex,/remove_aec,_extra=_extra
+  aia_load_data,event.st,event.et,wav,coords=coords,event=event,subdata=subdata,subindex=subindex,/remove_aec,_extra=_extra,/subroi
+  if not var_exist(subdata) then begin
+     print,''
+     print, 'No data available for event '+event.label
+     print,''
+     return
+  endif
   nsteps=n_elements(subindex)
   ;Make sure the plotting FOV corresponds to the data dimensions.
   if n_elements(reform(subdata[*,0,0])) ne event.aiafov[0] then $

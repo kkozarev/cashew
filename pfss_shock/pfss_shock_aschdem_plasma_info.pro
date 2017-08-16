@@ -1,14 +1,16 @@
-pro test_pfss_shock_aschdem_plasma_info ;A program to test pfss_shock_aschdem_plasma_info
+pro test_pfss_shock_aschdem_plasma_info
+;A program to test pfss_shock_aschdem_plasma_info
   
  ;You can run for one event, like this.
   one=1
   if one eq 1 then begin
      labels=['110607_01','120526_01','130423_01','140708_01','130517_01','120915_01','110211_02','120424_01','110125_01','131212_01']
-     labels=['151104_01']
+     labels=['110607_01'];'151104_01',
+     
      for ev=0,n_elements(labels)-1 do begin
         label=labels[ev]
         event=load_events_info(label=label)
-        pfss_shock_aschdem_plasma_info,event,/lores,/force
+        pfss_shock_aschdem_plasma_info,event,/hires
         ;pfss_shock_aschdem_plasma_info,event,/hires
      endfor
   endif
@@ -29,10 +31,14 @@ end
 
 pro pfss_shock_aschdem_plasma_info,event,hires=hires,lores=lores,force=force
 ;PURPOSE:
-;A procedure to update the shock-crossing point structures with average model and density and temperature maps
-;from the Aschwanden DEM model. It takes 5x5 pixels around the crossing point assuming the same density along the
-;line of sight, then checks if the chi-squared is not too bad (<25). It gets rid of the 'bad' fit pixels, and averages
-;the density and temperature in the ones that are left. This is passed on to the crossing point structures.
+;A procedure to update the shock-crossing point structures with
+;average model and density and temperature maps
+;from the Aschwanden DEM model. It takes 5x5 pixels around the
+;crossing point assuming the same density along the
+;line of sight, then checks if the chi-squared is not too bad (<25).
+;It gets rid of the 'bad' fit pixels, and averages
+;the density and temperature in the ones that are left.
+;This is passed on to the crossing point structures.
 ;
 ;CATEGORY:
 ; AIA/CSGS/ASCHDEM
@@ -51,28 +57,38 @@ pro pfss_shock_aschdem_plasma_info,event,hires=hires,lores=lores,force=force
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 03/11/2016
 
-  
+  wav='193'
+  print, event.savepath
   ;restore the crossing points
   savename=event.csgs.lores.map_savename
   if keyword_set(hires) then savename=event.csgs.hires.map_savename
   savepath=event.mfhcpath
   if file_exist(savepath+savename) then begin
      restore,savepath+savename
-     if not keyword_set(force) then begin
-        print,''
-        print,'Resulting file exists. Re-run with /force to force an update.'
-        return
-     endif
+     ;if not keyword_set(force) then begin
+     ;   print,''
+     ;   print,'Resulting file exists. Re-run with /force to force an update.'
+     ;   return
+     ;endif
   endif else begin
      print,'Non-existent CSGS results file '+savepath+savename
      return
   endelse
+
+          ;Temporary hack to make sure there is
+        ;a timestamp on the crossing points.
+  if not tag_exist(crosspoints,'time') then begin
+     if keyword_set(hires) then pfss_shock_update_crosspoints_tags,event,/hires
+     if keyword_set(lores) then pfss_shock_update_crosspoints_tags,event,/lores
+     restore,savepath+savename
+  endif
   
   
-  nmaxcrosses=max(allcrosses)
-  ind=subindex[0]
+  nmaxcrosses = max(allcrosses)
+  ind = subindex[0]
   wcs = fitshead2wcs(ind)
   coords = wcs_get_coord(wcs)/ind.rsun_obs ;Cartesian coordinates of the pixels in solar radii.
+  radcoords=sqrt(coords[0,*,*]^2+coords[1,*,*]^2)
   ;h = float(sqrt((coords[0,*,*] - 0.)^2. + (coords[1,*,*] - 0.)^2.))
   sz = size(reform(coords[0,*,*]))
   
@@ -101,24 +117,39 @@ pro pfss_shock_aschdem_plasma_info,event,hires=hires,lores=lores,force=force
   cytol=reform(coords[1,*,*]+tolerance)
   
   ;Find background density at the location
-  aia_aschdem_calculate_em,event,demtots[0],emtot,temperature=basetemperature,density=basedensity,chi_map=chi_map
+  
+  aia_aschdem_calculate_em,event,demtots[0],emtot,radcoords=radcoords, $
+                           temperature=basetemperature,density=basedensity,chi_map=chi_map
+  
+  ;Restore the averaged radial kinematics measurement, to obtain the
+  ;front speed
+  radkinfile = event.annuluspath+replace_string(event.annplot.analyzed.radial.avg_savename,'WAV',wav)
+  if file_exist(radkinfile) then begin
+     restore, radkinfile
+     event=load_events_info(label=event.label)
+     rng = [rad_data.timefitrange[0],rad_data.timefitrange[1]]
+     vshocks = rad_data.savgolfits.front[rng[0]:rng[1]].speed
+  endif else begin
+     vshocks = fltarr(nsteps)
+  endelse
+  
   
   for step=0,nsteps-1 do begin
      ;print,'basedensity[0]: '+string(basedensity[0])
      ncrosses=allcrosses[step]
-      
+     
      cptime=cptimes[step]
+     vshock=vshocks[step]
      tmp=min(abs(cptime.jd - demtimes.jd),demind)
-     print,cptime.cashew_time + '  ' + demtimes[demind].cashew_time
+     ;print,cptime.cashew_time + '  ' + demtimes[demind].cashew_time
      ;calculate the density and temperature maps for the appropriate time
      ;BY THE WAY, the density can be re-calculated using emtot and a better model for the
                                 ;radial dependence of the column
                                 ;depth! The formula is density =
                                 ;sqrt(em_tot/demheight)
-     
-     
-     aia_aschdem_calculate_em,event,demtots[demind],emtot,temperature=temperature,density=density,chi_map=chi_map
-     
+     aia_aschdem_calculate_em,event,demtots[demind],emtot,radcoords=radcoords,$
+                              temperature=temperature,density=density,chi_map=chi_map
+
      for cross=0,ncrosses-1 do begin
         pt=crosspoints[step,cross]
         ptr=sqrt(pt.rpx^2+pt.rpy^2)
@@ -133,27 +164,26 @@ pro pfss_shock_aschdem_plasma_info,event,hires=hires,lores=lores,force=force
         ;print,pt.rpx,pt.rpy,n_elements(resx),min(density[resx]),max(density[resx]),mean(density[resx]),mean(chi_map[resx])
         
         ;Of the pixels that were found, only choose the ones with Chi-squared lower than 20.
-        ;This means that the number of pixels, over which we average, will vary, but at least the quality of the
-        ;model is much better.
-        goodchi=where(chi_map[resx]^2 lt 25.)
+                                ;This means that the number of pixels,
+                                ;over which we average, will vary, but
+                                ;at least the quality of the model is much better.
+        goodchi=where(chi_map[resx]^2 lt 40.)
         if goodchi[0] eq -1 or n_elements(goodchi) lt 3 then bestind=resx else bestind=resx[goodchi]
         ;if chi is huge, give up
-        if mean(chi_map[bestind]) gt 15 then begin
+        if mean(chi_map[bestind]^2) ge 40. then begin
            print,'chisq of '+strtrim(string(mean(chi_map[bestind])^2),2)
+           ;stop
            continue
         endif
         ;print,pt.rpx,pt.rpy,n_elements(bestind),min(density[bestind]),max(density[bestind]),mean(density[bestind]),mean(chi_map[bestind])
-     ;Assign the density and temperature to the crossing points
-        crosspoints[step,cross].density=mean(density[resx])
-        crosspoints[step,cross].temperature=mean(temperature[resx])
-        ;print,'density[0]: '+string(density[0])+'  basedensity[0]: '+string(basedensity[0])
-        crosspoints[step,cross].shockjump=mean(density[resx]/basedensity[resx])
+        
+        ;Assign the density and temperature to the crossing points
+        crosspoints[step,cross].time = cptime
+        crosspoints[step,cross].vshock = vshock
+        crosspoints[step,cross].density = mean(density[resx])
+        crosspoints[step,cross].temperature = mean(temperature[resx])
+        crosspoints[step,cross].shockjump = mean(density[resx]/basedensity[resx])
      endfor
-     ;print,'density[resx]: '
-     ;print,density[resx]
-     ;print,'basedensity[resx]: '
-     ;print,basedensity[resx]
-     ;stop
   endfor
   tmp=crosspoints.shockjump
   tmp[where(tmp le 1.0)]=1.00000001 
