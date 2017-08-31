@@ -34,7 +34,7 @@ pro find_start_end_radial, rad_data
   ;Smooth the sum of the pixel intensities for the local minima detection
   totalSmoothVals = smooth(totalPixVals, 6, /edge_truncate)
   tmp = lindgen(n_elements(totalSmoothVals))
-
+  
   ;Compute the local minima and maxima to center the Gaussian fit on first wave
   maxima = get_local_maxima(totalSmoothVals, tmp)
   minind = lclxtrem(totalSmoothVals-smooth(totalSmoothVals, 20, /edge_truncate), 10)
@@ -66,43 +66,50 @@ pro find_start_end_radial, rad_data
   endif else begin
      gaussData = totalPixVals
      x=lindgen(n_elements(totalPixVals))
-  endelse 
+  endelse
   
   gaussData=totalPixVals
   x=lindgen(n_elements(totalPixVals))
   sigma_factor=3.
   
-  
-  set_plot,'x'
-  wdef,0,800
-  !p.background=255
-  !p.color=0
-  loadct,39,/silent
-  plot,totalpixvals,charsize=2,title='Automatic J-map wave start/end detect',$
-       xtitle='Time, px',ytitle='Intensity'
+  if debug gt 0 then begin
+     set_plot,'x'
+     wdef,0,800,600
+     !p.background=255
+     !p.color=0
+     !p.multi=0
+     !p.position=[0.14,0.12,0.95,0.93]
+     loadct,39,/silent
+     plot,totalpixvals,charsize=2,title='Automatic J-map wave start/end detect',$
+          xtitle='Time, px',ytitle='Intensity',/xstyle
+  endif
   
   ;Compute a Gaussian fit to determine start and end times
   gfit2 = mpfitpeak(x, gaussData, coeff, nterms=4)
-
+  
+  
   ;If the peak or stdev is outrageous, refit with all of the data
-  if coeff[2] gt n_elements(totalPixVals)/2 || coeff[0] lt 0 then begin
+  if coeff[2] gt n_elements(totalPixVals)/2 or coeff[0] lt 0 then begin
      x = lindgen(n_elements(totalPixVals))
      gfit2 = mpfitpeak(x, totalPixVals, coeff, nterms=4)
   endif
-  oplot,gfit2,color=120
+  
+  if debug gt 0 then oplot,gfit2,color=120
 
+  
+  
   ;Set the start/end locations
-  minusTwoSigma = coeff[1] - sigma_factor*coeff[2]
-  plusTwoSigma = coeff[1] + sigma_factor*coeff[2]
-
+  minusTwoSigma = fix(coeff[1] - sigma_factor*coeff[2])
+  plusTwoSigma = fix(coeff[1] + sigma_factor*coeff[2])
+  
   ; Refit the Gaussian with all of the
   ; data if the initial start guess is negative
   if minusTwoSigma lt 0 then begin
      x = lindgen(n_elements(totalPixVals))
      gfit2 = mpfitpeak(x, totalPixVals, coeff, nterms=4)
 
-     minusTwoSigma = coeff[1] - sigma_factor*coeff[2]
-     plusTwoSigma = coeff[1] + sigma_factor*coeff[2]
+     minusTwoSigma = fix(coeff[1] - sigma_factor*coeff[2])
+     plusTwoSigma = fix(coeff[1] + sigma_factor*coeff[2])
   endif    
   
   if minusTwoSigma lt 0 then begin
@@ -117,9 +124,10 @@ pro find_start_end_radial, rad_data
      print, "No valid end point found, setting index to "+strtrim(string(n_elements(totalPixVals)-1),2)+'...'
   endif
   
-  oplot,[plusTwoSigma, plusTwoSigma], !y.crange,color=60
-  oplot,[minusTwoSigma, minusTwoSigma], !y.crange,color=60
-  
+  if debug gt 0 then begin
+     oplot,[plusTwoSigma, plusTwoSigma], !y.crange,color=60
+     oplot,[minusTwoSigma, minusTwoSigma], !y.crange,color=60
+  endif
   
 ;The rest of the procedure makes sure the maxima exceed the background
 ;noise, and tries to find the start and end time based on the slope of
@@ -131,12 +139,12 @@ pro find_start_end_radial, rad_data
 ; Use MPFitPeak to provide initial starting and ending
 ; time guess
 
-  startGuess = round(minusTwoSigma)
-  endGuess = round(plusTwoSigma)
-
+  startGuess = minusTwoSigma
+  endGuess = plusTwoSigma
+  
   backgroundLevel = mean(totalPixVals[0:startGuess])
   backgroundThresh = backgroundLevel + 0.50*backgroundLevel
-
+  
                                 ; Make sure the first maximum is
                                 ; sufficiently above background, or
                                 ; fit the entire data duration
@@ -144,16 +152,19 @@ pro find_start_end_radial, rad_data
      if debug eq 1 then print, "Below background threshold, recomputing..."
      x = lindgen(n_elements(totalPixVals))
      gfit2 = mpfitpeak(x, totalPixVals, coeff, nterms=4)
-     oplot,gfit2,color=120
+     if debug gt 0 then oplot,gfit2,color=120
 
      minusTwoSigma = coeff[1] - sigma_factor*coeff[2]
      plusTwoSigma = coeff[1] + sigma_factor*coeff[2]
-     
-     oplot,[plusTwoSigma, plusTwoSigma], !y.crange,color=60
-     oplot,[minusTwoSigma, minusTwoSigma], !y.crange,color=60      
 
+     if debug gt 0 then begin
+        oplot,[plusTwoSigma, plusTwoSigma], !y.crange,color=60
+        oplot,[minusTwoSigma, minusTwoSigma], !y.crange,color=60      
+     endif
+     
      startGuess = round(minusTwoSigma)
      endGuess = round(plusTwoSigma)
+     
   endif
 
   if debug eq 1 then begin
@@ -162,6 +173,7 @@ pro find_start_end_radial, rad_data
      print, "Gaussian based end index guess"
      print, endGuess
   endif
+  
   
   backgroundEnd = startGuess
   if backgroundEnd lt 0 then backgroundEnd=0 ;DEBUG
@@ -195,7 +207,7 @@ pro find_start_end_radial, rad_data
 ; slope, finding the place where we have a large slope within
 ; the background window should mark the start of the front.
 ; Save this as the starting index
-  startInd = min(where(slope gt 225))
+  startInd = min(where(slope gt 225.))
   if debug eq 1 then print, "Slope detected start: ", startInd
   
   if startInd eq -1 then begin
@@ -209,9 +221,7 @@ pro find_start_end_radial, rad_data
      x = lindgen(n_elements(totalPixVals))
      gfit2 = mpfitpeak(x, totalPixVals, coeff, nterms=4)
   endif
-
-
-
+  
 
   
 ;-----------------------------------------------------------------
@@ -236,7 +246,6 @@ pro find_start_end_radial, rad_data
   endfor
   
   
-  
   ; If unsuccesful, find where the Gaussian crosses the background
   if endInd eq -1 then begin
      for tt=startInd, nt-1 do begin
@@ -255,17 +264,20 @@ pro find_start_end_radial, rad_data
      endfor
   endif
   
-
+  
   ; If nothing works use the Gaussian based two sigma guess
   if endInd eq -1 then begin
      print, "Could not find valid ending point, using Gaussian based guess"
      endInd = endGuess
      if endInd gt n_elements(totalPixVals)-1 then endInd = n_elements(totalPixVals)-2
-     return
+     rad_data.timefitrange=[startInd, endInd]
+     return 
   endif
-  
-  oplot,[startInd,startInd], !y.crange,color=160
-  oplot,[endInd,endInd], !y.crange,color=160      
+
+  if debug gt 0 then begin
+     oplot,[startInd,startInd], !y.crange,color=160
+     oplot,[endInd,endInd], !y.crange,color=160      
+  endif
   
   ;Exit if a good start position is not found
   if startInd eq -1 then begin
@@ -280,11 +292,13 @@ pro find_start_end_radial, rad_data
      print,'Wave start time is the same as wave end time. Rerun manually. Quitting...'
      return
   endif
-  print,'Press any key to continue.'
-  test = get_kbrd(1)
-  ;wait,1
-  wdel,0
-  loadct,0,/silent
+  ;print,'Press any key to continue.'
+                                ;test = get_kbrd(1)
+                                ;wait,1
+  if debug gt 0 then begin
+     wdel,0
+     loadct,0,/silent
+  endif
   
   ;The final result is written into rad_data
   rad_data.timefitrange=[startInd, endInd]

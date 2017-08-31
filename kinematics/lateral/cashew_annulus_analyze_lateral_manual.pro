@@ -8,13 +8,13 @@ pro test_cashew_annulus_analyze_lateral_manual
      wav='193'
      labels=['110511_01']
      labels=['120806_01','140220_02']
-     labels=['120307_01','120405_01','151104_01','151104_02','151104_03']
-     labels=['110607_01']
+     labels=['120307_01','120405_01','151104_01','151104_02','151104_03','110607_01']
+     labels=['131212_01']
      for ev=0,n_elements(labels)-1 do begin
         label=labels[ev]
         event=load_events_info(label=label)
                                 ;rrange=[1.1,1.34]
-        cashew_annulus_analyze_lateral_manual,event,wave=wav,/constrain,/fitdata;,/auto ;,rrange=rrange ;,/interactive
+        cashew_annulus_analyze_lateral_manual,event,wave=wav,/constrain,/fitdata;,rrange=rrange ;,/interactive
      endfor
   endif
   
@@ -98,7 +98,7 @@ end
 
 ;+============================================================================
 pro cashew_annulus_analyze_lateral_manual,event,datapath=datapath,savepath=savepath,thrange=thrange,fitdata=fitdata,$
-                                   wave=wave,rrange=rrange,constrain=constrain, gradient=gradient, auto=auto
+                                   wave=wave,rrange=rrange,constrain=constrain, gradient=gradient
 ;PURPOSE:
 ;Procedure to analyze the speeds of radial expansion of a
 ;wave and/or a filament.

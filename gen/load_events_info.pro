@@ -4,6 +4,10 @@ pro save_duplicate_event_info,event
 ;Note: the event structure must have been populated prior to passing it to this procedure.
   path=event.savepath
   close,/all
+  if not file_exist(event.json_savename) then begin
+     print,'ERROR: Non-existing file: '+event.json_savename
+     return
+  endif
   openw,lun,event.json_savename,/get_lun
   printf,lun,'{'
   printf,lun,'     "label": "'+event.label+'",'
@@ -137,10 +141,11 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet,global
 ;SAVEPATHS
   savepath=basepath+'events/'   ;The base savepath
   webpath=webbasepath+'events/'
-
+  
   ;FOLDER STRUCTURE
-  folder_structure=['radio','annulusplot','kinematics','pfss','swap','ionization','particles','png','gif','movies','dem','yaftawave','euvi']
-  subfolder_structure={radio:['NRH','RSTN','Callisto'],annulusplot:['araw','abase','arun'],png:['raw','base','run'],dem:['aschwanden','weber']}
+  folder_structure=['radio','annulusplot','kinematics','pfss','swap','ionization','particles','png','gif','movies','dem','yaftawave','euvi','csgs','dtc']
+  ;folder_structure=['radio','annulusplot','kinematics','pfss','mfhc','csgs','swap','ionization','particles','png','gif','movies','dtc','yaftawave','euvi']
+  subfolder_structure={radio:['NRH','RSTN','Callisto'],annulusplot:['araw','abase','arun'],png:['raw','base','run'],dem:['aschwanden','weber'],dtc:['aschwanden','weber']}
   
   
 ;----------------------------------------------------------------------------------------
@@ -150,7 +155,7 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet,global
          aia_datapath:'',nrh_datapath:'',rhessi_datapath:'',rstn_datapath:'',callisto_datapath:'',$
          rstn_lookup:'',callisto_lookup:'',nrh_lookup:'',$
          euvi_datapath:'',swap_datapath:'',pfss_datapath:'',savepath:'',webpath:'',$
-         moviepath:'',radiopath:'',nrhpath:'',rstnpath:'',callistopath:'',annuluspath:'',pfsspath:'',$
+         moviepath:'',radiopath:'',nrhpath:'',rstnpath:'',callistopath:'',annuluspath:'',pfsspath:'',mfhcpath:'',csgspath:'',$
          swappath:'',ionizationpath:'',aschdempath:'',weberpath:'',particlespath:'',$
          euvipath:'',dtcpath:'',pngpath:'',gifpath:'',yaftawavepath:'',kinematicspath:'',aia_fulldata_savename:'',aia_subdata_savename:'',json_savename:'',$
          $
@@ -168,8 +173,15 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet,global
          pfss:{hiresmap_savename:'',loresmap_savename:''},$
          csgs:{$
         hires:{map_savename:'',plot_savename:'',thetabn:{plot_savename:'',overplot_savename:'',stats:{timeplot_savename:'',crossings_savename:'',timeradpos_savename:'',timeradposbinned_savename:'',distance_savename:''}},anginfluence:{plot_savename:'',topview_plot_savename:''}},$
-        lores:{map_savename:'',plot_savename:'',thetabn:{plot_savename:'',overplot_savename:'',stats:{timeplot_savename:'',crossings_savename:'',timeradpos_savename:'',timeradposbinned_savename:'',distance_savename:''}},anginfluence:{plot_savename:'',topview_plot_savename:''}}},$
-         movies:{annplot:{araw_savename:'',abase_savename:'',arun_savename:''},aschdem:{teem_savename:'',density_savename:'',temperature_savename:'',em_ratios_savename:'',em_differences_savename:'',density_ratios_savename:'',density_differences_savename:'',temperature_ratios_savename:'',temperature_differences_savename:''},csgs:{hires:{plot_savename:'',thetabn:{plot_savename:'',overplot_savename:''},anginfluence:{plot_savename:'',topview_plot_savename:''}},lores:{plot_savename:'',thetabn:{plot_savename:'',overplot_savename:''},anginfluence:{plot_savename:'',topview_plot_savename:''}}},yaftawave_savename:''},folder_structure:folder_structure,subfolder_structure:subfolder_structure}
+        lores:{map_savename:'',plot_savename:'',thetabn:{plot_savename:'',overplot_savename:'',stats:{timeplot_savename:'',crossings_savename:'',timeradpos_savename:'',timeradposbinned_savename:'',distance_savename:''}},anginfluence:{plot_savename:'',topview_plot_savename:''}}$
+              },$
+         movies:{$
+        raw_savename:'',base_savename:'',run_savename:'',$
+        annplot:{araw_savename:'',abase_savename:'',arun_savename:''},$
+        aschdem:{teem_savename:'',density_savename:'',temperature_savename:'',em_ratios_savename:'',em_differences_savename:'',density_ratios_savename:'',density_differences_savename:'',temperature_ratios_savename:'',temperature_differences_savename:''},$
+        csgs:{hires:{plot_savename:'',thetabn:{plot_savename:'',overplot_savename:''},anginfluence:{plot_savename:'',topview_plot_savename:''}},lores:{plot_savename:'',thetabn:{plot_savename:'',overplot_savename:''},anginfluence:{plot_savename:'',topview_plot_savename:''}}},$
+        yaftawave_savename:''},$
+         folder_structure:folder_structure,subfolder_structure:subfolder_structure}
   
   events=replicate(event,nevents)
   
@@ -204,6 +216,7 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet,global
      events[ev].rstn_lookup=rstn_lookup[ev]
      
 ;DATAPATHS
+;+======================================================================================================
      events[ev].aia_datapath=aia_datapath
      events[ev].nrh_datapath=nrh_datapath
      events[ev].callisto_datapath=callisto_datapath
@@ -212,7 +225,9 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet,global
      events[ev].swap_datapath=swap_datapath
      events[ev].euvi_datapath=euvi_datapath
      events[ev].pfss_datapath=pfss_datapath
-     
+;-======================================================================================================     
+
+
 ;SAVEPATHS
 ;+======================================================================================================
      events[ev].savepath=savepath+events[ev].label+'/'
@@ -223,7 +238,9 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet,global
      events[ev].rstnpath=events[ev].radiopath+'RSTN/'
      events[ev].callistopath=events[ev].radiopath+'Callisto/'
      events[ev].annuluspath=events[ev].savepath+'annulusplot/'
+     events[ev].mfhcpath=events[ev].savepath+'pfss/'
      events[ev].pfsspath=events[ev].savepath+'pfss/'
+     events[ev].csgspath=events[ev].savepath+'csgs/'
      events[ev].swappath=events[ev].savepath+'swap/'
      events[ev].ionizationpath=events[ev].savepath+'ionization/'
      events[ev].euvipath=events[ev].savepath+'euvi/'
@@ -314,6 +331,10 @@ function load_events_info,printlabels=printlabels,label=label,quiet=quiet,global
      
      
 ;MOVIE FILENAMES WILL GO HERE
+     events[ev].movies.raw_savename='raw_WAV_'+events[ev].label+'.mp4'
+     events[ev].movies.base_savename='base_WAV_'+events[ev].label+'.mp4'
+     events[ev].movies.run_savename='run_WAV_'+events[ev].label+'.mp4'
+     
      events[ev].movies.annplot.araw_savename='araw_WAV_'+events[ev].label+'.mp4'
      events[ev].movies.annplot.abase_savename='abase_WAV_'+events[ev].label+'.mp4'
      events[ev].movies.annplot.arun_savename='arun_WAV_'+events[ev].label+'.mp4'
