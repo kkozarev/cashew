@@ -3,18 +3,20 @@ pro test_calculate_lateral_kinematics_results
   events=['100613_01','101103_02','101231_01','110125_01','110211_02','110327_01','110515_01','110607_01','110904_01','120307_01','120424_01','120526_01','120728_01','120915_01','121007_01','130423_01','130501_01','130517_01','131107_01','131207_01','131212_01','140217_01','140708_01','140901_01','141105_02','141205_01','150303_01','150421_01','150920_01','151109_01']
   events=['100613_01','101103_02']
   events=['110607_01','131212_01']
+  events=['151104_01']
+  ;events = ['131212_01']
   nevents=n_elements(events)
   for ev=0,nevents-1 do begin
      event_label=events[ev]
      event=load_events_info(label=event_label)
-     calculate_lateral_kinematics_results,event,/ps 
+     calculate_lateral_kinematics_results,event,/ps;,/force
   endfor
 end
 
 
 
 
-pro calculate_lateral_kinematics_results,event,ps=ps
+pro calculate_lateral_kinematics_results,event,ps=ps,force=force
 
 ;PURPOSE:
 ;Analyze data from the 10 manually created runs for annulus data,
@@ -50,7 +52,7 @@ pro calculate_lateral_kinematics_results,event,ps=ps
 
 ;--------------------------AVERAGES AND STANDARD DEVIATIONS------------------------
 ;nmeas needs to be = N-1 once every event has N meas to their names
-  search_fname = event.annuluspath + 'annplot_'+strtrim(event.date)+'_'+strtrim(event.label)+'_'+wav+'_analyzed_lateral*_m*.sav'
+  search_fname = event.annuluspath + 'annplot_'+strtrim(event.date)+'_'+strtrim(event.label)+'_'+wav+'_analyzed_lateral_m*.sav'
   fnames=file_search(search_fname)
   nmeas = n_elements(fnames)
   if nmeas lt 3 then begin
@@ -59,9 +61,9 @@ pro calculate_lateral_kinematics_results,event,ps=ps
      print,'Run a measurement with procedure cashew_annulus_analyze_lateral.'
      print,'Quitting...'
      print,''
+     return
   endif
-  
-                                ;Defining some values for later 
+  ;Defining some values for later 
   restore, fnames[0]
   RSUN=ind_arr[0].rsun_ref/1000. ;Solar radius in km.
   numrad=n_elements(total_lat_data)
@@ -72,8 +74,12 @@ pro calculate_lateral_kinematics_results,event,ps=ps
   
   LEFTDIR=0
   RIGHTDIR=1
-
-;Then you load the data for each measurement, and so you loop over measurements:
+  VERYSMALL=1.e-33
+  numdirs=2
+  
+;Then you load the data for each measurement, and so you loop over
+;measurements:
+  resave=0
   for mm=0,nmeas-1 do begin
      restore, fnames[mm]
      for rr=0,numrad-1 do begin
@@ -82,18 +88,46 @@ pro calculate_lateral_kinematics_results,event,ps=ps
            if dir eq RIGHTDIR then lat_data=total_lat_data[rr].right
            alllat_data[mm,rr,dir]=lat_data
            if lat_data.status eq -1 then continue
-           if mean(lat_data.savgolfits.back.speed) eq 0. or $
+           if keyword_set(force) or (mean(lat_data.savgolfits.back.speed) eq 0. or $
               mean(lat_data.savgolfits.front.speed) eq 0. or $
-              mean(lat_data.savgolfits.peak.speed) eq 0. then begin
+              mean(lat_data.savgolfits.peak.speed) eq 0.) then begin
               fit_wave_kinematics_lateral,lat_data,ind_arr,/front
               fit_wave_kinematics_lateral,lat_data,ind_arr,/peak
               fit_wave_kinematics_lateral,lat_data,ind_arr,/back
+              resave=1
            endif
            alllat_data[mm,rr,dir]=lat_data
+           if resave gt 0 then begin
+              if dir eq LEFTDIR then total_lat_data[rr].left=lat_data
+              if dir eq RIGHTDIR then total_lat_data[rr].right=lat_data
+           endif
         endfor
      endfor
+     if resave gt 0 then save,filename=fnames[mm],total_lat_data,ind_arr,annulus_info
   endfor
   
+  
+  ntotaltimes=n_elements(alllat_data[0,0,0].data[*,0])
+  stdintensity=fltarr(ntotaltimes)
+  wav_thick_std=fltarr(ntotaltimes)
+  stdbackaccel=fltarr(ntotaltimes)
+  stdpeakaccel=fltarr(ntotaltimes)
+  stdfrontaccel=fltarr(ntotaltimes)
+  stdbackspeed=fltarr(ntotaltimes)
+  stdpeakspeed=fltarr(ntotaltimes)
+  stdfrontspeed=fltarr(ntotaltimes)
+  lat_stdv=replicate({front:replicate({speed:0.,accel:0.},ntotaltimes),$
+                      peak:replicate({speed:0.,accel:0.},ntotaltimes),$
+                      back:replicate({speed:0.,accel:0.},ntotaltimes),$
+                      intensity:fltarr(ntotaltimes),wav_thick:fltarr(ntotaltimes)},numrad,2)
+  
+  frontrad=fltarr(ntotaltimes)
+  frontstdv=fltarr(ntotaltimes)
+  peakrad=fltarr(ntotaltimes)
+  peakstdv=fltarr(ntotaltimes)
+  backrad=fltarr(ntotaltimes)
+  backstdv=fltarr(ntotaltimes)
+  rad_from_lat = replicate({front:frontrad, frontstdv:frontstdv, peak:peakrad, peakstdv:peakstdv, back:backrad, backstdv:backstdv},numrad,numdirs)
   
   for rr=0,numrad-1 do begin
      for dir=LEFTDIR,RIGHTDIR do begin
@@ -114,15 +148,6 @@ pro calculate_lateral_kinematics_results,event,ps=ps
         ntimes=n_elements(lat_data.data[*,0])
         
 ;Finds the mean and stddev of all the events
-        
-        stdintensity=fltarr(ntimes)
-        wav_thick_std=fltarr(ntimes)
-        stdbackaccel=fltarr(ntimes)
-        stdpeakaccel=fltarr(ntimes)
-        stdfrontaccel=fltarr(ntimes)
-        stdbackspeed=fltarr(ntimes)
-        stdpeakspeed=fltarr(ntimes)
-        stdfrontspeed=fltarr(ntimes)
         
         for tt=0,ntimes-1 do begin
            lat_data_average[rr,dir].wave_frontedge[tt].lat=mean(alllat_data[*,rr,dir].wave_frontedge[tt].lat) - yarray_offset
@@ -150,6 +175,17 @@ pro calculate_lateral_kinematics_results,event,ps=ps
            lat_data_average[rr,dir].savgolfits.front[tt].speed=mean(alllat_data[*,rr,dir].savgolfits.front[tt].speed)
            stdfrontspeed[tt]=stddev(alllat_data[*,rr,dir].savgolfits.front[tt].speed)
         endfor
+        
+        ;Record the standard deviations
+        lat_stdv[rr,dir].front.speed = stdfrontspeed
+        lat_stdv[rr,dir].front.accel = stdfrontaccel
+        lat_stdv[rr,dir].peak.speed = stdpeakspeed
+        lat_stdv[rr,dir].peak.accel = stdpeakaccel
+        lat_stdv[rr,dir].back.speed = stdbackspeed
+        lat_stdv[rr,dir].back.accel = stdbackaccel
+        lat_stdv[rr,dir].intensity = stdintensity
+        lat_stdv[rr,dir].wav_thick = wav_thick_std
+        
         event=load_events_info(label=event.label)
         timesec = lat_data_average[rr,dir].time.relsec
         timejd=lat_data_average[rr,dir].time.jd
@@ -160,25 +196,28 @@ pro calculate_lateral_kinematics_results,event,ps=ps
         gamma = lat_data_average[rr,dir].wave_frontedge[sp:ep].lat * !PI/180.
         gammastdv = lat_data_average[rr,dir].wave_frontedge[sp:ep].stdv * !PI/180.
         radius = lat_data_average[rr,dir].radius
-        frontrad = radius*sqrt(2*(1-cos(gamma))); + 1.
-        frontstdv = abs( ( frontrad * abs(sin(gamma) * gammastdv) ) / ( 2. * (1 - cos(gamma))))
-        frontrad +=1.
+        frontrad[sp:ep] = radius*sqrt(2*(1-cos(gamma))); + 1.
+        frontstdv[sp:ep] = abs( ( frontrad * abs(sin(gamma) * gammastdv) ) / ( 2. * (1 - cos(gamma)+VERYSMALL)))
+        frontrad[sp:ep] +=1.
         
         gamma = lat_data_average[rr,dir].wave_peak[sp:ep].lat * !PI/180.
         gammastdv = lat_data_average[rr,dir].wave_peak[sp:ep].stdv * !PI/180.
         radius = lat_data_average[rr,dir].radius
-        peakrad = radius*sqrt(2*(1-cos(gamma))) ;+ 1.
-        peakstdv = abs( ( peakrad * abs(sin(gamma) * gammastdv) ) / ( 2. * (1 - cos(gamma))))
-        peakrad +=1.
+        peakrad[sp:ep] = radius*sqrt(2*(1-cos(gamma))) ;+ 1.
+        peakstdv[sp:ep] = abs( ( peakrad * abs(sin(gamma) * gammastdv) ) / ( 2. * (1 - cos(gamma)+VERYSMALL)))
+        peakrad[sp:ep] +=1.
         
         gamma = lat_data_average[rr,dir].wave_backedge[sp:ep].lat * !PI/180.
         gammastdv = lat_data_average[rr,dir].wave_backedge[sp:ep].stdv * !PI/180.
         radius = lat_data_average[rr,dir].radius
-        backrad = radius*sqrt(2*(1-cos(gamma))) ;+ 1.
-        backstdv = abs( ( backrad * abs(sin(gamma) * gammastdv) ) / ( 2. * (1 - cos(gamma))))
-        backrad +=1.
+        backrad[sp:ep] = radius*sqrt(2*(1-cos(gamma))) ;+ 1.
+        backstdv[sp:ep] = abs( ( backrad * abs(sin(gamma) * gammastdv) ) / ( 2. * (1 - cos(gamma)+VERYSMALL)))
+        backrad[sp:ep] +=1.
         
-        rad_from_lat = {front:frontrad, frontstdv:frontstdv, peak:peakrad, peakstdv:peakstdv, back:backrad, backstdv:backstdv}
+        rad_from_lat[rr,dir] = {front:frontrad, frontstdv:frontstdv, peak:peakrad, peakstdv:peakstdv, back:backrad, backstdv:backstdv}
+        
+        
+        
         
 ;----------Finding plotting range for acceleration--------------------
         accel_array_front=lat_data_average[rr,dir].savgolfits.front[sp:ep].accel
@@ -465,8 +504,8 @@ pro calculate_lateral_kinematics_results,event,ps=ps
         ;plot, timejd[sp:ep], lat_data_average[rr,dir].wave_peak[sp:ep].lat,/xstyle, thick = linethick, color = 0, background = 255,$
         ;      ytitle="Front est. radial position R!Ds!N", xtitle = "Time, seconds", charsize = 3,/ystyle, xthick=linethick,ythick=linethick,$
         ;      xrange = xrnge, /nodata, yrange = yrnge_rad, XTICKUNITS = ['Time'],XTICKFORMAT='LABEL_DATE' ;, position = plot_pos
-        plot, timejd[sp:ep], rad_from_lat.peak,/xstyle, thick = linethick, color = 0, background = 255,$
-              ytitle="Front est. radial position R!Ds!N", xtitle = "Time, seconds", charsize = 3,/ystyle, xthick=linethick,ythick=linethick,$
+        plot, timejd[sp:ep], rad_from_lat[rr,dir].peak[sp:ep],/xstyle, thick = linethick, color = 0, background = 255,$
+              ytitle="Est. radial position R!Ds!N", xtitle = "Time of "+event.date, charsize = 3,/ystyle, xthick=linethick,ythick=linethick,$
               xrange = xrnge, /nodata, yrange = yrnge_rad, XTICKUNITS = ['Time'],XTICKFORMAT='LABEL_DATE'
         
         loadct, 13, /silent
@@ -478,27 +517,27 @@ pro calculate_lateral_kinematics_results,event,ps=ps
         ;oplot, timejd[sp:ep], lat_data_average[rr,dir].wave_frontedge[sp:ep].lat,psym=sym(1),symsize=0.8,color=cfront
         ;oploterr, timejd[sp:ep], lat_data_average[rr,dir].wave_frontedge[sp:ep].lat, lat_data_average[rr,dir].wave_frontedge[sp:ep].stdv, $
         ;          errcolor = cfront, errthick = 4, /noconnect
-        oplot, timejd[sp:ep], rad_from_lat.front, thick=linethick,color = cfront
-        oplot, timejd[sp:ep], rad_from_lat.front,psym=sym(1),symsize=0.8,color=cfront
-        oploterr, timejd[sp:ep], rad_from_lat.front, rad_from_lat.frontstdv, $
+        oplot, timejd[sp:ep], rad_from_lat[rr,dir].front[sp:ep], thick=linethick,color = cfront
+        oplot, timejd[sp:ep], rad_from_lat[rr,dir].front[sp:ep],psym=sym(1),symsize=0.8,color=cfront
+        oploterr, timejd[sp:ep], rad_from_lat[rr,dir].front[sp:ep], rad_from_lat[rr,dir].frontstdv[sp:ep], $
                   errcolor = cfront, errthick = 4, /noconnect
         
         ;oplot, timejd[sp:ep],  lat_data_average[rr,dir].wave_peak[sp:ep].lat, thick=linethick,color = cpeak,linestyle=2 ;lat_data_average.wave_peak[sp:ep].lat
         ;oplot, timejd[sp:ep], lat_data_average[rr,dir].wave_peak[sp:ep].lat,psym=sym(1),symsize=0.8,color=cpeak ;lat_data_average.wave_peak[sp:ep].lat
         ;oploterr, timejd[sp:ep], lat_data_average[rr,dir].wave_peak[sp:ep].lat, lat_data_average[rr,dir].wave_peak[sp:ep].stdv, $
         ;          errcolor = cpeak, errthick = 4, /noconnect
-        oplot, timejd[sp:ep],  rad_from_lat.peak, thick=linethick,color = cpeak,linestyle=2 ;lat_data_average.wave_peak[sp:ep].lat
-        oplot, timejd[sp:ep], rad_from_lat.peak,psym=sym(1),symsize=0.8,color=cpeak ;lat_data_average.wave_peak[sp:ep].lat
-        oploterr, timejd[sp:ep], rad_from_lat.peak, rad_from_lat.peakstdv, $
+        oplot, timejd[sp:ep],  rad_from_lat[rr,dir].peak[sp:ep], thick=linethick,color = cpeak,linestyle=2 ;lat_data_average.wave_peak[sp:ep].lat
+        oplot, timejd[sp:ep], rad_from_lat[rr,dir].peak[sp:ep],psym=sym(1),symsize=0.8,color=cpeak ;lat_data_average.wave_peak[sp:ep].lat
+        oploterr, timejd[sp:ep], rad_from_lat[rr,dir].peak[sp:ep], rad_from_lat[rr,dir].peakstdv[sp:ep], $
                   errcolor = cpeak, errthick = 4, /noconnect
-
+        
         ;oplot, timejd[sp:ep], lat_data_average[rr,dir].wave_backedge[sp:ep].lat, thick=linethick, color = cback,linestyle=3
         ;oplot, timejd[sp:ep], lat_data_average[rr,dir].wave_backedge[sp:ep].lat,psym=sym(1),symsize=0.8,color=cback
         ;oploterr, timejd[sp:ep], lat_data_average[rr,dir].wave_backedge[sp:ep].lat, lat_data_average[rr,dir].wave_backedge[sp:ep].stdv, $
         ;          errcolor = cback, errthick = 4, /noconnect
-        oplot, timejd[sp:ep], rad_from_lat.back, thick=linethick, color = cback,linestyle=3
-        oplot, timejd[sp:ep], rad_from_lat.back,psym=sym(1),symsize=0.8,color=cback
-        oploterr, timejd[sp:ep], rad_from_lat.back, rad_from_lat.backstdv, $
+        oplot, timejd[sp:ep], rad_from_lat[rr,dir].back[sp:ep], thick=linethick, color = cback,linestyle=3
+        oplot, timejd[sp:ep], rad_from_lat[rr,dir].back[sp:ep],psym=sym(1),symsize=0.8,color=cback
+        oploterr, timejd[sp:ep], rad_from_lat[rr,dir].back[sp:ep], rad_from_lat[rr,dir].backstdv[sp:ep], $
                   errcolor = cback, errthick = 4, /noconnect
         
         loadct, 0, /silent
@@ -521,8 +560,7 @@ pro calculate_lateral_kinematics_results,event,ps=ps
   event=load_events_info(label=event.label)
   shockfile=event.annuluspath+replace_string(event.annplot.analyzed.lateral.avg_savename,'WAV',wav)
   lat_data=lat_data_average
-  save,filename=shockfile,lat_data,ind_arr,annulus_info,rad_from_lat
-  
+  save,filename=shockfile,lat_data,ind_arr,annulus_info,rad_from_lat,lat_stdv
   print, "Done computing averages for event "+event.label
 ;=====================================================================================
 ;=====================================================================================
