@@ -15,7 +15,7 @@ pro test_aia_make_movies
         wavelengths=['193']
         movie_types=['araw','abase','arun','raw','base','run']
         movie_types=['pfss_shock','thetabn_oplot_hires','pfss_spread_hires','pfss_spread_topview_hires']
-        ;movie_types=['pfss_shock']
+        movie_types=['pfss_shock','raw','base','density_ratios','thetabn_oplot_hires','pfss_spread_hires','pfss_spread_topview_hires']
                                 ;movie_types=['abase']
                                 ;movie_types=['density_ratios','temperature_differences'];'teem_ratios',
         wavelengths=['193']
@@ -30,23 +30,24 @@ pro test_aia_make_movies
   endif
   
                                 ;Alternatively, run it for all/multiple events
-  all=0
+  all=1
   if all eq 1 then begin
      events=load_events_info()
      wavelengths=['193','211']
      wavelengths='193'
-     movie_types=['raw','base','run']
+     movie_types=['raw','base']
                                 ;movie_types=['araw','abase','arun','raw','base','run']
      movie_types=['teem']
+    movie_types=['pfss_shock','raw','base','density_ratios','thetabn_oplot_hires','pfss_spread_hires','pfss_spread_topview_hires']
      nevents=n_elements(events)
      for ev=0,nevents-1 do begin
         event=events[ev]
         for w=0,n_elements(wavelengths)-1 do begin
            wavelength=wavelengths[w]
-           for mt=0,n_elements(movie_types)-1 do begin
-              movie_type=movie_types[mt]
-              aia_make_movies, event, movie_type=movie_type, wav=wavelength,/force
-           endfor
+           ;for mt=0,n_elements(movie_types)-1 do begin
+              ;movie_type=movie_types[mt]
+              aia_make_movies, event, movie_type=movie_types, wav=wavelength,/force
+           ;endfor
         endfor
      endfor
   endif

@@ -1,5 +1,5 @@
 ;+============================================================================
-pro test_aia_annulus_analyze_radial_manual
+pro test_aia_annulus_analyze_radial_auto
 ;Procedure to run and test aia_annulus_analyze
 
 ;You can run for one event, like this.
@@ -16,7 +16,7 @@ pro test_aia_annulus_analyze_radial_manual
      for ev=0,n_elements(labels)-1 do begin
         label=labels[ev]
         event=load_events_info(label=label)
-        aia_annulus_analyze_radial_manual,event,wave=wav,/fitdata ;,rrange=rrange ;,/interactive
+        aia_annulus_analyze_radial_auto,event,wave=wav,/fitdata,/force ;,rrange=rrange ;,/interactive
      endfor
   endif
   
@@ -31,7 +31,7 @@ pro test_aia_annulus_analyze_radial_manual
         event=events[ev]
         for w=0,n_elements(wavelengths)-1 do begin
            wavelength=wavelengths[w]
-           aia_annulus_analyze_radial_manual,event,wave=wavelength,rrange=rrange;,/interactive
+           aia_annulus_analyze_radial_auto,event,wave=wavelength,rrange=rrange ;,/interactive
         endfor
      endfor
   endif
@@ -42,71 +42,27 @@ end
 
 
 ;+============================================================================
-pro annulus_get_radial_edges, event, rad_data, annulus_info, plotinfo, exit_status
-
-  RSUN=6.96e5                   ;Solar radius in km.
-  TIME_FACTOR=3600.
-  DIST_FACTOR=RSUN
-  y_rsun_array=rad_data.y_rsun_array
-  time=rad_data.time
-  nt=n_elements(time)
-  yrng=rad_data.radfitrange
-  ;Define the exit statuses here:
+pro annulus_get_radial_edges, event, rad_data, plotinfo, exit_status
+                                ;Define the exit statuses here:
   NORMAL_STATUS=0
   CONTINUE_STATUS=1
   QUIT_STATUS=2
   exit_status=NORMAL_STATUS
   
-  
 ;Find the starting and ending time indices for which we believe we have a wave to fit.
-  find_start_end_radial_manual, event, rad_data, plotinfo, exit_status
-  
-  if rad_data.timefitrange[0] eq -1 and rad_data.timefitrange[1] eq -1 then begin
-     print,''
-     uinput=''
-     valid=0
-     while valid eq 0 do begin
-        read,uinput,prompt='NO WAVE PROFILE IS DETECTED. Do you want to continue anyway (y/n)?:'
-        if uinput eq 'y' or uinput eq 'n' then valid=1
-     endwhile
-     if uinput eq 'n' then begin
-        exit_status=CONTINUE_STATUS
-        return
-     endif
-     if uinput eq 'y' then begin
-        rad_data.timefitrange=[0,n_elements(time)-1]
-     endif
-  endif
-  startInd=rad_data.timefitrange[0]
-  endInd=rad_data.timefitrange[1]
-  print, "Initial start index: ", startInd
-  print, "Start Time: ", time[startInd].cashew_time
-  print, "Initial end index: ", endInd
-  print, "End Time: ", time[endInd].cashew_time
-  
-  ;Find the local intensity maxima in the J-map data
-  ;aia_jmap_find_maxima,rad_data,yrange=[y_rsun_array[yrng[0]],y_rsun_array[yrng[1]]]
-  
-;Filter the maxima positions here for physicality
-  ;if keyword_set(constrain) then begin
-  ;maxinds=jmap_filter_maxima_radial(rad_data)
-  ;mymaxima=maxinds
-  ;endif
+  find_start_end_radial_auto, event, rad_data, plotinfo, exit_status
   
 ; Find the front and back edges of the wave at each time step,
-; using gaussian MPFITPEAK routine.
-  ;maxRadIndex = min(where(data[0,*] eq 0.0))
-  find_wave_radial_positions_manual, event, rad_data, plotinfo, exit_status
-
+; using Savitzky-Golay filtering
+  find_wave_radial_positions_auto, rad_data, exit_status
+  
 end
 ;-============================================================================
 
 
 
-
 ;+============================================================================
-pro aia_annulus_analyze_radial_manual,event,datapath=datapath,savepath=savepath,thrange=thrange,fitdata=fitdata,$
-                                  wave=wave,rrange=rrange,constrain=constrain, gradient=gradient, auto=auto
+pro aia_annulus_analyze_radial_auto,event,datapath=datapath,savepath=savepath,thrange=thrange,fitdata=fitdata,wave=wave,rrange=rrange,constrain=constrain, gradient=gradient, force=force
 ;PURPOSE:
 ;Procedure to analyze the speeds of radial expansion of a
 ;wave and/or a filament.
@@ -142,9 +98,9 @@ pro aia_annulus_analyze_radial_manual,event,datapath=datapath,savepath=savepath,
 ;MODIFICATION HISTORY:
 ;Written by Kamen Kozarev, 05/13/2014
 ;
-!p.multi=0
-!p.background=255
-!p.color=0
+  !p.multi=0
+  !p.background=255
+  !p.color=0
 ;----------------------------
 ;Restore the file with the deprojected data
   date=event.date
@@ -157,13 +113,17 @@ pro aia_annulus_analyze_radial_manual,event,datapath=datapath,savepath=savepath,
   restore, datapath+fname
   
   print,''
-  print,'Runnning the manual radial kinematics analysis tool for Event '+event.label
+  print,'Runnning the automatic radial kinematics analysis tool for Event '+event.label
   print,''
-
+  
+  ;Define the exit statuses here:
+  NORMAL_STATUS=0
+  CONTINUE_STATUS=1
+  QUIT_STATUS=2
   
 
   ;Check what has been run and display to user
-  runfile_searchname=replace_string(event.annplot.analyzed.radial.savename,'SSSSS','_m*')
+  runfile_searchname=replace_string(event.annplot.analyzed.radial.savename,'SSSSS','_am*')
   runfile_searchname=replace_string(runfile_searchname,'WAV',wav)
   search_result=file_search(event.annuluspath+runfile_searchname)
   if search_result[0] ne '' then begin
@@ -172,13 +132,10 @@ pro aia_annulus_analyze_radial_manual,event,datapath=datapath,savepath=savepath,
   endif
   
   analysis_run_id=0
-  print,''
-  read,analysis_run_id,prompt='Please enter run # (1 for first): '
-  analysis_run_id--
-  ;Check that the radial measurement position is good. Show a movie,
+                                ;Check that the radial measurement position is good. Show a movie,
 ;optionally.
   if analysis_run_id le 1 then begin
-     aia_inspect_source_position_manual, event
+                                ;aia_inspect_source_position_manual, event
      label=event.label
      event=load_events_info(label=label)
   endif
@@ -186,7 +143,6 @@ pro aia_annulus_analyze_radial_manual,event,datapath=datapath,savepath=savepath,
   if analysis_run_id lt 10 then analysis_run_id='0'+analysis_run_id
 ;----------------------------
   
-
   
 ;----------------------------  
 ;Create the time structure and set parameters
@@ -227,7 +183,7 @@ pro aia_annulus_analyze_radial_manual,event,datapath=datapath,savepath=savepath,
   arlonind=min(where(x_deg_array ge arlon))
   limb=1                        ;Limb position in Rsun
   limbind=min(where(y_rsun_array ge limb))
-  ;rel_rad_positions=[0.05,0.15,0.43,0.53]
+                                ;rel_rad_positions=[0.05,0.15,0.43,0.53]
   rel_rad_positions=[0.1,0.51]
   lat_heights=(limb+rel_rad_positions*(max(y_rsun_limits)-limb))
   
@@ -241,7 +197,7 @@ pro aia_annulus_analyze_radial_manual,event,datapath=datapath,savepath=savepath,
   yradlimind=max(where(y_rsun_array le yradlimit))
 ;----------------------------  
 
- 
+  
 
 ;----------------------------
   see_context=0
@@ -305,11 +261,11 @@ pro aia_annulus_analyze_radial_manual,event,datapath=datapath,savepath=savepath,
                      wavethick:fltarr(nsteps),$
                      avgIntense:fltarr(nsteps)}
   
-  ;Make sure there are no negative values in the data.
+                                ;Make sure there are no negative values in the data.
   ind=where(projdata le 0.0d)
   if ind[0] ne -1 then projdata[ind]=1.0e-20 ;Set to very nearly zero
   
-  ;If the user has supplied a hard radial range, apply it.
+                                ;If the user has supplied a hard radial range, apply it.
   if keyword_set(rrange) then begin
      rind=min(where(y_rsun_array gt rrange[0]))
      if rind ne -1 then rad_data.radfitrange[0]=rind
@@ -335,27 +291,21 @@ pro aia_annulus_analyze_radial_manual,event,datapath=datapath,savepath=savepath,
      diffdata[tt,yradlimind+1:*]=base[yradlimind+1:*]
      diffdata[tt,*]-=base
   endfor
-  ;Despike the resulting image
+                                ;Despike the resulting image
   diffdata=despike_gen(diffdata)
   rad_data.diffdata=diffdata
 ;----------------------------
 
   
-  
 ;----------------------------
 ;Generate the fit data by processing the base difference data
-fitdata_prep_radial_manual, rad_data, plotinfo
+  fitdata_prep_radial_auto, rad_data, plotinfo
 ;----------------------------
-
 
   
 ;----------------------------
 ;Find the wave front, back, peak positions
-  annulus_get_radial_edges, event, rad_data, annulus_info, plotinfo, exit_status
-  ;Define the exit statuses here:
-  NORMAL_STATUS=0
-  CONTINUE_STATUS=1
-  QUIT_STATUS=2
+  annulus_get_radial_edges, event, rad_data, plotinfo, exit_status
   
   if exit_status eq CONTINUE_STATUS then begin
      print, ''
@@ -367,16 +317,32 @@ fitdata_prep_radial_manual, rad_data, plotinfo
      return
   endif
 ;----------------------------
+
+  ;Figure out the file names for the .sav files and the plot files.
+  pa=get_polar_angle(event)
+  strpa=strtrim(string(pa,format='(f6.2)'),2)
+  save_fname=replace_string(event.annplot.analyzed.radial.savename,'SSSSS','_pa'+strpa+'_am'+analysis_run_id)
+                                ;save_fname=replace_string(event.annplot.analyzed.radial.savename,'SSSSS','_am'+analysis_run_id)
+  save_fname=replace_string(save_fname,'WAV',wav)
   
+  plot_fname=replace_string(event.annplot.analyzed.radial.plot_savename,'SSSSS','_pa'+strpa+'_am'+analysis_run_id)
+                                ;plot_fname=replace_string(event.annplot.analyzed.radial.plot_savename,'SSSSS','_am'+analysis_run_id)
+  plot_fname=replace_string(plot_fname,'WAV',wav)
   
 ;----------------------------
 ;Fit the kinematics of the front, peak, and back of the wave!
-if keyword_set(fitdata) then begin
-   fit_wave_kinematics_radial,rad_data,ind_arr,/front
-   fit_wave_kinematics_radial,rad_data,ind_arr,/peak
-   fit_wave_kinematics_radial,rad_data,ind_arr,/back
-endif
+  if keyword_set(fitdata) then begin
+     if mean(rad_data.savgolfits.back.speed) eq 0. or $
+        mean(rad_data.savgolfits.front.speed) eq 0. or $
+        mean(rad_data.savgolfits.peak.speed) eq 0. then begin
+        fit_wave_kinematics_radial,rad_data,ind_arr,/front
+        fit_wave_kinematics_radial,rad_data,ind_arr,/peak
+        fit_wave_kinematics_radial,rad_data,ind_arr,/back
+     endif
+  endif
+  save,filename=savepath+save_fname,rad_data,ind_arr,annulus_info
 ;----------------------------
+
 
 
 ;----------------------------
@@ -392,56 +358,52 @@ endif
   wdef,0,1200,1000
   plotdiff=rad_data.diffdata[*,yrng[0]:yrng[1]]
   plotdiff=plotdiff-smooth(plotdiff,[14,1],/edge_truncate)
-  aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],plotdiff,$
+
+  aia_plot_jmap_data,time.jd,yarray[yrng[0]:yrng[1]],plotdiff,charsize=3.4,$
                      min=-10,max=20,title=plotinfo.imgtit,xtitle=plotinfo.xtitle,ytitle=plotinfo.ytitle
+
+  event=load_events_info(label=event.label)
+  oplot,[time[xrng[0]].jd,time[xrng[0]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=4
+  oplot,[time[xrng[0]].jd,time[xrng[0]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=4,color=255,linestyle=2
+  oplot,[time[xrng[1]].jd,time[xrng[1]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=4
+  oplot,[time[xrng[1]].jd,time[xrng[1]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=4,color=255,linestyle=2  
   
-  oplot,[time[xrng[0]].jd,time[xrng[0]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=3
-  oplot,[time[xrng[0]].jd,time[xrng[0]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=3,color=255,linestyle=2
-  oplot,[time[xrng[1]].jd,time[xrng[1]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=3
-  oplot,[time[xrng[1]].jd,time[xrng[1]].jd]+dt2,[yarray[yrng[0]],yarray[yrng[1]]],thick=3,color=255,linestyle=2
   if sp eq ep then begin
      print,''
      print,"Starting and ending times are the same - can't plot or save measurements."
   endif else begin
      loadct,39,/silent
-     oplot,time[sp:ep].jd+dt2,rad_data.wave_frontedge[sp:ep].rad,psym=sym(3),symsize=2,color=130
-     oplot,time[sp:ep].jd+dt2,rad_data.wave_frontedge[sp:ep].rad,psym=sym(8),symsize=2,color=0,thick=3
-     oplot,time[sp:ep].jd+dt2,rad_data.wave_peak[sp:ep].rad,psym=sym(1),symsize=2,color=130
-     oplot,time[sp:ep].jd+dt2,rad_data.wave_peak[sp:ep].rad,psym=sym(6),symsize=2,color=0,thick=3
-     oplot,time[sp:ep].jd+dt2,rad_data.wave_backedge[sp:ep].rad,psym=sym(2),symsize=2,color=130
-     oplot,time[sp:ep].jd+dt2,rad_data.wave_backedge[sp:ep].rad,psym=sym(7),symsize=2,color=0,thick=3
+     oplot,time[sp:ep].jd+dt2,rad_data.wave_frontedge[sp:ep].rad,psym=sym(3),symsize=3,color=50
+     oplot,time[sp:ep].jd+dt2,rad_data.wave_frontedge[sp:ep].rad,psym=sym(8),symsize=3,color=0,thick=3
+     oplot,time[sp:ep].jd+dt2,rad_data.wave_peak[sp:ep].rad,psym=sym(1),symsize=3,color=150
+     oplot,time[sp:ep].jd+dt2,rad_data.wave_peak[sp:ep].rad,psym=sym(6),symsize=3,color=0,thick=3
+     oplot,time[sp:ep].jd+dt2,rad_data.wave_backedge[sp:ep].rad,psym=sym(2),symsize=3,color=200
+     oplot,time[sp:ep].jd+dt2,rad_data.wave_backedge[sp:ep].rad,psym=sym(7),symsize=3,color=0,thick=3
      loadct,0,/silent
-
      
-     pa=get_polar_angle(event)
-     strpa=strtrim(string(pa,format='(f6.2)'),2)
-     save_fname=replace_string(event.annplot.analyzed.radial.savename,'SSSSS','_pa'+strpa+'_m'+analysis_run_id)
-     ;save_fname=replace_string(event.annplot.analyzed.radial.savename,'SSSSS','_m'+analysis_run_id)
-     save_fname=replace_string(save_fname,'WAV',wav)
-     
-     plot_fname=replace_string(event.annplot.analyzed.radial.plot_savename,'SSSSS','_pa'+strpa+'_m'+analysis_run_id)
-     ;plot_fname=replace_string(event.annplot.analyzed.radial.plot_savename,'SSSSS','_m'+analysis_run_id)
-     plot_fname=replace_string(plot_fname,'WAV',wav)
      
      if file_exist(savepath+save_fname) then begin
-        uinput=''
-        print,''
-        print,'File '+save_fname+' already exists.'
-        read,uinput,prompt='Overwrite? (y for yes, n for no): '
-        if uinput eq 'y' then begin
+        if keyword_set(force) then begin
            write_png,savepath+plot_fname,tvrd(/true)
-           save,filename=savepath+save_fname,rad_data,ind_arr,annulus_info,event
+           save,filename=savepath+save_fname,rad_data,ind_arr, plotinfo, annulus_info
            print,''
-           print,'Saved plot file '+savepath+save_fname
-        endif
+           print,'Saved file '+savepath+save_fname
+           print,''
+        endif else begin
+           print,''
+           print,'Warning: radial analysis files exist. Rerun with /force to overwrite.'
+           print,''
+        endelse
      endif else begin
         write_png,savepath+plot_fname,tvrd(/true)
-        save,filename=savepath+save_fname,rad_data,ind_arr,annulus_info,event
+        save,filename=savepath+save_fname,rad_data,ind_arr, plotinfo, annulus_info
         print,''
-        print,'Saved plot file '+savepath+save_fname
+        print,'Saved file '+savepath+save_fname
+        print,''
+        wait,1
+        wdel,0
      endelse
-     wait,1
-     wdel,0
+
   endelse
 ;----------------------------
 
